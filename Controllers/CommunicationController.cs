@@ -1,6 +1,7 @@
 ﻿using HaloCareCore.DAL;
 using HaloCareCore.Models;
 using HaloCareCore.Repos;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -18,12 +19,13 @@ namespace HaloCareCore.Controllers
         private IMemberRepository _member;
         private readonly IConfiguration Configuration;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public CommunicationController(OH17Context context, IConfiguration configuration)
+        public CommunicationController(OH17Context context, IConfiguration configuration, IWebHostEnvironment webHostEnvironment)
         {
             _admin = new AdminRepository(context, configuration);
             _member = new MemberRepository(configuration, context);
-
+            _webHostEnvironment = webHostEnvironment;
         }
 
         public ActionResult ImportComminication()
@@ -51,8 +53,8 @@ namespace HaloCareCore.Controllers
                         fname = file.FileName;
 
                         // Get the complete folder path and store the file inside it.  
-                        fname = Path.Combine(Server.MapPath("~/Uploads/"), fname);
-                        var filePath = Path.Combine(Server.MapPath("~/Uploads/"), fname);
+                        string webRootPath = _webHostEnvironment.WebRootPath;
+                        var filePath = Path.Combine(webRootPath, "~/Uploads/",fname);
                         using (var stream = System.IO.File.Create(filePath))
                         {
                             file.CopyToAsync(stream);
@@ -95,9 +97,9 @@ namespace HaloCareCore.Controllers
                             string fileName = excelfile.FileName;
                             string fileContentType = excelfile.ContentType;
                             byte[] fileBytes = new byte[excelfile.Length];
-                            var data = excelfile.InputStream.Read(fileBytes, 0, Convert.ToInt32(excelfile.Length));
+                            //var data = excelfile.InputStream.Read(fileBytes, 0, Convert.ToInt32(excelfile.Length));
 
-                            using (var package = new ExcelPackage(excelfile.InputStream))
+                            using (var package = new ExcelPackage(excelfile.OpenReadStream()))
                             {
                                 var currentSheet = package.Workbook.Worksheets;
                                 var workSheet = currentSheet.First();

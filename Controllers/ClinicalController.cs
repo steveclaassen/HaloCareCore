@@ -13,6 +13,7 @@ using HaloCareCore.Models.Service;
 using HaloCareCore.Models.Validation;
 using HaloCareCore.Models.ViewModels;
 using HaloCareCore.Repos;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -37,13 +38,15 @@ namespace HaloCareCore.Controllers
         private IMedicalAidRepository _medical;
         private readonly IConfiguration Configuration;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public ClinicalController(IConfiguration configuration, IHttpContextAccessor httpContextAccessor, OH17Context context)
+        public ClinicalController(IConfiguration configuration, IHttpContextAccessor httpContextAccessor, OH17Context context, IWebHostEnvironment webHostEnvironment)
         {
             _member = new MemberRepository(configuration, context);
             _clinical = new ClinicalRepository(context, configuration);
             _admin = new AdminRepository(context, configuration);
             _medical = new MedicalAidRepository(configuration, context);//HCare-1197
+            _webHostEnvironment = webHostEnvironment;
         }
 
         // GET: Clinical
@@ -716,7 +719,7 @@ namespace HaloCareCore.Controllers
         }
 
         [HttpPost]
-        
+
         public ActionResult _InsertEmail(ComsViewModel model, Guid? pro)
         {
 
@@ -877,7 +880,8 @@ namespace HaloCareCore.Controllers
                     if (!String.IsNullOrEmpty(copy)) { mm.CC.Add(copy); }
                     mm.Subject = subject;
                     mm.Body = body;
-                    string[] files = Directory.GetFiles(Server.MapPath("~/uploads\\templates\\attachments"));
+                    string webRootPath = _webHostEnvironment.WebRootPath;
+                    var files = Directory.GetFiles(Path.Combine(webRootPath, "~/uploads\\templates\\attachments"));
                     if (!String.IsNullOrEmpty(attachments))
                     {
                         foreach (string file in files)
@@ -1325,7 +1329,7 @@ namespace HaloCareCore.Controllers
             {
                 string path = AppDomain.CurrentDomain.BaseDirectory + "uploads/";
                 string filename = Path.GetFileName(Request.Form.Files["file"].FileName);
-               
+
                 var filePath = Path.Combine(path, model.attachment.dependentID + "_" + filename);
                 using (var stream = System.IO.File.Create(filePath))
                 {
@@ -1561,7 +1565,7 @@ namespace HaloCareCore.Controllers
         public ActionResult ExportQueriesToExcel()
         {
             var model = _admin.GetOutstandingPathologiesView();
-         
+
             using (var workbook = new XLWorkbook())
             {
                 var worksheet = workbook.Worksheets.Add("outstandingAuthorisations");
@@ -1569,16 +1573,22 @@ namespace HaloCareCore.Controllers
                 for (int i = 0; i < model.Count; i++)
                 {
                     {
-
                         worksheet.Cell(currentRow, 1).Value = model[i].membershipNo;
                         worksheet.Cell(currentRow, 2).Value = model[i].dependantCode;
-                        worksheet.Cell(currentRow, 3).Value = model[i].schemeName;
-                        worksheet.Cell(currentRow, 4).Value = model[i].effectiveDate;
-                        worksheet.Cell(currentRow, 5).Value = model[i].dependantID;
-                        worksheet.Cell(currentRow, 6).Value = model[i].scriptId;
-                        worksheet.Cell(currentRow, 7).Value = model[i].createdDate;
-                        worksheet.Cell(currentRow, 8).Value = model[i].overdue;
-                        worksheet.Cell(currentRow, 9).Value = model[i].memStatus;
+                        worksheet.Cell(currentRow, 3).Value = model[i].firstName;
+                        worksheet.Cell(currentRow, 4).Value = model[i].lastName;
+                        worksheet.Cell(currentRow, 5).Value = model[i].idNumber;
+                        worksheet.Cell(currentRow, 6).Value = model[i].schemeName;
+                        worksheet.Cell(currentRow, 7).Value = model[i].schemeOption;
+                        worksheet.Cell(currentRow, 8).Value = model[i].registeredProgram;
+                        worksheet.Cell(currentRow, 9).Value = model[i].status;
+                        worksheet.Cell(currentRow, 10).Value = model[i].drEmail;
+                        worksheet.Cell(currentRow, 11).Value = model[i].expiredDate;
+                        worksheet.Cell(currentRow, 12).Value = model[i].TreatingDrName;
+                        worksheet.Cell(currentRow, 13).Value = model[i].TreatingDrBHF;
+                        worksheet.Cell(currentRow, 14).Value = model[i].overdue;
+                        worksheet.Cell(currentRow, 15).Value = model[i].monthsOutstanding;
+                        worksheet.Cell(currentRow, 16).Value = model[i].dependantID;
                         currentRow++;
                     }
                 }
@@ -1590,43 +1600,93 @@ namespace HaloCareCore.Controllers
                 Response.ContentType = "application/xls";
                 Response.Body.WriteAsync(content);
                 Response.Body.Flush();
-
-                return View(model);
+            }
+            return View(model);
         }
 
         public ActionResult openAssignmentsExcel()
         {
             var sb = new StringBuilder();
             var model = _clinical.GetCompactOpenAssignments();
-            var grid = new System.Web.UI.WebControls.GridView();
-            grid.DataSource = model;
-            grid.DataBind();
-            Response.Clear();
-            Response.Headers.Add("content-disposition", "attachment; filename=newAssignments_compact.xls");
-            Response.ContentType = "application/vnd.ms-excel";
-            StringWriter sw = new StringWriter();
-            System.Web.UI.HtmlTextWriter htw = new System.Web.UI.HtmlTextWriter(sw);
-            grid.RenderControl(htw);
-            Response.WriteAsync(sw.ToString());
-            Response.StatusCode = StatusCodes.Status200OK;
+
+            using (var workbook = new XLWorkbook())
+            {
+                var worksheet = workbook.Worksheets.Add("newAssignments_compact");
+                var currentRow = 1;
+                for (int i = 0; i < model.Count; i++)
+                {
+                    {
+                        worksheet.Cell(currentRow, 1).Value = model[i].MedicalAidID;
+                        worksheet.Cell(currentRow, 2).Value = model[i].medicalScheme;
+                        worksheet.Cell(currentRow, 3).Value = model[i].membershipNumber;
+                        worksheet.Cell(currentRow, 4).Value = model[i].dependantCode;
+                        worksheet.Cell(currentRow, 5).Value = model[i].patientName;
+                        worksheet.Cell(currentRow, 6).Value = model[i].dependantID;
+                        worksheet.Cell(currentRow, 7).Value = model[i].assignmentCount;
+                        worksheet.Cell(currentRow, 8).Value = model[i].option;
+                        worksheet.Cell(currentRow, 9).Value = model[i].patientStatus;
+                        worksheet.Cell(currentRow, 10).Value = model[i].programID;
+                        currentRow++;
+                    }
+                }
+                using var stream = new MemoryStream();
+                workbook.SaveAs(stream);
+                var content = stream.ToArray();
+                Response.Clear();
+                Response.Headers.Add("content-disposition", "attachment;filename=newAssignments_compact.xls");
+                Response.ContentType = "application/xls";
+                Response.Body.WriteAsync(content);
+                Response.Body.Flush();
+            }
+
             return View(model);
         }
 
         public ActionResult openAssignmentsExcelFullx()
         {
-            var sb = new StringBuilder();
             var model = _clinical.GetOpenAssignmentsFull(0);
-            var grid = new System.Web.UI.WebControls.GridView();
-            grid.DataSource = model;
-            grid.DataBind();
-            Response.Clear();
-            Response.Headers.Add("content-disposition", "attachment; filename=newAssignments_full.xls");
-            Response.ContentType = "application/vnd.ms-excel";
-            StringWriter sw = new StringWriter();
-            System.Web.UI.HtmlTextWriter htw = new System.Web.UI.HtmlTextWriter(sw);
-            grid.RenderControl(htw);
-            Response.WriteAsync(sw.ToString());
-            Response.StatusCode = StatusCodes.Status200OK;
+
+            using (var workbook = new XLWorkbook())
+            {
+                var worksheet = workbook.Worksheets.Add("newAssignments_full");
+                var currentRow = 1;
+                for (int i = 0; i < model.Count; i++)
+                {
+                    {
+                        worksheet.Cell(currentRow, 1).Value = model[i].assignmentID;
+                        worksheet.Cell(currentRow, 2).Value = model[i].Active;
+                        worksheet.Cell(currentRow, 3).Value = model[i].assignmentType;
+                        worksheet.Cell(currentRow, 4).Value = model[i].medicalScheme;
+                        worksheet.Cell(currentRow, 5).Value = model[i].membershipNumber;
+                        worksheet.Cell(currentRow, 6).Value = model[i].idNumber;
+                        worksheet.Cell(currentRow, 7).Value = model[i].dependantCode;
+                        worksheet.Cell(currentRow, 8).Value = model[i].patientName;
+                        worksheet.Cell(currentRow, 9).Value = model[i].assignmentEffective;
+                        worksheet.Cell(currentRow, 10).Value = model[i].dependantID;
+                        worksheet.Cell(currentRow, 11).Value = model[i].program;
+                        worksheet.Cell(currentRow, 12).Value = model[i].option;
+                        worksheet.Cell(currentRow, 13).Value = model[i].patientStatus;
+                        worksheet.Cell(currentRow, 14).Value = model[i].assignmentAge;
+                        worksheet.Cell(currentRow, 15).Value = model[i].assignmentStatus;
+                        worksheet.Cell(currentRow, 16).Value = model[i].assignmentitemType;
+                        worksheet.Cell(currentRow, 17).Value = model[i].taskClosedCount;
+                        worksheet.Cell(currentRow, 18).Value = model[i].MedicalAidID;
+                        worksheet.Cell(currentRow, 19).Value = model[i].itemType;
+                        worksheet.Cell(currentRow, 20).Value = model[i].programID;
+                        worksheet.Cell(currentRow, 21).Value = model[i].assignmentProgramID;
+                        currentRow++;
+                    }
+                }
+                using var stream = new MemoryStream();
+                workbook.SaveAs(stream);
+                var content = stream.ToArray();
+                Response.Clear();
+                Response.Headers.Add("content-disposition", "attachment;filename=newAssignments_full.xls");
+                Response.ContentType = "application/xls";
+                Response.Body.WriteAsync(content);
+                Response.Body.Flush();
+            }
+
             return View(model);
         }
 
@@ -1700,7 +1760,7 @@ namespace HaloCareCore.Controllers
                 Response.ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
                 Response.Headers.Add("content-disposition", "attachment;  filename=assignments-full-view.xlsx");
                 excel.SaveAs(memoryStream);
-                memoryStream.WriteTo(Response.OutputStream);
+                memoryStream.WriteTo(Response.Body);
                 Response.Body.Flush();
                 Response.StatusCode = StatusCodes.Status200OK;
                 return View(model);
@@ -1710,37 +1770,80 @@ namespace HaloCareCore.Controllers
 
         public ActionResult ipAssignmentsExcel()
         {
-            var sb = new StringBuilder();
+
             var model = _clinical.GetCompactInProgressAssignments();
-            var grid = new GridView();
-            grid.DataSource = model;
-            grid.DataBind();
-            Response.Clear();
-            Response.Headers.Add("content-disposition", "attachment; filename=activeAssignments_compact.xls");
-            Response.ContentType = "application/vnd.ms-excel";
-            StringWriter sw = new StringWriter();
-            System.Web.UI.HtmlTextWriter htw = new System.Web.UI.HtmlTextWriter(sw);
-            grid.RenderControl(htw);
-            Response.WriteAsync(sw.ToString());
-            Response.StatusCode = StatusCodes.Status200OK;
+            using (var workbook = new XLWorkbook())
+            {
+                var worksheet = workbook.Worksheets.Add("activeAssignments_compact");
+                var currentRow = 1;
+                for (int i = 0; i < model.Count; i++)
+                {
+                    {
+                        worksheet.Cell(currentRow, 1).Value = model[i].medicalScheme;
+                        worksheet.Cell(currentRow, 2).Value = model[i].membershipNumber;
+                        worksheet.Cell(currentRow, 3).Value = model[i].dependantCode;
+                        worksheet.Cell(currentRow, 4).Value = model[i].patientName;
+                        worksheet.Cell(currentRow, 5).Value = model[i].membershipNumber;
+                        worksheet.Cell(currentRow, 6).Value = model[i].dependantID;
+                        worksheet.Cell(currentRow, 7).Value = model[i].assignmentCount;
+                        worksheet.Cell(currentRow, 8).Value = model[i].program;
+                        worksheet.Cell(currentRow, 9).Value = model[i].option;
+                        worksheet.Cell(currentRow, 10).Value = model[i].patientStatus;
+                        worksheet.Cell(currentRow, 11).Value = model[i].program;
+                        worksheet.Cell(currentRow, 12).Value = model[i].option;
+                        worksheet.Cell(currentRow, 13).Value = model[i].patientStatus;
+                        currentRow++;
+                    }
+                }
+                using var stream = new MemoryStream();
+                workbook.SaveAs(stream);
+                var content = stream.ToArray();
+                Response.Clear();
+                Response.Headers.Add("content-disposition", "attachment;filename=activeAssignments_compact.xls");
+                Response.ContentType = "application/xls";
+                Response.Body.WriteAsync(content);
+                Response.Body.Flush();
+            }
+
             return View(model);
         }
 
         public ActionResult ipAssignmentsExcelFull()
         {
-            var sb = new StringBuilder();
             var model = _clinical.GetInProgressAssignments();
-            var grid = new System.Web.UI.WebControls.GridView();
-            grid.DataSource = model;
-            grid.DataBind();
-            Response.Clear();
-            Response.Headers.Add("content-disposition", "attachment; filename=activeAssignments_full.xls");
-            Response.ContentType = "application/vnd.ms-excel";
-            StringWriter sw = new StringWriter();
-            System.Web.UI.HtmlTextWriter htw = new System.Web.UI.HtmlTextWriter(sw);
-            grid.RenderControl(htw);
-            Response.WriteAsync(sw.ToString());
-            Response.StatusCode = StatusCodes.Status200OK;
+            using (var workbook = new XLWorkbook())
+            {
+                var worksheet = workbook.Worksheets.Add("activeAssignments_full");
+                var currentRow = 1;
+                for (int i = 0; i < model.Count; i++)
+                {
+                    worksheet.Cell(currentRow, 1).Value = model[i].assignmentID;
+                    worksheet.Cell(currentRow, 2).Value = model[i].Active;
+                    worksheet.Cell(currentRow, 3).Value = model[i].assignmentType;
+                    worksheet.Cell(currentRow, 4).Value = model[i].medicalScheme;
+                    worksheet.Cell(currentRow, 5).Value = model[i].membershipNumber;
+                    worksheet.Cell(currentRow, 6).Value = model[i].dependantCode;
+                    worksheet.Cell(currentRow, 7).Value = model[i].patientName;
+                    worksheet.Cell(currentRow, 8).Value = model[i].assignmentEffective;
+                    worksheet.Cell(currentRow, 9).Value = model[i].dependantID;
+                    worksheet.Cell(currentRow, 10).Value = model[i].program;
+                    worksheet.Cell(currentRow, 11).Value = model[i].option;
+                    worksheet.Cell(currentRow, 12).Value = model[i].patientStatus;
+                    worksheet.Cell(currentRow, 13).Value = model[i].assignmentAge;
+                    worksheet.Cell(currentRow, 13).Value = model[i].taskClosedCount;
+                    worksheet.Cell(currentRow, 13).Value = model[i].itemType;
+                    currentRow++;
+                }
+                using var stream = new MemoryStream();
+                workbook.SaveAs(stream);
+                var content = stream.ToArray();
+                Response.Clear();
+                Response.Headers.Add("content -disposition", "attachment;filename=activeAssignments_full.xls");
+                Response.ContentType = "application/xls";
+                Response.Body.WriteAsync(content);
+                Response.Body.Flush();
+            }
+
             return View(model);
         }
 
@@ -1748,17 +1851,37 @@ namespace HaloCareCore.Controllers
         {
             var sb = new StringBuilder();
             var model = _clinical.GetCompactClosedAssignments();
-            var grid = new System.Web.UI.WebControls.GridView();
-            grid.DataSource = model;
-            grid.DataBind();
-            Response.Clear();
-            Response.Headers.Add("content-disposition", "attachment; filename=closedAssignments_compact.xls");
-            Response.ContentType = "application/vnd.ms-excel";
-            StringWriter sw = new StringWriter();
-            System.Web.UI.HtmlTextWriter htw = new System.Web.UI.HtmlTextWriter(sw);
-            grid.RenderControl(htw);
-            Response.WriteAsync(sw.ToString());
-            Response.StatusCode = StatusCodes.Status200OK;
+
+            using (var workbook = new XLWorkbook())
+            {
+                var worksheet = workbook.Worksheets.Add("closedAssignments_compact");
+                var currentRow = 1;
+                for (int i = 0; i < model.Count; i++)
+                {
+                    worksheet.Cell(currentRow, 1).Value = model[i].medicalScheme;
+                    worksheet.Cell(currentRow, 2).Value = model[i].membershipNumber;
+                    worksheet.Cell(currentRow, 3).Value = model[i].dependantCode;
+                    worksheet.Cell(currentRow, 4).Value = model[i].patientName;
+                    worksheet.Cell(currentRow, 5).Value = model[i].dependantID;
+                    worksheet.Cell(currentRow, 6).Value = model[i].assignmentCount;
+                    worksheet.Cell(currentRow, 7).Value = model[i].program;
+                    worksheet.Cell(currentRow, 8).Value = model[i].option;
+                    worksheet.Cell(currentRow, 9).Value = model[i].dependantID;
+                    worksheet.Cell(currentRow, 10).Value = model[i].program;
+                    worksheet.Cell(currentRow, 11).Value = model[i].option;
+                    worksheet.Cell(currentRow, 12).Value = model[i].patientStatus;
+                    currentRow++;
+                }
+                using var stream = new MemoryStream();
+                workbook.SaveAs(stream);
+                var content = stream.ToArray();
+                Response.Clear();
+                Response.Headers.Add("content -disposition", "attachment;filename=closedAssignments_compact.xls");
+                Response.ContentType = "application/xls";
+                Response.Body.WriteAsync(content);
+                Response.Body.Flush();
+            }
+
             return View(model);
         }
 
@@ -1766,17 +1889,38 @@ namespace HaloCareCore.Controllers
         {
             var sb = new StringBuilder();
             var model = _clinical.GetClosedAssignments();
-            var grid = new System.Web.UI.WebControls.GridView();
-            grid.DataSource = model;
-            grid.DataBind();
-            Response.Clear();
-            Response.Headers.Add("content-disposition", "attachment; filename=closedAssignments_full.xls");
-            Response.ContentType = "application/vnd.ms-excel";
-            StringWriter sw = new StringWriter();
-            System.Web.UI.HtmlTextWriter htw = new System.Web.UI.HtmlTextWriter(sw);
-            grid.RenderControl(htw);
-            Response.WriteAsync(sw.ToString());
-            Response.StatusCode = StatusCodes.Status200OK;
+            using (var workbook = new XLWorkbook())
+            {
+                var worksheet = workbook.Worksheets.Add("closedAssignments_full");
+                var currentRow = 1;
+                for (int i = 0; i < model.Count; i++)
+                {
+                    worksheet.Cell(currentRow, 1).Value = model[i].assignmentID;
+                    worksheet.Cell(currentRow, 2).Value = model[i].Active;
+                    worksheet.Cell(currentRow, 3).Value = model[i].assignmentType;
+                    worksheet.Cell(currentRow, 4).Value = model[i].medicalScheme;
+                    worksheet.Cell(currentRow, 5).Value = model[i].membershipNumber;
+                    worksheet.Cell(currentRow, 6).Value = model[i].dependantCode;
+                    worksheet.Cell(currentRow, 7).Value = model[i].patientName;
+                    worksheet.Cell(currentRow, 8).Value = model[i].assignmentEffective;
+                    worksheet.Cell(currentRow, 9).Value = model[i].dependantID;
+                    worksheet.Cell(currentRow, 10).Value = model[i].program;
+                    worksheet.Cell(currentRow, 11).Value = model[i].option;
+                    worksheet.Cell(currentRow, 12).Value = model[i].patientStatus;
+                    worksheet.Cell(currentRow, 13).Value = model[i].assignmentAge;
+                    worksheet.Cell(currentRow, 14).Value = model[i].itemType;
+                    currentRow++;
+                }
+                using var stream = new MemoryStream();
+                workbook.SaveAs(stream);
+                var content = stream.ToArray();
+                Response.Clear();
+                Response.Headers.Add("content -disposition", "attachment;filename=closedAssignments_full.xls");
+                Response.ContentType = "application/xls";
+                Response.Body.WriteAsync(content);
+                Response.Body.Flush();
+            }
+
             return View(model);
         }
 
@@ -2760,7 +2904,7 @@ namespace HaloCareCore.Controllers
                 model.PatientDiagnosis.ProgramDescription = "Diabetes";
                 model.PatientDiagnosis.CreatedDate = DateTime.Now;
                 model.PatientDiagnosis.CreatedBy = User.Identity.Name;
-                model.PatientDiagnosis.Comment= "Entry ignored";
+                model.PatientDiagnosis.Comment = "Entry ignored";
                 model.PatientDiagnosis.FollowUp = false;
                 model.PatientDiagnosis.Active = false;
                 model.PatientDiagnosis.Medication = Request.Query["medication-registration"]; //hcare-863
@@ -2769,7 +2913,7 @@ namespace HaloCareCore.Controllers
                 var program = _member.GetPrograms().Where(x => x.code == model.PatientDiagnosis.ProgramCode).FirstOrDefault(); //hcare-863
                 model.PatientDiagnosis.ICD10Code = program.icd10code; //hcare-863
             }
-            else if (model.PatientDiagnosis.EffectiveDate != null || model.PatientDiagnosis.Comment!= null)
+            else if (model.PatientDiagnosis.EffectiveDate != null || model.PatientDiagnosis.Comment != null)
             {
                 model.PatientDiagnosis.DependantID = new Guid(Request.Query["DependantID"]);
                 model.PatientDiagnosis.Id = Convert.ToInt32(Request.Query["id"]);
@@ -2778,7 +2922,7 @@ namespace HaloCareCore.Controllers
                 model.PatientDiagnosis.ProgramDescription = "Diabetes";
                 model.PatientDiagnosis.CreatedDate = DateTime.Now;
                 model.PatientDiagnosis.CreatedBy = User.Identity.Name;
-                model.PatientDiagnosis.Comment= (Request.Query["PatientDiagnosis.generalComments"]);
+                model.PatientDiagnosis.Comment = (Request.Query["PatientDiagnosis.generalComments"]);
                 model.PatientDiagnosis.FollowUp = false;
                 model.PatientDiagnosis.Active = true;
                 model.PatientDiagnosis.Medication = Request.Query["medication-registration"]; //hcare-863
@@ -4540,9 +4684,9 @@ namespace HaloCareCore.Controllers
                     model.PatientDiagnosis.EffectiveDate = null;
 
                 if (!String.IsNullOrEmpty(Request.Query["PatientDiagnosis.generalComments"]))
-                    model.PatientDiagnosis.Comment= (Request.Query["PatientDiagnosis.generalComments"]);
+                    model.PatientDiagnosis.Comment = (Request.Query["PatientDiagnosis.generalComments"]);
                 else
-                    model.PatientDiagnosis.Comment= null;
+                    model.PatientDiagnosis.Comment = null;
 
                 if (String.IsNullOrEmpty(Request.Query["PatientDiagnosis.EffectiveDate"]))
                     model.PatientDiagnosis.FollowUp = true;
@@ -4552,7 +4696,7 @@ namespace HaloCareCore.Controllers
                 model.PatientDiagnosis.Active = true;
 
             }
-            else if (model.PatientDiagnosis.EffectiveDate != null || model.PatientDiagnosis.Comment!= null)
+            else if (model.PatientDiagnosis.EffectiveDate != null || model.PatientDiagnosis.Comment != null)
             {
                 model.PatientDiagnosis.DependantID = new Guid(Request.Query["DependantID"]);
                 model.PatientDiagnosis.Id = Convert.ToInt32(Request.Query["id"]);
@@ -4561,7 +4705,7 @@ namespace HaloCareCore.Controllers
                 model.PatientDiagnosis.ProgramDescription = "Diabetes";
                 model.PatientDiagnosis.CreatedDate = DateTime.Now;
                 model.PatientDiagnosis.CreatedBy = User.Identity.Name;
-                model.PatientDiagnosis.Comment= (Request.Query["PatientDiagnosis.generalComments"]);
+                model.PatientDiagnosis.Comment = (Request.Query["PatientDiagnosis.generalComments"]);
                 model.PatientDiagnosis.FollowUp = false;
                 model.PatientDiagnosis.Active = true;
 
@@ -7028,7 +7172,7 @@ namespace HaloCareCore.Controllers
                 model.PatientDiagnosis.CreatedDate = DateTime.Now;
                 model.PatientDiagnosis.EffectiveDate = Convert.ToDateTime(Request.Query["PatientDiagnosis.EffectiveDate"]);
                 model.PatientDiagnosis.CreatedBy = User.Identity.Name;
-                model.PatientDiagnosis.Comment= (Request.Query["PatientDiagnosis.generalComments"]);
+                model.PatientDiagnosis.Comment = (Request.Query["PatientDiagnosis.generalComments"]);
                 model.PatientDiagnosis.FollowUp = false;
                 model.PatientDiagnosis.Active = true;
                 model.PatientDiagnosis.Medication = Request.Query["medication-registration"]; //hcare-863
@@ -7684,7 +7828,7 @@ namespace HaloCareCore.Controllers
                 model.PatientDiagnosis.CreatedDate = DateTime.Now;
                 model.PatientDiagnosis.EffectiveDate = Convert.ToDateTime(Request.Query["PatientDiagnosis.EffectiveDate"]);
                 model.PatientDiagnosis.CreatedBy = User.Identity.Name;
-                model.PatientDiagnosis.Comment= (Request.Query["PatientDiagnosis.generalComments"]);
+                model.PatientDiagnosis.Comment = (Request.Query["PatientDiagnosis.generalComments"]);
                 model.PatientDiagnosis.FollowUp = false;
                 model.PatientDiagnosis.Active = true;
                 model.PatientDiagnosis.Medication = Request.Query["medication-registration"]; //hcare-863
@@ -11444,7 +11588,7 @@ namespace HaloCareCore.Controllers
         }
 
         [HttpPost]
-        
+
         public ActionResult _DoctorEmailAssignment(ComsViewModel model, Guid? pro)
         {
             var dependantID = Request.Query["e2-dependantid"];

@@ -22,8 +22,6 @@ namespace HaloCareCore.Controllers
         public ProductController(OH17Context context, IConfiguration configuration)
         {
             this._admin = new AdminRepository(context, configuration);
-            //this._memoryCache = new MemoryCache("Nappies");
-
         }
 
         // GET: Product
@@ -33,7 +31,7 @@ namespace HaloCareCore.Controllers
             {
                 if (_memoryCache.Get("Nappies") == null)
                 {
-                    _memoryCache.Add("", _admin.GetProductsSearch(nappi, ""), DateTime.Now.AddMinutes(10));
+                    _memoryCache.Set("Nappies",_admin.GetProductsSearch(nappi, ""));
                     var model = _memoryCache.Get("Nappies");
                     return View(model);
                 }

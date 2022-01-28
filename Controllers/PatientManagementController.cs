@@ -268,7 +268,7 @@ namespace HaloCareCore.Controllers
                 Response.ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
                 Response.Headers.Add("content-disposition", "attachment;  filename=advanced-search.xlsx");
                 excel.SaveAs(memoryStream);
-                memoryStream.WriteTo(Response.OutputStream);
+                memoryStream.WriteTo(Response.Body);
                 Response.Body.Flush();
                 Response.StatusCode = StatusCodes.Status200OK;
                 return View(model);
@@ -464,7 +464,7 @@ namespace HaloCareCore.Controllers
                 Response.ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
                 Response.Headers.Add("content-disposition", "attachment;  filename=assignment-search.xlsx");
                 excel.SaveAs(memoryStream);
-                memoryStream.WriteTo(Response.OutputStream);
+                memoryStream.WriteTo(Response.Body);
                 Response.Body.Flush();
                 Response.StatusCode = StatusCodes.Status200OK;
                 return View(model);
@@ -597,7 +597,7 @@ namespace HaloCareCore.Controllers
                     Response.ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
                     Response.Headers.Add("content-disposition", "attachment;  filename=querySearch.xlsx");
                     excel.SaveAs(memoryStream);
-                    memoryStream.WriteTo(Response.OutputStream);
+                    memoryStream.WriteTo(Response.Body);
                     Response.Body.Flush();
                     Response.StatusCode = StatusCodes.Status200OK;
                     return View(model);
@@ -678,7 +678,7 @@ namespace HaloCareCore.Controllers
                     Response.ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
                     Response.Headers.Add("content-disposition", "attachment;  filename=querySearch.xlsx");
                     excel.SaveAs(memoryStream);
-                    memoryStream.WriteTo(Response.OutputStream);
+                    memoryStream.WriteTo(Response.Body);
                     Response.Body.Flush();
                     Response.StatusCode = StatusCodes.Status200OK;
                     return View(model);
@@ -854,7 +854,7 @@ namespace HaloCareCore.Controllers
                     Response.ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
                     Response.Headers.Add("content-disposition", "attachment;  filename=ProductionReport.xlsx");
                     excel.SaveAs(memoryStream);
-                    memoryStream.WriteTo(Response.OutputStream);
+                    memoryStream.WriteTo(Response.Body);
                     Response.Body.Flush();
                     Response.StatusCode = StatusCodes.Status200OK;
                     return View(model);
@@ -935,7 +935,7 @@ namespace HaloCareCore.Controllers
                     Response.ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
                     Response.Headers.Add("content-disposition", "attachment;  filename=querySearch.xlsx");
                     excel.SaveAs(memoryStream);
-                    memoryStream.WriteTo(Response.OutputStream);
+                    memoryStream.WriteTo(Response.Body);
                     Response.Body.Flush();
                     Response.StatusCode = StatusCodes.Status200OK;
                     return View(model);
@@ -1093,7 +1093,7 @@ namespace HaloCareCore.Controllers
                     Response.ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
                     Response.Headers.Add("content-disposition", "attachment;  filename=pathology-search.xlsx");
                     excel.SaveAs(memoryStream);
-                    memoryStream.WriteTo(Response.OutputStream);
+                    memoryStream.WriteTo(Response.Body);
                     Response.Body.Flush();
                     Response.StatusCode = StatusCodes.Status200OK;
                     return View(model);
@@ -1117,7 +1117,7 @@ namespace HaloCareCore.Controllers
                     Response.ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
                     Response.Headers.Add("content-disposition", "attachment;  filename=pathology-search.xlsx");
                     excel.SaveAs(memoryStream);
-                    memoryStream.WriteTo(Response.OutputStream);
+                    memoryStream.WriteTo(Response.Body);
                     Response.Body.Flush();
                     Response.StatusCode = StatusCodes.Status200OK;
                     return View(model);
@@ -1207,7 +1207,7 @@ namespace HaloCareCore.Controllers
                 Response.ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
                 Response.Headers.Add("content-disposition", "attachment;  filename=CommunicationLogSearch.xlsx");
                 excel.SaveAs(memoryStream);
-                memoryStream.WriteTo(Response.OutputStream);
+                memoryStream.WriteTo(Response.Body);
                 Response.Body.Flush();
                 Response.StatusCode = StatusCodes.Status200OK;
                 return View(model);
@@ -1403,7 +1403,7 @@ namespace HaloCareCore.Controllers
                 Response.ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
                 Response.Headers.Add("content-disposition", "attachment;  filename=risk-rating-search.xlsx");
                 excel.SaveAs(memoryStream);
-                memoryStream.WriteTo(Response.OutputStream);
+                memoryStream.WriteTo(Response.Body);
                 Response.Body.Flush();
                 Response.StatusCode = StatusCodes.Status200OK;
                 return View(model);
@@ -1552,7 +1552,7 @@ namespace HaloCareCore.Controllers
                     Response.ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
                     Response.Headers.Add("content-disposition", "attachment;  filename=management-status-search.xlsx"); //hcare-1267-correction
                     excel.SaveAs(memoryStream);
-                    memoryStream.WriteTo(Response.OutputStream);
+                    memoryStream.WriteTo(Response.Body);
                     Response.Body.Flush();
                     Response.StatusCode = StatusCodes.Status200OK;
                     return View(model);
@@ -1605,7 +1605,7 @@ namespace HaloCareCore.Controllers
                     Response.ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
                     Response.Headers.Add("content-disposition", "attachment;  filename=management-status-search.xlsx"); //hcare-1267-correction
                     excel.SaveAs(memoryStream);
-                    memoryStream.WriteTo(Response.OutputStream);
+                    memoryStream.WriteTo(Response.Body);
                     Response.Body.Flush();
                     Response.StatusCode = StatusCodes.Status200OK;
                     return View(model);
@@ -1757,7 +1757,7 @@ namespace HaloCareCore.Controllers
                 Response.ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
                 Response.Headers.Add("content-disposition", "attachment;  filename=production-search.xlsx");
                 excel.SaveAs(memoryStream);
-                memoryStream.WriteTo(Response.OutputStream);
+                memoryStream.WriteTo(Response.Body);
                 Response.Body.Flush();
                 Response.StatusCode = StatusCodes.Status200OK;
                 return View(model);
@@ -1914,7 +1914,7 @@ namespace HaloCareCore.Controllers
                 Response.ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
                 Response.Headers.Add("content-disposition", "attachment;  filename=enquiry-search.xlsx");
                 excel.SaveAs(memoryStream);
-                memoryStream.WriteTo(Response.OutputStream);
+                memoryStream.WriteTo(Response.Body);
                 Response.Body.Flush();
                 Response.StatusCode = StatusCodes.Status200OK;
                 return View(model);
@@ -2032,7 +2032,7 @@ namespace HaloCareCore.Controllers
                 Response.ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
                 Response.Headers.Add("content-disposition", "attachment;  filename=system-log-search.xlsx");
                 excel.SaveAs(memoryStream);
-                memoryStream.WriteTo(Response.OutputStream);
+                memoryStream.WriteTo(Response.Body);
                 Response.Body.Flush();
                 Response.StatusCode = StatusCodes.Status200OK;
                 return View(model);

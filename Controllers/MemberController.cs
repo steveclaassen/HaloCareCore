@@ -1,4 +1,5 @@
-﻿using HaloCareCore.DAL;
+﻿using ClosedXML.Excel;
+using HaloCareCore.DAL;
 using HaloCareCore.Extensions;
 using HaloCareCore.Helpers;
 using HaloCareCore.Management;
@@ -4366,23 +4367,53 @@ namespace HaloCareCore.Controllers
             return View("Searchresult", model);
         }
 
-        public ActionResult patientExtract()
-        {
-            var sb = new StringBuilder();
-            var model = _member.GetPatients();
-            var grid = new System.Web.UI.WebControls.GridView();
-            grid.DataSource = model;
-            grid.DataBind();
-            Response.Clear();
-            Response.Headers.Add("content-disposition", "attachment; filename=patientExtract.xls");
-            Response.ContentType = "application/vnd.ms-excel";
-            StringWriter sw = new StringWriter();
-            System.Web.UI.HtmlTextWriter htw = new System.Web.UI.HtmlTextWriter(sw);
-            grid.RenderControl(htw);
-            Response.WriteAsync(sw.ToString());
-            Response.StatusCode = StatusCodes.Status200OK;
-            return View(model);
-        }
+        //public ActionResult patientExtract()
+        //{
+        //    var model = _member.GetPatients();
+        //
+        //    using (var workbook = new XLWorkbook())
+        //    {
+        //        var worksheet = workbook.Worksheets.Add("patientExtract");
+        //        var currentRow = 1;
+        //        for (int i = 0; i < model.Count; i++)
+        //        {
+        //            {
+        //                worksheet.Cell(currentRow, 1).Value = model[i].assignmentID;
+        //                worksheet.Cell(currentRow, 2).Value = model[i].Active;
+        //                worksheet.Cell(currentRow, 3).Value = model[i].assignmentType;
+        //                worksheet.Cell(currentRow, 4).Value = model[i].medicalScheme;
+        //                worksheet.Cell(currentRow, 5).Value = model[i].membershipNumber;
+        //                worksheet.Cell(currentRow, 6).Value = model[i].idNumber;
+        //                worksheet.Cell(currentRow, 7).Value = model[i].dependantCode;
+        //                worksheet.Cell(currentRow, 8).Value = model[i].patientName;
+        //                worksheet.Cell(currentRow, 9).Value = model[i].assignmentEffective;
+        //                worksheet.Cell(currentRow, 10).Value = model[i].dependantID;
+        //                worksheet.Cell(currentRow, 11).Value = model[i].program;
+        //                worksheet.Cell(currentRow, 12).Value = model[i].option;
+        //                worksheet.Cell(currentRow, 13).Value = model[i].patientStatus;
+        //                worksheet.Cell(currentRow, 14).Value = model[i].assignmentAge;
+        //                worksheet.Cell(currentRow, 15).Value = model[i].assignmentStatus;
+        //                worksheet.Cell(currentRow, 16).Value = model[i].assignmentitemType;
+        //                worksheet.Cell(currentRow, 17).Value = model[i].taskClosedCount;
+        //                worksheet.Cell(currentRow, 18).Value = model[i].MedicalAidID;
+        //                worksheet.Cell(currentRow, 19).Value = model[i].itemType;
+        //                worksheet.Cell(currentRow, 20).Value = model[i].programID;
+        //                worksheet.Cell(currentRow, 21).Value = model[i].assignmentProgramID;
+        //                currentRow++;
+        //            }
+        //        }
+        //        using var stream = new MemoryStream();
+        //        workbook.SaveAs(stream);
+        //        var content = stream.ToArray();
+        //        Response.Clear();
+        //        Response.Headers.Add("content-disposition", "attachment;filename=patientExtract.xls");
+        //        Response.ContentType = "application/xls";
+        //        Response.Body.WriteAsync(content);
+        //        Response.Body.Flush();
+        //    }
+        //
+        //    return View(model);
+        //}
 
         public ActionResult AssignmentSummary(Guid DependentID)
         {
@@ -4869,7 +4900,8 @@ namespace HaloCareCore.Controllers
             {
                 var doc1 = new Document();
                 string path = AppDomain.CurrentDomain.BaseDirectory + "uploads\\";
-                string imagepath = Server.MapPath("~/Content/Images/2017Scheme");
+                string webRootPath = _webHostEnvironment.WebRootPath;
+                var imagepath = Path.Combine(webRootPath, "~/Content/Images/2017Scheme");
 
                 var filename = "AuthLetter_" + model.membershipno + "_" + model.dependentCode + "_" + DateTime.Now.Day + DateTime.Now.Month + DateTime.Now.Year + ".pdf";
                 PdfWriter writer = PdfWriter.GetInstance(doc1, new FileStream(Path.Combine(path, filename), FileMode.Create));
@@ -5110,8 +5142,8 @@ namespace HaloCareCore.Controllers
             {
                 var doc1 = new Document();
                 string path = AppDomain.CurrentDomain.BaseDirectory + "uploads\\";
-                string imagepath = Server.MapPath("~/Content/Images/2017Scheme");
-
+                string webRootPath = _webHostEnvironment.WebRootPath;
+                var imagepath = Path.Combine(webRootPath, "~/Content/Images/2017Scheme");
                 var filename = "AuthLetter_" + model.membershipno + "_" + model.dependentCode + "_" + DateTime.Now.Day + DateTime.Now.Month + DateTime.Now.Year + ".pdf";
                 PdfWriter writer = PdfWriter.GetInstance(doc1, new FileStream(Path.Combine(path, filename), FileMode.Create));
                 doc1.Open();
@@ -5696,7 +5728,7 @@ namespace HaloCareCore.Controllers
                 Response.ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
                 Response.Headers.Add("content-disposition", "attachment;  filename=medication-history.xlsx");
                 excel.SaveAs(memoryStream);
-                memoryStream.WriteTo(Response.OutputStream);
+                memoryStream.WriteTo(Response.Body);
                 Response.Body.Flush();
                 Response.StatusCode = StatusCodes.Status200OK;
                 return View(model);
@@ -5810,7 +5842,7 @@ namespace HaloCareCore.Controllers
                 Response.ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
                 Response.Headers.Add("content-disposition", "attachment;  filename=medication-history.xlsx");
                 excel.SaveAs(memoryStream);
-                memoryStream.WriteTo(Response.OutputStream);
+                memoryStream.WriteTo(Response.Body);
                 Response.Body.Flush();
                 Response.StatusCode = StatusCodes.Status200OK;
                 return View(model);
@@ -5924,7 +5956,7 @@ namespace HaloCareCore.Controllers
                 Response.ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
                 Response.Headers.Add("content-disposition", "attachment;  filename=medication-history.xlsx");
                 excel.SaveAs(memoryStream);
-                memoryStream.WriteTo(Response.OutputStream);
+                memoryStream.WriteTo(Response.Body);
                 Response.Body.Flush();
                 Response.StatusCode = StatusCodes.Status200OK;
                 return View(model);
@@ -6039,7 +6071,7 @@ namespace HaloCareCore.Controllers
                 Response.ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
                 Response.Headers.Add("content-disposition", "attachment;  filename=medication-history.xlsx");
                 excel.SaveAs(memoryStream);
-                memoryStream.WriteTo(Response.OutputStream);
+                memoryStream.WriteTo(Response.Body);
                 Response.Body.Flush();
                 Response.StatusCode = StatusCodes.Status200OK;
                 return View(model);
@@ -6851,8 +6883,8 @@ namespace HaloCareCore.Controllers
 
         public ActionResult GetImage(string image)
         {
-            var path = Path.Combine(Server.MapPath("~/uploads"), image);
-
+            string webRootPath = _webHostEnvironment.WebRootPath;
+            var path = Path.Combine(webRootPath, "~/ uploads", image);
             byte[] fileBytes = System.IO.File.ReadAllBytes(path);
             string fileName = image;
             return File(fileBytes, System.Net.Mime.MediaTypeNames.Application.Octet, fileName);
@@ -9183,7 +9215,7 @@ namespace HaloCareCore.Controllers
                 Response.ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
                 Response.Headers.Add("content-disposition", "attachment;  filename=pathology-search.xlsx");
                 excel.SaveAs(memoryStream);
-                memoryStream.WriteTo(Response.OutputStream);
+                memoryStream.WriteTo(Response.Body);
                 Response.Body.Flush();
                 Response.StatusCode = StatusCodes.Status200OK;
                 return View(model);
@@ -9445,17 +9477,53 @@ namespace HaloCareCore.Controllers
         {
             var sb = new StringBuilder();
             var model = _member.GetPathology(DependentID);
-            var grid = new System.Web.UI.WebControls.GridView();
-            grid.DataSource = model;
-            grid.DataBind();
-            Response.Clear();
-            Response.Headers.Add("content-disposition", "attachment; filename=patientPathology.xls");
-            Response.ContentType = "application/vnd.ms-excel";
-            StringWriter sw = new StringWriter();
-            System.Web.UI.HtmlTextWriter htw = new System.Web.UI.HtmlTextWriter(sw);
-            grid.RenderControl(htw);
-            Response.WriteAsync(sw.ToString());
-            Response.StatusCode = StatusCodes.Status200OK;
+
+            //using (var workbook = new XLWorkbook())
+            //{
+            //    var worksheet = workbook.Worksheets.Add("patientPathology");
+            //    var currentRow = 1;
+            //    for (int i = 0; i < model.Count; i++)
+            //    {
+            //        {
+            //            worksheet.Cell(currentRow, 1).Value = model[i].membershipNo;
+            //            worksheet.Cell(currentRow, 2).Value = model[i].dependantCode;
+            //            worksheet.Cell(currentRow, 3).Value = model[i].firstName;
+            //            worksheet.Cell(currentRow, 4).Value = model[i].lastName;
+            //            worksheet.Cell(currentRow, 5).Value = model[i].idNumber;
+            //            worksheet.Cell(currentRow, 6).Value = model[i].schemeName;
+            //            worksheet.Cell(currentRow, 7).Value = model[i].schemeOption;
+            //            worksheet.Cell(currentRow, 8).Value = model[i].registeredProgram;
+            //            worksheet.Cell(currentRow, 9).Value = model[i].status;
+            //            worksheet.Cell(currentRow, 10).Value = model[i].drEmail;
+            //            worksheet.Cell(currentRow, 11).Value = model[i].expiredDate;
+            //            worksheet.Cell(currentRow, 12).Value = model[i].TreatingDrName;
+            //            worksheet.Cell(currentRow, 13).Value = model[i].TreatingDrBHF;
+            //            worksheet.Cell(currentRow, 14).Value = model[i].overdue;
+            //            worksheet.Cell(currentRow, 15).Value = model[i].monthsOutstanding;
+            //            worksheet.Cell(currentRow, 16).Value = model[i].dependantID;
+            //            currentRow++;
+            //        }
+            //    }
+            //    using var stream = new MemoryStream();
+            //    workbook.SaveAs(stream);
+            //    var content = stream.ToArray();
+            //    Response.Clear();
+            //    Response.Headers.Add("content-disposition", "attachment;filename=patientPathology.xls");
+            //    Response.ContentType = "application/xls";
+            //    Response.Body.WriteAsync(content);
+            //    Response.Body.Flush();
+            //}
+            //var grid = new System.Web.UI.WebControls.GridView();
+            //grid.DataSource = model;
+            //grid.DataBind();
+            //Response.Clear();
+            //Response.Headers.Add("content-disposition", "attachment; filename=patientPathology.xls");
+            //Response.ContentType = "application/vnd.ms-excel";
+            //StringWriter sw = new StringWriter();
+            //System.Web.UI.HtmlTextWriter htw = new System.Web.UI.HtmlTextWriter(sw);
+            //grid.RenderControl(htw);
+            //Response.WriteAsync(sw.ToString());
+            //Response.StatusCode = StatusCodes.Status200OK;
             return View(model);
         }
 
@@ -16128,7 +16196,8 @@ namespace HaloCareCore.Controllers
                     if (!String.IsNullOrEmpty(copy)) { mm.CC.Add(copy); }
                     mm.Subject = subject;
                     mm.Body = body;
-                    string[] files = Directory.GetFiles(Server.MapPath("~/uploads\\templates\\attachments"));
+                    string webRootPath = _webHostEnvironment.WebRootPath;
+                    string[] files = Directory.GetFiles(Path.Combine(webRootPath, "~/uploads\\templates\\attachments"));
                     if (!String.IsNullOrEmpty(attachments))
                     {
                         foreach (string file in files)
@@ -16205,9 +16274,9 @@ namespace HaloCareCore.Controllers
                     string fileName = excelfile.FileName;
                     string fileContentType = excelfile.ContentType;
                     byte[] fileBytes = new byte[excelfile.Length];
-                    var data = excelfile.InputStream.Read(fileBytes, 0, Convert.ToInt32(excelfile.Length));
+                    //var data = excelfile.InputStream.Read(fileBytes, 0, Convert.ToInt32(excelfile.Length));
 
-                    using (var package = new ExcelPackage(excelfile.InputStream))
+                    using (var package = new ExcelPackage(excelfile.OpenReadStream()))
                     {
                         var currentSheet = package.Workbook.Worksheets;
                         var workSheet = currentSheet.First();
