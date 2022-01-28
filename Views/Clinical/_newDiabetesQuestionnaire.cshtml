@@ -1,0 +1,2684 @@
+﻿@model HaloCareCore.Models.DoctorQuestionnaireViewModel
+@{
+    ViewBag.Title = "Diabetes Questionnaire";
+    Layout = "~/Views/Shared/_LayoutModal.cshtml";
+}
+
+<comment>
+    <!--
+        25 May 2020 -- HCare-832(Questionnaire: Diabetes Questionnaire development)
+        As per SR requirement as well as discussions held. A NEW Diabetes questionnaire has been developed.
+
+        17 June 2020 -- HCare-902(Limit dates Diabetes questionnaire)
+        Limited dates to 1900-01-01 on all three diabetes questionnaires
+    -->
+</comment>
+<style>
+    ::-webkit-input-placeholder { /* Chrome */
+        color: #333;
+        font-weight: 500;
+        font-size: 14px;
+        transition: opacity 250ms ease-in-out;
+    }
+
+    :focus::-webkit-input-placeholder {
+        opacity: 0.5;
+    }
+
+    .fab {
+        position: fixed;
+        z-index: 100;
+        right: 3.5%;
+        top: 5.5%;
+    }
+
+    .fa-stack {
+        font-size: 20px;
+        color: rgba(255, 255, 255, 0.75)
+    }
+
+        .fa-stack:hover {
+            transition-duration: 0.1s;
+            font-size: 22px;
+            color: orange;
+        }
+
+    i {
+        vertical-align: middle;
+        margin-left: 5px;
+    }
+
+    .field-validation-error:before {
+        font-family: FontAwesome;
+        content: "\f06a\00a0";
+        animation: pulse 2s ease infinite;
+    }
+
+    .field-validation-valid {
+        display: none;
+    }
+
+    .validation-summary-valid {
+        display: none;
+    }
+
+    .subtext {
+        color: #808080;
+        font-size: 14px;
+    }
+
+    .select2-container--default .select2-results__option--highlighted[aria-selected] .subtext {
+        color: #fff
+    }
+
+    .select2-container--default .select2-results__option--highlighted[aria-selected]:hover .subtext {
+        color: #fff
+    }
+
+    .select2-container--default .select2-selection--single {
+        display: block !important;
+        width: 380px !important;
+        max-height: 100px;
+        height: 30px;
+        margin-left: 10px;
+        padding: 6px 6px;
+        line-height: 1.428571429;
+        color: #003366;
+        border-radius: 0px !important;
+        border: none !important;
+        border-bottom: 1px solid #e8e6e6 !important;
+        background-color: transparent !important;
+        -webkit-box-shadow: none !important;
+        box-shadow: none !important;
+        outline: none !important
+    }
+
+        .select2-container--default .select2-selection--single .select2-selection__placeholder {
+            color: white !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow b {
+            margin-top: -5px !important;
+        }
+</style>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet" />
+
+<div class="questionnaire-modal" id="section2">
+    @using (Ajax.BeginForm("_newDiabetesQuestionnaire", "Clinical", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "divPath", OnSuccess = "hideModal(); alert('Saved');" }, new { id = "newDiabetesQuestionnaire" }))
+    {
+        @Html.Hidden("taskId", (object)ViewBag.task)
+        @Html.Hidden("DependantID", (object)ViewBag.DependantID)
+        @Html.Hidden("id", (object)ViewBag.id)
+        @Html.Hidden("template", (object)ViewBag.templateID)
+        @Html.Hidden("pro", (object)ViewBag.programId)
+        @Html.Hidden("questionnaireID", (object)ViewBag.questionnaireID)
+
+        @Html.AntiForgeryToken()
+
+        <div class="modal-header questionnaire-modal-header">
+            <!--follow-up-button-->
+            <div class="pull-right">
+                <div class="diabetes-questionnaire-checkbox">
+                    @Html.CheckBox("follow-up-all") <label for="follow-up-all" title="follow up - all"><span><i class="fas fa-circle follow-up-all"></i></span></label>
+                </div>
+            </div>
+            <h2>&nbsp; DIABETES/SUIKERSIEKTE</h2>
+        </div>
+
+        <div class="form-horizontal" style="margin-left: 2%">
+            <!-- diagnosis -->
+            <div class="questionnaireContainer">
+                <h3 class="questionnaire-heading">DIAGNOSIS/DIAGNOSE</h3>
+                <!-- diagnosis-data -->
+                <div id="diagnosisPanel_ci">
+                    <hr class="questionnaire_Ruler" />
+                    <br />
+                    <div class="historyTable_header">HISTORY/GESKIEDENIS</div>
+                    <div class="form-group">
+                        <div class="row">
+                            <table class="table historyTable_Quesionnaire table-hover" style="margin-left: 1.6%">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 18%">@Html.DisplayNameFor(model => model.PatientDiagnosis.CreatedDate)</th>
+                                        <th style="width: 18%">@Html.DisplayNameFor(model => model.PatientDiagnosis.ProgramCode)</th>
+                                        <th style="width: 18%">@Html.DisplayNameFor(model => model.PatientDiagnosis.ProgramDescription)</th>
+                                        <th style="width: 18%">@Html.DisplayNameFor(model => model.PatientDiagnosis.EffectiveDate)</th>
+                                        <th style="width: 18%">@Html.DisplayNameFor(model => model.PatientDiagnosis.CreatedBy)</th>
+                                        <th style="width: 10%; text-align: center!important">@Html.DisplayNameFor(model => model.PatientDiagnosis.Comment)</th>
+                                    </tr>
+                                </thead>
+                                @if (Model.programDiagnoses.Count() == 0)
+                                {
+                                    <tr><td colspan="6" style="text-align: center!important; color: rgba(128, 128, 128, 0.50)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="color: rgba(128, 128, 128, 0.50)"></i></span> no records found</td></tr>
+                                }
+                                else
+                                {
+                                    foreach (var item in Model.programDiagnoses)
+                                    {
+                                        <tbody>
+                                            @if (item.followUp == true)
+                                            {
+                                                <tr>
+                                                    <td colspan="6" style="text-align: center!important; color: rgba(204, 0, 0, 0.70)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="font-size: 18px; color: rgba(204, 0, 0, 0.70)!important"></i></span> Follow up required!</td>
+                                                </tr>
+                                            }
+                                            else
+                                            {
+                                                <tr style="text-indent: 5px">
+                                                    <td data-dateformat="DD-MM-YYYY">@Html.DisplayFor(Modelitem => item.createdDate)</td>
+                                                    <td>@Html.DisplayFor(Modelitem => item.programCode)</td>
+                                                    <td>@Html.DisplayFor(Modelitem => item.programDescription)</td>
+                                                    <td data-dateformat="DD-MM-YYYY">@Html.DisplayFor(Modelitem => item.diagnosisDate)</td>
+                                                    <td>@Html.DisplayFor(Modelitem => item.createdBy)</td>
+                                                    <td style="text-align: center!important"><span class="@(!String.IsNullOrEmpty(item.generalComments) ? "check-yes far fa-check-circle" : "check-no far fa-times-circle")" title="@item.generalComments"></span></td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    }
+                                }
+                            </table>
+                        </div>
+                    </div>
+                    <hr class="questionnaire_Ruler" />
+                    <br />
+                    <!---->
+                    <div class="form-group">
+                        <div class="col-md-3" style="margin-left: 3.5%; text-align: right">
+                            <p class="questionnaireQuestion">
+                                When were you diagnosed with Diabetes?<br />
+                                Wanneer was u gediagnoseer met Diabetes?
+                            </p>
+                        </div>
+                        <div class="col-md-8">
+                            <div>
+                                <i class="fas fa-asterisk pulser asterisk-warning"></i>
+                            </div>
+                            <input class="text-box single-line input-validation-error infoBox_doctorQuestionnaire" data-val="true" data-val-date="The field must be a date." id="PatientDiagnosis.EffectiveDate" name="PatientDiagnosis.EffectiveDate" required type="date" aria-required="true" aria-describedby="DOB-error" aria-invalid="true" min="@DateTime.Now.ToString("1900-01-01")" max="@DateTime.Now.ToString("yyyy-MM-dd")" oninvalid="InvalidMsg(this);">
+                            @Html.ValidationMessageFor(model => model.PatientDiagnosis.EffectiveDate, "", new { @class = "text-danger", @style = "font-size: 110%; margin-left: 1%" })
+                        </div>
+                        <br />
+                        <hr class="settings-ruler" />
+                        <div class="col-md-12">
+                            <table class="table historyTable_Quesionnaire" style="margin-left: 0.8%">
+                                <tbody>
+                                    <tr style="background-color: #fff">
+                                        <td class="socialHistory_Category" style="width: 20%">
+                                            <p class="questionnaireQuestion">
+                                                Where are you going to get your medication from?
+                                            </p>
+                                        </td>
+                                        <td style="width: 50%">
+                                            <select id="medication-registration" name="medication-registration" class="form-control select2" style="width: 45%;" onchange="MedicationRegistration()" required>
+                                                <option subtext="" selected="selected" disabled>Select</option>
+                                                <option value="Pharmacy" subtext=" ">Pharmacy</option>
+                                                <option value="State" subtext=" ">State</option>
+                                            </select>
+                                            <br />@Html.ValidationMessage("medication-registration", "", new { @class = "text-danger", @style = "font-size: 95%; margin-left: 1%", @id = "nd-medication-registration-error" })
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- medication -->
+            <div class="questionnaireContainer">
+                <div class="form-group pull-right">
+                    <div class="col-md-4 diabetes-questionnaire-checkbox">
+                        @Html.CheckBox("d-medication-ignore") <label for="d-medication-ignore" title="ignore"><span id="iMedical" class="ignore"><i class="fas fa-circle q-btn"></i></span></label>
+                    </div>
+                    <div class="col-md-4 diabetes-questionnaire-checkbox">
+                        @Html.CheckBox("d-medication-followup") <label for="d-medication-followup" title="follow up"><span id="fMedical" class="follow-up"><i class="fas fa-circle q-btn"></i></span></label>
+                    </div>
+                </div>
+                <h3 class="questionnaire-heading">MEDICATION/MEDIKASIE</h3>
+
+                <!-- medication-data -->
+                <div id="medicationpanel_diabetes">
+                    <hr class="questionnaire_Ruler" />
+                    <br />
+                    <div class="historyTable_header">HISTORY/GESKIEDENIS</div>
+                    <div class="form-group">
+                        <div class="row">
+                            <table class="table historyTable_Quesionnaire table-hover" id="tab_logic_diabetes_Medication" style="margin-left: 1.6%">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 8%; text-align: center!important">@Html.DisplayNameFor(model => model.generalScriptItems[0].scriptID)</th>
+                                        <th style="width: 8%; text-align: center!important">@Html.DisplayNameFor(model => model.generalScriptItems[0].nappiCode)</th>
+                                        <th style="width: 22%">@Html.DisplayNameFor(model => model.generalScriptItems[0].productName)</th>
+                                        <th style="width: 5%; text-align: center !important">@Html.DisplayNameFor(model => model.generalScriptItems[0].quantity)</th>
+                                        <th style="width: 22%">@Html.DisplayNameFor(model => model.generalScriptItems[0].directions)</th>
+                                        <th style="width: 15%">@Html.DisplayNameFor(model => model.generalScriptItems[0].itemStatus)</th>
+                                        <th style="width: 8%; text-align: center!important">@Html.DisplayNameFor(model => model.generalScriptItems[0].fromDate)</th>
+                                        <th style="width: 8%; text-align: center!important">@Html.DisplayNameFor(model => model.generalScriptItems[0].toDate)</th>
+                                    </tr>
+                                </thead>
+                                @if (Model.ScriptItems.Count() == 0)
+                                {
+                                    <tr><td colspan="9" style="text-align: center!important; color: rgba(128, 128, 128, 0.50)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="color: rgba(128, 128, 128, 0.50)"></i></span> no records found</td></tr>
+                                }
+                                else
+                                {
+                                    foreach (var item in Model.ScriptItems)
+                                    {
+                                        <tbody>
+                                            <tr style="text-indent: 5px">
+                                                <td style="text-align: center!important">@Html.DisplayFor(Modelitem => item.scriptID)</td>
+                                                <td style="text-align: center !important" class="checkQuest">@Html.DisplayFor(Modelitem => item.nappiCode)</td>
+                                                <td>@Html.DisplayFor(Modelitem => item.productName)</td>
+                                                <td style="text-align: center !important" data-dateformat="DD-MM-YYYY">@Html.DisplayFor(Modelitem => item.quantity)</td>
+                                                <td>@Html.DisplayFor(Modelitem => item.directions)</td>
+                                                <td>@Html.DisplayFor(Modelitem => item.itemStatus)</td>
+                                                <td style="text-align: center !important" data-dateformat="DD-MM-YYYY">@Html.DisplayFor(Modelitem => item.fromDate)</td>
+                                                <td style="text-align: center !important" data-dateformat="DD-MM-YYYY">@Html.DisplayFor(Modelitem => item.toDate)</td>
+                                            </tr>
+                                        </tbody>
+                                    }
+                                }
+                            </table>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <p style="color: rgba(8, 169, 250, 0.69); text-align: center; font-size: 16px">
+                            <span><i class="fas fa-info-circle" style="color: rgba(8, 169, 250, 0.69)"></i></span> For additional medication, please go to "Patient Clinical" tab and add under the clinical section
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <!-- optometry -->
+            <div class="questionnaireContainer">
+                <div class="form-group pull-right">
+                    <div class="col-md-4 diabetes-questionnaire-checkbox">
+                        @Html.CheckBox("d-optometry-ignore") <label for="d-optometry-ignore" title="ignore"><span id="iOptometry" class="ignore"><i class="fas fa-circle q-btn"></i></span></label>
+                    </div>
+                    <div class="col-md-4 diabetes-questionnaire-checkbox">
+                        @Html.CheckBox("d-optometry-followup") <label for="d-optometry-followup" title="follow up"><span id="fOptometry" class="follow-up"><i class="fas fa-circle q-btn"></i></span></label>
+                    </div>
+                </div>
+                <h3 class="questionnaire-heading">OPTOMETRY/OPTOMETRIE</h3>
+
+                <!-- optometry-data -->
+                <div id="optometrypanel_diabetes">
+
+                    <hr class="questionnaire_Ruler" />
+                    <br />
+                    <div class="historyTable_header">HISTORY/GESKIEDENIS</div>
+                    <div class="form-group">
+                        <div class="row">
+                            <table class="table historyTable_Quesionnaire table-hover" id="socialHistoryTable" style="margin-left: 1.6%">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 16%">@Html.DisplayNameFor(model => model.vision.createdDate) <i class="fa fa-fw fa-sort"></i></th>
+                                        <th style="width: 16%">@Html.DisplayNameFor(model => model.vision.vision) <i class="fa fa-fw fa-sort"></i></th>
+                                        <th style="width: 16%">@Html.DisplayNameFor(model => model.vision.eyeTreatment) <i class="fa fa-fw fa-sort"></i></th>
+                                        <th style="width: 16%">@Html.DisplayNameFor(model => model.vision.createdBy) <i class="fa fa-fw fa-sort"></i></th>
+                                        <th style="width: 16%">@Html.DisplayNameFor(model => model.vision.programType) <i class="fa fa-fw fa-sort"></i></th>
+                                        <th style="width: 16%">@Html.DisplayNameFor(model => model.vision.generalComments) <i class="fa fa-fw fa-sort"></i></th>
+                                    </tr>
+                                </thead>
+
+                                @if (Model.visions.Count() == 0)
+                                {
+                                    <tr><td colspan="6" style="text-align: center!important; color: rgba(128, 128, 128, 0.50)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="color: rgba(128, 128, 128, 0.50)"></i></span> no records found</td></tr>
+                                }
+                                else
+                                {
+                                    foreach (var item in Model.visions)
+                                    {
+                                        <tbody>
+                                            @if (item.followUp == true)
+                                            {
+                                                <tr>
+                                                    <td colspan="6" style="text-align: center!important; color: rgba(204, 0, 0, 0.70)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="font-size: 18px; color: rgba(204, 0, 0, 0.70)!important"></i></span> Follow up required!</td>
+                                                </tr>
+                                            }
+                                            else
+                                            {
+                                                <tr style="text-indent: 5px">
+                                                    <td data-dateformat="DD-MM-YYYY">@Html.DisplayFor(Modelitem => item.createdDate)</td>
+                                                    <td>@Html.Raw(Html.Encode(item.vision).Replace(",", "<br />" + ""))</td>
+                                                    <td>@Html.Raw(Html.Encode(item.eyeTreatment).Replace(",", "<br />" + ""))</td>
+                                                    <td data-dateformat="DD-MM-YYYY">@Html.DisplayFor(Modelitem => item.createdBy)</td>
+                                                    <td>@Html.DisplayFor(Modelitem => item.programType)</td>
+
+                                                    @if (item.generalComments == "None" || item.generalComments == "none" || item.generalComments == "NONE")
+                                                    {
+                                                        <td style="text-align: center!important"><span style="font-size: 14px; color: darkred; text-align: center!important"><i class="fas fa-times" title="No comment"></i></span></td>
+                                                    }
+                                                    else if (item.generalComments == "Follow up")
+                                                    {
+                                                        <td style="text-align: center!important; color: rgba(204, 0, 0, 0.70)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="font-size: 18px; color: rgba(204, 0, 0, 0.70)!important"></i></span> Follow up!</td>
+                                                    }
+                                                    else if (item.generalComments == null || item.generalComments == " " || item.generalComments == "")
+                                                    {
+                                                        <td style="text-align: center!important"><span style="font-size: 14px; color: darkred; text-align: center!important"><i class="fas fa-times" title="No comment"></i></span></td>
+                                                    }
+                                                    else
+                                                    {
+                                                        <td style="text-align: center!important"><span style="font-size: 14px; color: forestgreen; text-align: center!important"><i class="fas fa-check" title="@item.generalComments"></i></span></td>
+                                                    }
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    }
+                                }
+                            </table>
+                        </div>
+                        <br />
+                        <div class="form-group">
+                            <div class="col-md-12" id="podiatry-question">
+                                <table class="table historyTable_Quesionnaire" style="margin-left: 0.8%">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 50%">
+                                                Question
+                                            </th>
+                                            <th style="width: 50%">
+                                                Action
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                                <table class="table historyTable_Quesionnaire" style="margin-left: 0.8%">
+                                    <tbody>
+                                        <!-- vision -->
+                                        <tr style="background-color: #fff">
+                                            <td class="socialHistory_Category" style="width: 50%">
+                                                <p class="questionnaireQuestion">
+                                                    How is your vision? <sup><i class="fas fa-asterisk pulser"></i></sup><br />
+                                                    Hoe is jou visie?
+                                                </p>
+
+                                            </td>
+                                            <td style="width: 50%">
+                                                @Html.DropDownListFor(model => model.vision.vision, new List<SelectListItem>
+                                               {
+                                                    new SelectListItem() { Text = "• Normal vision", Value = "• Normal vision" },
+                                                    new SelectListItem() { Text = "• Glasses", Value = "• Glasses"},
+                                                    new SelectListItem() { Text = "• Partially blind / Blind in one or both eyes", Value = "• Partially blind/Blind in one or both eyes"},
+
+                                                }, "-- Select --", new { @class = "infoBox_doctorQuestionnaire", @required = "required" })
+
+                                                @Html.ValidationMessageFor(model => model.vision.vision, "", new { @class = "text-danger", @style = "font-size: 110%;margin-left: 1%" })
+
+                                                <div class="form-group pull-right" style="margin-top: 1%; margin-bottom: 0%">
+                                                    <div class="col-md-4 checkBox_True" style="margin-left: 2%">
+                                                        <div class="vision-education">
+                                                            @Html.CheckBox("vision-education", new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire" } })
+                                                            <label for="vision-education" style="width: 50px"><i class="fas fa-graduation-cap" style="font-size: 18px" title="educational note" id="vision-education"></i></label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <!-- vision-education -->
+                                <div class="row houdini" id="vision-educational">
+                                    <table class="table educationTable_Quesionnaire table-striped table-hover" id="socialHistoryTable" style="margin-left: 1%">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 100%;">
+                                                    @Html.DisplayName("Educational note/Opvoedkundige nota")
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>
+                                                    <ul class="diabetesQuestionnaire_educationalNotes">
+                                                        <li>Consult with an Ophthalmologist at least annually</li>
+                                                    </ul>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <ul class="diabetesQuestionnaire_educationalNotes">
+                                                        <li>Good glycaemic control is very important in slow down the process of complications</li>
+                                                    </ul>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <ul class="diabetesQuestionnaire_educationalNotes">
+                                                        <li>Maintain a healthy weight</li>
+                                                    </ul>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <ul class="diabetesQuestionnaire_educationalNotes">
+                                                        <li>By physically active</li>
+                                                    </ul>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <ul class="diabetesQuestionnaire_educationalNotes">
+                                                        <li>Stop smoking</li>
+                                                    </ul>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <ul class="diabetesQuestionnaire_educationalNotes">
+                                                        <li>
+                                                            Diabetic retinopathy, glaucoma and Cataracts symptoms. You may have no symptoms at first, but be aware of any of the following:<br>
+                                                            o	Spots or dark strings floating in your vision (floaters)<br>
+                                                            o	Blurred vision<br>
+                                                            o	Fluctuating vision<br>
+                                                            o	Impaired colour vision<br>
+                                                            o	Dark or empty areas in your vision<br>
+                                                            o	Vision loss<br>
+                                                            o	Pain in the eye<br>
+                                                            o	Yellowing of your vision
+                                                        </li>
+                                                    </ul>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <!-- eye-treatments  -->
+                                <table class="table historyTable_Quesionnaire" style="margin-left: 0.8%">
+                                    <tbody>
+                                        <tr style="background-color: #fff">
+                                            <td class="socialHistory_Category" style="width: 50%">
+                                                <p class="questionnaireQuestion">
+                                                    Have you had any of the following procedures in one or both eyes?<sup><i class="fas fa-asterisk pulser"></i></sup><br />
+                                                    Het u al enige van die volgende in een of beide oё gehad?
+                                                </p>
+                                            </td>
+                                            <td style="width: 50%">
+                                                @Html.ListBoxFor(model => model.vision.eyeTreatment, new List<SelectListItem>
+                                                    {
+                                                    new SelectListItem() { Text = "• None/Geen", Value = "• None/Geen"},
+                                                    new SelectListItem() { Text = "• Laser treatment/Laser behandeling", Value = "• Laser treatment/Laser behandeling"},
+                                                    new SelectListItem() { Text = "• Eye injections/Oog inspuiting", Value = "• Eye injections/Oog inspuiting"},
+                                                    new SelectListItem() { Text = "• Eye surgery/Oog operasie", Value = "• Eye surgery/Oog operasie"},
+                                                    new SelectListItem() { Text = "• Cataract/Katarak", Value = "• Cataract/Katarak"},
+                                                    new SelectListItem() { Text = "• Lens replacement/Lens vervanging", Value = "• Lens replacement/Lens vervanging"},
+
+                                                    }, new { @class = "questionDrop", @multiple = "multiple", @style = "max-width: 100%!important; width: 600px; margin-left: 1%;", @required = "required" })
+
+                                                @Html.ValidationMessageFor(model => model.vision.eyeTreatment, "", new { @class = "text-danger", @style = "font-size: 110%;margin-left: 1%" })
+
+                                                <div class="form-group pull-right" style="margin-top: 1%; margin-bottom: 0%">
+                                                    <div class="col-md-4 checkBox_True" style="margin-left: 2%">
+                                                        <div class="eye-treatment-education">
+                                                            @Html.CheckBox("eye-treatment-education", new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire" } })
+                                                            <label for="eye-treatment-education" style="width: 50px"><i class="fas fa-graduation-cap" style="font-size: 18px" title="educational note" id="eye-treatment-education"></i></label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <!-- eye-treatments-education -->
+                                <div class="row houdini" id="eye-treatment-educational">
+                                    <table class="table educationTable_Quesionnaire table-striped table-hover" id="socialHistoryTable" style="margin-left: 1%">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 100%;">
+                                                    @Html.DisplayName("Educational note/Opvoedkundige nota")
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>
+                                                    <ul class="diabetesQuestionnaire_educationalNotes">
+                                                        <li>Laser treatment: to treat the growth of new blood vessels at the back of the eye (retina) in cases of proliferative diabetic retinopathy, and to stabilise some cases of maculopathy</li>
+                                                    </ul>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <ul class="diabetesQuestionnaire_educationalNotes">
+                                                        <li>Eye injections: to treat severe maculopathy that's threatening your sight</li>
+                                                    </ul>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <ul class="diabetesQuestionnaire_educationalNotes">
+                                                        <li>Eye surgery: to remove blood or scar tissue from the eye if laser treatment isn't possible because retinopathy is too advanced</li>
+                                                    </ul>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <!-- vision-comments -->
+                                <div>
+                                    <h3 style="margin-left: 2%">COMMENT/KOMMENTAAR &nbsp; <span style="color: rgba(128, 128, 128, 0.85); font-size: 14px"><i class="fas fa-pen-square" title="Comment"></i></span></h3>
+                                    <table class="table historyTable_Quesionnaire">
+                                        <tr>
+                                            <td colspan="4">
+                                                @Html.TextAreaFor(model => model.vision.generalComments, new { htmlAttributes = new { @class = "emailTemplate_Bodys", @placeholder = "Comment" } })<br>
+                                                @Html.ValidationMessageFor(model => model.vision.generalComments, "", new { @class = "text-danger" })
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- podiatry -->
+            <div class="questionnaireContainer">
+                <div class="form-group pull-right">
+                    <div class="col-md-4 diabetes-questionnaire-checkbox">
+                        @Html.CheckBox("d-podiatry-ignore") <label for="d-podiatry-ignore" title="ignore"><span id="iPodiatry" class="ignore"><i class="fas fa-circle q-btn"></i></span></label>
+                    </div>
+                    <div class="col-md-4 diabetes-questionnaire-checkbox">
+                        @Html.CheckBox("d-podiatry-followup") <label for="d-podiatry-followup" title="follow up"><span id="fPodiatry" class="follow-up"><i class="fas fa-circle q-btn"></i></span></label>
+                    </div>
+                </div>
+                <h3 class="questionnaire-heading">PODIATRY/PODIATRIE</h3>
+
+                <!-- podiatry-data -->
+                <div id="podiatrypanel_diabetes">
+                    <hr class="questionnaire_Ruler" />
+                    <br />
+                    <div class="historyTable_header">HISTORY/GESKIEDENIS</div>
+                    <div class="form-group">
+                        <div class="row">
+                            <table class="table historyTable_Quesionnaire table-hover" id="socialHistoryTable" style="margin-left: 1.6%">
+                                <thead>
+                                    <tr>
+                                        <th onclick="socialTable(0)" style="width: 11%">@Html.DisplayName("Amputation") <i class="fa fa-fw fa-sort"></i></th>
+                                        <th onclick="socialTable(1)" style="width: 11%">@Html.DisplayName("Reason") <i class="fa fa-fw fa-sort"></i></th>
+                                        <th onclick="socialTable(2)" style="width: 11%">@Html.DisplayName("LOPS") <i class="fa fa-fw fa-sort"></i></th>
+                                        <th onclick="socialTable(3)" style="width: 11%">@Html.DisplayName("Deformity") <i class="fa fa-fw fa-sort"></i></th>
+                                        <th onclick="socialTable(4)" style="width: 11%">@Html.DisplayName("Arterial disease") <i class="fa fa-fw fa-sort"></i></th>
+                                        <th onclick="socialTable(5)" style="width: 11%">@Html.DisplayName("Wounds") <i class="fa fa-fw fa-sort"></i></th>
+                                        <th onclick="socialTable(6)" style="width: 8%; text-align: center!important">@Html.DisplayName("Program") <i class="fa fa-fw fa-sort"></i></th>
+                                        <th onclick="socialTable(7)" style="width: 8%; text-align: center!important">@Html.DisplayName("Comment") <i class="fa fa-fw fa-sort"></i></th>
+                                    </tr>
+                                </thead>
+
+                                @if (Model.podiatries.Count() == 0)
+                                {
+                                    <tr><td colspan="8" style="text-align: center!important; color: rgba(128, 128, 128, 0.50)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="color: rgba(128, 128, 128, 0.50)"></i></span> no records found</td></tr>
+                                }
+                                else
+                                {
+                                    foreach (var item in Model.podiatries)
+                                    {
+                                        <tbody>
+                                            @if (item.followUp == true)
+                                            {
+                                                <tr>
+                                                    <td colspan="8" style="text-align: center!important; color: rgba(204, 0, 0, 0.70)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="font-size: 18px; color: rgba(204, 0, 0, 0.70)!important"></i></span> Follow up required!</td>
+                                                </tr>
+                                            }
+                                            else
+                                            {
+                                                <tr style="text-indent: 5px">
+                                                    <td>@Html.Raw(Html.Encode(item.amputationComment).Replace(",", "<br />" + " "))</td>
+                                                    <td>@Html.Raw(Html.Encode(item.amputationReason).Replace(",", "<br />" + " "))</td>
+                                                    <td>@Html.Raw(Html.Encode(item.podiatryLopsComment).Replace(",", "<br />" + " "))</td>
+                                                    <td>@Html.Raw(Html.Encode(item.podiatryDeformityComment).Replace(",", "<br />" + " "))</td>
+                                                    <td>@Html.Raw(Html.Encode(item.podiatryPerArterialDiseaseComment).Replace(",", "<br />" + " "))</td>
+                                                    <td>@Html.Raw(Html.Encode(item.podiatryWoundAffectedLeg).Replace(",", "<br />" + " "))</td>
+                                                    <td style="text-align: center!important">@Html.DisplayFor(modelItem => item.programType)</td>
+
+                                                    @if (item.generalComments == "None" || item.generalComments == "none" || item.generalComments == "NONE")
+                                                    {
+                                                        <td style="text-align: center!important"><span style="font-size: 14px; color: darkred; text-align: center!important"><i class="fas fa-times" title="No comment"></i></span></td>
+                                                    }
+                                                    else if (item.generalComments == "Follow up")
+                                                    {
+                                                        <td style="text-align: center!important; color: rgba(204, 0, 0, 0.70)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="font-size: 18px; color: rgba(204, 0, 0, 0.70)!important"></i></span> Follow up!</td>
+                                                    }
+                                                    else if (item.generalComments == null || item.generalComments == " " || item.generalComments == "")
+                                                    {
+                                                        <td style="text-align: center!important"><span style="font-size: 14px; color: darkred; text-align: center!important"><i class="fas fa-times" title="No comment"></i></span></td>
+                                                    }
+                                                    else
+                                                    {
+                                                        <td style="text-align: center!important"><span style="font-size: 14px; color: forestgreen; text-align: center!important"><i class="fas fa-check" title="@item.generalComments"></i></span></td>
+                                                    }
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    }
+                                }
+                            </table>
+                        </div>
+                        <br />
+                        <div class="form-group">
+                            <div class="col-md-12" id="podiatry-question">
+                                <table class="table historyTable_Quesionnaire" style="margin-left: 0.8%">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 50%">
+                                                Question
+                                            </th>
+                                            <th style="width: 50%">
+                                                Action
+                                            </th>
+
+                                        </tr>
+                                    </thead>
+                                </table>
+                                <!-- amputation -->
+                                <table class="table historyTable_Quesionnaire" style="margin-left: 0.8%">
+                                    <tbody>
+                                        <tr style="background-color: #fff">
+                                            <td class="socialHistory_Category" style="width: 50%">
+                                                <p class="questionnaireQuestion">
+                                                    Have you lost any limbs as a result of diabetes that led to amputation?<sup><i class="fas fa-asterisk pulser"></i></sup><br />
+                                                    Het u enige ledemate verloor weens diabetes wat tot amputasie gely het?
+                                                </p>
+                                            </td>
+                                            <td style="width: 50%">
+                                                @Html.ListBoxFor(model => model.podiatry.amputationComment, new List<SelectListItem>
+                                               {
+                                                    new SelectListItem() { Text = "• Left: 1 toe/toon", Value = "• Left: 1 toe/toon"},
+                                                    new SelectListItem() { Text = "• Left: > than 1 toe/> as 1 toon", Value = "• Left: > than 1 toe/> as 1 toon"},
+                                                    new SelectListItem() { Text = "• Left: Foot/Voet", Value = "• Left: Foot/Voet"},
+                                                    new SelectListItem() { Text = "• Left: Below knee/Onder knie", Value = "• Left: Below knee/Onder knie"},
+                                                    new SelectListItem() { Text = "• Left: Above knee/Bo knie", Value = "• Left: Above knee/Bo knie"},
+
+                                                    new SelectListItem() { Text = "• Right: 1 toe/toon", Value = "• Right: 1 toe/toon"},
+                                                    new SelectListItem() { Text = "• Right: > than 1 toe/> as 1 toon", Value = "• Right: > than 1 toe/> as 1 toon"},
+                                                    new SelectListItem() { Text = "• Right: Foot/Voet", Value = "• Right: Foot/Voet"},
+                                                    new SelectListItem() { Text = "• Right: Below knee/Onder knie", Value = "• Right: Below knee/Onder knie"},
+                                                    new SelectListItem() { Text = "• Right: Above knee/Bo knie", Value = "• Right: Above knee/Bo knie"},
+
+                                                    new SelectListItem() { Text = "• Other/Ander", Value = "• Other/Ander"},
+                                                    new SelectListItem() { Text = "• None/Geen", Value = "• None/Geen"},
+
+                                                }, new { @class = "questionDrop", @multiple = "multiple", @style = "max-width: 100%!important; width: 600px; margin-left: 1%;", @required = "required" })
+
+                                                @Html.ValidationMessageFor(model => model.podiatry.amputationComment, "", new { @class = "text-danger", @style = "font-size: 110%;margin-left: 0%" })
+
+                                                <div class="form-group pull-right" style="margin-top: 1%; margin-bottom: 0%">
+                                                    <div class="col-md-4 checkBox_True" style="margin-left: 2%">
+                                                        <div class="podiatryEducation-true">
+                                                            @Html.CheckBox("amputation-education", new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire" } })
+                                                            <label for="amputation-education" style="width: 50px"><i class="fas fa-graduation-cap" style="font-size: 18px" title="educational note" id="amputation-education"></i></label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <!-- amputation-education -->
+                                <div class="row houdini" id="amputation-educational">
+                                    <table class="table educationTable_Quesionnaire table-striped table-hover" id="socialHistoryTable" style="margin-left: 1%">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 100%;">
+                                                    @Html.DisplayName("Educational note/Opvoedkundige nota")
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>
+                                                    <ul class="diabetesQuestionnaire_educationalNotes">
+                                                        <li>Inspect your feet daily for any cuts, blisters, redness, swelling or nail problems.</li>
+                                                    </ul>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <ul class="diabetesQuestionnaire_educationalNotes">
+                                                        <li>Bath in lukewarm water. Never hot. Inspect the water temperature before you get into the bath.</li>
+                                                    </ul>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <ul class="diabetesQuestionnaire_educationalNotes">
+                                                        <li>Wash between toes and ensure to dry carefully.</li>
+                                                    </ul>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <!-- amputation-reason -->
+                                <table class="table historyTable_Quesionnaire" style="margin-left: 0.8%">
+                                    <tbody>
+                                        <tr style="background-color: #fff">
+                                            <td class="socialHistory_Category" style="width: 50%">
+                                                <p class="questionnaireQuestion">
+                                                    Reason for amputation?<sup><i class="fas fa-asterisk pulser"></i></sup><br />
+                                                    Rede vir amputasie?
+                                                </p>
+                                            </td>
+                                            <td style="width: 50%">
+                                                @Html.ListBoxFor(model => model.podiatry.amputationReason, new List<SelectListItem>
+                                               {
+                                                    new SelectListItem() { Text = "• Traumatic/Traumatiese", Value = "• Traumatic/Traumatiese"},
+                                                    new SelectListItem() { Text = "• Poor circulation/Swak sirkulasie", Value = "• Poor circulation/Swak sirkulasie"},
+                                                    new SelectListItem() { Text = "• Cancer/Kanker", Value = "• Cancer/Kanker"},
+                                                    new SelectListItem() { Text = "• Infection/Infeksie", Value = "• Infection/Infeksie"},
+                                                    new SelectListItem() { Text = "• Neuroma/Neuroom", Value = "• Neuroma/Neuroom"},
+                                                    new SelectListItem() { Text = "• Frostbite/Bevroren", Value = "• Frostbite/Bevroren"},
+
+                                                    new SelectListItem() { Text = "• Other/Ander", Value = "• Other/Ander"},
+                                                    new SelectListItem() { Text = "• None/Geen", Value = "• None/Geen"},
+
+                                                }, new { @class = "questionDrop", @multiple = "multiple", @style = "max-width: 100%!important; width: 600px; margin-left: 1%;", @required = "required" })
+
+                                                @Html.ValidationMessageFor(model => model.podiatry.amputationReason, "", new { @class = "text-danger", @style = "font-size: 110%;margin-left: 0%" })
+
+                                                <div class="form-group pull-right" style="margin-top: 1%; margin-bottom: 0%">
+                                                    <div class="col-md-4 checkBox_True" style="margin-left: 2%">
+                                                        <div class="ampReasonEducation-true">
+                                                            @Html.CheckBox("amputation-reason-education", new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire" } })
+                                                            <label for="amputation-reason-education" style="width: 50px"><i class="fas fa-graduation-cap" style="font-size: 18px" title="educational note" id="amputation-reason-education"></i></label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <!-- amputation-education -->
+                                <div class="row houdini" id="amputation-reason-educational">
+                                    <table class="table educationTable_Quesionnaire table-striped table-hover" id="socialHistoryTable" style="margin-left: 1%">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 100%;">
+                                                    @Html.DisplayName("Educational note/Opvoedkundige nota")
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>
+                                                    <ul class="diabetesQuestionnaire_educationalNotes">
+                                                        <li>Moisturize your feet. Not between the toes. This could encourage a fungal infections.</li>
+                                                    </ul>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <ul class="diabetesQuestionnaire_educationalNotes">
+                                                        <li>Cut nails carefully. (consult podiatrist)</li>
+                                                    </ul>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <ul class="diabetesQuestionnaire_educationalNotes">
+                                                        <li>Do not treat corns and calluses yourself.</li>
+                                                    </ul>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <!-- lops -->
+                                <table class="table historyTable_Quesionnaire" style="margin-left: 0.8%">
+                                    <tbody>
+                                        <tr style="background-color: #fff">
+                                            <td class="socialHistory_Category" style="width: 50%">
+                                                <p class="questionnaireQuestion">
+                                                    Do you have any of the following symptoms in your lower legs or feet?<sup><i class="fas fa-asterisk pulser"></i></sup><br />
+                                                    Het u enige vd volgende simptome in u in onderbeen of voete?
+                                                </p>
+                                            </td>
+                                            <td style="width: 50%">
+                                                @Html.ListBoxFor(model => model.podiatry.podiatryLopsComment, new List<SelectListItem>
+                                                  {
+                                                  new SelectListItem() { Text = "• Prickling and tingling sensation (pins and needles)/Naalde en spelde gevoel", Value = "• Prickling and tingling sensation (pins and needles)/Naalde en spelde gevoel"},
+                                                  new SelectListItem() { Text = "• A loss of sensation or reduced sensation/Verlies of verminderde sensasie", Value = "• A loss of sensation or reduced sensation/Verlies of verminderde sensasie"},
+                                                  new SelectListItem() { Text = "• Burning sensation in the soles of the feet/Brand sensasie van voetsole", Value = "• Burning sensation in the soles of the feet/Brand sensasie van voetsole"},
+                                                  new SelectListItem() { Text = "• Stabbing pain or electric-shock sensations/Steek pyn of elektriese skok gevoel", Value = "• Stabbing pain or electric-shock sensations/Steek pyn of elektriese skok gevoel"},
+                                                  new SelectListItem() { Text = "• Weakened muscles/Verswakte spiere", Value = "• Weakened muscles/Verswakte spiere"},
+                                                  new SelectListItem() { Text = "• Muscles that becomes smaller/Spiere wat verklein", Value = "• Muscles that becomes smaller/Spiere wat verklein"},
+                                                  new SelectListItem() { Text = "• Poor coordination when walking and poor balance/Swak koördinasie as u loop en swak balans", Value = "• Poor coordination when walking and poor balance/Swak koördinasie as u loop en swak balans"},
+                                                  new SelectListItem() { Text = "• Hypersensitivity of the skin when touched/Hypersensitiwiteit van die vel met aanraking", Value = "• Hypersensitivity of the skin when touched/Hypersensitiwiteit van die vel met aanraking"},
+                                                  new SelectListItem() { Text = "• None/Geen", Value = "• None/Geen"},
+
+                                                }, new { @class = "questionDrop", @multiple = "multiple", @style = "max-width: 100%!important; width: 600px; margin-left: 1%;overflow-x: scroll", @required = "required" })
+
+                                                @Html.ValidationMessageFor(model => model.podiatry.podiatryLopsComment, "", new { @class = "text-danger", @style = "font-size: 110%;margin-left: 0%" })
+
+                                                <div class="form-group pull-right" style="margin-top: 1%; margin-bottom: 0%">
+                                                    <div class="col-md-4 checkBox_True" style="margin-left: 2%">
+                                                        <div class="lopsEducation-true">
+                                                            @Html.CheckBox("lops-education", new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire" } })
+                                                            <label for="lops-education" style="width: 50px"><i class="fas fa-graduation-cap" style="font-size: 18px" title="educational note" id="lops-education"></i></label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <!-- lops-education -->
+                                <div class="row houdini" id="lops-educational">
+                                    <table class="table educationTable_Quesionnaire table-striped table-hover" id="socialHistoryTable" style="margin-left: 1%">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 100%;">
+                                                    @Html.DisplayName("Educational note/Opvoedkundige nota")
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>
+                                                    <ul class="diabetesQuestionnaire_educationalNotes">
+                                                        <li>Wear clean, dry socks. Not synthetic.</li>
+                                                    </ul>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <ul class="diabetesQuestionnaire_educationalNotes">
+                                                        <li>Shake out shoes and feel the inside before wearing.</li>
+                                                    </ul>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <ul class="diabetesQuestionnaire_educationalNotes">
+                                                        <li>Keep feet warm and dry</li>
+                                                    </ul>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <!-- deformity -->
+                                <table class="table historyTable_Quesionnaire" style="margin-left: 0.8%">
+                                    <tbody>
+                                        <tr style="background-color: #fff">
+                                            <td class="socialHistory_Category" style="width: 50%">
+                                                <p class="questionnaireQuestion">
+                                                    Do you have any deformities or defects in your toes or feet?<sup><i class="fas fa-asterisk pulser"></i></sup><br />
+                                                    Het u enige deformiteite of gebreke van u tone of voete?
+                                                </p>
+                                            </td>
+                                            <td style="width: 50%">
+                                                @Html.ListBoxFor(model => model.podiatry.podiatryDeformityComment, new List<SelectListItem>
+                                                  {
+                                                  new SelectListItem() { Text = "• Hammer toe (a toe that is permanently bent over another toe)/Hammertoon (toon wat permanent gebuig staan bokant ander tone)", Value = "• Hammer toe (a toe that is permanently bent over another toe)/Hammertoon (toon wat permanent gebuig staan bokant ander tone)"},
+                                                  new SelectListItem() { Text = "• Bunion/Knokkeltoon", Value = "• Bunion/Knokkeltoon"},
+                                                  new SelectListItem() { Text = "• High foot arch/Hoё voetbrug", Value = "• High foot arch/Hoё voetbrug"},
+                                                  new SelectListItem() { Text = "• Flat feet (low foot arch)/Platvoet (lae voetbrug)", Value = "• Flat feet (low foot arch)/Platvoet (lae voetbrug)"},
+                                                  new SelectListItem() { Text = "• Charcot foot (loss of sensation of the whole foot and the destruction of foot joints with an abnormal flat foot taking shape over time)/Charcot voet (verlies van sensasie van hele voet en vernietiging van voet gewrigte met ‘n abnormale platvoet wat vorm mettertyd)", Value = "• Charcot foot (loss of sensation of the whole foot and the destruction of foot joints with an abnormal flat foot taking shape over time)/Charcot voet (verlies van sensasie van hele voet en vernietiging van voet gewrigte met ‘n abnormale platvoet wat vorm mettertyd)"},
+                                                  new SelectListItem() { Text = "• None/Geen", Value = "• None/Geen"},
+
+                                                  }, new { @class = "questionDrop", @multiple = "multiple", @style = "max-width: 100%!important; width: 600px; margin-left: 1%;overflow-x: scroll", @required = "required" })
+
+                                                @Html.ValidationMessageFor(model => model.podiatry.podiatryDeformityComment, "", new { @class = "text-danger", @style = "font-size: 110%;margin-left: 0%" })
+
+                                                <div class="form-group pull-right" style="margin-top: 1%; margin-bottom: 0%">
+                                                    <div class="col-md-4 checkBox_True" style="margin-left: 2%">
+                                                        <div class="deformityEducation-true">
+                                                            @Html.CheckBox("deformity-education", new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire" } })
+                                                            <label for="deformity-education" style="width: 50px"><i class="fas fa-graduation-cap" style="font-size: 18px" title="educational note" id="deformity-education"></i></label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <!-- deformity-education -->
+                                <div class="row houdini" id="deformity-educational">
+                                    <table class="table educationTable_Quesionnaire table-striped table-hover" id="socialHistoryTable" style="margin-left: 1%">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 100%;">
+                                                    @Html.DisplayName("Educational note/Opvoedkundige nota")
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>
+                                                    <ul class="diabetesQuestionnaire_educationalNotes">
+                                                        <li>Never walk barefoot.</li>
+                                                    </ul>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <ul class="diabetesQuestionnaire_educationalNotes">
+                                                        <li>Do not smoke.</li>
+                                                    </ul>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <ul class="diabetesQuestionnaire_educationalNotes">
+                                                        <li>Consult a Podiatrist at least annually and ask your doctor/sister to inspect your feet with each consultation.</li>
+                                                    </ul>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <!-- arterial-disease -->
+                                <div class="form-group">
+                                    <div class="col-md-4" style="margin-left: 1.1%; margin-top: 1%">
+                                        <p class="" style="text-align: left">
+                                            Do you have blood supply problems in your legs or feet? <sup><i class="fas fa-asterisk pulser"></i></sup><br />
+                                            Het u bloedstoevoer probleme van u bene of voete?
+                                        </p>
+                                    </div>
+                                    <div style="margin-left: 52%!important;margin-top: 1%">
+                                        <table class="padCheck">
+                                            <tr>
+                                                <td style="border: 1px solid rgba(204, 204, 204, 0.75);">
+                                                    <div class="col-md-8 padQuestion_True">
+                                                        <div class="art-disease-yes">
+                                                            @Html.CheckBox("art-disease-yes", new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire", @required = "required" } })
+                                                            <label for="art-disease-yes" style="width: 50px"><i class="fas fa-check" style="font-size: 22px" title="yes" id="art-disease-yes"></i></label>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        <table class="padCheck">
+                                            <tr>
+                                                <td style="border: 1px solid rgba(204, 204, 204, 0.75);">
+                                                    <div class="col-md-8 padQuestion_False">
+                                                        <div class="art-disease-no">
+                                                            @Html.CheckBox("art-disease-no", new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire" } })
+                                                            <label for="art-disease-no" style="width: 50px"><i class="fas fa-times" style="font-size: 22px" title="no" id="art-disease-no"></i></label>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        <br />
+                                        @Html.ValidationMessage("art-disease-yes", "", new { @class = "text-danger", @style = "font-size: 110%;margin-left: 0%", @id = "bloodSupply-error" })
+                                    </div>
+
+                                </div>
+                                <!--left/right-->
+                                <div class="form-group houdini" id="art-disease-question" style="margin-top: 1%">
+                                    <table class="table historyTable_Quesionnaire">
+                                        <tr style="background-color: #fff">
+                                            <td class="socialHistory_Category">
+                                                <p class="questionnaireQuestion">
+                                                    Indicate which leg:<br />
+                                                    Merk watter been:
+                                                </p>
+                                            </td>
+                                            <td>
+                                                <div style="margin-left: 0%!important">
+                                                    @Html.DropDownListFor(model => model.podiatry.podiatryPerArterialDiseaseAffectedLeg, new List<SelectListItem>
+                                                      {
+                                                    new SelectListItem() { Text = "• Left leg/Linkerbeen", Value = "• Left leg/Linkerbeen"},
+                                                    new SelectListItem() { Text = "• Right leg/Regterbeen", Value = "• Right leg/Regterbeen"},
+                                                    new SelectListItem() { Text = "• Both/Beide", Value = "• Both/Beide"},
+
+                                                }, " -- Select --", new { @class = "questionDrop", @style = "width: 600px; margin-left: 6%!important", @required = "required" })
+
+                                                    @Html.ValidationMessageFor(model => model.podiatry.podiatryPerArterialDiseaseAffectedLeg, "", new { @class = "text-danger", @style = "font-size: 110%;margin-left: 0%" })
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <!-- wound -->
+                                <div class="form-group">
+                                    <div class="col-md-4" style="margin-left: 1.1%">
+                                        <p class="" style="text-align: left">
+                                            Do you currently have any wounds/sores on your legs or feet? <sup><i class="fas fa-asterisk pulser"></i></sup><br />
+                                            Het u tans enige sere of wonde aan u bene of voete?
+                                        </p>
+                                    </div>
+                                    <div style="margin-left: 52%!important">
+                                        <table class="padCheck">
+                                            <tr>
+                                                <td style="border: 1px solid rgba(204, 204, 204, 0.75);">
+                                                    <div class="col-md-8 padQuestion_True">
+                                                        <div class="wound-yes">
+                                                            @Html.CheckBox("wound-yes", new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire", @required = "required" } })
+                                                            <label for="wound-yes" style="width: 50px"><i class="fas fa-check" style="font-size: 22px" title="yes" id="wound-yes"></i></label>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        <table class="padCheck">
+                                            <tr>
+                                                <td style="border: 1px solid rgba(204, 204, 204, 0.75);">
+                                                    <div class="col-md-8 padQuestion_False">
+                                                        <div class="wound-no">
+                                                            @Html.CheckBox("wound-no", new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire" } })
+                                                            <label for="wound-no" style="width: 50px"><i class="fas fa-times" style="font-size: 22px" title="no" id="wound-no"></i></label>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        <br />
+                                        @Html.ValidationMessage("wound-yes", "", new { @class = "text-danger", @style = "font-size: 110%;margin-left: 0%", @id = "wound-error" })
+                                    </div>
+                                </div>
+                                <!-- left/right -->
+                                <div class="form-group houdini" id="wounds-question" style="margin-top: 1%">
+                                    <table class="table historyTable_Quesionnaire">
+                                        <tr style="background-color: #fff">
+                                            <td class="socialHistory_Category">
+                                                <p class="questionnaireQuestion">
+                                                    Indicate which leg:<br />
+                                                    Merk watter been:
+                                                </p>
+                                            </td>
+                                            <td>
+                                                <div style="margin-left: 0%!important">
+                                                    @Html.DropDownListFor(model => model.podiatry.podiatryWoundAffectedLeg, new List<SelectListItem>
+                                                      {
+                                                    new SelectListItem() { Text = "• Left leg/Linkerbeen", Value = "• Left leg/Linkerbeen"},
+                                                    new SelectListItem() { Text = "• Right leg/Regterbeen", Value = "• Right leg/Regterbeen"},
+                                                    new SelectListItem() { Text = "• Both/Beide", Value = "• Both/Beide"},
+
+                                                      }, " -- Select --", new { @class = "questionDrop", @style = "width: 600px; margin-left: 6%!important", @required = "required" })
+
+                                                    @Html.ValidationMessageFor(model => model.podiatry.podiatryWoundAffectedLeg, "", new { @class = "text-danger", @style = "font-size: 110%;margin-left: 0%" })
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <!-- arterial-disease-comment -->
+                                <div class="col-md-12">
+                                    <table class="table historyTable_Quesionnaire">
+                                        <tbody>
+                                            <tr style="background-color: #fff">
+                                                <td class="socialHistory_Category col-md-6">
+                                                    <p class="questionnaireQuestion">
+                                                        Do you have any of the following symptoms?<sup><i class="fas fa-asterisk pulser"></i></sup><br />
+                                                        Het u enige van die volgende simptome?
+                                                    </p>
+                                                </td>
+                                                <td class="col-md-6" style="margin-left: 52%!important">
+                                                    @Html.ListBoxFor(model => model.podiatry.podiatryPerArterialDiseaseComment, new List<SelectListItem>
+                                                        {
+                                                            new SelectListItem() { Text = "• Leg pain/cramping that occurs while walking (intermittent claudication)/Bene wat pyn/kramp wanneer u loop (afwisselende kloudikasie)", Value = "• Leg pain/cramping that occurs while walking (intermittent claudication)/Bene wat pyn/kramp wanneer u loop (afwisselende kloudikasie)"},
+                                                            new SelectListItem() { Text = "• Leg pain/cramping that occurs while lying down (rest pain)/Bene wat pyn/kramp wanneer u lê", Value = "• Leg pain/cramping that occurs while lying down (rest pain)/Bene wat pyn/kramp wanneer u lê"},
+                                                            new SelectListItem() { Text = "• Weakend leg/Lam verswakte been", Value = "• Weakend leg/Lam verswakte been"},
+                                                            new SelectListItem() { Text = "• Cold legs or feet (colder than other limbs)/Koue bene of voete (koeler as wat ander ledemate is)", Value = "• Cold legs or feet (colder than other limbs)/Koue bene of voete (koeler as wat ander ledemate is)"},
+                                                            new SelectListItem() { Text = "• Sores that will not heal/Sere wat nie gesond wil word nie", Value = "• Sores that will not heal/Sere wat nie gesond wil word nie"},
+                                                            new SelectListItem() { Text = "• Discoloration of legs (pale or blue)/Bene wat verkleur het (bleek of blou)", Value = "• Discoloration of legs (pale or blue)/Bene wat verkleur het (bleek of blou)"},
+                                                            new SelectListItem() { Text = "• None/Geen", Value = "• None/Geen"},
+
+                                                        }, new { @class = "questionDrop", @id = "podiatryPerArterialDiseaseComment", @multiple = "multiple", @style = "max-width: 800px!important; width: 600px; margin-left: 0%;overflow-x: scroll;margin-bottom: 10px", @required = "required" })
+
+                                                    @Html.ValidationMessageFor(model => model.podiatry.podiatryPerArterialDiseaseComment, "", new { @class = "text-danger", @style = "font-size: 110%;margin-left: 0%" })
+
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <!-- wound-infection -->
+                                <div class="col-md-12">
+                                    <table class="table historyTable_Quesionnaire">
+                                        <tbody>
+                                            <tr style="background-color: #fff">
+                                                <td class="socialHistory_Category col-md-6">
+                                                    <p class="questionnaireQuestion">
+                                                        Does the wound have an active infection?<sup><i class="fas fa-asterisk pulser"></i></sup><br />
+                                                        Het die wonde aktiewe infeksie?
+                                                    </p>
+                                                </td>
+                                                <td style="width: 50%">
+                                                    @Html.DropDownListFor(model => model.podiatry.WoundInfection, new List<SelectListItem>
+                                                   {
+                                                        new SelectListItem() { Text = "Yes", Value = "Yes"},
+                                                        new SelectListItem() { Text = "No", Value = "No"},
+
+                                                    }, "-- Select --", new { @class = "infoBox_doctorQuestionnaire", @style = "max-width: 100%!important; width: 600px; margin-left: 1%;overflow-x: scroll", @required = "required" })
+
+                                                    @Html.ValidationMessageFor(model => model.podiatry.WoundInfection, "", new { @class = "text-danger", @style = "font-size: 110%;margin-left: 1%" })
+
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <!-- podiatry-comments -->
+                                <div>
+                                    <h3 style="margin-left: 2%">COMMENT/KOMMENTAAR &nbsp; <span style="color: rgba(128, 128, 128, 0.85); font-size: 14px"><i class="fas fa-pen-square" title="Comment"></i></span></h3>
+                                    <table class="table historyTable_Quesionnaire">
+                                        <tr>
+                                            <td colspan="4">
+                                                @Html.TextAreaFor(model => model.podiatry.generalComments, new { htmlAttributes = new { @class = "emailTemplate_Bodys", @placeholder = "Comment" } })<br>
+                                                @Html.ValidationMessageFor(model => model.podiatry.generalComments, "", new { @class = "text-danger" })
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- nervous-system -->
+            <div class="questionnaireContainer">
+                <div class="form-group pull-right">
+                    <div class="col-md-4 diabetes-questionnaire-checkbox">
+                        @Html.CheckBox("d-autonero-ignore") <label for="d-autonero-ignore" title="ignore"><span id="insystem" class="ignore"><i class="fas fa-circle q-btn"></i></span></label>
+                    </div>
+                    <div class="col-md-4 diabetes-questionnaire-checkbox">
+                        @Html.CheckBox("d-autonero-followup") <label for="d-autonero-followup" title="follow up"><span id="fnsystem" class="follow-up"><i class="fas fa-circle q-btn"></i></span></label>
+                    </div>
+                </div>
+                <h3 class="questionnaire-heading">NERVOUS SYSTEM/SENUWEESTELSEL</h3>
+
+                <!-- nervous-system-data -->
+                <div id="autoneropanel_diabetes">
+
+                    <hr class="questionnaire_Ruler" />
+                    <br />
+                    <div class="historyTable_header">HISTORY/GESKIEDENIS</div>
+                    <div class="form-group">
+                        <div class="row">
+                            <table class="table historyTable_Quesionnaire table-hover" id="socialHistoryTable" style="margin-left: 1.6%">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 16%">@Html.DisplayNameFor(model => model.autoNeropathy.createdDate) <i class="fa fa-fw fa-sort"></i></th>
+                                        <th style="width: 16%">@Html.DisplayNameFor(model => model.autoNeropathy.autoNeuroSympComment) <i class="fa fa-fw fa-sort"></i></th>
+                                        <th style="width: 16%">@Html.DisplayNameFor(model => model.autoNeropathy.createdBy) <i class="fa fa-fw fa-sort"></i></th>
+                                        <th style="width: 16%">@Html.DisplayNameFor(model => model.autoNeropathy.programType) <i class="fa fa-fw fa-sort"></i></th>
+                                        <th style="width: 16%">@Html.DisplayNameFor(model => model.autoNeropathy.generalComments) <i class="fa fa-fw fa-sort"></i></th>
+                                    </tr>
+                                </thead>
+
+                                @if (Model.autoNeropathies.Count() == 0)
+                                {
+                                    <tr><td colspan="5" style="text-align: center!important; color: rgba(128, 128, 128, 0.50)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="color: rgba(128, 128, 128, 0.50)"></i></span> no records found</td></tr>
+                                }
+                                else
+                                {
+                                    foreach (var item in Model.autoNeropathies)
+                                    {
+                                        <tbody>
+                                            @if (item.followUp == true)
+                                            {
+                                                <tr>
+                                                    <td colspan="5" style="text-align: center!important; color: rgba(204, 0, 0, 0.70)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="font-size: 18px; color: rgba(204, 0, 0, 0.70)!important"></i></span> Follow up required!</td>
+                                                </tr>
+                                            }
+                                            else
+                                            {
+                                                <tr style="text-indent: 5px">
+                                                    <td data-dateformat="DD-MM-YYYY">@Html.DisplayFor(Modelitem => item.createdDate)</td>
+                                                    <td>@Html.Raw(Html.Encode(item.autoNeuroSympComment).Replace(",", "<br />" + ""))</td>
+                                                    <td data-dateformat="DD-MM-YYYY">@Html.DisplayFor(Modelitem => item.createdBy)</td>
+                                                    <td>@Html.DisplayFor(Modelitem => item.programType)</td>
+
+                                                    @if (item.generalComments == "None" || item.generalComments == "none" || item.generalComments == "NONE")
+                                                    {
+                                                        <td style="text-align: center!important"><span style="font-size: 14px; color: darkred; text-align: center!important"><i class="fas fa-times" title="No comment"></i></span></td>
+                                                    }
+                                                    else if (item.generalComments == "Follow up")
+                                                    {
+                                                        <td style="text-align: center!important; color: rgba(204, 0, 0, 0.70)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="font-size: 18px; color: rgba(204, 0, 0, 0.70)!important"></i></span> Follow up!</td>
+                                                    }
+                                                    else if (item.generalComments == null || item.generalComments == " " || item.generalComments == "")
+                                                    {
+                                                        <td style="text-align: center!important"><span style="font-size: 14px; color: darkred; text-align: center!important"><i class="fas fa-times" title="No comment"></i></span></td>
+                                                    }
+                                                    else
+                                                    {
+                                                        <td style="text-align: center!important"><span style="font-size: 14px; color: forestgreen; text-align: center!important"><i class="fas fa-check" title="@item.generalComments"></i></span></td>
+                                                    }
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    }
+                                }
+                            </table>
+                        </div>
+                        <br />
+                        <div class="form-group">
+                            <div class="col-md-12" id="podiatry-question">
+                                <table class="table historyTable_Quesionnaire" style="margin-left: 0.8%">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 50%">
+                                                Question
+                                            </th>
+                                            <th style="width: 50%">
+                                                Action
+                                            </th>
+
+                                        </tr>
+                                    </thead>
+                                </table>
+                                <table class="table historyTable_Quesionnaire" style="margin-left: 0.8%">
+                                    <tbody>
+                                        <!-- symptoms -->
+                                        <tr style="background-color: #fff">
+                                            <td class="socialHistory_Category" style="width: 50%">
+                                                <p class="questionnaireQuestion">
+                                                    Do you experience any of the following symptoms?<br />
+                                                    Ervaar u enige van die volgende simptome?
+                                                </p>
+                                            </td>
+                                            <td style="width: 50%">
+                                                @Html.ListBoxFor(model => model.autoNeropathy.autoNeuroSympComment, new List<SelectListItem>
+                                                {
+                                                    new SelectListItem() { Text = "Cardiovascular system/Kardiovaskulêre sisteem", Disabled = true},
+                                                    new SelectListItem() { Text = "• Dizziness just after standing", Value = "• Dizziness just after standing"},
+                                                    new SelectListItem() { Text = "• Fainting just after standing", Value = "• Fainting just after standing"},
+                                                    new SelectListItem() { Text = "• Irregular heart rate", Value = "• Irregular heart rate"},
+                                                    new SelectListItem() { Text = "Sweat glands/Sweetkliere", Disabled = true},
+                                                    new SelectListItem() { Text = "• Profuse sweating, especially at night or when eating particular foods", Value = "• Profuse sweating - especially at night or when eating particular foods"},
+                                                    new SelectListItem() { Text = "• Reduced sweating, especially in the legs and feet", Value = "• Reduced sweating - especially in the legs and feet"},
+                                                    new SelectListItem() { Text = "• Dry, flaky, thinning skin", Value = "• Dry/flaky/thinning skin"},
+                                                    new SelectListItem() { Text = "• Hair loss", Value = "• Hair loss"},
+                                                    new SelectListItem() { Text = "Urinary system/Urinêre stelsel", Disabled = true},
+                                                    new SelectListItem() { Text = "• Incontinence", Value = "• Incontinence"},
+                                                    new SelectListItem() { Text = "• Frequent or urgent urination", Value = "• Frequent or urgent urination"},
+                                                    new SelectListItem() { Text = "• Trouble urinating", Value = "• Trouble urinating"},
+
+                                                    new SelectListItem() { Text = "• None/Geen", Value = "• None/Geen"},
+
+                                                }, new { @class = "questionDrop", @id = "autoNeuroSympComment", @multiple = "multiple", @style = "max-width: 100%!important; width: 600px; margin-left: 1%;", @required = "required" })
+                                                @Html.ValidationMessageFor(model => model.autoNeropathy.autoNeuroSympComment, "", new { @class = "text-danger", @style = "font-size: 110%;margin-left: 1%" })
+
+                                                <div class="form-group pull-right" style="margin-top: 1%; margin-bottom: 0%">
+                                                    <div class="col-md-4 checkBox_True" style="margin-left: 2%">
+                                                        <div class="autonero-education">
+                                                            @Html.CheckBox("autonero-education", new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire" } })
+                                                            <label for="autonero-education" style="width: 50px"><i class="fas fa-graduation-cap" style="font-size: 18px" title="educational note" id="autonero-education"></i></label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+                                <div class="row houdini" id="autonero-educational">
+                                    <table class="table educationTable_Quesionnaire table-striped table-hover" id="socialHistoryTable" style="margin-left: 1%">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 100%;">
+                                                    @Html.DisplayName("Educational note/Opvoedkundige nota")
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>
+                                                    <ul class="diabetesQuestionnaire_educationalNotes">
+                                                        <li>Cheese commonly causes excessive sweating, although this is not true for every person with diabetic neuropathy</li>
+                                                    </ul>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- comment -->
+                                <div>
+                                    <h3 style="margin-left: 2%">COMMENT/KOMMENTAAR &nbsp; <span style="color: rgba(128, 128, 128, 0.85); font-size: 14px"><i class="fas fa-pen-square" title="Comment"></i></span></h3>
+                                    <table class="table historyTable_Quesionnaire">
+                                        <tr>
+                                            <td colspan="4">
+                                                @Html.TextAreaFor(model => model.autoNeropathy.generalComments, new { htmlAttributes = new { @class = "emailTemplate_Bodys", @placeholder = "Comment" } })<br>
+                                                @Html.ValidationMessageFor(model => model.autoNeropathy.generalComments, "", new { @class = "text-danger" })
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- hypoglycaemia -->
+            <div class="questionnaireContainer">
+                <div class="form-group pull-right">
+                    <div class="col-md-4 diabetes-questionnaire-checkbox">
+                        @Html.CheckBox("d-hypoglycaemia-ignore") <label for="d-hypoglycaemia-ignore" title="ignore"><span id="iHypoglycaemia" class="ignore"><i class="fas fa-circle q-btn"></i></span></label>
+                    </div>
+                    <div class="col-md-4 diabetes-questionnaire-checkbox">
+                        @Html.CheckBox("d-hypoglycaemia-followup") <label for="d-hypoglycaemia-followup" title="follow up"><span id="fHypoglycaemia" class="follow-up"><i class="fas fa-circle q-btn"></i></span></label>
+                    </div>
+                </div>
+                <h3 class="questionnaire-heading">HYPOGLYCEMIA/HIPOGLUKEMIE</h3>
+                <!-- hypoglycaemia-data -->
+                <div id="hypoglycaemiapanel_diabetes">
+
+                    <hr class="questionnaire_Ruler" />
+                    <br />
+                    <div class="historyTable_header">HISTORY/GESKIEDENIS</div>
+                    <div class="form-group">
+                        <div class="row">
+                            <table class="table historyTable_Quesionnaire table-hover" id="socialHistoryTable" style="margin-left: 1.6%">
+                                <thead>
+                                    <tr>
+                                        <th onclick="socialTable(0)" style="width: 25%">@Html.DisplayName("Symptoms") <i class="fa fa-fw fa-sort"></i></th>
+                                        <th onclick="socialTable(1)" style="width: 25%">@Html.DisplayName("Glucose < 4,1mol") <i class="fa fa-fw fa-sort"></i></th>
+                                        <th onclick="socialTable(2)" style="width: 25%">@Html.DisplayName("Hypoglycaemic assistance") <i class="fa fa-fw fa-sort"></i></th>
+                                        <th onclick="socialTable(3)" style="width: 12%; text-align: center!important">@Html.DisplayName("Program") <i class="fa fa-fw fa-sort"></i></th>
+                                        <th onclick="socialTable(4)" style="width: 12%; text-align: center!important">Comment</th>
+                                    </tr>
+                                </thead>
+                                @if (Model.hypoglycaemias.Count() == 0)
+                                {
+                                    <tr><td colspan="5" style="text-align: center!important; color: rgba(128, 128, 128, 0.50)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="color: rgba(128, 128, 128, 0.50)"></i></span> no records found</td></tr>
+                                }
+                                else
+                                {
+                                    foreach (var item in Model.hypoglycaemias)
+                                    {
+                                        <tbody>
+                                            @if (item.followUp == true)
+                                            {
+                                                <tr>
+                                                    <td colspan="5" style="text-align: center!important; color: rgba(204, 0, 0, 0.70)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="font-size: 18px; color: rgba(204, 0, 0, 0.70)!important"></i></span> Follow up required!</td>
+                                                </tr>
+                                            }
+                                            else
+                                            {
+                                                <tr style="text-indent: 5px">
+                                                    <td>@Html.Raw(Html.Encode(item.hypoglycaemiaSymptomsComment).Replace(",", "<br />" + "	"))</td>
+                                                    <td>@Html.DisplayFor(modelItem => item.glucoseReading)</td>
+                                                    <td>@Html.DisplayFor(modelItem => item.hypoglycaemiaAssistance)</td>
+                                                    <td>@Html.DisplayFor(modelItem => item.programType)</td>
+                                                    @if (item.generalComments == "None" || item.generalComments == "none" || item.generalComments == "NONE")
+                                                    {
+                                                        <td style="text-align: center!important"><span style="font-size: 14px; color: darkred; text-align: center!important"><i class="fas fa-times" title="No comment"></i></span></td>
+                                                    }
+                                                    else if (item.generalComments == "Follow up")
+                                                    {
+                                                        <td style="text-align: center!important; color: rgba(204, 0, 0, 0.70)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="font-size: 18px; color: rgba(204, 0, 0, 0.70)!important"></i></span> Follow up!</td>
+                                                    }
+                                                    else if (item.generalComments == null || item.generalComments == " " || item.generalComments == "")
+                                                    {
+                                                        <td style="text-align: center!important"><span style="font-size: 14px; color: darkred; text-align: center!important"><i class="fas fa-times" title="No comment"></i></span></td>
+                                                    }
+                                                    else
+                                                    {
+                                                        <td style="text-align: center!important"><span style="font-size: 14px; color: forestgreen; text-align: center!important"><i class="fas fa-check" title="@item.generalComments"></i></span></td>
+                                                    }
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    }
+                                }
+                            </table>
+                        </div>
+                        <br />
+                        <div class="form-group">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <div class="col-md-4" style="margin-left: 1.5%; text-indent:0; text-indent: each-line ">
+                                        <p class="questionnaireQuestion">
+                                            Do you wake up during the night feeling confused & sweating?<br />
+                                            Word u snags wakker, verward en sweterig?
+                                        </p>
+                                    </div>
+                                    <div style="margin-left: 52%!important">
+                                        <table class="padCheck">
+                                            <tr>
+                                                <td style="border: 1px solid rgba(204, 204, 204, 0.75);">
+                                                    <div class="col-md-8 padQuestion_True">
+                                                        <div class="hypog-symptoms-yes">
+                                                            @Html.CheckBox("hypog-symptoms-yes", new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire" } })
+                                                            <label for="hypog-symptoms-yes" style="width: 50px"><i class="fas fa-check" style="font-size: 22px" title="yes" id="hypog-symptoms-yes"></i></label>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        <table class="padCheck">
+                                            <tr>
+                                                <td style="border: 1px solid rgba(204, 204, 204, 0.75);">
+                                                    <div class="col-md-8 padQuestion_False">
+                                                        <div class="hypog-symptoms-no">
+                                                            @Html.CheckBox("hypog-symptoms-no", new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire" } })
+                                                            <label for="hypog-symptoms-no" style="width: 50px"><i class="fas fa-times" style="font-size: 22px" title="no" id="hypog-symptoms-no"></i></label>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        <br />
+                                        @Html.ValidationMessage("hypog-symptoms-yes", "", new { @class = "text-danger", @style = "font-size: 110%;margin-left: 0%", @id = "error" })
+                                    </div>
+                                    <!-- hypoglycaemic-symptoms-education -->
+                                    <div class="form-group pull-right" style="margin-top: 1%; margin-bottom: 1%">
+                                        <div class="col-md-4 checkBox_True" style="margin-left: 2%">
+                                            <div class="hypog-symptoms-education">
+                                                @Html.CheckBox("hypog-symptoms-education", new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire" } })
+                                                <label for="hypog-symptoms-education" style="width: 50px"><i class="fas fa-graduation-cap" style="font-size: 18px" title="educational note" id="hypog-symptoms-education"></i></label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- hypoglycaemic-symptoms-education-->
+                                    <div class="row houdini" id="hypoglycaemia-educational">
+                                        <table class="table educationTable_Quesionnaire table-striped table-hover" id="socialHistoryTable" style="margin-left: 1%">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width: 100%;">
+                                                        @Html.DisplayName("Educational note/Opvoedkundige nota")
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>
+                                                        <ul class="diabetesQuestionnaire_educationalNotes">
+                                                            <li>Blood sugar below 4mmol is regarded as Low blood sugar (Hypoglycaemia)</li>
+                                                        </ul>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <ul class="diabetesQuestionnaire_educationalNotes">
+                                                            <li>
+                                                                EyeTreating a low blood sugar:
+                                                                o	Drink half cup soft drink (not sugar free) OR
+                                                                o	Chew four to six pieces of hard candy (not sugar free) OR
+                                                                o	Eat 1 tablespoon honey (place under tongue for rapid absorption)
+                                                                o	Wait 15 minutes after you have eaten a sugar-containing food, check your glucose again.
+                                                                o	If you do not feel better and your blood sugar is still less than 3.88mmol/l, eat another serving of the foods listed above.
+                                                                o	Eat a protein snack such as peanut butter & crackers or cheese & crackers to maintain the glucose.
+                                                            </li>
+                                                        </ul>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="col-md-12" id="podiatryPanel">
+                                            <table class="table historyTable_Quesionnaire">
+                                                <thead>
+                                                    <tr>
+                                                        <th width="50%">
+                                                            Question
+                                                        </th>
+                                                        <th style="width: 50%">
+                                                            Action
+                                                        </th>
+
+                                                    </tr>
+                                                </thead>
+                                            </table>
+                                            <table class="table historyTable_Quesionnaire" style="margin-left: 0.8%">
+                                                <tbody>
+                                                    <!-- glucose-check -->
+                                                    <tr style="background-color: #fff">
+                                                        <td class="socialHistory_Category" style="width: 50%">
+                                                            <p class="questionnaireQuestion">
+                                                                How often do you have a glucose reading < 4.1mmol/L?<br />
+                                                                Hoe gereeld het u glukose lesing < 4.1 mmol/L?
+                                                            </p>
+                                                        </td>
+                                                        <td style="width: 50%">
+                                                            @Html.DropDownListFor(model => model.hypoglycaemia.glucoseReading, new List<SelectListItem>
+                                                           {
+                                                                new SelectListItem() { Text = "• Daily/Daagliks", Value = "• Daily/Daagliks"},
+                                                                new SelectListItem() { Text = "• Weekly/Weekliks", Value = "• Weekly/Weekliks"},
+                                                                new SelectListItem() { Text = "• Monthly/Maandeliks", Value = "• Monthly/Maandeliks"},
+                                                                new SelectListItem() { Text = "• None/Geen", Value = "• None/Geen"},
+
+                                                            }, "-- Select --", new { @class = "infoBox_doctorQuestionnaire", @style = "max-width: 100%!important; width: 600px; margin-left: 1%;overflow-x: scroll", @required = "required" })
+
+                                                            @Html.ValidationMessageFor(model => model.hypoglycaemia.glucoseReading, "", new { @class = "text-danger", @style = "font-size: 110%;margin-left: 1%" })
+
+                                                            <div class="form-group pull-right" style="margin-top: 1%; margin-bottom: 0%">
+                                                                <div class="col-md-4 checkBox_True" style="margin-left: 2%">
+                                                                    <div class="glucose-education">
+                                                                        @Html.CheckBox("glucose-education", new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire" } })
+                                                                        <label for="glucose-education" style="width: 50px"><i class="fas fa-graduation-cap" style="font-size: 18px" title="educational note" id="glucose-education"></i></label>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+
+                                            <!-- glucose-education -->
+                                            <div class="row houdini" id="glucose-educational">
+                                                <table class="table educationTable_Quesionnaire table-striped table-hover" id="socialHistoryTable" style="margin-left: 1%">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width: 100%;">
+                                                                @Html.DisplayName("Educational note/Opvoedkundige nota")
+                                                            </th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td>
+                                                                <ul class="diabetesQuestionnaire_educationalNotes">
+                                                                    <li style="list-style: none">
+                                                                        Always try to identify the reason why you could have had a low blood sugar. Possible reasons could be:
+                                                                        <ul>
+                                                                            <li>Treatment related (high dosages)</li>
+                                                                            <li>Excessive alcohol consumption</li>
+                                                                            <li>Illnesses (kidney failure, hepatitis, anorexia nervosa, gluconeogenesis)</li>
+                                                                            <li>Exercise (Ensure to test your glucose before you exercise. Be aware of any hypo-symptoms. Eat carbohydrate during exercise if required.)</li>
+                                                                            <li>Irregular/skipping meals. (Ensure to not skip a meal. Especially if you use insulin or a Sulfonylureas)</li>
+                                                                        </ul>
+                                                                    </li>
+                                                                </ul>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
+                                            <table class="table historyTable_Quesionnaire" style="margin-left: 0.8%">
+                                                <tbody>
+                                                    <!--hypoglycaemic-symptoms -->
+                                                    <tr style="background-color: #fff">
+                                                        <td class="socialHistory_Category" style="width: 50%">
+                                                            <p class="questionnaireQuestion">
+                                                                Do you experience any of these hypoglycaemic symptoms?<br />
+                                                                Ervaar u enige van die volgende lae bloedsuiker simptome?
+                                                            </p>
+                                                        </td>
+                                                        <td style="width: 50%">
+                                                            @Html.ListBoxFor(model => model.hypoglycaemia.hypoglycaemiaSymptomsComment, new List<SelectListItem>
+                                                              {
+                                                              new SelectListItem() { Text = "• Tremors/Tremore", Value = "• Tremors/Tremore"},
+                                                              new SelectListItem() { Text = "• Sweating/Sweet", Value = "• Sweating/Sweet"},
+                                                              new SelectListItem() { Text = "• Palpitations/Hartkloppings", Value = "• Palpitations/Hartkloppings"},
+                                                              new SelectListItem() { Text = "• Feeling of anxiety, dread or confusion/Gevoel van angs, vrees of verwarring", Value = "• Feeling of anxiety, dread or confusion/Gevoel van angs, vrees of verwarring"},
+                                                              new SelectListItem() { Text = "• Restlessness/Rusteloosheid", Value = "• Restlessness/Rusteloosheid"},
+                                                              new SelectListItem() { Text = "• Hunger/Honger", Value = "• Hunger/Honger"},
+                                                              new SelectListItem() { Text = "• Irritability/Geïrriteerd", Value = "• Irritability/Geïrriteerd"},
+                                                              new SelectListItem() { Text = "• Tingling sensation around the mouth/Tintelende sensasie om die mond", Value = "• Tingling sensation around the mouth/Tintelende sensasie om die mond"},
+                                                              new SelectListItem() { Text = "• Blurred vision/Versteurde visie", Value = "• Blurred vision/Versteurde visie"},
+                                                              new SelectListItem() { Text = "• None/Geen", Value = "• None/Geen"},
+
+                                                       }, new { @class = "questionDrop", @id = "hypoglycaemiaSymptomsComment", @multiple = "multiple", @style = "max-width: 100%!important; width: 600px; margin-left: 1%;overflow-x: scroll", @required = "required" })
+
+                                                            @Html.ValidationMessageFor(model => model.hypoglycaemia.hypoglycaemiaSymptomsComment, "", new { @class = "text-danger", @style = "font-size: 110%;margin-left: 1%" })
+
+                                                        </td>
+                                                    </tr>
+                                                    <!-- hypoglycaemic-assistance -->
+                                                    <tr style="background-color: #fff">
+                                                        <td class="socialHistory_Category" style="width: 50%">
+                                                            <p class="questionnaireQuestion">
+                                                                How many times did you require medical assistance due to hypoglycaemia (low blood sugar)?<br />
+                                                                Hoeveel keer het u mediese bystand benodig vir hipoglukemie (lae bloedsuiker)?
+                                                            </p>
+                                                        </td>
+                                                        <td style="width: 50%">
+                                                            @Html.DropDownListFor(model => model.hypoglycaemia.hypoglycaemiaAssistance, new List<SelectListItem>
+                                                           {
+                                                                new SelectListItem() { Text = "0", Value = "0"},
+                                                                new SelectListItem() { Text = "1 or 2", Value = "1 to 2"},
+                                                                new SelectListItem() { Text = "3 or more", Value = "3 or more"},
+
+                                                            }, "-- Select --", new { @class = "infoBox_doctorQuestionnaire", @style = "max-width: 100%!important; width: 600px; margin-left: 1%;overflow-x: scroll; margin-top: 10px", @required = "required" })
+
+                                                            @Html.ValidationMessageFor(model => model.hypoglycaemia.hypoglycaemiaAssistance, "", new { @class = "text-danger", @style = "font-size: 110%;margin-left: 1%" })
+
+                                                        </td>
+                                                    </tr>
+                                                    <!-- emergency-visits-->
+                                                    <tr style="background-color: #fff">
+                                                        <td class="socialHistory_Category" style="width: 50%">
+                                                            <p class="questionnaireQuestion">
+                                                                How many times have you been to an emergency room in the past 12 months?<br />
+                                                                Hoeveel keer was u in 'n ongevalle eenheid in die laaste 12 maande?
+                                                            </p>
+                                                        </td>
+                                                        <td style="width: 50%">
+                                                            @Html.DropDownListFor(model => model.hypoglycaemia.emergencyRoomVisits, new List<SelectListItem>
+                                                           {
+                                                                new SelectListItem() { Text = "0", Value = "0"},
+                                                                new SelectListItem() { Text = "2 or less", Value = "2 or less"},
+                                                                new SelectListItem() { Text = "2 or more", Value = "2 or more"},
+
+                                                            }, "-- Select --", new { @class = "infoBox_doctorQuestionnaire", @style = "max-width: 100%!important; width: 600px; margin-left: 1%;overflow-x: scroll; margin-top: 10px", @required = "required" })
+
+                                                            @Html.ValidationMessageFor(model => model.hypoglycaemia.emergencyRoomVisits, "", new { @class = "text-danger", @style = "font-size: 110%;margin-left: 1%" })
+
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- insulin-check -->
+                                <div class="form-group">
+                                    <div class="col-md-6" style="margin-left: 1.5%; text-indent:0; text-indent: each-line ">
+                                        <p class="questionnaireQuestion">
+                                            Does the patient use insulin?<br />
+                                            Gebruik die pasiënt insulien?
+                                        </p>
+                                    </div>
+                                    <div style="margin-left: 52%!important">
+                                        <table class="padCheck">
+                                            <tr>
+                                                <td style="border: 1px solid rgba(204, 204, 204, 0.75);">
+                                                    <div class="col-md-8 hypoG-question_True">
+                                                        <div class="insulin-use-yes">
+                                                            @Html.CheckBox("insulin-use-yes", new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire" } })
+                                                            <label for="insulin-use-yes"><i class="fas fa-check" title="Yes"></i></label>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        <table class="padCheck">
+                                            <tr>
+                                                <td style="border: 1px solid rgba(204, 204, 204, 0.75);">
+                                                    <div class="col-md-8 hypoG-question_False">
+                                                        <div class="insulin-use-no">
+                                                            @Html.CheckBox("insulin-use-no", new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire" } })
+                                                            <label for="insulin-use-no"><i class="fas fa-times" title="No"></i></label>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        <br />
+                                        @Html.ValidationMessageFor(model => model.hypoglycaemia.insulinUseCheck, "", new { @class = "text-danger", @style = "font-size: 110%;margin-left: 1%" })
+                                    </div>
+                                </div>
+                                <!-- sulfonylurea-check-->
+                                <div class="form-group" style="background-color: #fff">
+                                    <br />
+                                    <div class="col-md-6" style="margin-left: 1.5%; text-indent:0; text-indent: each-line ">
+                                        <p class="questionnaireQuestion">
+                                            Does the patient use sulfonylurea?<br />
+                                            Gebruik die pasiënt sulfonylureum?
+                                        </p>
+                                    </div>
+                                    <div style="margin-left: 52%!important">
+                                        <table class="padCheck">
+                                            <tr>
+                                                <td style="border: 1px solid rgba(204, 204, 204, 0.75);">
+                                                    <div class="col-md-8 hypoG-question_True">
+                                                        <div class="sulfonylurea-use-yes">
+                                                            @Html.CheckBox("sulfonylurea-use-yes", new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire" } })
+                                                            <label for="sulfonylurea-use-yes"><i class="fas fa-check" title="Yes"></i></label>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        <table class="padCheck">
+                                            <tr>
+                                                <td style="border: 1px solid rgba(204, 204, 204, 0.75);">
+                                                    <div class="col-md-8 hypoG-question_False">
+                                                        <div class="sulfonylurea-use-no">
+                                                            @Html.CheckBox("sulfonylurea-use-no", new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire" } })
+                                                            <label for="sulfonylurea-use-no"><i class="fas fa-times" title="No"></i></label>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        <br />
+                                        @Html.ValidationMessageFor(model => model.hypoglycaemia.sulfonylureaUseCheck, "", new { @class = "text-danger", @style = "font-size: 110%;margin-left: 1%" })
+                                    </div>
+                                    <br />
+                                </div>
+                                <!-- ckd-check -->
+                                <div class="form-group">
+                                    <div style="margin-bottom: 0.5%"></div>
+                                    <div class="col-md-6" style="margin-left: 1.5%; text-indent:0; text-indent: each-line ">
+                                        <p class="questionnaireQuestion">
+                                            Does the patient have severe or end-stage Kidney disease (CKD stage 4 or 5)?<br />
+                                            Het die pasiënt ernstige of eindstadium nier siekte (CKD stadium 4 of 5)?
+                                        </p>
+                                    </div>
+                                    <div style="margin-left: 52%!important">
+                                        <table class="padCheck">
+                                            <tr>
+                                                <td style="border: 1px solid rgba(204, 204, 204, 0.75);">
+                                                    <div class="col-md-8 hypoG-question_True">
+                                                        <div class="ckd-stage-yes">
+                                                            @Html.CheckBox("ckd-stage-yes", new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire" } })
+                                                            <label for="ckd-stage-yes" style="width: 50px"><i class="fas fa-check" style="font-size: 22px" title="yes" id="ckd-stage-yes"></i></label>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        <table class="padCheck">
+                                            <tr>
+                                                <td style="border: 1px solid rgba(204, 204, 204, 0.75);">
+                                                    <div class="col-md-8 hypoG-question_False">
+                                                        <div class="ckd-stage-no">
+                                                            @Html.CheckBox("ckd-stage-no", new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire" } })
+                                                            <label for="ckd-stage-no" style="width: 50px"><i class="fas fa-times" style="font-size: 22px" title="yes" id="ckd-stage-no"></i></label>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        <br />
+                                        @Html.ValidationMessageFor(model => model.hypoglycaemia.ckdStageCheck, "", new { @class = "text-danger", @style = "font-size: 110%;margin-left: 1%" })
+                                    </div>
+                                </div>
+                                <!-- age check -->
+                                <div class="form-group" style="background-color: #fff">
+                                    <br />
+                                    <div class="col-md-6" style="margin-left: 1.5%; text-indent:0; text-indent: each-line ">
+                                        <p class="questionnaireQuestion">
+                                            Is the patient < 77 years old?<br />
+                                            Is die pasiënt < 77 jaar oud?
+                                        </p>
+                                    </div>
+                                    <div style="margin-left: 52%!important">
+                                        <table class="padCheck">
+                                            <tr>
+                                                <td style="border: 1px solid rgba(204, 204, 204, 0.75);">
+                                                    <div class="col-md-8 hypoG-question_True">
+                                                        <div class="patient-age-yes">
+                                                            @Html.CheckBox("patient-age-yes", new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire" } })
+                                                            <label for="patient-age-yes"><i class="fas fa-check" title="Yes"></i></label>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        <table class="padCheck">
+                                            <tr>
+                                                <td style="border: 1px solid rgba(204, 204, 204, 0.75);">
+                                                    <div class="col-md-8 hypoG-question_False">
+                                                        <div class="patient-age-no">
+                                                            @Html.CheckBox("patient-age-no", new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire" } })
+                                                            <label for="patient-age-no"><i class="fas fa-times" title="No"></i></label>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        <br />
+                                        @Html.ValidationMessageFor(model => model.hypoglycaemia.patientAgeCheck, "", new { @class = "text-danger", @style = "font-size: 110%;margin-left: 1%" })
+                                    </div>
+                                    <br />
+
+                                </div>
+                                <!-- comment -->
+                                <div>
+                                    <h3 style="margin-left: 2%">COMMENT/KOMMENTAAR &nbsp; <span style="color: rgba(128, 128, 128, 0.85); font-size: 14px"><i class="fas fa-pen-square" title="Comment"></i></span></h3>
+                                    <table class="table historyTable_Quesionnaire">
+                                        <tr>
+                                            <td colspan="4">
+                                                @Html.TextAreaFor(model => model.hypoglycaemia.generalComments, new { htmlAttributes = new { @class = "emailTemplate_Bodys", @placeholder = "Comment" } })<br>
+                                                @Html.ValidationMessageFor(model => model.hypoglycaemia.generalComments, "", new { @class = "text-danger" })
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- general -->
+            <div class="questionnaireContainer">
+                <div class="form-group pull-right">
+                    <div class="col-md-4 diabetes-questionnaire-checkbox">
+                        @Html.CheckBox("d-general-ignore") <label for="d-general-ignore" title="ignore"><span id="iGeneral" class="ignore"><i class="fas fa-circle q-btn"></i></span></label>
+                    </div>
+                    <div class="col-md-4 diabetes-questionnaire-checkbox">
+                        @Html.CheckBox("d-general-followup") <label for="d-general-followup" title="follow up"><span id="fGeneral" class="follow-up"><i class="fas fa-circle q-btn"></i></span></label>
+                    </div>
+                </div>
+                <h3 class="questionnaire-heading">GENERAL/ALGEMEEN</h3>
+                <!-- general-data -->
+                <div id="generalpanel_diabetes">
+                    <hr class="questionnaire_Ruler" />
+                    <br />
+                    <div class="historyTable_header">HISTORY/GESKIEDENIS</div>
+                    <div class="form-group">
+                        <div class="row">
+                            <table class="table historyTable_Quesionnaire table-hover" id="socialHistoryTable" style="margin-left: 1.6%">
+                                <thead>
+                                    <tr>
+                                        <th onclick="socialTable(0)" style="width: 20%; text-align: center!important">@Html.DisplayName("Depression") <i class="fa fa-fw fa-sort"></i></th>
+                                        <th onclick="socialTable(1)" style="width: 80%">@Html.DisplayName("Comment") <i class="fa fa-fw fa-sort"></i></th>
+                                    </tr>
+                                </thead>
+                                @if (Model.diabQuestionnaireOthers.Count() == 0)
+                                {
+                                    <tr><td colspan="3" style="text-align: center!important; color: rgba(128, 128, 128, 0.50)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="color: rgba(128, 128, 128, 0.50)"></i></span> no records found</td></tr>
+                                }
+
+                                else
+                                {
+                                    foreach (var item in Model.diabQuestionnaireOthers)
+                                    {
+                                        <tbody>
+                                            @if (item.followUp == true)
+                                            {
+                                                <tr>
+                                                    <td colspan="3" style="text-align: center!important; color: rgba(204, 0, 0, 0.70)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="font-size: 18px; color: rgba(204, 0, 0, 0.70)!important"></i></span> Follow up required!</td>
+                                                </tr>
+                                            }
+                                            else
+                                            {
+                                                <tr style="text-indent: 5px">
+                                                    <td style="text-align: center!important"><span class="@(item.depression == true ? "check-yes far fa-check-circle" : "check-no far fa-times-circle")"></span></td>
+                                                    <td>@Html.DisplayFor(modelItem => item.depressionComment)</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    }
+                                }
+                            </table>
+                        </div>
+                        <br />
+                        <div class="form-group">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <!-- depression -->
+                                    <table class="table historyTable_Quesionnaire" style="margin-left: 0.8%">
+                                        <tbody>
+                                            <tr style="background-color: #fff!important">
+                                                <td class="socialHistory_Category" style="width: 50%">
+                                                    <p class="questionnaireQuestion">
+                                                        Do you feel, or have you ever felt downhearted or depressed?<br>
+                                                        Voel u of het u al ooit neerslagtig of depressief gevoel?
+                                                    </p>
+                                                </td>
+                                                <td style="width: 50%">
+                                                    <table class="padCheck">
+                                                        <tr>
+                                                            <td style="border: 1px solid rgba(204, 204, 204, 0.75);">
+                                                                <div class="col-md-8 hypoG-question_True">
+                                                                    <div class="depression-yes">
+                                                                        @Html.CheckBox("depression-yes", new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire" } })
+                                                                        <label for="depression-yes"><i class="fas fa-check" title="Yes"></i></label>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                    <table class="padCheck">
+                                                        <tr>
+                                                            <td style="border: 1px solid rgba(204, 204, 204, 0.75);">
+                                                                <div class="col-md-8 hypoG-question_False">
+                                                                    <div class="depression-no">
+                                                                        @Html.CheckBox("depression-no", new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire" } })
+                                                                        <label for="depression-no"><i class="fas fa-times" title="No"></i></label>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                    <br />
+                                                    @Html.ValidationMessageFor(model => model.questionnaireOther.depression, "", new { @class = "text-danger", @style = "font-size: 110%;margin-left: 1%" })
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <!-- depression-data -->
+                                    <div class="form-group houdini" id="general-diabetes-question" style="margin-top: 1%">
+                                        <table class="table historyTable_Quesionnaire">
+                                            <tr style="background-color: #fff">
+                                                <td style="width: 100%">
+                                                    <p class="questionnaireQuestion" style="margin-left: 2%">
+                                                        Comment/Kommentaar
+                                                    </p>
+                                                    @Html.TextAreaFor(model => model.questionnaireOther.depressionComment, new { htmlAttributes = new { @class = "emailTemplate_Bodys", @placeholder = "Comment" } })<br>
+                                                    @Html.ValidationMessageFor(model => model.questionnaireOther.depressionComment, "", new { @class = "text-danger" })
+
+                                                    <div class="form-group pull-right" style="margin-top: 0%; margin-bottom: 0%; z-index: 100!important">
+                                                        <div class="col-md-4 checkBox_True" style="margin-left: 2%">
+                                                            <div class="depression-education">
+                                                                @Html.CheckBox("depression-education", new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire" } })
+                                                                <label for="depression-education" style="width: 50px"><i class="fas fa-graduation-cap" style="font-size: 18px" title="educational note" id="depression-education"></i></label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                    <!-- depression-education -->
+                                    <div class="row houdini" id="depression-educational">
+                                        <table class="table educationTable_Quesionnaire table-striped table-hover" id="socialHistoryTable" style="margin-left: 1%">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width: 100%;">
+                                                        @Html.DisplayName("Educational note/Opvoedkundige nota")
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>
+                                                        <ul class="diabetesQuestionnaire_educationalNotes">
+                                                            <li>Studies has shown that your risk for depression increases if you are a diabetic.</li>
+                                                            <li>
+                                                                Symptoms of depression: <br />
+                                                                o      Loss of pleasure<br />
+                                                                o      Change in sleep patterns<br />
+                                                                o      Early to wake up<br />
+                                                                o      Change in appetite<br />
+                                                                o      Trouble concentrating<br />
+                                                                o      Loss of energy<br />
+                                                                o      Nervousness<br />
+                                                                o      Guilt<br />
+                                                                o      Morning sadness<br />
+                                                                o      Suicidal thoughts<br />
+                                                            </li>
+                                                        </ul>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- submit -->
+            <div class="questionnaireContainer">
+
+                <div class="form-group">
+                    <div class="actionButton" style="margin-top: 0.5%; margin-left: 43.5%; margin-bottom: 0.5%">
+                        <input type="submit" value="Submit" class="btn questionnaireButton" id="qSubmit" />
+                    </div>
+                </div>
+            </div>
+
+            <a href="#section2" class="glass-button-right"><i class="fas fa-chevron-up" style="color: rgba(204, 204, 204, 0.50)" title="scroll to top"></i></a>
+
+        </div>
+    }
+</div>
+
+@section Scripts {
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+
+    @if (ViewBag.Message != null)
+    {
+        <script type="text/javascript">
+
+        window.onload = function () {
+            toastr.options.positionClass = 'toast-bottom-right';
+            toastr.options.timeOut = 10000;
+
+            toastr.error("@ViewBag.Message");
+
+        }
+        </script>
+    }
+
+    <!-- follow-up -->
+    <script>
+        $('#follow-up-all').change(function () {
+            if (this.checked)
+                // medication
+                $('#medicationpanel_diabetes').addClass('houdini'),
+                    $('#iMedical').addClass('grey'),
+                    $('#fMedical').removeClass('grey'),
+                    document.getElementById("d-medication-followup").checked = true,
+                    document.getElementById("d-medication-ignore").checked = false,
+                    // vision
+                    $('#optometrypanel_diabetes').addClass('houdini'),
+                    $('#iOptometry').addClass('grey'),
+                    $('#fOptometry').removeClass('grey'),
+                    document.getElementById("d-optometry-followup").checked = true,
+                    document.getElementById("d-optometry-ignore").checked = false,
+                    // podiatry
+                    $('#podiatrypanel_diabetes').addClass('houdini'),
+                    $('#iPodiatry').addClass('grey'),
+                    $('#fPodiatry').removeClass('grey'),
+                    document.getElementById("d-podiatry-followup").checked = true,
+                    document.getElementById("d-podiatry-ignore").checked = false,
+                    // auto-nero
+                    $('#autoneropanel_diabetes').addClass('houdini'),
+                    $('#insystem').addClass('grey'),
+                    $('#fnsystem').removeClass('grey'),
+                    document.getElementById("d-autonero-followup").checked = true,
+                    document.getElementById("d-autonero-ignore").checked = false,
+                    // hypoglycaemia
+                    $('#hypoglycaemiapanel_diabetes').addClass('houdini'),
+                    $('#iHypoglycaemia').addClass('grey'),
+                    $('#fHypoglycaemia').removeClass('grey'),
+                    document.getElementById("d-hypoglycaemia-followup").checked = true,
+                    document.getElementById("d-hypoglycaemia-ignore").checked = false,
+                    $("[name='hypoglycaemia.glucoseReading']").attr("required", false),
+                    $("[name='hypoglycaemia.hypoglycaemiaSymptomsComment']").attr("required", false),
+                    $("[name='hypoglycaemia.hypoglycaemiaAssistance']").attr("required", false),
+                    // general
+                    $('#generalpanel_diabetes').addClass('houdini'),
+                    $('#iGeneral').addClass('grey'),
+                    $('#fGeneral').removeClass('grey'),
+                    document.getElementById("d-general-followup").checked = true,
+                    document.getElementById("d-general-ignore").checked = false;
+            else
+                // medical
+                $('#medicationpanel_diabetes').removeClass('houdini'),
+                    $('#iMedical').removeClass('grey'),
+                    document.getElementById("d-medication-followup").checked = false,
+                    // vision
+                    $('#optometrypanel_diabetes').removeClass('houdini'),
+                    $('#iOptometry').removeClass('grey'),
+                    document.getElementById("d-optometry-followup").checked = false,
+                    // podiatry
+                    $('#podiatrypanel_diabetes').removeClass('houdini'),
+                    $('#iPodiatry').removeClass('grey'),
+                    document.getElementById("d-podiatry-followup").checked = false,
+                    // auto-nero
+                    $('#autoneropanel_diabetes').removeClass('houdini'),
+                    $('#insystem').removeClass('grey'),
+                    document.getElementById("d-autonero-followup").checked = false,
+                    // hypoglycaemia
+                    $('#hypoglycaemiapanel_diabetes').removeClass('houdini'),
+                    $('#iHypoglycaemia').removeClass('grey'),
+                    document.getElementById("d-hypoglycaemia-followup").checked = false,
+                    // general
+                    $('#generalpanel_diabetes').removeClass('houdini'),
+                    $('#iGeneral').removeClass('grey'),
+                    document.getElementById("d-general-followup").checked = false;
+        });
+    </script>
+    <!-- medication-->
+    <script>
+        $('#d-medication-followup').change(function () {
+            if (this.checked)
+                $('#medicationpanel_diabetes').addClass('houdini'),
+                    $('#iMedical').addClass('grey'),
+                    $('#fMedical').removeClass('grey'),
+                    document.getElementById("d-medication-followup").checked = true,
+                    document.getElementById("d-medication-ignore").checked = false;
+            else
+                $('#medicationpanel_diabetes').removeClass('houdini'),
+                    $('#iMedical').removeClass('grey'),
+                    document.getElementById("d-medication-followup").checked = false,
+                    document.getElementById("d-medication-ignore").checked = true;
+        });
+
+        $('#d-medication-ignore').change(function () {
+            if (this.checked)
+                $('#medicationpanel_diabetes').addClass('houdini'),
+                    $('#fMedical').addClass('grey'),
+                    $('#iMedical').removeClass('grey'),
+                    document.getElementById("d-medication-followup").checked = false,
+                    document.getElementById("d-medication-ignore").checked = true;
+            else
+                $('#medicationpanel_diabetes').removeClass('houdini'),
+                    $('#fMedical').removeClass('grey'),
+                    document.getElementById("d-medication-followup").checked = false,
+                    document.getElementById("d-medication-ignore").checked = false;
+        });
+    </script>
+    <!-- optometry -->
+    <script>
+        $('#d-optometry-followup').change(function () {
+            if (this.checked)
+                $('#optometrypanel_diabetes').addClass('houdini'),
+                    $('#iOptometry').addClass('grey'),
+                    $('#fOptometry').removeClass('grey'),
+                    document.getElementById("d-optometry-followup").checked = true,
+                    document.getElementById("d-optometry-ignore").checked = false;
+            else
+                $('#optometrypanel_diabetes').removeClass('houdini'),
+                    $('#iOptometry').removeClass('grey'),
+                    document.getElementById("d-optometry-followup").checked = false;
+        });
+        $('#d-optometry-ignore').change(function () {
+            if (this.checked)
+                $('#optometrypanel_diabetes').addClass('houdini'),
+                    $('#iOptometry').removeClass('grey'),
+                    $('#fOptometry').addClass('grey'),
+                    document.getElementById("d-optometry-followup").checked = false,
+                    document.getElementById("d-optometry-ignore").checked = true;
+            else
+                $('#optometrypanel_diabetes').removeClass('houdini'),
+                    $('#fOptometry').removeClass('grey'),
+                    document.getElementById("d-optometry-ignore").checked = false;
+        });
+
+        // education
+        $('#vision-education').change(function () {
+            if (this.checked)
+                $('.vision-education').addClass('checkBox_blue'),
+                    $('#vision-educational').removeClass('houdini');
+            else
+                $('.vision-education').removeClass('checkBox_blue'),
+                    $('#vision-educational').addClass('houdini');
+        });
+        $('#eye-treatment-education').change(function () {
+            if (this.checked)
+                $('.eye-treatment-education').addClass('checkBox_blue'),
+                    $('#eye-treatment-educational').removeClass('houdini');
+
+            else
+                $('.eye-treatment-education').removeClass('checkBox_blue'),
+                    $('#eye-treatment-educational').addClass('houdini');
+        });
+    </script>
+    <!-- podiatry -->
+    <script>
+        $('#d-podiatry-followup').change(function () {
+            if (this.checked)
+                $('#podiatrypanel_diabetes').addClass('houdini'),
+                    $('#iPodiatry').addClass('grey'),
+                    $('#fPodiatry').removeClass('grey'),
+                    document.getElementById("d-podiatry-followup").checked = true,
+                    document.getElementById("d-podiatry-ignore").checked = false;
+            else
+                $('#podiatrypanel_diabetes').removeClass('houdini'),
+                    $('#iPodiatry').removeClass('grey'),
+                    document.getElementById("d-podiatry-followup").checked = false;
+        });
+        $('#d-podiatry-ignore').change(function () {
+            if (this.checked)
+                $('#podiatrypanel_diabetes').addClass('houdini'),
+                    $('#iPodiatry').removeClass('grey'),
+                    $('#fPodiatry').addClass('grey'),
+                    document.getElementById("d-podiatry-followup").checked = false,
+                    document.getElementById("d-podiatry-ignore").checked = true;
+            else
+                $('#podiatrypanel_diabetes').removeClass('houdini'),
+                    $('#fPodiatry').removeClass('grey'),
+                    document.getElementById("d-podiatry-ignore").checked = false;
+        });
+
+        // education
+        $('#amputation-education').change(function () {
+            if (this.checked)
+                $('.podiatryEducation-true').addClass('checkBox_blue'),
+                    $('#amputation-educational').removeClass('houdini');
+            else
+                $('.podiatryEducation-true').removeClass('checkBox_blue'),
+                    $('#amputation-educational').addClass('houdini');
+        });
+        $('#amputation-reason-education').change(function () {
+            if (this.checked)
+                $('.ampReasonEducation-true').addClass('checkBox_blue'),
+                    $('#amputation-reason-educational').removeClass('houdini');
+            else
+                $('.ampReasonEducation-true').removeClass('checkBox_blue'),
+                    $('#amputation-reason-educational').addClass('houdini');
+        });
+        $('#lops-education').change(function () {
+            if (this.checked)
+                $('.lopsEducation-true').addClass('checkBox_blue'),
+                    $('#lops-educational').removeClass('houdini');
+            else
+                $('.lopsEducation-true').removeClass('checkBox_blue'),
+                    $('#lops-educational').addClass('houdini');
+        });
+        $('#deformity-education').change(function () {
+            if (this.checked)
+                $('.deformityEducation-true').addClass('checkBox_blue'),
+                    $('#deformity-educational').removeClass('houdini');
+            else
+                $('.deformityEducation-true').removeClass('checkBox_blue'),
+                    $('#deformity-educational').addClass('houdini');
+        });
+
+        // art-disease required-fields
+        $(document).ready(function () {
+            $("[name='art-disease-yes']").attr("required", true),
+                $("[name='art-disease-no']").attr("required", true);
+        });
+        // art-disease yes
+        $('#art-disease-yes').change(function () {
+            if (this.checked)
+                $("[name='art-disease-no']").attr("required", false),
+                    $("[name='podiatry.podiatryPerArterialDiseaseAffectedLeg']").attr("required", true),
+                    document.getElementById("art-disease-yes").checked = true,
+                    document.getElementById("art-disease-no").checked = false,
+                    $('.art-disease-yes').addClass('checkBox_green'),
+                    $('.art-disease-no').removeClass('checkBox_red'),
+                    $('#art-disease-question').removeClass('houdini');
+            else
+                $("[name='art-disease-no']").attr("required", true),
+                    $('.art-disease-yes').removeClass('checkBox_green'),
+                    $('#art-disease-question').addClass('houdini'),
+                    $("#bloodSupply-error").show();
+
+        });
+        // art-disease no
+        $('#art-disease-no').change(function () {
+            if (this.checked)
+                $("[name='art-disease-yes']").attr("required", false),
+                    $("[name='podiatry.podiatryPerArterialDiseaseAffectedLeg']").attr("required", false),
+                    $("[name='podiatry.podiatryPerArterialDiseaseAffectedLeg']").val(""),
+                    document.getElementById("art-disease-no").checked = true,
+                    document.getElementById("art-disease-yes").checked = false,
+                    $('.art-disease-no').addClass('checkBox_red'),
+                    $('.art-disease-yes').removeClass('checkBox_green'),
+                    $('#art-disease-question').addClass('houdini');
+            else
+                $("[name='art-disease-yes']").attr("required", true),
+                    $('.art-disease-no').removeClass('checkBox_red'),
+                    $("#bloodSupply-error").show();
+
+        });
+
+        // wound required-fields
+        $(document).ready(function () {
+            $("[name='wound-yes']").attr("required", true),
+                $("[name='wound-no']").attr("required", true);
+        });
+        // wound-yes
+        $('#wound-yes').change(function () {
+            if (this.checked)
+                $("[name='wound-no']").attr("required", false),
+                    $("[name='podiatry.podiatryPerArterialDiseaseAffectedLeg']").attr("required", true),
+                    document.getElementById("wound-yes").checked = true,
+                    document.getElementById("wound-no").checked = false,
+                    $('.wound-yes').addClass('checkBox_green'),
+                    $('.wound-no').removeClass('checkBox_red'),
+                    $('#wounds-question').removeClass('houdini');
+            else
+                $("[name='wound-no']").attr("required", true),
+                    $('.wound-yes').removeClass('checkBox_green'),
+                    $('#wounds-question').addClass('houdini'),
+                    $("#wound-error").show();
+
+        });
+        // wound-no
+        $('#wound-no').change(function () {
+            if (this.checked)
+                $("[name='wound-yes']").attr("required", false),
+                    $("[name='podiatry.podiatryWoundAffectedLeg']").attr("required", false),
+                    $("[name='podiatry.podiatryWoundAffectedLeg']").val(""),
+                    document.getElementById("wound-no").checked = true,
+                    document.getElementById("wound-yes").checked = false,
+                    $('.wound-no').addClass('checkBox_red'),
+                    $('.wound-yes').removeClass('checkBox_green'),
+                    $('#wounds-question').addClass('houdini');
+            else
+                $("[name='wound-yes']").attr("required", true),
+                    $('.wound-no').removeClass('checkBox_red'),
+                    $("#wound-error").show();
+
+        });
+    </script>
+    <!-- auto-nero -->
+    <script>
+        $('#d-autonero-followup').change(function () {
+            if (this.checked)
+                $('#autoneropanel_diabetes').addClass('houdini'),
+                    $('#insystem').addClass('grey'),
+                    $('#fnsystem').removeClass('grey'),
+                    document.getElementById("d-autonero-followup").checked = true,
+                    document.getElementById("d-autonero-ignore").checked = false;
+            else
+                $('#autoneropanel_diabetes').removeClass('houdini'),
+                    $('#insystem').removeClass('grey'),
+                    document.getElementById("d-autonero-followup").checked = false;
+        });
+        $('#d-autonero-ignore').change(function () {
+            if (this.checked)
+                $('#autoneropanel_diabetes').addClass('houdini'),
+                    $('#insystem').removeClass('grey'),
+                    $('#fnsystem').addClass('grey'),
+                    document.getElementById("d-autonero-followup").checked = false,
+                    document.getElementById("d-autonero-ignore").checked = true;
+            else
+                $('#autoneropanel_diabetes').removeClass('houdini'),
+                    $('#fnsystem').removeClass('grey'),
+                    document.getElementById("d-autonero-ignore").checked = false;
+        });
+
+        // education
+        $('#autonero-education').change(function () {
+            if (this.checked)
+                $('.autonero-education').addClass('checkBox_blue'),
+                    $('#autonero-educational').removeClass('houdini');
+            else
+                $('.autonero-education').removeClass('checkBox_blue'),
+                    $('#autonero-educational').addClass('houdini');
+        });
+    </script>
+    <!-- hypoglycaemia -->
+    <script>
+        $('#d-hypoglycaemia-followup').change(function () {
+            if (this.checked)
+                $('#hypoglycaemiapanel_diabetes').addClass('houdini'),
+                    $('#iHypoglycaemia').addClass('grey'),
+                    $('#fHypoglycaemia').removeClass('grey'),
+                    document.getElementById("d-hypoglycaemia-followup").checked = true,
+                    document.getElementById("d-hypoglycaemia-ignore").checked = false;
+            else
+                $('#hypoglycaemiapanel_diabetes').removeClass('houdini'),
+                    $('#iHypoglycaemia').removeClass('grey'),
+                    document.getElementById("d-hypoglycaemia-followup").checked = false;
+        });
+        $('#d-hypoglycaemia-ignore').change(function () {
+            if (this.checked)
+                $('#hypoglycaemiapanel_diabetes').addClass('houdini'),
+                    $('#iHypoglycaemia').removeClass('grey'),
+                    $('#fHypoglycaemia').addClass('grey'),
+                    document.getElementById("d-hypoglycaemia-followup").checked = false,
+                    document.getElementById("d-hypoglycaemia-ignore").checked = true;
+            else
+                $('#hypoglycaemiapanel_diabetes').removeClass('houdini'),
+                    $('#fHypoglycaemia').removeClass('grey'),
+                    document.getElementById("d-hypoglycaemia-ignore").checked = false;
+        });
+
+        // hypog-symptoms required-fields
+        $(document).ready(function () {
+            $("[name='hypog-symptoms-yes']").attr("required", true),
+                $("[name='hypog-symptoms-no']").attr("required", true);
+        });
+        // hypo-symp-yes
+        $('#hypog-symptoms-yes').change(function () {
+            if (this.checked)
+                $("[name='hypog-symptoms-no']").attr("required", false),
+                    document.getElementById("hypog-symptoms-yes").checked = true,
+                    document.getElementById("hypog-symptoms-no").checked = false,
+                    $('.hypog-symptoms-yes').addClass('checkBox_green'),
+                    $('.hypog-symptoms-no').removeClass('checkBox_red');
+            else
+                $("[name='hypog-symptoms-no']").attr("required", true),
+                    $('.hypog-symptoms-yes').removeClass('checkBox_green');
+
+        });
+        // hypo-symp-no
+        $('#hypog-symptoms-no').change(function () {
+            if (this.checked)
+                $("[name='hypog-symptoms-yes']").attr("required", false),
+                    document.getElementById("hypog-symptoms-no").checked = true,
+                    document.getElementById("hypog-symptoms-yes").checked = false,
+                    $('.hypog-symptoms-no').addClass('checkBox_red'),
+                    $('.hypog-symptoms-yes').removeClass('checkBox_green');
+            else
+                $("[name='hypog-symptoms-yes']").attr("required", true),
+                    $('.hypog-symptoms-no').removeClass('checkBox_red');
+        });
+
+        // insulin required-fields
+        $(document).ready(function () {
+            $("[name='insulin-use-yes']").attr("required", true),
+                $("[name='insulin-use-no']").attr("required", true);
+        });
+        // insulin-yes
+        $('#insulin-use-yes').change(function () {
+            if (this.checked)
+                $("[name='insulin-use-no']").attr("required", false),
+                    document.getElementById("insulin-use-yes").checked = true,
+                    document.getElementById("insulin-use-no").checked = false,
+                    $('.insulin-use-yes').addClass('checkBox_green'),
+                    $('.insulin-use-no').removeClass('checkBox_red');
+            else
+                $("[name='insulin-use-no']").attr("required", true),
+                    $('.insulin-use-yes').removeClass('checkBox_green');
+
+        });
+        // insulin-no
+        $('#insulin-use-no').change(function () {
+            if (this.checked)
+                $("[name='insulin-use-yes']").attr("required", false),
+                    document.getElementById("insulin-use-no").checked = true,
+                    document.getElementById("insulin-use-yes").checked = false,
+                    $('.insulin-use-no').addClass('checkBox_red'),
+                    $('.insulin-use-yes').removeClass('checkBox_green');
+            else
+                $("[name='insulin-use-yes']").attr("required", true),
+                    $('.insulin-use-no').removeClass('checkBox_red');
+        });
+
+        // sulfonylurea required-fields
+        $(document).ready(function () {
+            $("[name='sulfonylurea-use-yes']").attr("required", true),
+                $("[name='sulfonylurea-use-no']").attr("required", true);
+        });
+        // sulfonylurea-yes
+        $('#sulfonylurea-use-yes').change(function () {
+            if (this.checked)
+                $("[name='sulfonylurea-use-no']").attr("required", false),
+                    document.getElementById("sulfonylurea-use-yes").checked = true,
+                    document.getElementById("sulfonylurea-use-no").checked = false,
+                    $('.sulfonylurea-use-yes').addClass('checkBox_green'),
+                    $('.sulfonylurea-use-no').removeClass('checkBox_red');
+            else
+                $("[name='sulfonylurea-use-no']").attr("required", true),
+                    $('.sulfonylurea-use-yes').removeClass('checkBox_green');
+
+        });
+        // sulfonylurea-no
+        $('#sulfonylurea-use-no').change(function () {
+            if (this.checked)
+                $("[name='sulfonylurea-use-yes']").attr("required", false),
+                    document.getElementById("sulfonylurea-use-no").checked = true,
+                    document.getElementById("sulfonylurea-use-yes").checked = false,
+                    $('.sulfonylurea-use-no').addClass('checkBox_red'),
+                    $('.sulfonylurea-use-yes').removeClass('checkBox_green');
+            else
+                $("[name='sulfonylurea-use-yes']").attr("required", true),
+                    $('.sulfonylurea-use-no').removeClass('checkBox_red');
+        });
+
+        // ckd-stage required-fields
+        $(document).ready(function () {
+            $("[name='ckd-stage-yes']").attr("required", true),
+                $("[name='ckd-stage-no']").attr("required", true);
+        });
+        // ckd-stage-yes
+        $('#ckd-stage-yes').change(function () {
+            if (this.checked)
+                $("[name='ckd-stage-no']").attr("required", false),
+                    document.getElementById("ckd-stage-yes").checked = true,
+                    document.getElementById("ckd-stage-no").checked = false,
+                    $('.ckd-stage-yes').addClass('checkBox_green'),
+                    $('.ckd-stage-no').removeClass('checkBox_red');
+            else
+                $("[name='ckd-stage-no']").attr("required", true),
+                    $('.ckd-stage-yes').removeClass('checkBox_green');
+
+        });
+        // ckd-stage-no
+        $('#ckd-stage-no').change(function () {
+            if (this.checked)
+                $("[name='ckd-stage-yes']").attr("required", false),
+                    document.getElementById("ckd-stage-no").checked = true,
+                    document.getElementById("ckd-stage-yes").checked = false,
+                    $('.ckd-stage-no').addClass('checkBox_red'),
+                    $('.ckd-stage-yes').removeClass('checkBox_green');
+            else
+                $("[name='ckd-stage-yes']").attr("required", true),
+                    $('.ckd-stage-no').removeClass('checkBox_red');
+        });
+
+        // patient-age required-fields
+        $(document).ready(function () {
+            $("[name='patient-age-yes']").attr("required", true),
+                $("[name='patient-age-no']").attr("required", true);
+        });
+        // patient-age-yes
+        $('#patient-age-yes').change(function () {
+            if (this.checked)
+                $("[name='patient-age-no']").attr("required", false),
+                    document.getElementById("patient-age-yes").checked = true,
+                    document.getElementById("patient-age-no").checked = false,
+                    $('.patient-age-yes').addClass('checkBox_green'),
+                    $('.patient-age-no').removeClass('checkBox_red');
+            else
+                $("[name='patient-age-no']").attr("required", true),
+                    $('.patient-age-yes').removeClass('checkBox_green');
+
+        });
+        // patient-age-no
+        $('#patient-age-no').change(function () {
+            if (this.checked)
+                $("[name='patient-age-yes']").attr("required", false),
+                    document.getElementById("patient-age-no").checked = true,
+                    document.getElementById("patient-age-yes").checked = false,
+                    $('.patient-age-no').addClass('checkBox_red'),
+                    $('.patient-age-yes').removeClass('checkBox_green');
+            else
+                $("[name='patient-age-yes']").attr("required", true),
+                    $('.patient-age-no').removeClass('checkBox_red');
+        });
+
+        // education
+        $('#hypog-symptoms-education').change(function () {
+            if (this.checked)
+                $('.hypog-symptoms-education').addClass('checkBox_blue'),
+                    $('#hypoglycaemia-educational').removeClass('houdini');
+            else
+                $('.hypog-symptoms-education').removeClass('checkBox_blue'),
+                    $('#hypoglycaemia-educational').addClass('houdini');
+        });
+        $('#glucose-education').change(function () {
+            if (this.checked)
+                $('.glucose-education').addClass('checkBox_blue'),
+                    $('#glucose-educational').removeClass('houdini');
+            else
+                $('.glucose-education').removeClass('checkBox_blue'),
+                    $('#glucose-educational').addClass('houdini');
+        });
+    </script>
+    <!-- general -->
+    <script>
+        $('#d-general-followup').change(function () {
+            if (this.checked)
+                $('#generalpanel_diabetes').addClass('houdini'),
+                    $('#iGeneral').addClass('grey'),
+                    $('#fGeneral').removeClass('grey'),
+                    document.getElementById("d-general-followup").checked = true,
+                    document.getElementById("d-general-ignore").checked = false;
+            else
+                $('#generalpanel_diabetes').removeClass('houdini'),
+                    $('#iGeneral').removeClass('grey'),
+                    document.getElementById("d-general-followup").checked = false;
+        });
+        $('#d-general-ignore').change(function () {
+            if (this.checked)
+                $('#generalpanel_diabetes').addClass('houdini'),
+                    $('#iGeneral').removeClass('grey'),
+                    $('#fGeneral').addClass('grey'),
+                    document.getElementById("d-general-followup").checked = false,
+                    document.getElementById("d-general-ignore").checked = true;
+            else
+                $('#generalpanel_diabetes').removeClass('houdini'),
+                    $('#fGeneral').removeClass('grey'),
+                    document.getElementById("d-general-ignore").checked = false;
+        });
+
+        // depression required-fields
+        $(document).ready(function () {
+            $("[name='depression-yes']").attr("required", true),
+                $("[name='depression-no']").attr("required", true);
+        });
+        // depression-yes
+        $('#depression-yes').change(function () {
+            if (this.checked)
+                $("[name='depression-no']").attr("required", false),
+                    $("[name='questionnaireOther.depression']").attr("required", true),
+                    document.getElementById("depression-yes").checked = true,
+                    document.getElementById("depression-no").checked = false,
+                    $('.depression-yes').addClass('checkBox_green'),
+                    $('.depression-no').removeClass('checkBox_red'),
+                    $('#general-diabetes-question').removeClass('houdini');
+            else
+                $("[name='depression-no']").attr("required", true),
+                    $('.depression-yes').removeClass('checkBox_green'),
+                    $('#depression-question').addClass('houdini'),
+                    $('#general-diabetes-question').addClass('houdini'),
+                    $("#depression-error").show();
+
+        });
+        // depression-no
+        $('#depression-no').change(function () {
+            if (this.checked)
+                $("[name='depression-yes']").attr("required", false),
+                    $("[name='questionnaireOther.depression']").attr("required", false),
+                    $("[name='questionnaireOther.depressionComment']").val(""),
+                    document.getElementById("depression-no").checked = true,
+                    document.getElementById("depression-yes").checked = false,
+                    $('.depression-no').addClass('checkBox_red'),
+                    $('.depression-yes').removeClass('checkBox_green'),
+                    $('#general-diabetes-question').addClass('houdini');
+            else
+                $("[name='depression-yes']").attr("required", true),
+                    $('.depression-no').removeClass('checkBox_red'),
+                    $("#depression-error").show();
+
+        });
+        // education
+        $('#depression-education').change(function () {
+            if (this.checked)
+                $('.depression-education').addClass('checkBox_blue'),
+                    $('#depression-educational').removeClass('houdini');
+            else
+                $('.depression-education').removeClass('checkBox_blue'),
+                    $('#depression-educational').addClass('houdini');
+        });
+    </script>
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.4/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.4/js/select2.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+
+    <script>
+        $(function () {
+            $(".select2").select2({ matcher: matchCustom, templateResult: formatCustom });
+        })
+
+        function stringMatch(term, candidate) {
+            return candidate && candidate.toLowerCase().indexOf(term.toLowerCase()) >= 0;
+        }
+
+        function matchCustom(params, data) {
+            // If there are no search terms, return all of the data
+            if ($.trim(params.term) === '') {
+                return data;
+            }
+            // Do not display the item if there is no 'text' property
+            if (typeof data.text === 'undefined') {
+                return null;
+            }
+            // Match text of option
+            if (stringMatch(params.term, data.text)) {
+                return data;
+            }
+            // Match attribute "data-foo" of option
+            if (stringMatch(params.term, $(data.element).attr('subtext'))) {
+                return data;
+            }
+            // Return `null` if the term should not be displayed
+            return null;
+        }
+
+        function formatCustom(state) {
+            return $(
+                '<div><div>' + state.text + '</div><div class="subtext">'
+                + $(state.element).attr('subtext')
+                + '</div></div>'
+            );
+        }
+    </script>
+
+    <script>
+        function MedicationRegistration() {
+            $("#nd-medication-registration-error").hide();
+        }
+    </script>
+
+
+
+}
+

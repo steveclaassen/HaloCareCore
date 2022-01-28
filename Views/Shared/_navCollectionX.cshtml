@@ -1,0 +1,96 @@
+﻿@using HaloCareCore.Extensions
+
+<!--navCollection-->
+@if (User.Identity.IsAuthenticated)
+{
+    if (User.HasRole("6. Global user") || (User.HasRole("5. Super user")))
+    {
+        <div style="margin-top: -2.2%; margin-bottom: -0.6%; margin-left: -6%">
+            <div class="navCollection-buttons">
+                <div class="col-md-12">
+                    <div class="col-md-4"></div>
+                    <div class="col-md-4">
+                        <div class="col-md-2">
+                            <a href="@Url.Action("Index", "Home", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Home"><span style="" class="sub_icon fas fa-home"></span></a>
+                        </div>
+                        <div class="col-md-2">
+                            <a href="@Url.Action("OpenAssignments", "Clinical", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Assignments"><span style="" class="sub_icon fas fa-bell"></span></a>
+                        </div>
+                        <div class="col-md-2">
+                            <a href="@Url.Action("Search", "Member", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Patient"><span style="" class="sub_icon fas fa-user-circle"></span></a>
+                        </div>
+                        <div class="col-md-2">
+                            <a href="@Url.Action("OutstandingAuthorise", "Scripts", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Authorisation"><span style="" class="sub_icon fas fa-check-circle"></span></a>
+                        </div>
+                        <div class="col-md-2">
+                            <a href="@Url.Action("searchManagement", "patientManagement", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Search"><span style="" class="sub_icon fas fa-search"></span></a>
+                        </div>
+                        <div class="col-md-2">
+                            <a href="@Url.Action("Index", "Administration", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Settings"><span style="" class="sub_icon fas fa-cog"></span></a>
+                        </div>
+
+                    </div>
+                    <div class="col-md-4"></div>
+                </div>
+            </div>
+        </div>
+    }
+    else if (User.HasRole("4. Advisor"))
+    {
+        <div style="margin-top: -1.5%; margin-bottom: -0.6%; margin-left: 2%">
+            <div class="buttonCollection">
+                <div class="col-md-12">
+                    <div class="col-md-4"></div>
+                    <div class="col-md-4">
+                        <div class="col-md-1"></div>
+                        <div class="col-md-2">
+                            <a href="@Url.Action("Index", "Home", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Home"><span style="font-size: 12px" class="sub_icon fas fa-home"></span></a>
+                        </div>
+                        <div class="col-md-2">
+                            <a href="@Url.Action("OpenAssignments", "Clinical", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Assignments"><span style="font-size: 12px" class="sub_icon fas fa-bell"></span></a>
+                        </div>
+                        <div class="col-md-2">
+                            <a href="@Url.Action("Search", "Member", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Patient"><span style="font-size: 12px" class="sub_icon fas fa-user-circle"></span></a>
+                        </div>
+                        <div class="col-md-2">
+                            <a href="@Url.Action("OutstandingAuthorise", "Scripts", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Authorisation"><span style="font-size: 12px" class="sub_icon fas fa-check-circle"></span></a>
+                        </div>
+                        <div class="col-md-2">
+                            <a href="@Url.Action("searchManagement", "patientManagement", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Search"><span style="font-size: 12px" class="sub_icon fas fa-search"></span></a>
+                        </div>
+                        <div class="col-md-1"></div>
+                    </div>
+                    <div class="col-md-4"></div>
+                </div>
+            </div>
+        </div>
+    }
+    else if (User.HasRole("1. Consultant") || (User.HasRole("2. Case manager") || (User.HasRole("3. Specialist"))))
+    {
+        <div style="margin-top: -1.5%; margin-bottom: -0.6%; margin-left: 2%">
+            <div class="buttonCollection">
+                <div class="col-md-12">
+                    <div class="col-md-4"></div>
+                    <div class="col-md-4">
+                        <div class="col-md-2"></div>
+                        <div class="col-md-2">
+                            <a href="@Url.Action("Index", "Home", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Home"><span style="font-size: 12px" class="sub_icon fas fa-home"></span></a>
+                        </div>
+                        <div class="col-md-2">
+                            <a href="@Url.Action("OpenAssignments", "Clinical", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Assignments"><span style="font-size: 12px" class="sub_icon fas fa-bell"></span></a>
+                        </div>
+                        <div class="col-md-2">
+                            <a href="@Url.Action("Search", "Member", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Patient"><span style="font-size: 12px" class="sub_icon fas fa-user-circle"></span></a>
+                        </div>
+                        <div class="col-md-2">
+                            <a href="@Url.Action("searchManagement", "patientManagement", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Search"><span style="font-size: 12px" class="sub_icon fas fa-search"></span></a>
+                        </div>
+                        <div class="col-md-2"></div>
+                    </div>
+                    <div class="col-md-4"></div>
+                </div>
+            </div>
+
+        </div>
+    }
+}

@@ -1,0 +1,102 @@
+﻿@using HaloCareCore.Extensions
+
+<!--settingsSlider-->
+@if (User.Identity.IsAuthenticated)
+{
+
+    <div id="patientWrapper" class="">
+
+        <!-- leftSidebar_patientProfile -->
+        <div id="sidebar-wrapper_patientProfile">
+
+            <ul class="sidebar-navX" id="sidebar">
+                <li class="blankuM"></li>
+                <!--User-->
+                <h5>User Profile</h5>
+                <div class="pull-right">
+                    <div class="site-title_exit">
+                        <a href="" id="exit-toggle"><span><i class="fas fa-times"></i></span></a>
+                    </div>
+                </div>
+
+                <li class="blankxS"></li>
+                <hr class="toggleMenu_Ruler">-->
+                <!--Menues-->
+                <li class="blankxXS"></li>
+
+                <h5>Menus</h5>
+
+                <li class="blankxS"></li>
+
+                <div class="userMenu_links">
+                    <div class="col-md-4 userLink">
+                        <a href="@Url.Action("Index", "Home", new { })"><i class="fas fa-home"></i><p>Home</p></a>
+                    </div>
+                    <div class="col-md-4 userLink">
+                        <a href="@Url.Action("OpenAssignments", "Clinical", new { })"><i class="fas fa-bell"></i><p>Assignments</p></a>
+                    </div>
+                    <div class="col-md-4 userLink">
+                        <a href="@Url.Action("Search", "Member", new { })"><i class="fas fa-user-circle"></i><p>Patient</p></a>
+
+                    </div>
+                </div>
+
+                <li class="blankX"></li>
+
+                <div class="userMenu_links">
+                    <!--<div class="col-md-4 userLink">
+            <a href="@Url.Action("OutstandingAuthorise", "Scripts", new { })"><i class="fas fa-check-circle"></i><p>Authorisation</p></a>
+        </div>-->
+                    <div class="col-md-4 userLink">
+                        <a href="@Url.Action("searchManagement", "patientManagement", new { })"><i class="fas fa-search"></i><p>Search</p></a>
+                    </div>
+                    @if (User.HasRole("6. Global user") || User.RoleHasAccess())
+                    {
+                        <div class="col-md-4 userLink">
+                            <a href="@Url.Action("Index", "Administration", new { })"><i class="fas fa-cog"></i><p>Settings</p></a>
+                        </div>
+                    }
+                </div>
+
+                <li class="blankX"></li>
+
+                <div class="userMenu_links">
+                    <div class="col-md-4 userLink">
+
+                    </div>
+                    <div class="col-md-4 userLink">
+
+                    </div>
+                    <div class="col-md-4 userLink">
+
+                    </div>
+                </div>
+
+                <li class="blankX"></li>
+
+                <hr class="toggleMenu_Ruler">
+
+                <li class="blankxXS"></li>
+                @*<h5>Services</h5>*@
+                <li class="blankxXS"></li>
+
+                <div class="userMenu_links">
+                    <div class="col-md-4 userLink">
+                        <a href="@Url.Action("Login", "Account", new { })"><i class="fas fa-sign-out-alt"></i><p>Log Out</p></a>
+
+                    </div>
+                    <div class="col-md-4 userLink">
+
+                    </div>
+                    <div class="col-md-4 userLink">
+
+                    </div>
+                </div>
+
+            </ul>
+
+        </div>
+    </div>
+
+
+}

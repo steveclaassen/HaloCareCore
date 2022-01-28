@@ -1,0 +1,36 @@
+﻿<!--sideNavigation Bar-->
+<div id="tabs sideBar_left">
+    <div class="nav-side-menu memberNav pull-left" style="display: block">
+        <div class="blank">&nbsp;</div>
+        <div class="blank">&nbsp;</div>
+        <div class="blank">&nbsp;</div>
+        <div class="blank">&nbsp;</div>
+        <div class="blank">&nbsp;</div>
+
+
+        <div class="menu-list">
+
+            <ul id="menu-content" class="menu-content collapse out active navbar-tabs">
+
+                <li>
+                    <a href="@Url.Action("patientDashboard", "Member" , new {DependentID = Context.Request.Query["DependentID"]})"><i><img src="~/Content/Images/memberProfile/passportIcon_member.png" style="width: 12%; margin-left: 0%; margin-right: 1%" /></i>Dashboard</a>
+                </li>
+                <li>
+                    <a href="@Url.Action("patientAssignments", "Member" , new {DependentID = Context.Request.Query["DependentID"]})"><i><img src="~/Content/Images/memberProfile/topBar Icons/openAssignments.png" style="width: 12%; margin-left: 0%; margin-right: 1%" /></i>Assignments</a>
+                </li>
+                <li>
+                    <a href="@Url.Action("patientCommunication", "Member" , new {DependentID = Context.Request.Query["DependentID"]})"><i><img src="~/Content/Images/memberProfile/topBar Icons/communicationIcon_White.png" style="width: 12%; margin-left: 0%; margin-right: 1%" /></i>Communication</a>
+                </li>
+                <li>
+                    <a href="@Url.Action("patientClinical", "Member" , new {DependentID = Context.Request.Query["DependentID"]})"><i><img src="~/Content/Images/memberProfile/clinicalIcon_member.png" style="width: 12%; margin-left: 0%; margin-right: 1%" /></i>Patient Clinical</a>
+                </li>
+                <li>
+                    <a href="@Url.Action("patientProfile", "Member" , new {DependentID = Context.Request.Query["DependentID"]})"><i><img src="~/Content/Images/memberProfile/patientIcon_member.png" style="width: 12%; margin-left: 0%; margin-right: 1%" /></i>Patient Profile</a>
+                </li>
+
+
+            </ul>
+        </div>
+    </div>
+
+</div>

@@ -1,0 +1,313 @@
+﻿@model IEnumerable<HaloCareCore.Models.MemberSearchViewModel>
+
+@using Microsoft.AspNetCore.Identity
+@using HaloCareCore.Extensions
+@{
+    ViewBag.Title = "Managed Care Home";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+
+}
+<comment>
+    <!-- 08 March 2019 -- HCare-681 -->
+    <!-- 09 January 2019 -- HCare-928 -->
+    <!-- 14 August 2021 -- HCare-1398 -->
+</comment>
+<style>
+    .indexnav {
+        margin-top: 100px;
+    }
+
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .fullScreen_home {
+        background-image: url('../../Content/Images/Backgrounds/homePage/homePage_one.png');
+        background-size: 120%;
+    }
+
+    #search {
+        position: fixed;
+        z-index: 10000;
+        top: 0px;
+        left: 0px;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.75);
+        -webkit-transition: all 0.5s ease-in-out;
+        -moz-transition: all 0.5s ease-in-out;
+        -o-transition: all 0.5s ease-in-out;
+        -ms-transition: all 0.5s ease-in-out;
+        transition: all 0.5s ease-in-out;
+        -webkit-transform: translate(0px, -100%) scale(0, 0);
+        -moz-transform: translate(0px, -100%) scale(0, 0);
+        -o-transform: translate(0px, -100%) scale(0, 0);
+        -ms-transform: translate(0px, -100%) scale(0, 0);
+        transform: translate(0px, -100%) scale(0, 0);
+        opacity: 0;
+    }
+
+        #search.open {
+            -webkit-transform: translate(0px, 0px) scale(1, 1);
+            -moz-transform: translate(0px, 0px) scale(1, 1);
+            -o-transform: translate(0px, 0px) scale(1, 1);
+            -ms-transform: translate(0px, 0px) scale(1, 1);
+            transform: translate(0px, 0px) scale(1, 1);
+            opacity: 1;
+        }
+
+        #search input[type="search"] {
+            position: absolute;
+            top: 50%;
+            max-width: 1500px;
+            width: 100%;
+            color: rgb(255, 255, 255);
+            background: rgba(0, 0, 0, 0);
+            font-size: 60px;
+            font-weight: 300;
+            text-align: center;
+            border: 0px;
+            margin: 0px auto;
+            margin-top: -51px;
+            padding-left: 30px;
+            padding-right: 30px;
+            outline: none;
+            margin-left: 1.8%
+        }
+
+        #search .btn {
+            position: absolute;
+            top: 50%;
+            left: 51.8%;
+            margin-top: 61px;
+            margin-left: -45px;
+            border-radius: 20px;
+        }
+
+        #search .close {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            color: #fff;
+            background-color: transparent;
+            opacity: 1;
+            padding: 10px 17px;
+            font-size: 27px;
+        }
+
+    ::-webkit-input-placeholder { /* Chrome */
+        color: white;
+        transition: opacity 250ms ease-in-out;
+        text-align: center
+    }
+    /*HCare-875*/
+    .material-icons {
+        font-size: 68px !important;
+        /*padding-top: 14px;*/
+    }
+</style>
+
+<div class="">
+    <nav id="global-nav" class="nav">
+        <div class="pull-left title">
+            <h1 class="site-title_patientProfile">
+                <span><i class="fas fa-home"></i>&emsp; HaloCare Disease Management Services</span>
+            </h1>
+        </div>
+        <div class="pull-right title">
+            <h1 class="site-title_userID pull-right">
+                <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+            </h1>
+            <h1 class="site-title_userID pull-right">
+            </h1>
+            <h1 class="site-waffleIcon pull-right">
+                <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+            </h1>
+        </div>
+    </nav>
+
+    <div class="fullScreen_home">
+        <ul class="breadcrumbs_home">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+        </ul>
+
+        @if (User.Identity.IsAuthenticated)
+        {
+            if (User.HasRole("6. Global user") || User.RoleHasAccess())
+            {
+                <div class="navCollection_fullScreens">
+                    <div class="buttonCollection">
+                        <div class="col-md-12">
+                            <div class="col-md-4"></div>
+                            <div class="col-md-4">
+                                <div class="col-md-1"></div>
+                                <div class="col-md-10">
+                                    <div class="col-md-2"></div>
+                                    <div class="col-md-2">
+                                        <a href="@Url.Action("Index", "Home" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Home"><span style="font-size: 12px" class="sub_icon fas fa-home"></span></a>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <a href="@Url.Action("Search", "Member" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Patient"><span style="font-size: 12px" class="sub_icon fas fa-user-circle"></span></a>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <a href="@Url.Action("searchManagement", "patientManagement" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Search"><span style="font-size: 12px" class="sub_icon fas fa-search"></span></a>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <a href="@Url.Action("Index", "Administration" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Settings"><span style="font-size: 12px" class="sub_icon fas fa-cog"></span></a>
+                                    </div>
+                                    <div class="col-md-2"></div>
+                                </div>
+                                <div class="col-md-1"></div>
+                            </div>
+                            <div class="col-md-4"></div>
+
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="navCollection_fullScreens">
+                    <div class="buttonCollection">
+                        <div class="col-md-12">
+                            <div class="col-md-4"></div>
+                            <div class="col-md-4">
+                                <div class="col-md-1"></div>
+                                <div class="col-md-10">
+                                    <div class="col-md-3"></div>
+                                    <div class="col-md-2">
+                                        <a href="@Url.Action("Index", "Home" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Home"><span style="font-size: 12px" class="sub_icon fas fa-home"></span></a>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <a href="@Url.Action("Search", "Member" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Patient"><span style="font-size: 12px" class="sub_icon fas fa-user-circle"></span></a>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <a href="@Url.Action("searchManagement", "patientManagement" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Search"><span style="font-size: 12px" class="sub_icon fas fa-search"></span></a>
+                                    </div>
+                                    <div class="col-md-3"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-4"></div>
+
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+
+        @if (User.Identity.IsAuthenticated)
+        {
+            if (User.HasRole("6. Global user") || User.RoleHasAccess())
+            {
+                <div class="container_Home">
+                    <div class="menuIcons row">
+                        <div class="col-md-12" style="margin-top: 15%; margin-bottom: 5%">
+                            <div class="col-md-2"></div>
+                            <div class="col-md-2">
+                                <a href="#search">
+                                    <i class="material-icons" style="padding-bottom: 15px!important;">account_circle</i>
+                                    <p>Patient</p>
+                                </a>
+                            </div>
+                            <div class="col-md-2">
+                                <a href="@Url.Action("searchManagement", "PatientManagement", new {UserName = User.Identity.Name })">
+                                    <i class="material-icons" style=" padding-bottom: 15px!important;">search</i>
+                                    <p>Search</p>
+                                </a>
+                            </div>
+                            <div class="col-md-2">
+                                <a href="@Url.Action("Index", "administration", new { })">
+                                    <br />
+                                    <i class="material-icons" style="padding-bottom: 14px!important; margin-top: -7%">settings</i>
+                                    <p>Settings</p>
+                                </a>
+                            </div>
+                            <div class="col-md-2">
+                                <a href="@Url.Action("UserWorkflow", "Workflow", new { UserName = User.Identity.Name })">
+                                    <i class="material-icons" style=" padding-bottom: 15px!important;">
+                                        library_add_check
+                                    </i>
+                                    <p>Workflow</p>
+                                </a>
+                            </div>
+                            <div class="col-md-2"></div>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="container_Home">
+                    <div class="menuIcons row">
+                        <div class="col-md-12" style="margin-top: 15%; margin-bottom: 5%">
+                            <div class="col-md-2"></div>
+                            <div class="col-md-3">
+                                <a href="#search">
+                                    <i class="material-icons" style="padding-bottom: 15px!important;">account_circle</i>
+                                    <p>Patient</p>
+                                </a>
+                            </div>
+                            <div class="col-md-2">
+                                <a href="@Url.Action("searchManagement", "PatientManagement", new {UserName = User.Identity.Name })">
+                                    <i class="material-icons" style=" padding-bottom: 15px!important;">search</i>
+                                    <p>Search</p>
+                                </a>
+                            </div>
+                            <div class="col-md-2">
+                                <a href="@Url.Action("UserWorkflow", "Workflow", new { UserName = User.Identity.Name })">
+                                    <i class="material-icons" style=" padding-bottom: 15px!important;">
+                                        library_add_check
+                                    </i>
+                                    <p>Workflow</p>
+                                </a>
+                            </div>
+                            <div class="col-md-3"></div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+
+    </div>
+
+    <div id="search">
+        <button type="button" class="close">×</button>
+        @using (Html.BeginForm("Search", "Member")) //HCare-1250
+        {
+            @Html.AntiForgeryToken()
+
+            <ul class="">
+                <li class="focus" style="list-style: none">
+                    @Html.TextBox("SearchVar", null, new { @class = "form-control-memberSearchX focus", @placeholder = "type to search", autocomplete = "off" })
+                </li>
+                <div class="patientSearchButton" role="group">
+                    <button type="submit" class="btn btn-search homeSearch">Search</button>
+                </div>
+            </ul>
+
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <script>
+        $(function () {
+            $('a[href="#search"]').on('click', function (event) {
+                event.preventDefault();
+                $('#search').addClass('open');
+                $('.focus').focus();
+            });
+
+            $('#search, #search button.close').on('click keyup', function (event) {
+                if (event.target == this || event.target.className == 'close' || event.keyCode == 27) {
+                    $(this).removeClass('open');
+                }
+            });
+
+        });
+
+    </script>
+}

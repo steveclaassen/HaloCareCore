@@ -1,0 +1,149 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - Managed Care</title>
+    <style src="~/Content/bootstrap.css"></style>
+    <style src="~/Content/datatables/css/datatables.bootstrap.css"></style>
+    <style src="~/Content/site.css"></style>
+    <script src="~/bundles/modernizr"></script>
+
+    <script src="https://kit.fontawesome.com/1c01daaa7f.js"></script>
+
+    <!--Import FontAwesome Icon Font-->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.10/css/all.css" integrity="sha384-+d0P83n9kaQMCwj8F4RJB66tzIwOKmrdb46+porD/OvrJ+37WqIM7UoBtwHO6Nlg" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://raw.githubusercontent.com/l-lin/font-awesome-animation/master/dist/font-awesome-animation.css">
+    <!--Import Google Icon Font-->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <!--Import materialize.css-->
+    <link type="text/css" rel="stylesheet" href="../css/materialize.min.css" media="screen,projection" />
+</head>
+<comment>
+    <!--
+        17 April 2019 -- HCare-712(UAT Testing system - page icon)
+        Added the word UAT and a tool icon to the layout in order to show users when they are in UAT to differentiate.
+    -->
+</comment>
+<style>
+    .topBar_Authorization img {
+        position: fixed;
+        z-index: 500;
+        width: 1.2%;
+        top: -21px;
+        left: 1250px;
+        overflow: hidden;
+        margin: 0 !important;
+    }
+
+    .topBar_userLogon img {
+        position: relative;
+        z-index: 500;
+        width: 1.1%;
+        top: -42px;
+        left: 1280px;
+        overflow: hidden;
+        margin: 0 !important;
+    }
+
+    .topBar_Settings img {
+        position: relative;
+        z-index: 500;
+        width: 1.2%;
+        top: -61px;
+        left: 1310px;
+        overflow: hidden;
+        margin: 0 !important;
+    }
+
+    .topBar_logOnOff img {
+        position: relative;
+        z-index: 500;
+        width: 1.1%;
+        top: -81px;
+        left: 1340px;
+        overflow: hidden;
+        margin: 0 !important;
+    }
+
+    .topBar_links ul li {
+        float: left;
+        display: block;
+        padding: 0;
+    }
+
+        .topBar_links ul li a {
+            margin-top: 12px;
+            margin-left: 5px;
+            margin-right: 10px;
+            padding-top: 5px;
+            padding-bottom: 5px;
+            padding-right: 10px;
+            padding-left: 10px;
+            width: 95%;
+            text-align: center;
+            background-color: transparent !important;
+            border: 1px solid rgba(255, 255, 255, 0.00);
+            color: #fff !important;
+            font-size: 85% !important;
+            font-family: Calibri;
+            font-weight: 200;
+        }
+
+            .topBar_links ul li a:hover {
+                border-top: 2px solid #fff;
+            }
+
+            .topBar_links ul li a:focus {
+                border-top: 2px solid #fff;
+            }
+
+    .container {
+        max-width: 1600px;
+        width: 1500px;
+        margin: auto;
+        display: block;
+        padding: 0;
+    }
+</style>
+<body>
+    @Html.Partial("_settingsSlider")
+
+    <!--pageLoader-->
+    <div id="loading-screen" class="hidden">
+        <div class="container-loader">
+            <div></div><div></div><div></div><div></div>
+            <span class="loading-text">LOADING...</span>
+        </div>
+        <div id="loading" class="loading"></div>
+    </div>
+
+    <br />
+    <br />
+    <br />
+
+
+    <div class="memberNav_container body-content">
+        <br />
+        @RenderBody()
+    </div>
+
+    <script src="~/bundles/jquery" ></script>
+    <script src="~/bundles/bootstrap"></script>
+    <script src="~/bundles/admin"></script>
+    @RenderSection("scripts", required: false)
+
+    <!--page-loader-->
+    <script>
+        $("form").submit(function () {
+            if ($(this).valid()) {  //<<< If validation passes
+                $("#loading-screen").removeClass("hidden");
+            }
+        });
+    </script>
+</body>
+</html>
+
+
+
+

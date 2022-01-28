@@ -1,0 +1,143 @@
+﻿@using HaloCareCore.Extensions
+<!DOCTYPE html>
+<html>
+<head>
+
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="/Content/css?v=oJj1RW3IGSKe85_Oya9vS1AV1-paw_rTRVCSLpKGNgE1" rel="stylesheet" />
+    <script src="/bundles/modernizr?v=w9fZKPSiHtN4N4FRqV7jn-3kGoQY5hHpkwFv5TfMrus1"></script>
+
+    <title>@ViewBag.Title - Managed Care</title>
+    <style src="~/Content/bootstrap.css"></style>
+    <style src="~/Content/datatables/css/datatables.bootstrap.css"></style>
+    <style src="~/Content/site.css"></style>
+    <script src="~/bundles/modernizr"></script>
+
+    <style>
+        ::-webkit-input-placeholder { /* Chrome */
+            color: rgba(128, 128, 128, 0.50);
+            transition: opacity 250ms ease-in-out;
+        }
+
+        :focus::-webkit-input-placeholder {
+            opacity: 0.5;
+        }
+    </style>
+
+</head>
+
+
+<body>
+
+
+
+    <div class="navbar navbar-fixed-top" style="background-color: #404040; border-bottom: none; color: #ffffff; padding-bottom:0!important; margin-top: -10px">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+            </div>
+            <div class="">
+                @if (User.Identity.IsAuthenticated)
+            {
+                    <div class="navbar-collapse collapse">
+                        <ul class="nav navbar-nav topBar_links" style="margin-left: -13.5%; margin-top: 0.5%">
+                            <li>@Html.ActionLink("Home", "Index", "Home")</li>
+                            @if (User.HasRole("Clinical Manager") || User.HasRole("System Admin") || User.HasRole("Case Manager"))
+                            {
+                                <li>@Html.ActionLink("Patient Management", "Index", "PatientManagement")</li>
+                                <li>@Html.ActionLink("Clinical Management", "Index", "Clinical")</li>
+                            }
+                            @if (User.HasRole("System Admin") || User.RoleHasAccess())//HCare-889
+                            {
+                                <li>@Html.ActionLink("Administration", "Index", "Administration")</li>
+                            }
+
+                            @if (User.HasRole("Clinical Manager") || User.HasRole("System Admin") || User.HasRole("Administrator"))
+                            {
+                                <!--<li>@Html.ActionLink("Reports", "reportDashboard", "ReportManagement")</li>-->
+                            }
+                        </ul>
+
+
+                        <ul class="topBar_links pull-right" style="margin-left: 10px;">
+
+                            @Html.Partial("_LoginPartial")
+                        </ul>
+
+
+
+
+
+
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+    <br />
+
+
+
+    <br />
+    <br />
+    <div class="container body-content">
+        <br />
+        <br />
+
+        @RenderBody()
+
+    </div>
+
+    <script src="/bundles/jquery?v=FVs3ACwOLIVInrAl5sdzR2jrCDmVOWFbZMY6g6Q0ulE1"></script>
+    <script src="/bundles/bootstrap?v=7L-olbawGSUx59JiE48fJka4FRXUNXX42lHNhTi0-og1"></script>
+    <script src="/bundles/jqueryval?v=sTM6z75i3uDpVeh__Zai1IpnDnqY9pO-TNy0Ztaw6Y81"></script>
+
+
+    <script src="~/bundles/jquery"></script>
+    <script src="~/bundles/bootstrap"></script>
+    @RenderSection("scripts", required: false)
+
+
+
+
+    <!-- Admin SubDropDown Menu-->
+    <script>
+        $(document).ready(function () {
+            $('.dropdown-submenu a.test').on("click", function (e) {
+                $(this).next('ul').toggle();
+                e.stopPropagation();
+                e.preventDefault();
+            });
+        });
+
+        $(document).ready(function () {
+            $('#tabs').tabs();
+        });
+
+    </script>
+
+
+    <br />
+    <br />
+    <br />
+    <br />
+    <br />
+    <br />
+    <br />
+    <br />
+    <footer>
+        <p style="font-style: italic; font-size: 55%; position:fixed; bottom:0; right: 0; left: 0;text-align: right; margin-right: 20px;">&copy; @DateTime.Now.Year - HaloCare</p>
+    </footer>
+
+</body>
+
+
+
+</html>

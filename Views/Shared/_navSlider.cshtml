@@ -1,0 +1,46 @@
+﻿<!-- navSlider -->
+<div id="wrapper" class="">
+
+    <div id="sidebar-wrapper_blueGray">
+
+        <ul class="sidebar-nav" id="sidebar">
+            <li class="space_dashboardSlider"></li>
+
+            <li><a id="menu-toggle" href="#" title="Menu">Menu<span id="main_icon"></span><i class="sub_icon material-icons">&#xe871;</i></a></li>
+            <!-- Dashboard -->
+            @*<li><a href="@Url.Action("Index", "Home", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Home"><span>Home</span><span class="sub_icon fas fa-home" style="font-size: 14px"></span></a></li>*@
+
+            <li data-toggle="collapse" data-target="#patientDash" class="collapsed">
+                <a href="@Url.Action("patientDashboard", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"]})" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Patient"><span>Patient</span><span class="sub_icon fa fa-user-circle" style="font-size: 14px"></span></a>
+            </li>
+
+            <!-- Assignments -->
+            <li data-toggle="collapse" data-target="#assignmentDrop" class="collapsed">
+                @*<span class="fa-stack_Small has-badge" data-count="@ViewBag.assignment">*@
+                <div class="badgeNotifications">
+                    @ViewBag.assignment
+                </div>
+
+                <a href="@Url.Action("patientAssignments", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"]})" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Assignments"><span>Assignments</span><span class="sub_icon far fa-bell" style="font-size: 14px"></span></a>
+                @*</span>*@
+            </li>
+
+            <!-- Communication -->
+            <li data-toggle="collapse" data-target="#authorisations" class="collapsed">
+                <a href="@Url.Action("patientCommunication", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"]})" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Communication"><span>Communication</span><span class="sub_icon fas fa-comments" style="font-size: 14px"></span></a>
+            </li>
+            <!-- Clinical -->
+            <li data-toggle="collapse" data-target="#reports" class="collapsed">
+                <a href="@Url.Action("PatientClinical_Summary", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"]})" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Clinical"><span>Clinical</span><span class="sub_icon fas fa-file-medical-alt" style="font-size: 14px"></span></a>
+            </li>
+
+            <!-- Profile -->
+            @*<li data-toggle="collapse" data-target="#ee" class="collapsed">
+                <a href="@Url.Action("patientProfile", "Member", new { DependentID = Request.Query["DependentID"], pro = Request.Query["pro"]})" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Profile"><span>Profile</span><span class="sub_icon fas fa-plus-square" style="font-size: 14px"></span></a>
+            </li>*@
+
+            <li><a class="go_back" title="Back"><span style="font-size: 10px; position: fixed; bottom: 2px; margin-left: -18px">Back</span><span style="position:fixed; bottom: 15px; padding-left: 110px; margin-right: 0px" class="back_icon fas fa-arrow-alt-circle-left"></span></a></li>
+
+        </ul>
+    </div>
+</div>

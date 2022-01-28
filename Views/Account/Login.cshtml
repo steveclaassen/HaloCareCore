@@ -1,0 +1,106 @@
+﻿@model HaloCareCore.Models.UserLoginModel
+@{
+    ViewBag.Title = "Log in";
+    Layout = "~/Views/Shared/_LayoutLogin.cshtml";
+
+}
+
+<div class="fullScreen">
+    <!--pageHeader-->
+    <nav id="global-nav" class="nav">
+        <div class="pull-left title">
+            <h1 class="site-login_userProfile">
+                <span><i class="fas fa-lock"></i>&emsp; HaloCare (PTY) LTD</span>
+            </h1>
+        </div>
+        <div class="pull-right title" style="margin-top: 0.5%!important">
+            <h1 class="site-title_userID pull-right">
+                <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+            </h1>
+        </div>
+    </nav>
+    <div class="homePanel" style="margin-top: -4.5%; margin-left: 0%">
+        <div class="Loginbox">
+
+            <div class="container_Home">
+                <div class="lockIcon row">
+
+                    <div class="col-md-12" style="margin-top: 5%; margin-bottom: 1%">
+                        <div class="col-md-5"></div>
+
+                        <!--login-->
+                        <div class="col-md-2" style="z-index: 100">
+                            <div>
+                                <i class="material-icons" style="font-size: 68px!important; padding-bottom: 10px!important; margin-top: -7%!important">lock</i>
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-5"></div>
+
+                    </div>
+                    <div class="col-md-12">
+                        <div class="loginScreen_prompt">
+                            <p>Please enter your username and password</p>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+
+
+                        @using (Html.BeginForm())
+                        {
+                            @Html.AntiForgeryToken()
+                            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                            <div class="form-group">
+                                <div class="col-md-12">
+                                    @Html.TextBoxFor(m => m.Username, new { @class = "loginBox", @placeholder = "Username" })
+                                    @Html.ValidationMessageFor(m => m.Username, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="col-md-12">
+                                    @Html.PasswordFor(m => m.Password, new { @class = "loginBox", @placeholder = "Password" })
+                                    @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <br />
+                            <br />
+                            <div style="margin-top: 5%"></div>
+
+                            <div class="form-group" style="margin-left: 18%">
+                                <div class="col-md-offset-2 col-md-10">
+                                    <input type="submit" value="Log in" class="btn newEnquiry" style="width: 40%; position: absolute; z-index: 100; margin-top: 6%" />
+                                </div>
+                            </div>
+                            <br />
+                            <br />
+
+                            <div class="form-group" style="margin-top: 25%; margin-left: 38.5%; position: absolute; z-index: 100; ">
+                                <div>
+                                    @Html.ActionLink("Forgotten password", "ForgotPassword", "Account", new { @style = "font-size: 10px!important" })
+                                </div>
+                            </div>
+
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+        <footer style="font-family: 'Century Gothic'; font-size: 10px;position: fixed; bottom: 15px; left: 20px">
+            A subsidiary of Mediscor PBM (PTY) LTD
+        </footer>
+    </div>
+
+</div>
+
+@section Scripts {
+    <script src="~/bundles/jqueryval"></script>
+
+    <script>
+        $(function () {
+            $(".footer").remove();
+        });
+    </script>
+}

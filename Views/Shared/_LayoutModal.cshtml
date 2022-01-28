@@ -1,0 +1,45 @@
+﻿@using HaloCareCore.Extensions
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - Managed Care</title>
+    <script src="~/Content/bootstrap.css"></script>
+    <style src="~/Content/datatables/css/datatables.bootstrap.css"></style>
+    <style src="~/Content/site.css"></style>
+    <script src="~/bundles/modernizr"></script>
+    @*<script src="~ /bundles/jquery")*@
+
+</head>
+<body>
+    <!--pageLoader-->
+    <div id="loading-screen" class="hidden">
+        <div class="container-loader">
+            <div></div><div></div><div></div><div></div>
+            <span class="loading-text">LOADING...</span>
+        </div>
+        <div id="loading" class="loading"></div>
+    </div>
+
+    <div class="container body-content">
+        @RenderBody()
+    </div>
+
+
+
+    <!--page-loader-->
+    <script>
+        $("form").submit(function () {
+            if ($(this).valid()) {  //<<< If validation passes
+                $("#loading-screen").removeClass("hidden");
+            }
+        });
+    </script>
+
+    <script src="~/bundles/jquery"></script>
+    <script src="~/bundles/bootstrap"></script>
+    @RenderSection("scripts", required: false)
+</body>
+
+</html>

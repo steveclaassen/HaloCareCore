@@ -1,0 +1,138 @@
+﻿<!DOCTYPE html >
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no" ">
+
+    <link href="/Content/css?v=oJj1RW3IGSKe85_Oya9vS1AV1-paw_rTRVCSLpKGNgE1" rel="stylesheet" />
+    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Comfortaa" />
+
+    <script src="/bundles/modernizr?v=w9fZKPSiHtN4N4FRqV7jn-3kGoQY5hHpkwFv5TfMrus1"></script>
+    <script src="~/Scripts/jquery.validate.min.js"></script>
+    <script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>
+
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+    <!--Import FontAwesome Icon Font-->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://raw.githubusercontent.com/l-lin/font-awesome-animation/master/dist/font-awesome-animation.css">
+    <!--Import Google Icon Font-->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <!--Import materialize.css-->
+    <link type="text/css" rel="stylesheet" href="../css/materialize.min.css" media="screen,projection" />
+
+
+
+    <title>@ViewBag.Title - Managed Care</title>
+
+    <script src ="~/bundles/modernizr"></script>
+    <style src="~/Content/bootstrap.css"></style>
+    <style src="~/Content/datatables/css/datatables.bootstrap.css"></style>
+    <style src="~ /Content/site.css"></style>
+
+    <style>
+        .indexnav {
+            margin-top: 100px;
+        }
+
+        body {
+            background-color: #f9f9fc !important;
+        }
+
+        .homePanel {
+            background-image: url('../../Content/Images/Backgrounds/homePage/homePage_one.png');
+            background-size: 120%;
+        }
+
+        ::-webkit-input-placeholder { /* Chrome */
+            color: #808080;
+            transition: opacity 250ms ease-in-out;
+            text-align: center
+        }
+
+        :focus::-webkit-input-placeholder {
+            opacity: 0.5;
+        }
+
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover,
+        input:-webkit-autofill:focus,
+        input:-webkit-autofill:active {
+            transition: background-color 5000s ease-in-out 0s;
+            background-color: transparent !important;
+            text-align: center;
+        }
+
+        .Loginbox {
+            background-color: #fff !important;
+            border: 1px solid transparent;
+            box-shadow: 2px 2px 1px 0px rgba(0,0,0,0.38);
+            border-radius: 1px;
+            width: 600px;
+            height: auto;
+            padding-left: 50px;
+            padding-right: 100px;
+            padding-top: 20px;
+            padding-bottom: 100px;
+            display: block;
+            margin: auto;
+            margin-top: 5%
+        }
+
+        .loginBox {
+            margin-left: -15%;
+            display: block;
+            width: 180%;
+            height: 40px;
+            padding: 6px 6px;
+            font-size: 16px;
+            font-style: italic;
+            line-height: 1.428571429;
+            color: #003366;
+            vertical-align: middle;
+            background-color: rgba(255, 255, 255, 0.46);
+            border: 1px solid #ccc;
+            border-radius: 1px;
+            margin-bottom: 5px;
+            max-width: 480px !important;
+        }
+
+            .loginBox:hover {
+                -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+                box-shadow: 0px 1px 1px 0px rgba(0,0,0,0.30);
+                -webkit-transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+                transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+            }
+
+
+    </style>
+
+
+</head>
+
+
+<body>
+
+
+
+
+    <div class="container body-content">
+
+
+        @RenderBody()
+
+        <hr />
+
+        <footer style="font-size: 10px; position: fixed; padding: 1rem; right: 0; bottom: 0; z-index: 50">
+        </footer>
+    </div>
+
+    <script src="~/bundles/jquery"></script>
+    <script src="~/bundles/bootstrap"></script>
+    @RenderSection("scripts", required: false)
+</body>
+</html>

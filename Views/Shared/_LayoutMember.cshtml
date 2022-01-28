@@ -1,0 +1,213 @@
+﻿@using HaloCareCore.Extensions
+@using Microsoft.Extensions.Configuration;
+@inject IConfiguration Configuration
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Comfortaa" />
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="/Content/css?v=oJj1RW3IGSKe85_Oya9vS1AV1-paw_rTRVCSLpKGNgE1" rel="stylesheet" />
+    <script src="/bundles/modernizr?v=w9fZKPSiHtN4N4FRqV7jn-3kGoQY5hHpkwFv5TfMrus1"></script>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css">
+
+    <script src="~/Scripts/bootstrap.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    @*<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+        <script src="http://code.jquery.com/jquery-1.10.2.js"></script>*@
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.js"></script>
+    <script src="~/Scripts/jquery.validate.min.js"></script>
+    <script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>
+    <script src="~/Content/ckeditor/ckeditor.js" type="text/javascript"></script>
+
+
+    <!--Import FontAwesome Icon Font-->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.10/css/all.css" integrity="sha384-+d0P83n9kaQMCwj8F4RJB66tzIwOKmrdb46+porD/OvrJ+37WqIM7UoBtwHO6Nlg" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://raw.githubusercontent.com/l-lin/font-awesome-animation/master/dist/font-awesome-animation.css">
+    <!--Import Google Icon Font-->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <!--Import materialize.css-->
+    <link type="text/css" rel="stylesheet" href="css/materialize.min.css" media="screen,projection" />
+
+    <title>@ViewBag.Title - Managed Care</title>
+    <style src="~/Content/bootstrap.css"></style>
+    <style src="~/Content/datatables/css/datatables.bootstrap.css"></style>
+    <style src="~/Content/site.css"></style>
+    <script src="~/bundles/modernizr"></script>
+    <comment>
+        <!--
+            17 April 2019 -- HCare-712(UAT Testing system - page icon)
+            Added the word UAT and a tool icon to the layout in order to show users when they are in UAT to differentiate.
+        -->
+    </comment>
+
+    <style>
+        .topBar_Authorization img {
+            position: fixed;
+            z-index: 500;
+            width: 1.2%;
+            top: -21px;
+            left: 1250px;
+            overflow: hidden;
+            margin: 0 !important;
+        }
+
+        .topBar_userLogon img {
+            position: relative;
+            z-index: 500;
+            width: 1.1%;
+            top: -42px;
+            left: 1280px;
+            overflow: hidden;
+            margin: 0 !important;
+        }
+
+        .topBar_Settings img {
+            position: relative;
+            z-index: 500;
+            width: 1.2%;
+            top: -61px;
+            left: 1310px;
+            overflow: hidden;
+            margin: 0 !important;
+        }
+
+        .topBar_logOnOff img {
+            position: relative;
+            z-index: 500;
+            width: 1.1%;
+            top: -81px;
+            left: 1340px;
+            overflow: hidden;
+            margin: 0 !important;
+        }
+
+        .topBar_links ul li {
+            float: left;
+            display: block;
+            padding: 0;
+        }
+
+            .topBar_links ul li a {
+                margin-top: 12px;
+                margin-left: 5px;
+                margin-right: 10px;
+                padding-top: 5px;
+                padding-bottom: 5px;
+                padding-right: 10px;
+                padding-left: 10px;
+                width: 95%;
+                text-align: center;
+                background-color: transparent !important;
+                border: 1px solid rgba(255, 255, 255, 0.00);
+                color: #fff !important;
+                font-size: 85% !important;
+                font-family: Calibri;
+                font-weight: 200;
+            }
+
+                .topBar_links ul li a:hover {
+                    border-top: 2px solid #fff;
+                }
+
+                .topBar_links ul li a:focus {
+                    border-top: 2px solid #fff;
+                }
+
+        .container {
+            max-width: 1600px;
+            width: 1500px;
+            margin: auto;
+            display: block;
+            padding: 0;
+        }
+    </style>
+
+    @if (Configuration.GetSection("AppSettings")["System"].ToString().ToUpper() == "UAT")
+    {
+        <div>
+            <img src="~/Content/Images/Navigation/hammerTool_uat.png" style="width: 1.5%; position: fixed; right: 15px; top: 92px; z-index: 1000 " title="User Acceptance Testing" />
+        </div>
+
+        <footer>
+            <p style="font-size: 125%; position:fixed; bottom:-2px; right: 2px; left: 0;text-align: right; margin-right: 20px; background: -webkit-linear-gradient(#e80a89, #f15b2a);-webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow (10px 10px 1px rgba(34, 34, 34, 0.50)); font-weight: bold; font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif; z-index:1000 ">UAT</p>
+        </footer>
+
+    }
+    else
+    {
+        <footer>
+            <p style="font-style: italic; font-size: 8px; position:fixed; bottom:0; right: 0; left: 0;text-align: right; margin-right: 20px;">&copy; @DateTime.Now.Year - HaloCare</p>
+        </footer>
+    }
+</head>
+
+
+<body>
+
+
+    @Html.Partial("_settingsSlider")
+
+    <!--pageLoader-->
+    <div id="loading-screen" class="hidden">
+        <div class="container-loader">
+            <div></div><div></div><div></div><div></div>
+            <span class="loading-text">LOADING...</span>
+        </div>
+        <div id="loading" class="loading"></div>
+    </div>
+
+    <div class="memberNav_container body-content">
+        <br />
+        <br />
+        <br />
+        <br />
+
+        @RenderBody()
+
+
+
+    </div>
+
+    <div class="modal" tabindex="-1" role="dialog" id="form-modal" style="position: fixed; width: 600px; top: 40px; left: calc(50% - 300px); bottom: 40px; z-index: 100;">
+        <div class="modal-dialog" role="document" style="left:0% !important">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/bundles/jquery?v=FVs3ACwOLIVInrAl5sdzR2jrCDmVOWFbZMY6g6Q0ulE1"></script>
+    <script src="/bundles/bootstrap?v=7L-olbawGSUx59JiE48fJka4FRXUNXX42lHNhTi0-og1"></script>
+    <script src="/bundles/jqueryval?v=sTM6z75i3uDpVeh__Zai1IpnDnqY9pO-TNy0Ztaw6Y81"></script>
+    <script src="http://code.jquery.com/jquery-1.10.2.js" type="text/javascript"></script>
+
+
+    <script src="~/bundles/jquery"></script>
+    <script src="~/bundles/bootstrap"></script>
+    @RenderSection("scripts", required: false)
+
+    <!--page-loader-->
+    <script>
+        $("form").submit(function () {
+            if ($(this).valid()) {  //<<< If validation passes
+                $("#loading-screen").removeClass("hidden");
+            }
+        });
+    </script>
+</body>
+</html>
+
+
+

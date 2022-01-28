@@ -1,0 +1,48 @@
+  // Configure bundling and minification for the project.
+// More info at https://go.microsoft.com/fwlink/?LinkId=808241
+[
+  {
+    "outputFileName": "~/bundles/cssStyles",
+    // An array of relative input file paths. Globbing patterns supported
+    "inputFiles": [
+      "~/Content/bootstrap.css",
+      "~/Content/datatables/css/datatables.bootstrap.css",
+      "~/Content/site.css"
+    ]
+  },
+  {
+    "outputFileName": "~/bundles/jquery",
+    "inputFiles": [
+      "~/Scripts/jquery-{version}.js",
+      "~/Scripts/datatables/jquery.datatables.js",
+      "~/Scripts/datatables/datatables.bootstrap.js",
+      "~/Scripts/DatePickerReady.js"
+    ]
+  },
+  {
+    "outputFileName": "~/bundles/jqueryval",
+    "inputFiles": [
+      "~/Scripts/jquery.validate*"
+    ] 
+  },
+  {
+    "outputFileName": "~/bundles/modernizr",
+    "inputFiles": [
+      "~/Scripts/modernizr-*"
+    ]
+  },
+  {
+    "outputFileName": "~/bundles/bootstrap",
+    "inputFiles": [
+      "~/Scripts/bootstrap.js",
+      "~/Scripts/respond.js"
+    ],
+    // Optionally specify minification options
+    "minify": {
+      "enabled": true,
+      "renameLocals": true
+    },
+    // Optionally generate .map file
+    "sourceMap": false
+  }
+]

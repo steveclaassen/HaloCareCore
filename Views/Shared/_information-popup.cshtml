@@ -1,0 +1,40 @@
+﻿@model HaloCareCore.Models.EnrolmentViewModel
+
+@if (Model.Notes == null)
+{
+    <div>
+        <a><span id="alert_iconX"><i class="fas fa-info-circle"></i></span></a>
+    </div>
+}
+else
+{
+    <div>
+        <a id="alert-toggle" href="#" title="information"><span id="alert_icon"><i class="fas fa-info-circle"></i></span></a>
+    </div>
+}
+
+<div id="alertWrapper" class="">
+    <div id="sidebar-wrapper_alertNote">
+        <div class="specialNote_header">
+            @Html.Label(null,"Special note: ", htmlAttributes: new { @class = "control-label-member_view" })
+        </div>
+        <div class="specialNote_noteBody">
+            @Html.DisplayFor(model => model.Notes.note)
+        </div>
+        @if (Model.Notes == null)
+        {
+            <div class="specialNote_addButton">
+                @Html.ActionLink("Add", "AddNote", new { DependentID = Model.dependent.DependantID, pro = Context.Request.Query["pro"] }, null)
+            </div>
+        }
+        @if (Model.Notes != null)
+        {
+            <div class="specialNote_addButton">
+                @Html.ActionLink("Edit", "EditNote", "Member", new { NoteId = Model.Notes.noteID, pro = Context.Request.Query["pro"] }, null)
+            </div>
+        }
+    </div>
+</div>
+
+
+

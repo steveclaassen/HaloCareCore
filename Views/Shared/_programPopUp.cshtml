@@ -1,0 +1,25 @@
+﻿@model HaloCareCore.Models.EnrolmentViewModel
+
+<div class="program-nav" id="sidebar">
+    <a id="program-toggle" href="#"><span id="program-icon"><i class="sub_icon fas fa-list-ul programIcon"></i></span></a>
+</div>
+
+<div id="programWrapper" class="">
+    <div id="sidebar-wrapper-program">
+        <div class="program-pop-header">
+            @Html.Label(null,"Programs: ", htmlAttributes: new { @class = "control-label-member_view" })
+        </div>
+        <div class="program-pop-body">
+            <table>
+                @foreach (var prog in Model.programs)
+                {
+                    <tr><td>@Html.DisplayFor(model => prog.programCode) - @Html.DisplayFor(model => prog.icd10Code)</td></tr>
+                }
+            </table>
+        </div>
+
+    </div>
+</div>
+
+
+

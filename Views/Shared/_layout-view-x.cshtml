@@ -1,0 +1,135 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - Managed Care</title>
+    <style src="~/Content/bootstrap.css"></style>
+    <style src="~/Content/datatables/css/datatables.bootstrap.css"></style>
+    <style src="~/Content/site.css"></style>
+    <script src="~/bundles/modernizr"></script>
+
+    <script src="~/Content/ckeditor/ckeditor.js" type="text/javascript"></script>
+    <script src="https://kit.fontawesome.com/1c01daaa7f.js"></script>
+
+    <!--Import FontAwesome Icon Font-->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.10/css/all.css" integrity="sha384-+d0P83n9kaQMCwj8F4RJB66tzIwOKmrdb46+porD/OvrJ+37WqIM7UoBtwHO6Nlg" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://raw.githubusercontent.com/l-lin/font-awesome-animation/master/dist/font-awesome-animation.css">
+    <!--Import Google Icon Font-->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <!--Import materialize.css-->
+    <link type="text/css" rel="stylesheet" href="../css/materialize.min.css" media="screen,projection" />
+
+    <script src="~/Content/ckeditor/ckeditor.js" type="text/javascript"></script>
+
+</head>
+<body>
+
+    <!------------------------------------------------------------------------------------ left-navigation-slider ----------------------------------------------------------------------------------->
+    <div>
+        <span id="navigation-slider-blank">
+            @Html.Partial("_navSlider_blank")
+        </span>
+    </div>
+
+    <!------------------------------------------------------------------------------------ right-navigation-slider ----------------------------------------------------------------------------------->
+    @Html.Partial("_settingsSlider")
+
+    <div class="container-full-screen">
+        <div class="container-slider">
+            <!----------------------------------------------------------------------------- html-top-navigation-panel  ---------------------------------------------------------------------------->
+            <nav id="global-navigation" class="nav">
+                <div class="green-overlay"></div>
+                <div class="pull-left title">
+                    <h1 class="site-title-member-information">
+                        <span>&nbsp;&emsp; @ViewBag.Title</span>
+                    </h1>
+                </div>
+                <div class="pull-right title">
+                    <h1 class="site-title_userID pull-right">
+                        <div class="logo-halocare"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+                    </h1>
+                    <h1 class="site-title_userID pull-right">
+                        @if (@HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                        {
+                            <span class="user-avatar" style="color: white!important; font-size: 12px">@HttpContextAccessor.HttpContext.Session.GetString("Init")</span>
+                        }
+                    </h1>
+                    <h1 class="site-waffleIcon pull-right">
+                        <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 11px"><i class="fas fa-th"></i></span></span>
+                    </h1>
+                </div>
+            </nav>
+
+            @RenderBody()
+            @*<footer style="position: fixed; bottom: 15px; right: 30px; font-size: 8px ">
+                    <span id="halocare-logo"><img src="~/Content/Images/haloCareLoginx.png" style="width: 3.5%; opacity: 1; position: fixed; right:20px; bottom: 15px" /></span>
+                </footer>*@
+        </div>
+    </div>
+
+    <script src="~/bundles/jquery"></script>
+    <script src="~/bundles/bootstrap"></script>
+    <script src="~/bundles/admin"></script>
+    @RenderSection("scripts", required: false)
+
+    <!-- general -->
+    <script>
+        // waffle-navigation-script-open
+        $("#patientMenu-toggle").click(function (e) {
+            e.preventDefault();
+            $("#patientWrapper").toggleClass("active");
+        });
+        // waffle-navigation-script-close
+        $("#exit-toggle").click(function (e) {
+            e.preventDefault();
+            $("#patientWrapper").toggleClass("active");
+        });
+        // special-note
+        $("#alert-toggle").click(function (e) {
+            e.preventDefault();
+            $("#alertWrapper").toggleClass("active");
+        });
+        // left-navigation-slider
+        $("#menu-toggle").click(function (e) {
+            e.preventDefault();
+            $("#wrapper").toggleClass("active");
+        });
+        // go-back
+        $(function () {
+            $('.go_back').click(function (e) {
+                e.preventDefault();
+                history.go(-1);
+            });
+        });
+    </script>
+    <!-- member-information-hide -->
+    <script>
+        function memberInformation() {
+            $('#memInfo').toggleClass('houdini'),
+                $('#memberInformationData').toggleClass('collapse-space');
+        }
+    </script>
+    <!-- member-information-name -->
+    <script>
+        $(document).ready(function () {
+            var riskID = '@(ViewBag.riskRatingID)';
+            if (riskID.toUpperCase() == "G") {
+                $('#memberInformation').addClass('riskRating-green');
+            }
+            else if (riskID.toUpperCase() == "Y") {
+                $('#memberInformation').addClass('riskRating-yellow');
+            }
+            else if (riskID.toUpperCase() == "R") {
+                $('#memberInformation').addClass('riskRating-red');
+            }
+
+        });
+    </script>
+</body>
+</html>
+
+
+
