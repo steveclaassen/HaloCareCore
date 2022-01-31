@@ -1,0 +1,510 @@
+﻿@model HaloCareCore.Models.ViewModels.ManagementStatusVM
+@using HaloCareCore.Extensions
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<comment>
+    <!--
+            xx September 2019 -- HCare-803 (Add reason to Deactivated status)
+            Added maintenance table for Management status Deactivated reasons. Full CRUD functionality along with table layout standards.
+            Needed to join the management status as well as the reasons into the one index view in order to save space in the settings view.
+
+    -->
+</comment>
+
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+</style>
+
+<!--dateSort_JQ-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js"></script>
+<script src="https://www.jqueryscript.net/demo/jQuery-Plugin-For-Sortable-Bootstrap-Tables-Bootstrap-Sortable/Scripts/bootstrap-sortable.js"></script>
+
+<div class="fullScreen_container">
+
+    <!--pageHeader-->
+    <nav id="global-nav" class="nav">
+        <div class="pull-left title">
+            <h1 class="site-title_patientProfile">
+                <span><i class="fas fa-id-card-alt"></i>&emsp; Management status</span>
+            </h1>
+        </div>
+        <div class="pull-right title">
+            <h1 class="site-title_userID pull-right">
+                <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+            </h1>
+            <h1 class="site-title_userID pull-right">
+                @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                {
+                    <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                }
+            </h1>
+            <h1 class="site-waffleIcon pull-right">
+                <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+            </h1>
+        </div>
+    </nav>
+
+    <!--breadCrumbs-->
+    <ul class="breadcrumbs_fullScreens">
+        <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+        <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+        <li><a href="@Url.Action("Index", "Administration", new {})">Settings</a></li>
+        <li><a href="#">Templates</a></li>
+    </ul>
+
+    <!--navCollection-->
+    <div class="navCollection_fullScreens">
+        @Html.Partial("_navCollectionX")
+    </div>
+
+    <div style="margin-bottom: 3%"></div>
+
+    <div class="compactAssignmentTabs">
+        <!--=========================================================================================================================================================================-->
+        <!--                                                                              ManagementStatus                                                                           -->
+        <!--=========================================================================================================================================================================-->
+
+        <div class="tab-3">
+            <label for="tab3-1">Management status</label>
+            <input id="tab3-1" name="tabs-three" type="radio" checked="checked">
+            <div class="row">
+                <!--fullView-->
+                <div class="form-group">
+                    <a href="@Url.Action("Create", "ManagementStatus", new { })">
+                        <div class="actionButton">
+                            <input type="submit" value="Create new" class="btn buttonRound_templates" />
+                        </div>
+                    </a>
+                </div>
+
+                <h4 class="tableHeading" style="margin-top: -5%; margin-bottom: 1%">Management status overview</h4>
+
+                <!--jQ_Search-->
+                <div class="row tableSearch_compactAssignments">
+                    <div class="col-md-6 pull-right">
+                        <ul class="input-group" id="adv-search">
+
+                            <ul class="nav navbar-nav navbar-right">
+                                <li class="focus">
+                                    <label for="tableSearch" class="control-label"></label> <input type="text" class="form-control-patientSearch" id="search" onkeyup="myFunction()" placeholder="Search..." style="position: relative; z-index: 50; margin-top: -7.5%" />
+                                </li>
+                                <div class="btn-group" role="group">
+                                    <button type="submit" class="btn btn-search" style="height: 30px"><span class="glyphicon glyphicon-search" aria-hidden="true" title="Search"></span></button>
+                                </div>
+                            </ul>
+                        </ul>
+                    </div>
+                </div>
+
+                <table class="table systemTemplatesTable" id="msTable">
+                    <thead>
+                        <tr>
+                            <th onclick="msTable(0)" style="width: 10%">
+                                @Html.DisplayNameFor(model => model.managementStatus.createdDate) <i class="fa fa-fw fa-sort sortArrow"></i>
+                            </th>
+                            <th onclick="msTable(1)" style="width: 10%">
+                                @Html.DisplayNameFor(model => model.managementStatus.statusCode) <i class="fa fa-fw fa-sort sortArrow"></i>
+                            </th>
+                            <th onclick="msTable(2)">
+                                @Html.DisplayNameFor(model => model.managementStatus.statusName) <i class="fa fa-fw fa-sort sortArrow"></i>
+                            </th>
+                            <th onclick="msTable(3)" style="width: 15%">
+                                @Html.DisplayNameFor(model => model.managementStatus.statusType) <i class="fa fa-fw fa-sort sortArrow"></i>
+                            </th>
+                            <th onclick="msTable(4)" style="text-align: center!important; width: 10%">
+                                @Html.DisplayNameFor(model => model.managementStatus.active) <i class="fa fa-fw fa-sort sortArrow"></i>
+                            </th>
+                            <th style="text-align: center!important; width: 10%">
+                                Action
+                            </th>
+                        </tr>
+                    </thead>
+
+                    @foreach (var item in Model.managementStatuses)
+                    {
+                        <tbody>
+                            <tr>
+                                <td style="text-align: left">
+                                    @if (item.active == false)
+                                    {
+                                        <span style="color: lightgray">@Html.DisplayFor(modelItem => item.createdDate)</span>
+                                    }
+                                    else
+                                    {
+                                        @Html.DisplayFor(modelItem => item.createdDate)
+                                    }
+                                </td>
+                                <td style="text-align: left">
+                                    @if (item.active == false)
+                                    {
+                                        <span style="color: lightgray">@Html.DisplayFor(modelItem => item.statusCode)</span>
+                                    }
+                                    else
+                                    {
+                                        @Html.DisplayFor(modelItem => item.statusCode)
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.active == false)
+                                    {
+                                        <span style="color: lightgray">@Html.DisplayFor(modelItem => item.statusName)</span>
+                                    }
+                                    else
+                                    {
+                                        @Html.DisplayFor(modelItem => item.statusName)
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.active == false)
+                                    {
+                                        <span style="color: lightgray">@Html.DisplayFor(modelItem => item.statusType)</span>
+                                    }
+                                    else
+                                    {
+                                        @Html.DisplayFor(modelItem => item.statusType)
+                                    }
+                                </td>
+                                <td style="text-align: center!important; width: 10%">
+                                    @if (item.active)
+                                    {
+                                        <img src="~/Content/Images/Navigation/5. Reports/reportCheck.png" style="width: 15%; opacity: 0.7" />
+                                    }
+                                    else
+                                    {
+                                        <img src="~/Content/Images/Navigation/5. Reports/reportCheck_x.png" style="width: 15%; opacity: 0.5" />
+                                    }
+                                </td>
+                                <td class="statusCode linkNav" style="text-align: center!important">
+                                    @Html.ActionLink("Edit", "Edit", new { id = item.statusCode }) |
+                                    @Html.ActionLink("Details", "Details", new { id = item.statusCode })
+                                </td>
+                            </tr>
+                        </tbody>
+                    }
+
+                </table>
+
+                <br />
+            </div>
+            <script type="text/javascript">
+                /*openTable tableSearch*/
+                var $rows = $('#msTable tr');
+                $('#search').keyup(function () {
+                    var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+                    $rows.show().filter(function () {
+                        var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                        return !~text.indexOf(val);
+                    }).hide();
+                });
+
+                /*openTable TableSorting*/
+                function msTable(n) {
+                    var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+                    table = document.getElementById("msTable");
+                    switching = true;
+                    dir = "asc";
+
+                    while (switching) {
+                        switching = false;
+                        rows = table.getElementsByTagName("TR");
+
+                        for (i = 1; i < (rows.length - 1); i++) {
+
+                            shouldSwitch = false;
+
+                            x = rows[i].getElementsByTagName("TD")[n];
+                            y = rows[i + 1].getElementsByTagName("TD")[n];
+
+                            if (dir == "asc") {
+                                if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+
+                                    shouldSwitch = true;
+                                    break;
+                                }
+                            } else if (dir == "desc") {
+                                if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+
+                                    shouldSwitch = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (shouldSwitch) {
+
+                            rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                            switching = true;
+
+                            switchcount++;
+                        } else {
+
+                            if (switchcount == 0 && dir == "asc") {
+                                dir = "desc";
+                                switching = true;
+                            }
+                        }
+                    }
+                }
+            </script>
+        </div>
+
+        <!--=========================================================================================================================================================================-->
+        <!--                                                                           ManagementStatus Reasons                                                                      -->
+        <!--=========================================================================================================================================================================-->
+
+        <div class="tab-3">
+            <label for="tab3-3">Reasons</label>
+            <input id="tab3-3" name="tabs-three" type="radio">
+            <div class="row" style="margin-left: -99.5%">
+
+                <!--fullView-->
+                <div class="form-group">
+                    <a href="@Url.Action("msReason_Create", "ManagementStatus", new { })">
+                        <div class="actionButton">
+                            <input type="submit" value="Create new" class="btn buttonRound_templates" />
+                        </div>
+                    </a>
+                </div>
+
+                <h4 class="tableHeading" style="margin-top: -5%; margin-bottom: 1%">Management status reason overview</h4>
+
+                <!--jQ_Search-->
+                <div class="row tableSearch_compactAssignments">
+                    <div class="col-md-6 pull-right">
+                        <ul class="input-group" id="adv-search">
+
+                            <ul class="nav navbar-nav navbar-right">
+                                <li class="focus">
+                                    <label for="tableSearch" class="control-label"></label> <input type="text" class="form-control-patientSearch" id="search" onkeyup="myFunction()" placeholder="Search..." style="position: relative; z-index: 50; margin-top: -7.5%" />
+                                </li>
+                                <div class="btn-group" role="group">
+                                    <button type="submit" class="btn btn-search" style="height: 30px"><span class="glyphicon glyphicon-search" aria-hidden="true" title="Search"></span></button>
+                                </div>
+                            </ul>
+                        </ul>
+                    </div>
+                </div>
+                <!--textTemplate_Table-->
+                <table class="table systemTemplatesTable sortable" id="emTable">
+                    <thead>
+                        <tr>
+                            <th onclick="emTable(0)" style="width: 10%">
+                                @Html.DisplayNameFor(model => model.msReason.createdDate) <i class="fa fa-fw fa-sort sortArrow"></i>
+                            </th>
+                            <th onclick="emTable(2)" style="width: 10%">
+                                @Html.DisplayNameFor(model => model.msReason.name) <i class="fa fa-fw fa-sort sortArrow"></i>
+                            </th>
+                            <th onclick="emTable(3)" style="width: 20%">
+                                @Html.DisplayNameFor(model => model.msReason.reason) <i class="fa fa-fw fa-sort sortArrow"></i>
+                            </th>
+                            <th style="text-align: center!important; width: 7%">
+                                @Html.DisplayNameFor(model => model.msReason.active) <i class="fa fa-fw fa-sort sortArrow"></i>
+                            </th>
+                            <th style="text-align: center!important; width: 7%">
+                                Action
+                            </th>
+                        </tr>
+                    </thead>
+
+                    @foreach (var item in Model.msReasons)
+                    {
+                        <tbody>
+                            <tr>
+                                <td style="text-align: left">
+                                    @if (item.active == false)
+                                    {
+                                        <span style="color: lightgray">@Html.DisplayFor(modelItem => item.createdDate)</span>
+                                    }
+                                    else
+                                    {
+                                        @Html.DisplayFor(modelItem => item.createdDate)
+                                    }
+                                </td>
+                                <td style="text-align: left">
+                                    @if (item.active == false)
+                                    {
+                                        <span style="color: lightgray">@Html.DisplayFor(modelItem => item.name)</span>
+                                    }
+                                    else
+                                    {
+                                        @Html.DisplayFor(modelItem => item.name)
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.active == false)
+                                    {
+                                        <span style="color: lightgray">@Html.DisplayFor(modelItem => item.reason)</span>
+                                    }
+                                    else
+                                    {
+                                        @Html.DisplayFor(modelItem => item.reason)
+                                    }
+                                </td>
+                                <td style="text-align: center!important; width: 7%">
+                                    @if (item.active)
+                                    {
+                                        <img src="~/Content/Images/Navigation/5. Reports/reportCheck.png" style="width: 10%; opacity: 0.7" />
+                                    }
+                                    else
+                                    {
+                                        <img src="~/Content/Images/Navigation/5. Reports/reportCheck_x.png" style="width: 10%; opacity: 0.5" />
+                                    }
+                                </td>
+                                <td class="statusCode linkNav" style="text-align: center!important">
+                                    @Html.ActionLink("Edit", "Edit", new { id = item.id }) |
+                                    @Html.ActionLink("Details", "Details", new { id = item.id })
+                                </td>
+                            </tr>
+                        </tbody>
+                    }
+
+                </table>
+
+            </div>
+            <script type="text/javascript">
+                /*openTable tableSearch*/
+                var $rows = $('#emTable tr');
+                $('#search').keyup(function () {
+                    var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+                    $rows.show().filter(function () {
+                        var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                        return !~text.indexOf(val);
+                    }).hide();
+                });
+
+                /*openTable TableSorting*/
+                function emTable(n) {
+                    var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+                    table = document.getElementById("emTable");
+                    switching = true;
+                    dir = "asc";
+
+                    while (switching) {
+                        switching = false;
+                        rows = table.getElementsByTagName("TR");
+
+                        for (i = 1; i < (rows.length - 1); i++) {
+
+                            shouldSwitch = false;
+
+                            x = rows[i].getElementsByTagName("TD")[n];
+                            y = rows[i + 1].getElementsByTagName("TD")[n];
+
+                            if (dir == "asc") {
+                                if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+
+                                    shouldSwitch = true;
+                                    break;
+                                }
+                            } else if (dir == "desc") {
+                                if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+
+                                    shouldSwitch = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (shouldSwitch) {
+
+                            rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                            switching = true;
+
+                            switchcount++;
+                        } else {
+
+                            if (switchcount == 0 && dir == "asc") {
+                                dir = "desc";
+                                switching = true;
+                            }
+                        }
+                    }
+                }
+            </script>
+        </div>
+
+    </div>
+
+    <div class="fixedBack">
+        <input value="Back" class="btn buttonRound_formBack go_back" style="width: 15%" />
+    </div>
+</div>
+
+<script src="js/jquery.tablesorter.min.js"></script>
+
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <script>
+
+        /*tmTable TableSearch*/
+        var $rows = $('#tmTable tr');
+        $('#search').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $rows.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+
+        /*tmTable tableSort*/
+        function tmTable(n) {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("tmTable");
+            switching = true;
+            dir = "asc";
+
+            while (switching) {
+                switching = false;
+                rows = table.getElementsByTagName("TR");
+
+                for (i = 1; i < (rows.length - 1); i++) {
+
+                    shouldSwitch = false;
+
+                    x = rows[i].getElementsByTagName("TD")[n];
+                    y = rows[i + 1].getElementsByTagName("TD")[n];
+
+                    if (dir == "asc") {
+                        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                            //if so, mark as a switch and break the loop:
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (dir == "desc") {
+                        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                            //if so, mark as a switch and break the loop:
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+                if (shouldSwitch) {
+                    /*If a switch has been marked, make the switch
+                    and mark that a switch has been done:*/
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                    //Each time a switch is done, increase this count by 1:
+                    switchcount++;
+                } else {
+                    /*If no switching has been done AND the direction is "asc",
+                    set the direction to "desc" and run the while loop again.*/
+                    if (switchcount == 0 && dir == "asc") {
+                        dir = "desc";
+                        switching = true;
+                    }
+                }
+            }
+        }
+    </script>
+
+}
+

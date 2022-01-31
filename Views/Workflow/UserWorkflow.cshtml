@@ -1,0 +1,332 @@
+﻿@*@model IEnumerable<HaloCareCore.Models.Admin.WorkflowUser>*@
+@model HaloCareCore.Models.ViewModels.WorkflowUserVM
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Workflow";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<comment>
+    <!--
+        21 October 2020 -- HCare-1134(workflow)
+        20 April 2021 -- hcare-1315: update made to order by
+    -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .heading-detail {
+        font-family: 'Century Gothic' !important;
+        font-size: 20px;
+        font-weight: bold;
+        color: dimgray;
+        margin-left: 6% !important;
+    }
+
+    .label-detail {
+        font-family: 'Century Gothic' !important;
+        font-size: 12px;
+        font-weight: bold;
+        color: dimgray;
+        margin-left: 8% !important;
+        margin-bottom: 0px;
+        text-transform: unset;
+    }
+
+    .display-details {
+        font-family: 'Century Gothic' !important;
+        font-size: 14px;
+        color: dimgray;
+        margin-left: 8% !important;
+        text-transform: unset;
+    }
+
+    .label-detail-x {
+        font-family: 'Century Gothic' !important;
+        font-size: 12px;
+        font-weight: bold;
+        color: dimgray;
+        margin-left: 5% !important;
+        margin-bottom: 0px;
+        text-transform: unset;
+    }
+
+    .display-details-x {
+        font-family: 'Century Gothic' !important;
+        font-size: 14px;
+        color: dimgray;
+        margin-left: 5% !important;
+        text-transform: unset;
+    }
+</style>
+<javascript>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+    <script src="https://www.jqueryscript.net/demo/jQuery-Plugin-For-Sortable-Bootstrap-Tables-Bootstrap-Sortable/Scripts/bootstrap-sortable.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/js/standalone/selectize.js"></script>
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.default.css">
+</javascript>
+
+<div class="fullScreen_container">
+    <!----------------------------------------------------------------------------- html-top-navigation-panel  ---------------------------------------------------------------------------->
+    <navigation>
+        <nav id="global-nav" class="nav">
+            <div class="pull-left title">
+                <h1 class="site-title_patientProfile">
+                    <span><i class="fas fa-check-square"></i></span>&emsp; Workflow
+                </h1>
+            </div>
+            <div class="pull-right title">
+                <div class="site-title_userID pull-right">
+                    <div class="halocareLogoX"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+                </div>
+                <h1 class="site-title_userID pull-right">
+                    @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                    {
+                        <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                    }
+                </h1>
+                <h1 class="site-waffleIcon pull-right">
+                    <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+                </h1>
+            </div>
+        </nav>
+        <ul class="breadcrumbs_fullScreens">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+            <li><a href="#">@ViewBag.Title</a></li>
+        </ul>
+        <div class="navCollection_fullScreens">
+            @Html.Partial("_navCollection")
+        </div>
+
+        <div style="margin-bottom: 3%"></div>
+    </navigation>
+    <!-------------------------------------------------------------------------------------- html-body ------------------------------------------------------------------------------------>
+    <div class="container-tab">
+        <div class="row">
+            <div class="span12">
+                <br />
+                <!--------------------------------------------------------------------------- new/search -------------------------------------------------------------------------->
+                <div class="col-md-12 row">
+                    <div class="col-md-6">
+                        <h4 class="subHeading">
+                            Workflow overview <span style="color: #ccc; font-size: 10px">(@Model.wfQueues.Count() entries)</span>
+                        </h4>
+                    </div>
+                    <!--------------------------------------------------------------------------- jq-search -------------------------------------------------------------------------->
+                    <div class="col-md-6">
+                        <div class="input-wrapper-new-search">
+                            <input type="text" class="form-control-new-search" id="search" placeholder="Search..." />
+                        </div>
+                    </div>
+                </div>
+                <table class="table settings-table sortable">
+                    <thead>
+                        <tr>
+                            <th>@Html.DisplayNameFor(model => model.WorkflowUser.MedicalScheme)</th>
+                            <th>@Html.DisplayNameFor(model => model.WorkflowUser.Program)</th>
+                            <th>@Html.DisplayNameFor(model => model.WorkflowUser.MembershipNumber)</th>
+                            <th>@Html.DisplayNameFor(model => model.WorkflowUser.DependantCode)</th>
+                            <th>@Html.DisplayNameFor(model => model.WorkflowUser.MemberName)</th>
+                            <th>@Html.DisplayNameFor(model => model.WorkflowUser.ManagementStatus)</th>
+                            <th style="width: 8%; text-align: center!important">@Html.DisplayName("Status")</th>
+                            <th style="width: 8%; text-align: center!important">@Html.DisplayName("Action")</th>
+                        </tr>
+                    </thead>
+
+                    @foreach (var item in Model.wfQueues)
+                    {
+                        <tbody id="workflow">
+                            <tr>
+                                <td>@Html.DisplayFor(modelItem => item.MedicalScheme)</td>
+                                <td>@Html.DisplayFor(modelItem => item.Program)</td>
+                                <td>@Html.DisplayFor(modelItem => item.MembershipNumber)</td>
+                                <td>@Html.DisplayFor(modelItem => item.DependantCode)</td>
+                                <td>@Html.DisplayFor(modelItem => item.UserFullName)</td>
+                                <td>@Html.DisplayFor(modelItem => item.ManagementStatus)</td>
+                                <td>@Html.DisplayFor(modelItem => item.Status)</td>
+                                <td class="text-center"><input type="submit" class="link-button" value="View" href="#@item.Id" data-toggle="modal" /></td>
+                            </tr>
+                        </tbody>
+                    }
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="fixedBack">
+        <input value="Back" class="btn buttonRound_formBack go_back" style="width: 15%" />
+    </div>
+</div>
+
+@foreach (var item in Model.wfQueues)
+{
+    <div class="modal fade" id="@item.Id" role="dialog" aria-labelledby="@item.Id" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+        @using (Html.BeginForm("WorkflowTask", "Workflow", FormMethod.Post, new { id = "wf-task" }))
+        {
+            <div class="modal-content-assignment">
+                <div class="modal-dialog-assignment">
+                    <div class="modal-header-assignment">
+                        <div class="col-md-4"><h5 class="modal-title" id="modal-email"><img src="~/Content/Images/_2020/icons/create-new-assignment.png" class="logo-modal" /></h5></div>
+                        <div class="col-md-4 div-center"><p class="div-header">Workflow task</p></div>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    </div>
+                    <div class="modal-body" style="margin-left: -20px; margin-top: 10px; ">
+                        <div class="form-horizontal">
+
+                            <div class="hidden-fields">
+                                @Html.AntiForgeryToken()
+                                @Html.Hidden(item.DependantID.ToString())
+                                <input type="hidden" name="id" value="@item.Id" />
+                                <input type="hidden" name="queueid" value="@item.QueueID" />
+                                <input type="hidden" name="dependantid" value="@item.DependantID" />
+                                <input type="hidden" name="medicalaidid" value="@item.MedicalAidID" />
+                                <input type="hidden" name="programid" value="@item.ProgramID" />
+                                <input type="hidden" name="dependantcode" value="@item.DependantCode" />
+                                <input type="hidden" name="userid" value="@item.UserID" />
+                                <input type="hidden" name="title" value="@item.Title" />
+                                <input type="hidden" name="firstname" value="@item.UserFirstName" />
+                                <input type="hidden" name="lastname" value="@item.UserLastName" />
+                                <input type="hidden" name="membernumber" value="@item.MembershipNumber" />
+                                <input type="hidden" name="medicalaid" value="@item.MedicalScheme" />
+                                <input type="hidden" name="program" value="@item.Program" />
+                                <input type="hidden" name="mstatus" value="@item.ManagementStatus" />
+                                <input type="hidden" name="riskrating" value="@item.RiskRating" />
+                                <input type="hidden" name="instruction" value="@item.Instruction" />
+                            </div>
+
+                            <h class="heading-detail">Member information</h>
+                            <hr class="modal-ruler-wf" />
+                            <div class="form-group">
+                                <div class="col-md-12">
+                                    <div class="col-md-6">
+                                        <div><p class="label-detail">Title </p></div>
+                                        <div><span class="display-details">@Html.DisplayFor(model => item.Title)</span></div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div><p class="label-detail">Scheme </p></div>
+                                        <div><span class="display-details">@Html.DisplayFor(model => item.MedicalScheme)</span></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-12">
+                                    <div class="col-md-6">
+                                        <div><p class="label-detail">Member name </p></div>
+                                        <div><span class="display-details">@Html.DisplayFor(model => item.UserFullName)</span></div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div><p class="label-detail">Member number </p></div>
+                                        <div><span class="display-details">@Html.DisplayFor(model => item.MembershipNumber) @Html.DisplayFor(model => item.DependantCode)</span></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-12">
+                                    <div class="col-md-6">
+                                        <div><p class="label-detail">Program </p></div>
+                                        <div><span class="display-details">@Html.DisplayFor(model => item.Program)</span></div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div><p class="label-detail">Management status </p></div>
+                                        <div><span class="display-details">@Html.DisplayFor(model => item.ManagementStatus)</span></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr class="modal-ruler-wf" />
+                            <div class="form-group">
+                                <div class="col-md-12">
+                                    <div><p class="label-detail-x">Instruction </p></div>
+                                    <div><span class="display-details-x">@Html.DisplayFor(model => item.Instruction)</span></div>
+                                </div>
+                            </div>
+                            <br />
+                            <hr class="modal-ruler-wf" />
+                            <div class="form-group">
+                                <div class="col-md-12">
+                                    <div><p class="label-detail-x">Status </p></div>
+
+                                    <select id="status" name="status" class="dropdown-clean" style="width: 100%;" required>
+                                        <option value="@Html.DisplayFor(model => item.Status)" subtext="" selected="selected">@Html.DisplayFor(model => item.Status)</option>
+                                        <option value="Open" subtext="No signs or symptoms.">Open</option>
+                                        <option value="In progress" subtext="Slight reduction in social engagement with no impairment in social or interpersonal function.">In progress</option>
+                                        <option value="Closed" subtext="Clear reduction in social engagement with some functional sequelae, e.g., avoids some social engagements or conversations.">Closed</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer-assignment">
+                        <input id="wf-submit-x" type="submit" class="btn modal-button" value="Next" style="width: 15%" />
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+<script src="js/jquery.tablesorter.min.js"></script>
+
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/js/standalone/selectize.js"></script>
+    <!-- selectize dropdown menus -->
+    @*<script>
+            initSelectize();
+            function initSelectize() {
+                $('#status').selectize({
+                    persist: true,
+                    preload: true,
+                    maxItems: 1,
+                    delimiter: ',',
+                    valueField: 'id',
+                    labelField: 'name',
+                    searchField: ['name'],
+                    //create: true,
+                    hideSelected: true,
+                    plugins: ['remove_button'],
+                    render: {
+                        option: function (item, escape) {
+                            return '<span class="name">' + escape(item.name) + '</span>';
+
+                        }
+                    }
+                })
+            }
+        </script>*@
+    <!--<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.4/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.4/js/select2.min.js"></script>-->
+    <!--Select dropdowns-->
+    <!--<script>
+        //$(document).ready(function () { $("#status").select2({ selectOnClose: true, multiple: false }); });
+
+    $(document).ready(function() {$("#status").select2({dropdownParent: $(".modal fade")});});
+    </script>-->
+    <script>
+        $(document).ready(function () {
+            $("#search").on("keyup", function () {
+                var value = $(this).val().toLowerCase();
+                $("#workflow tr").filter(function () {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+            });
+        });
+    </script>
+
+    <!-- validation -->
+    <script>
+        //hcare-1311
+        $('#wf-task').submit(function () {
+            $('#wf-submit-x').attr('disabled', true);
+        });
+    </script>
+
+
+
+}

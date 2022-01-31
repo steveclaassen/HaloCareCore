@@ -1,0 +1,69 @@
+﻿@model HaloCareCore.Models.Validation.EnrolmentStepsMonitor
+
+
+<div class="form-horizontal">
+    @Html.HiddenFor(model => model.dependantId)
+    @if (Model != null)
+    {
+        <br />
+        if (Model.hasScript && !Model.scriptCaptured)
+        {
+                <a href="@Url.Action("AddScript", "Member", new { DependentID = Model.dependantId })">
+                    <div class="col-xs-12 awaitingDocs">
+                        <img src="~/Content/Images/Navigation/Member/modal_Script.png" style="width: 15%" />
+                        <h8>Upload <span>Script</span></h8>
+                    </div>
+                </a>
+        }
+
+        <br />
+        <br />
+        <br />
+
+        if (Model.hasPathology && !Model.pathologyCaptured)
+        {
+            <a href="@Url.Action("CreatePathology", "Clinical", new { DependentID = Model.dependantId })">
+                <div class="col-xs-12 awaitingDocs">
+                    <img src="~/Content/Images/Navigation/Member/modal_Pathology.png" style="width: 15%" />
+                    <h8>Upload <span>Pathology</span></h8>
+                </div>
+            </a>
+        }
+
+        <br />
+        <br />
+        <br />
+
+        if (Model.hasClinical && !Model.clinicalCaptured)
+        {
+            <div class="awaitingDocs">
+                <a href="@Url.Action("AddClinicalHistory", "Member", new { DependentID = Model.dependantId })">
+                    <div class="col-xs-12 awaitingDocs">
+                        <img src="~/Content/Images/Navigation/Member/modal_History.png" style="width: 15%" />
+                        <h8>Upload <span>Clinical History</span></h8>
+                    </div>
+                </a>
+            </div>
+        }
+
+        <br />
+        <br />
+        <br />
+
+        if (Model.hasDemographic && !Model.demographicCaptured)
+        {
+            @Html.ActionLink("Create Demographic Information", "AddDemographic", new { DependentID = Model.dependantId })
+
+        }
+        <br />
+        <br />
+
+
+    }
+</div>
+
+
+
+@section Scripts {
+    <script src="~/bundles/jqueryval"></script>
+}

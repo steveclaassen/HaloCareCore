@@ -1,0 +1,133 @@
+﻿@model IEnumerable<HaloCareCore.Models.Validation.Programs>
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Program_Index";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<comment>
+    <!--
+        18 September 2019 -- HCare-795 (HaloCare Program Management Maintenance Screen)
+        Created views for user to manage Programs. Set the Administration controller up with the CRUD functionality. Added CSS to the views as well as a duplicate check on the code and description in the Create Program view.
+        The index view allows a user to view the active and inactive entries in order to control the Programs from a settings perspective. I have added a search bar as well as a sort function that will allow the user to sort the columns.
+    -->
+</comment>
+<javascript>
+    <script src="https://www.jqueryscript.net/demo/jQuery-Plugin-For-Sortable-Bootstrap-Tables-Bootstrap-Sortable/Scripts/bootstrap-sortable.js"></script>
+</javascript>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+</style>
+
+<div class="fullScreen_container zero-padding">
+
+    <!--pageHeader-->
+    <nav id="global-nav" class="nav">
+        <div class="pull-left title">
+            <h1 class="site-title_patientProfile">
+                <span><i class="fab fa-digital-ocean fa-rotate-90"></i>&emsp; Program</span>
+            </h1>
+        </div>
+        <div class="pull-right title">
+            <h1 class="site-title_userID pull-right">
+                <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+            </h1>
+            <h1 class="site-title_userID pull-right">
+                @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                {
+                    <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                }
+            </h1>
+            <h1 class="site-waffleIcon pull-right">
+                <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+            </h1>
+        </div>
+    </nav>
+    <!--breadCrumbs-->
+    <ul class="breadcrumbs_fullScreens">
+        <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+        <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+        <li><a href="@Url.Action("Index", "Administration", new {})">Settings</a></li>
+        <li><a href="#">Program</a></li>
+    </ul>
+    <!--navCollection-->
+    <div class="navCollection_fullScreens">
+        @Html.Partial("_navCollection")
+    </div>
+    <div style="margin-bottom: 2%"></div>
+
+    <!--------------------------------------------------------------------------- new/search -------------------------------------------------------------------------->
+    <div class="col-md-12 row">
+        <div class="col-md-6">
+            <h4 class="subHeading">
+                Program overview
+                <a class="create-new" href="@Url.Action("Program_Create", "Administration", new { })" style="font-size: 14px">Create new <span><i class="fa fa-plus-circle" style="font-size: 12px"></i></span></a>
+            </h4>
+        </div>
+        <!--------------------------------------------------------------------------- jq-search -------------------------------------------------------------------------->
+        <div class="col-md-6">
+            <div class="input-wrapper-new-search">
+                <input type="text" class="form-control-new-search" id="search" onkeyup="myFunction()" placeholder="Search..." />
+            </div>
+        </div>
+    </div>
+
+    <table class="table riskRatingTable sortable" id="tableUser">
+        <thead>
+            <tr>
+                <th style="text-align: center!important;width: 10%">@Html.DisplayNameFor(model => model.code) <i class="fa fa-fw fa-sort"></th>
+                <th>@Html.DisplayNameFor(model => model.ProgramName) <i class="fa fa-fw fa-sort"></i></th>
+                <th style="text-align: center!important; width: 10%">@Html.DisplayNameFor(model => model.icd10code) <i class="fa fa-fw fa-sort"></i></th>
+                <th style="text-align: center!important; width: 10%">@Html.DisplayNameFor(model => model.Active) </th>
+                <th style="text-align: center!important; width: 10%">Action</th>
+            </tr>
+        </thead>
+
+        @foreach (var item in Model)
+        {
+            <tbody id="program-search">
+                <tr>
+                    <td class="text-center"><span class="@(item.Active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.code)</span></td>
+                    <td class="text-left"><span class="@(item.Active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.ProgramName)</span></td>
+                    <td class="text-center"><span class="@(item.Active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.icd10code)</span></td>
+                    <td class="row-information text-center"><span class="@(item.Active == true ? "chk-yes fas fa-circle" : "chk-no fas fa-circle")"></span></td>
+
+                    <td class="statusCode linkNav" style="text-align: center!important">
+                        @Html.ActionLink("Edit", "Program_Edit", new { id = item.programID }) |
+                        @Html.ActionLink("Details", "Program_Details", new { id = item.programID })
+                    </td>
+                </tr>
+            </tbody>
+
+        }
+
+    </table>
+    <div class="fixedBack">
+        <input value="Back" class="btn buttonRound_formBack " onclick="MainbackBtn();" style="width: 15%" />
+    </div>
+
+</div>
+
+
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+    <script type="text/javascript">
+        var $rows = $('#program-search tr');
+        $('#search').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $rows.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+    </script>
+    <script>
+         function MainbackBtn() {
+            window.location.href = '@Url.Action("Index", "Administration")';
+        }
+    </script>
+}

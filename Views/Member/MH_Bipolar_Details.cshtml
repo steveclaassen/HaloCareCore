@@ -1,0 +1,386 @@
+﻿@model HaloCareCore.Models.Questionnaire.MH_BipolarResponse
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Bipolar questionnaire";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<comment>
+    <!--
+        04 August 2020 -- HCare-1125(Mental Health Disease: QUESTIONNAIRE - BIPOLAR)
+    -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+</style>
+
+<!---------------------------------------------------------------------- header ---------------------------------------------------------------------->
+<nav id="global-nav" class="nav">
+    <div class="pull-left title">
+        <h1 class="site-title_patientProfile">
+            <span><img src="~/Content/Images/_2020/icons/banner-icon/mental-health-white.png" /></span>&emsp; Bipolar questionnaire
+        </h1>
+    </div>
+    <div class="pull-right title">
+        <h1 class="site-title_userID pull-right">
+            <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+        </h1>
+        <h1 class="site-title_userID pull-right">
+            @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+            {
+                <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+            }
+        </h1>
+        <h1 class="site-waffleIcon pull-right">
+            <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+        </h1>
+    </div>
+</nav>
+
+<div class="dashboardContainer zero-padding">
+    <div class="patientDashboard_View">
+        <!------------------------------------------------------------------------ bread-crumbs ------------------------------------------------------------------------>
+        <ul class="breadcrumbs_patientDashboard">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new { })">Home</a></li>
+            <li><a href="@Url.Action("patientClinical", "Member", new { DependentID = Context.Request.Query["DependentID"] })">Patient</a></li>
+            <li><a href="#">@ViewBag.Title</a></li>
+        </ul>
+
+        <!--------------------------------------------------------------------- left-navigation-bar --------------------------------------------------------------------->
+        @Html.Partial("_navSlider_blank", new { DependentID = Context.Request.Query["DependentID"] })
+
+        <!----------------------------------------------------------------------- nav-collection ----------------------------------------------------------------------->
+        <div class="navCollection_patientDashboard">
+            @Html.Partial("_navCollection")
+        </div>
+
+        <!----------------------------------------------------------------------- patient-profile ----------------------------------------------------------------------->
+        <div class="profileBar">
+            @Html.Action("_profileBar_edit", "Member", new { DependentID = Model.DependantID })
+        </div>
+    </div>
+    <br />
+    <!----------------------------------------------------------------------- form ----------------------------------------------------------------------->
+    <div class="profilebar-spacer"></div>
+
+    <div id="schizophrenia-panel" class="patientDashboard_container">
+        <div class="col-md-12 row">
+            <div class="heading-spacer"></div>
+            <div class="col-md-6"><div class="page-heading">Details</div></div>
+            <hr class="heading-ruler">
+        </div>
+        <div class="col-md-6 row"></div>
+        <div class="col-md-12">
+            <div class="row">
+                <table class="table details-table table-hover" id="bipolar-details">
+                    <tbody>
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayNameFor(model => model.AssignmentID)</td>
+                            <td class="row-information">@Html.DisplayFor(model => model.AssignmentID)</td>
+                        </tr>
+
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayNameFor(model => model.Outcome)</td>
+                            <td class="row-information">
+                                <span class="@(Model.Outcome.ToLower() == "absent" ? "chk-absent fas fa-circle" : Model.Outcome.ToLower() == "mild" ? "chk-mild fas fa-circle" : Model.Outcome.ToLower() == "moderate" ? "chk-moderate fas fa-circle" : Model.Outcome.ToLower() == "severe" ? "chk-severe fas fa-circle" : "chk-followup fas fa-circle")"></span>
+                                &emsp;@Html.DisplayFor(model => model.Outcome)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayNameFor(model => model.TotalScore)</td>
+                            <td class="row-information">@Html.DisplayFor(model => model.TotalScore)</td>
+                        </tr>
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayNameFor(model => model.Comment)</td>
+                            <td class="row-information">@Html.DisplayFor(model => model.Comment)</td>
+                        </tr>
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayNameFor(model => model.CreatedDate)</td>
+                            <td class="row-information">@Html.DisplayFor(model => model.CreatedDate)</td>
+                        </tr>
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayNameFor(model => model.CreatedBy)</td>
+                            <td class="row-information">@Html.DisplayFor(model => model.CreatedBy)</td>
+                        </tr>
+                        @if (Model.ModifiedDate != null)
+                        {
+                            <tr>
+                                <td class="row-heading subject">@Html.DisplayNameFor(model => model.ModifiedDate)</td>
+                                <td class="row-information">@Html.DisplayFor(model => model.ModifiedDate)</td>
+                            </tr>
+                            <tr>
+                                <td class="row-heading subject">@Html.DisplayNameFor(model => model.ModifiedBy)</td>
+                                <td class="row-information">@Html.DisplayFor(model => model.ModifiedBy)</td>
+                            </tr>
+                        }
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayNameFor(model => model.Program)</td>
+                            <td class="row-information">@Html.DisplayFor(model => model.Program)</td>
+                        </tr>
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayNameFor(model => model.Active)</td>
+                            <td class="row-information"><span class="@(Model.Active == true ? "chk-yes fas fa-circle" : "chk-no fas fa-circle")"></span>&emsp;@((Model.Active == true) ? "Yes" : "No")</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <br />
+                <br />
+                <div class="col-md-12 row">
+                    <div class="heading-spacer"></div>
+                    <div class="col-md-6"><div class="page-heading">Questionnaire results</div></div>
+                    <hr class="heading-ruler">
+                </div>
+
+                <table id="bipolar-table" class="table mental-health-table">
+                    <tr>
+                        <td style="width: 6%; text-align:center!important">Q1</td>
+                        <td style="width: 80%">
+                            Depressed mood: Sadness, hopeless, helpless, worthless
+                        </td>
+                        <td style="width: 50%">
+                            <span class="@(Model.Depression.ToLower() == "absent" ? "chk-absent fas fa-circle" : Model.Depression.ToLower() == "mild" ? "chk-mild fas fa-circle" : Model.Depression.ToLower() == "moderate" ? "chk-moderate fas fa-circle" : Model.Depression.ToLower() == "severe" ? "chk-severe fas fa-circle" : "chk-followup fas fa-circle")"></span>
+                            &emsp;@Html.DisplayName(Model.Depression)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 6%; text-align:center!important">Q2</td>
+                        <td style="width: 80%">
+                            Insomnia (reduction in total sleep time)
+                        </td>
+                        <td style="width: 50%">
+                            <span class="@(Model.Insomnia.ToLower() == "absent" ? "chk-absent fas fa-circle" : Model.Insomnia.ToLower() == "mild" ? "chk-mild fas fa-circle" : Model.Insomnia.ToLower() == "moderate" ? "chk-moderate fas fa-circle" : Model.Insomnia.ToLower() == "severe" ? "chk-severe fas fa-circle" : "chk-followup fas fa-circle")"></span>
+                            &emsp;@Html.DisplayName(Model.Insomnia)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 6%; text-align:center!important">Q3</td>
+                        <td style="width: 80%">
+                            Loss of appetite
+                        </td>
+                        <td style="width: 50%">
+                            <span class="@(Model.Appetite.ToLower() == "absent" ? "chk-absent fas fa-circle" : Model.Appetite.ToLower() == "mild" ? "chk-mild fas fa-circle" : Model.Appetite.ToLower() == "moderate" ? "chk-moderate fas fa-circle" : Model.Appetite.ToLower() == "severe" ? "chk-severe fas fa-circle" : "chk-followup fas fa-circle")"></span>
+                            &emsp;@Html.DisplayName(Model.Appetite)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 6%; text-align:center!important">Q4</td>
+                        <td style="width: 80%">
+                            Reduced social engagement
+                        </td>
+                        <td style="width: 50%">
+                            <span class="@(Model.SocialEngagement.ToLower() == "absent" ? "chk-absent fas fa-circle" : Model.SocialEngagement.ToLower() == "mild" ? "chk-mild fas fa-circle" : Model.SocialEngagement.ToLower() == "moderate" ? "chk-moderate fas fa-circle" : Model.SocialEngagement.ToLower() == "severe" ? "chk-severe fas fa-circle" : "chk-followup fas fa-circle")"></span>
+                            &emsp;@Html.DisplayName(Model.SocialEngagement)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 6%; text-align:center!important">Q5</td>
+                        <td style="width: 80%">
+                            Reduced energy and activity
+                        </td>
+                        <td style="width: 50%">
+                            <span class="@(Model.Activity.ToLower() == "absent" ? "chk-absent fas fa-circle" : Model.Activity.ToLower() == "mild" ? "chk-mild fas fa-circle" : Model.Activity.ToLower() == "moderate" ? "chk-moderate fas fa-circle" : Model.Activity.ToLower() == "severe" ? "chk-severe fas fa-circle" : "chk-followup fas fa-circle")"></span>
+                            &emsp;@Html.DisplayName(Model.Activity)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 6%; text-align:center!important">Q6</td>
+                        <td style="width: 80%">
+                            Reduced motivation
+                        </td>
+                        <td style="width: 50%">
+                            <span class="@(Model.Motivation.ToLower() == "absent" ? "chk-absent fas fa-circle" : Model.Motivation.ToLower() == "mild" ? "chk-mild fas fa-circle" : Model.Motivation.ToLower() == "moderate" ? "chk-moderate fas fa-circle" : Model.Motivation.ToLower() == "severe" ? "chk-severe fas fa-circle" : "chk-followup fas fa-circle")"></span>
+                            &emsp;@Html.DisplayName(Model.Motivation)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 6%; text-align:center!important">Q7</td>
+                        <td style="width: 80%">
+                            Impaired concentration and memory
+                        </td>
+                        <td style="width: 50%">
+                            <span class="@(Model.Concentration.ToLower() == "absent" ? "chk-absent fas fa-circle" : Model.Concentration.ToLower() == "mild" ? "chk-mild fas fa-circle" : Model.Concentration.ToLower() == "moderate" ? "chk-moderate fas fa-circle" : Model.Concentration.ToLower() == "severe" ? "chk-severe fas fa-circle" : "chk-followup fas fa-circle")"></span>
+                            &emsp;@Html.DisplayName(Model.Concentration)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 6%; text-align:center!important">Q8</td>
+                        <td style="width: 80%">
+                            Anxiety
+                        </td>
+                        <td style="width: 50%">
+                            <span class="@(Model.Anxiety.ToLower() == "absent" ? "chk-absent fas fa-circle" : Model.Anxiety.ToLower() == "mild" ? "chk-mild fas fa-circle" : Model.Anxiety.ToLower() == "moderate" ? "chk-moderate fas fa-circle" : Model.Anxiety.ToLower() == "severe" ? "chk-severe fas fa-circle" : "chk-followup fas fa-circle")"></span>
+                            &emsp;@Html.DisplayName(Model.Anxiety)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 6%; text-align:center!important">Q9</td>
+                        <td style="width: 80%">
+                            Reduced ability to experience pleasure in usual activities
+                        </td>
+                        <td style="width: 50%">
+                            <span class="@(Model.Pleasure.ToLower() == "absent" ? "chk-absent fas fa-circle" : Model.Pleasure.ToLower() == "mild" ? "chk-mild fas fa-circle" : Model.Pleasure.ToLower() == "moderate" ? "chk-moderate fas fa-circle" : Model.Pleasure.ToLower() == "severe" ? "chk-severe fas fa-circle" : "chk-followup fas fa-circle")"></span>
+                            &emsp;@Html.DisplayName(Model.Pleasure)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 6%; text-align:center!important">Q10</td>
+                        <td style="width: 80%">
+                            Reduced intensity or range of feelings or emotions
+                        </td>
+                        <td style="width: 50%">
+                            <span class="@(Model.Emotion.ToLower() == "absent" ? "chk-absent fas fa-circle" : Model.Emotion.ToLower() == "mild" ? "chk-mild fas fa-circle" : Model.Emotion.ToLower() == "moderate" ? "chk-moderate fas fa-circle" : Model.Emotion.ToLower() == "severe" ? "chk-severe fas fa-circle" : "chk-followup fas fa-circle")"></span>
+                            &emsp;@Html.DisplayName(Model.Emotion)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 6%; text-align:center!important">Q11</td>
+                        <td style="width: 80%">
+                            Subjective sense, or thoughts, of decreased self-value or self-worth
+                        </td>
+                        <td style="width: 50%">
+                            <span class="@(Model.Worthlessness.ToLower() == "absent" ? "chk-absent fas fa-circle" : Model.Worthlessness.ToLower() == "mild" ? "chk-mild fas fa-circle" : Model.Worthlessness.ToLower() == "moderate" ? "chk-moderate fas fa-circle" : Model.Worthlessness.ToLower() == "severe" ? "chk-severe fas fa-circle" : "chk-followup fas fa-circle")"></span>
+                            &emsp;@Html.DisplayName(Model.Worthlessness)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 6%; text-align:center!important">Q12</td>
+                        <td style="width: 80%">
+                            Sense of pessimism or gloom regarding the future, inability to cope, or sense of loss of control
+                        </td>
+                        <td style="width: 50%">
+                            <span class="@(Model.Helplessness.ToLower() == "absent" ? "chk-absent fas fa-circle" : Model.Helplessness.ToLower() == "mild" ? "chk-mild fas fa-circle" : Model.Helplessness.ToLower() == "moderate" ? "chk-moderate fas fa-circle" : Model.Helplessness.ToLower() == "severe" ? "chk-severe fas fa-circle" : "chk-followup fas fa-circle")"></span>
+                            &emsp;@Html.DisplayName(Model.Helplessness)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 6%; text-align:center!important">Q13</td>
+                        <td style="width: 80%">
+                            Thoughts or feelings that life is not worthwhile; thoughts of death or suicide
+                        </td>
+                        <td style="width: 50%">
+                            <span class="@(Model.Suicidal.ToLower() == "absent" ? "chk-absent fas fa-circle" : Model.Suicidal.ToLower() == "mild" ? "chk-mild fas fa-circle" : Model.Suicidal.ToLower() == "moderate" ? "chk-moderate fas fa-circle" : Model.Suicidal.ToLower() == "severe" ? "chk-severe fas fa-circle" : "chk-followup fas fa-circle")"></span>
+                            &emsp;@Html.DisplayName(Model.Suicidal)
+                        </td>
+                    </tr>
+                    <tr id="suicide-cmt">
+                        <td style="width: 5%; text-align:center!important">Q9</td>
+                        <td style="width: 80%">
+                            What did you think you might do? Did you actually try?
+                        </td>
+                        <td style="width: 50%">
+                            @if (Model.SuicidalCMT != null)
+                            {
+                                <span class="@(Model.Suicidal.ToLower() == "absent" ? "chk-absent fas fa-circle" : Model.Suicidal.ToLower() == "mild" ? "chk-mild fas fa-circle" : Model.Suicidal.ToLower() == "moderate" ? "chk-moderate fas fa-circle" : Model.Suicidal.ToLower() == "severe" ? "chk-severe fas fa-circle" : "chk-followup fas fa-circle")">&emsp;@Html.DisplayName(Model.SuicidalCMT)</span>
+
+                            }
+                            else
+                            {
+                                <span class="@(Model.Suicidal.ToLower() == "absent" ? "chk-absent fas fa-circle" : Model.Suicidal.ToLower() == "mild" ? "chk-mild fas fa-circle" : Model.Suicidal.ToLower() == "moderate" ? "chk-moderate fas fa-circle" : Model.Suicidal.ToLower() == "severe" ? "chk-severe fas fa-circle" : "chk-followup fas fa-circle")">&emsp;@Html.DisplayName(" - ")</span>
+                            }
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 6%; text-align:center!important">Q14</td>
+                        <td style="width: 80%">
+                            Subjective sense of self blame, failure, or remorse for real or imagined past errors
+                        </td>
+                        <td style="width: 50%">
+                            <span class="@(Model.Guilt.ToLower() == "absent" ? "chk-absent fas fa-circle" : Model.Guilt.ToLower() == "mild" ? "chk-mild fas fa-circle" : Model.Guilt.ToLower() == "moderate" ? "chk-moderate fas fa-circle" : Model.Guilt.ToLower() == "severe" ? "chk-severe fas fa-circle" : "chk-followup fas fa-circle")"></span>
+                            &emsp;@Html.DisplayName(Model.Guilt)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 6%; text-align:center!important">Q15</td>
+                        <td style="width: 80%">
+                            Presence of overvalued ideas, delusions, or hallucinations
+                        </td>
+                        <td style="width: 50%">
+                            <span class="@(Model.Psychotic.ToLower() == "absent" ? "chk-absent fas fa-circle" : Model.Psychotic.ToLower() == "mild" ? "chk-mild fas fa-circle" : Model.Psychotic.ToLower() == "moderate" ? "chk-moderate fas fa-circle" : Model.Psychotic.ToLower() == "severe" ? "chk-severe fas fa-circle" : "chk-followup fas fa-circle")"></span>
+                            &emsp;@Html.DisplayName(Model.Psychotic)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 6%; text-align:center!important">Q16</td>
+                        <td style="width: 80%">
+                            Reports uncharacteristic subjective irritability, short fuse, easily angered, manifested by verbal or physical outbursts
+                        </td>
+                        <td style="width: 50%">
+                            <span class="@(Model.Irritability.ToLower() == "absent" ? "chk-absent fas fa-circle" : Model.Irritability.ToLower() == "mild" ? "chk-mild fas fa-circle" : Model.Irritability.ToLower() == "moderate" ? "chk-moderate fas fa-circle" : Model.Irritability.ToLower() == "severe" ? "chk-severe fas fa-circle" : "chk-followup fas fa-circle")"></span>
+                            &emsp;@Html.DisplayName(Model.Irritability)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 6%; text-align:center!important">Q17</td>
+                        <td style="width: 80%">
+                            Reports uncharacteristic subjective irritability, short fuse, easily angered, manifested by verbal or physical outbursts
+                        </td>
+                        <td style="width: 50%">
+                            <span class="@(Model.Lability.ToLower() == "absent" ? "chk-absent fas fa-circle" : Model.Lability.ToLower() == "mild" ? "chk-mild fas fa-circle" : Model.Lability.ToLower() == "moderate" ? "chk-moderate fas fa-circle" : Model.Lability.ToLower() == "severe" ? "chk-severe fas fa-circle" : "chk-followup fas fa-circle")"></span>
+                            &emsp;@Html.DisplayName(Model.Lability)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 6%; text-align:center!important">Q18</td>
+                        <td style="width: 80%">
+                            Subjective reports and objective evidence of increased motor drive and motor activity
+                        </td>
+                        <td style="width: 50%">
+                            <span class="@(Model.IncMotorDrive.ToLower() == "absent" ? "chk-absent fas fa-circle" : Model.IncMotorDrive.ToLower() == "mild" ? "chk-mild fas fa-circle" : Model.IncMotorDrive.ToLower() == "moderate" ? "chk-moderate fas fa-circle" : Model.IncMotorDrive.ToLower() == "severe" ? "chk-severe fas fa-circle" : "chk-followup fas fa-circle")"></span>
+                            &emsp;@Html.DisplayName(Model.IncMotorDrive)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 6%; text-align:center!important">Q19</td>
+                        <td style="width: 80%">
+                            Increase in either the rate or quantity of speech, or observed flight of ideas
+                        </td>
+                        <td style="width: 50%">
+                            <span class="@(Model.IncSpeech.ToLower() == "absent" ? "chk-absent fas fa-circle" : Model.IncSpeech.ToLower() == "mild" ? "chk-mild fas fa-circle" : Model.IncSpeech.ToLower() == "moderate" ? "chk-moderate fas fa-circle" : Model.IncSpeech.ToLower() == "severe" ? "chk-severe fas fa-circle" : "chk-followup fas fa-circle")"></span>
+                            &emsp;@Html.DisplayName(Model.IncSpeech)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 6%; text-align:center!important">Q20</td>
+                        <td style="width: 80%">
+                            Restlessness or agitation
+                        </td>
+                        <td style="width: 50%">
+                            <span class="@(Model.Agitation.ToLower() == "absent" ? "chk-absent fas fa-circle" : Model.Agitation.ToLower() == "mild" ? "chk-mild fas fa-circle" : Model.Agitation.ToLower() == "moderate" ? "chk-moderate fas fa-circle" : Model.Agitation.ToLower() == "severe" ? "chk-severe fas fa-circle" : "chk-followup fas fa-circle")"></span>
+                            &emsp;@Html.DisplayName(Model.Agitation)
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="text-center">
+                <input id="edit-other" value="Edit" class="btn edit-button" onclick="location.href = '@Url.Action("MH_Bipolar_Edit", "Member", new { id = Model.Id, pro = Context.Request.Query["pro"] })'; editKey();" style="width: 15%!important" /><br />
+                <input value="Back" class="btn reset-button go_back" onclick="backKey()" style="width: 15%!important" />
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <script>
+        function backKey() {
+            localStorage.clear();
+            localStorage.removeItem("details_bipolar");
+            localStorage.setItem("back_bipolar", Date.now());
+        }
+        function editKey() {
+            localStorage.clear();
+            localStorage.removeItem("details_bipolar");
+            localStorage.setItem("edit_bipolar", Date.now());
+        }
+
+    </script>
+}

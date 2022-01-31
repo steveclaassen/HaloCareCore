@@ -1,0 +1,497 @@
+﻿@model IEnumerable<HaloCareCore.Models.Script.Products>
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<javascript>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <script src="https://www.jqueryscript.net/demo/jQuery-Plugin-For-Sortable-Bootstrap-Tables-Bootstrap-Sortable/Scripts/bootstrap-sortable.js"></script>
+</javascript>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .error-alert {
+        width: 100%;
+        margin: 0 auto;
+        background-color: rgba(217, 83, 79, 0.1);
+        padding: 10px;
+        border-left-color: #d9534f !important;
+        border: 1px solid transparent;
+        border-left-width: 5px;
+        border-radius: 3px;
+        margin: 0 auto;
+        font-family: 'Open Sans', sans-serif;
+        font-size: 12px;
+        margin-top: -10px;
+        margin-bottom: 20px;
+    }
+
+        .error-alert span {
+            color: #d9534f;
+            text-align: center;
+        }
+
+    .field-validation-error:before {
+        font-family: FontAwesome;
+        content: "\f06a\00a0";
+        animation: pulse 2s ease infinite;
+    }
+</style>
+
+@*<style>
+        .active{
+            font-size: 0;
+            width : 50px;
+            height: 50px;
+            border-radius:50px;
+            border-left-color:transparent;
+            animation: rotate 1.4s ease 0.5s infinite;
+        }
+
+      @@keyframes rotate{
+                 0%{
+                       transform: rotate(360deg);
+                   }
+             }
+    </style>*@
+
+<style>
+    .loader {
+        border: 16px solid #f3f3f3;
+        border-radius: 50%;
+        border-top: 16px solid #0081b3;
+        width: 80px;
+        height: auto;
+        -webkit-animation: spin 2s linear infinite; /* Safari */
+        animation: spin 2s linear infinite;
+    }
+
+    /* Safari */
+    @@-webkit-keyframes spin {
+        0% {
+            -webkit-transform: rotate(0deg);
+        }
+
+        100% {
+            -webkit-transform: rotate(360deg);
+        }
+    }
+
+    @@keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    #panel {
+        display: none;
+    }
+</style>
+
+@*<style type="text/css">
+
+        input:required:invalid, input:focus:invalid {
+            background-color: red!important;
+            background-position: right top;
+        }
+
+        input:required:valid {
+            background-color: green!important;
+            background-position: right top;
+        }
+    </style>*@
+
+<style>
+    .table td, .table th {
+        font-size: 10px;
+    }
+</style>
+
+
+<body>
+
+    <div class="fullScreen_container zero-padding">
+        <!--pageHeader-->
+        <nav id="global-nav" class="nav">
+            <div class="pull-left title">
+                <h1 class="site-title_patientProfile">
+                    <span><i class="fab fa-product-hunt"></i></span>&emsp; Products
+                </h1>
+            </div>
+            <div class="pull-right title">
+                <h1 class="site-title_userID pull-right">
+                    <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+                </h1>
+                <h1 class="site-title_userID pull-right">
+                    @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                    {
+                        <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                    }
+                </h1>
+                <h1 class="site-waffleIcon pull-right">
+                    <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+                </h1>
+            </div>
+        </nav>
+        <!--breadCrumbs-->
+        <ul class="breadcrumbs_fullScreens">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+            <li><a href="@Url.Action("Index", "Administration", new {})">Settings</a></li>
+            <li><a href="#">Products</a></li>
+        </ul>
+        <!--navCollection-->
+        <div class="navCollection_fullScreens">
+            @Html.Partial("_navCollection")
+        </div>
+        <div style="margin-bottom: 1%"></div>
+
+        @using (Html.BeginForm())
+        {
+            <div class="row productContentBlock">
+
+                <h4 class="tableHeading">Product search</h4>
+                <hr class="fancyruler">
+                <br />
+                <br />
+                <div class="form-group">
+                    <div class="form-horizontal createForm">
+
+                        <div class="form-group">
+                            @Html.Label(null,"NAPPI code", htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-10">
+                                @Html.Editor("nappi", new { htmlAttributes = new { @class = "allergyTextbox", @placeholder = "example: 000463822", autocomplete = "off" } })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.Label(null,"Description", htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-10">
+                                @Html.Editor("productname", new { htmlAttributes = new { @class = "allergyTextbox", @placeholder = "example: Needle BD 29g", autocomplete = "off" } })
+                            </div>
+                        </div>
+
+                    </div>
+                    <br />
+                    <br />
+
+                    <div class="form-group">
+                        <div class="actionButton" style="margin-left: 43.5%; margin-bottom: -1.5%">
+                            <input type="submit" value="Search" class="btn questionnaireButton" style="width: 25%!important" />
+                        </div>
+                    </div>
+
+                    <br />
+                </div>
+            </div>
+        }
+
+        <div style="margin-top: 0.5%"></div>
+
+        <div class="row productContentBlock">
+            <!--------------------------------------------------------------------------- new/search -------------------------------------------------------------------------->
+            <div class="col-md-12 row">
+                <div class="col-md-6">
+                    <h4 class="subHeading">
+                        Product list
+                        @*<a class="create-new" href="@Url.Action("Create", "Product", new { })" style="font-size: 14px">Create new <span><i class="fa fa-plus-circle" style="font-size: 12px"></i></span></a>*@
+
+                    </h4>
+                </div>
+                <!--------------------------------------------------------------------------- jq-search -------------------------------------------------------------------------->
+                <div class="col-md-6">
+                    <div class="input-wrapper-new-search">
+                        <input type="text" class="form-control-new-search" id="search" onkeyup="myFunction()" placeholder="Search..." />
+                    </div>
+                </div>
+            </div>
+            <div id="panel" class="loader"></div>
+            <table class="table settings-table sortable" id="productTable" style="width: 100%; height:auto;">
+                <thead>
+                    <tr>
+
+                        <th style="text-align: left !important;width: 130px;">@Html.DisplayNameFor(model => model.nappiCode) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                        <th style="text-align: left!important;width: 180px;">@Html.DisplayNameFor(model => model.productName) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                        <th style="text-align: left !important;width: 250px;">@Html.DisplayNameFor(model => model.therapeuticClass6Desc) </th>
+                        <th style="text-align: left!important; width: 100px;">@Html.DisplayNameFor(model => model.productSchedule) </th>
+                        <th style="text-align: left!important;width: 100px;">@Html.DisplayNameFor(model => model.strengthUOM) </th>
+                        <th style="text-align: center!important; width: 100px;">@Html.DisplayNameFor(model => model.Active)</i></th>
+                        <th style="text-align: center!important; width: 100px">@Html.DisplayName("Action") <i class="fa fa-fw"></i></th>
+                    </tr>
+                </thead>
+                @if (Model != null)
+                {
+                    if (Model.Count() == 0)
+                    {
+                        <tr><td colspan="10" style="text-align: center!important; color: rgba(128, 128, 128, 0.50)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="color: rgba(128, 128, 128, 0.50)"></i></span> no records found</td></tr>
+                    }
+                    else
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tbody id="product-search" class="tooltip-div">
+                                <tr class="dname" data-assigned-id="@item.nappiCode" style="text-indent: 5px">
+                                    <td class="text-left"><span class="@(item.Active == true? "" : "active-false") ">@Html.DisplayFor(Modelitem => item.nappiCode)</span></td>
+                                    <td class="text-left"><span class="@(item.Active == true? "" : "active-false") ">@Html.DisplayFor(Modelitem => item.productName)</span></td>
+                                    <td class="text-left"><span class="@(item.Active == true? "" : "active-false") ">@Html.DisplayFor(Modelitem => item.therapeuticClass6Desc)</span></td>
+                                    <td class="text-left"><span class="@(item.Active == true? "" : "active-false") ">@Html.DisplayFor(Modelitem => item.productSchedule)</span></td>
+                                    <td class="text-left"><span class="@(item.Active == true? "" : "active-false") ">@Html.DisplayFor(Modelitem => item.strengthUOM)</span></td>
+                                    <td class="text-center"><span class="@(item.Active == true ? "chk-yes fas fa-circle" : "chk-no fas fa-circle")"></span></td>
+                                    <td class="text-center">
+                                        <input type="submit" data-assigned-id="@item.nappiCode" class="link-button" value="Update" onclick="onclick=Isync(this)" />/
+                                        <input type="submit" class="link-button" value="Details" onclick="location.href='@Url.Action("Details", "Product", new { nappi = item.nappiCode })'" />
+                                    </td>
+
+                                </tr>
+                            </tbody>
+                        }
+                    }
+                }
+            </table>
+            <div class="form-group">
+                <div class="actionButton" style="margin-left: 46.5%; margin-bottom: 0.5%; margin-top: 10%">
+                    <input value="Back" class="btn buttonRound_formBack " onclick="MainbackBtn();" style="width: 15%!important" />
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+
+<script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.0.1/css/toastr.css" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.0.1/js/toastr.js"></script>
+
+
+
+
+@section scripts{
+    <script src="https://code.jquery.com/jquery-2.2.4.js" integrity="sha256-iT6Q9iMJYuQiMWNd9lDyBUStIq/8PuOW33aOqmvFpqI=" crossorigin="anonymous"></script>
+    <script src="~/bundles/jqueryval"></script>
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('[data-toggle="tooltip"]').tooltip({
+                placement: 'top'
+            });
+        });
+    </script>
+
+    <script>
+        // product-list-search
+        $(document).ready(function () {
+            $("#search").on("keyup", function () {
+                var value = $(this).val().toLowerCase();
+                $("#product-search tr").filter(function () {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+            });
+        });
+
+        // go-back
+         function MainbackBtn() {
+            window.location.href = '@Url.Action("Index", "Administration")';
+        }
+
+    </script>
+
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#productTable').DataTable({
+                "iDisplayLength": 50,
+                "lengthMenu": [10, 25, 50, 100, 200],
+                "searching": false,
+                "ordering": false,
+                "info": true,
+
+
+            });
+
+            var table = $('#productTable').dataTable();
+
+        });
+    </script>
+
+    <script>
+        var $rows = $('#productTable tr');
+        $('#search').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $rows.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+
+        /*tableSorting*/
+        function searchTable(n) {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("productTable");
+            switching = true;
+            dir = "asc";
+
+            while (switching) {
+                switching = false;
+                rows = table.getElementsByTagName("TR");
+
+                for (i = 1; i < ({
+
+                    shouldSwitch = false;
+
+                    x = rows[i].getElementsByTagName("TD")[n];
+                    y = rows[i + 1].getElementsByTagName("TD")[n];
+
+                    if(dir == "asc") {
+                        if(x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                    //if so, mark as a switch and break the loop:
+                    shouldSwitch = true;
+                    break;
+                }
+            } else if (dir == "desc") {
+                if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase({
+                    //if so, mark as a switch and break the loop:
+                    shouldSwitch = true;
+                    break;
+                }
+                            }
+        }
+        if (shouldSwitch) {
+            /*If a switch has been marked, make the switch
+            and mark that a switch has been done:*/
+            rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+            switching = true;
+            //Each time a switch is done, increase this count by 1:
+            switchcount++;
+        } else {
+            /*If no switching has been done AND the direction is "asc",
+            set the direction to "desc" and run the while loop again.*/
+            if (switchcount == 0 && dir == "asc") {
+                dir = "desc";
+                switching = true;
+            }
+        }
+                    }
+                }
+
+    </script>
+
+    <script type="text/javascript">
+
+        function Isync(elem) {
+            document.getElementsByClassName("loader")[0].style.display = "block";
+
+            var nappiCode = $(elem).data('assigned-id');
+            var data = { nappiCode: nappiCode };
+            var nappiCode = JSON.stringify(data);
+            $.ajax({
+                type: "POST",
+                url: "Product/Edit",
+                data: nappiCode,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: OnSucces,
+                error: OnError
+            });
+            function OnSucces(response) {
+
+                var id = $(elem).data('assigned-id');
+                var active = Boolean(response.Active);
+
+                $('table tr').each(function (index, el) {
+                    var $el = $(el);
+
+                    for (var i = 0; i <= $("#productTable > tbody > tr").length; i++) {
+                        // $(this).find('td').eq(0).text()
+
+                        response.modifiedDate = response.modifiedDate.replace(/[{()}]/g, '');
+                        response.createdDate = response.createdDate.replace(/[{()}]/g, '');
+
+                        var curday = function () {
+                            today = new Date();
+                            var dd = today.getDate();
+                            var mm = today.getMonth() + 1; //As January is 0.
+                            var yyyy = today.getFullYear();
+
+                            if (dd < 10) dd = '0' + dd;
+                            if (mm < 10) mm = '0' + mm;
+                            return (mm + "/" + dd + "/" + yyyy);
+                        };
+
+                        var today = new Date();
+                        var dd = String(today.getDate()).padStart(2, '0');
+                        var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+                        var yyyy = today.getFullYear();
+
+                        today = mm + '-' + dd + '-' + yyyy;
+
+
+
+
+                        if ($el.find('td').eq(0).text() === id.toString()) {
+
+                            if (active == true) {
+                                $el.find('td:nth-child(2)').text(response.productName);
+                                $el.find('td:nth-child(3)').text(response.therapeuticClass6Desc);
+                                $el.find('td:nth-child(4)').text(response.therapeuticClass12);
+                                $el.find('td:nth-child(5)').text(response.productSchedule);
+                                $el.find('td:nth-child(6)').text(response.strengthUOM);
+                                //$el.find('td:nth-child(7)').text(today);
+                                $el.find('td:nth-child(8) {chk - yes fas fa-circle}').text(active);
+                            } else {
+                                $el.find('td:nth-child(2) {active-false}').text(response.productName);
+                                $el.find('td:nth-child(3) {active - false}').text(response.therapeuticClass6Desc);
+                                $el.find('td:nth-child(4) {active - false}').text(response.therapeuticClass12);
+                                $el.find('td:nth-child(5) {active - false}').text(response.productSchedule);
+                                $el.find('td:nth-child(6) {active - false}').text(response.strengthUOM);
+                                //$el.find('td:nth-child(7)').text(today);
+                                $el.find('td:nth-child(8) {chk - no fas fa-circle}').text(active);
+                            }
+
+
+
+                        }
+                        document.getElementById("panel").style.display = "none";
+
+                    }
+
+                });
+
+                toastr.options.positionClass = 'toast-bottom-right';
+                toastr.options.timeOut = 2000;
+                toastr.success("Product No");
+                $(".textMessage_tabBox").val("");
+            }
+
+
+        }
+        function OnError(response) {
+            alert("hh");
+        }
+
+
+
+
+
+    </script>
+
+
+
+}
+
+
+
+
+
+
+
+

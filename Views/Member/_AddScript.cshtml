@@ -1,0 +1,380 @@
+﻿@model HaloCareCore.Models.ScriptCreationViewModel
+@{
+    Layout = "~/Views/Shared/_LayoutModal.cshtml";
+}
+
+<style>
+    .contentBlock_modal {
+        width: 85% !important;
+        background-color: #fff;
+        border: 1px solid #ddd;
+        box-shadow: 2px 2px 1px 0px rgba(0,0,0,0.38);
+        position: relative;
+        margin: auto;
+        display: block;
+        padding: 5px;
+        border-radius: 5px;
+        margin-top: 0% !important;
+        z-index: 10 !important;
+    }
+
+    .assignmentModal_AddScript {
+        width: 85% !important;
+        background-color: #fff;
+        border: none;
+        box-shadow: 2px 2px 1px 0px rgba(0,0,0,0.38);
+        position: relative;
+        margin: auto;
+        display: block;
+        padding: 0px;
+        border-radius: 5px;
+        margin-top: 0% !important;
+        z-index: 100 !important;
+    }
+
+    .fullWidth_Modal {
+        max-width: 1140px !important;
+        width: 1140px !important;
+        margin: auto;
+        margin-bottom: 2% !important;
+        font-size: 10px;
+        margin-left: 0% !important;
+    }
+
+    .scriptProduct_Table tr td {
+        background-color: transparent !important
+    }
+
+    .scriptProduct_Table tr th label {
+        font-weight: bold !important;
+        font-size: 11px !important;
+        font-family: 'Century Gothic';
+    }
+
+    .infoBox_scriptModal {
+        display: block;
+        width: 90%;
+        height: 34px;
+        padding: 6px 6px;
+        line-height: 1.428571429;
+        color: #003366;
+        vertical-align: middle;
+        border: 1px solid #f4f4f4;
+        border-radius: 4px;
+        margin-left: 2%;
+        margin-top: -1%;
+        -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+        box-shadow: 1px 1px 1px 0px rgba(0,0,0,0.20);
+        -webkit-transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+        transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+        max-width: 480px !important;
+        outline: none !important;
+        font-size: 100%;
+        font-weight: 100;
+        margin-bottom: -5%;
+        position: relative;
+        margin-right: 5%;
+    }
+
+
+
+        .infoBox_scriptModal:hover {
+            -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+            box-shadow: 1px 1px 1px 1px rgba(0,0,0,0.30);
+            -webkit-transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+            transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+        }
+
+        .infoBox_scriptModal:focus {
+            -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+            box-shadow: 1px 1px 1px 1px rgba(0,0,0,0.30);
+            -webkit-transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+            transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+        }
+</style>
+
+<div class="assignmentModal_AddScript">
+
+    @using (Ajax.BeginForm("_AddScriptAjax", "Member", new AjaxOptions { OnSuccess = "OnSuccess", OnFailure = "OnFailure", }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        @Html.HiddenFor(model => model.script.dependentID)
+        @Html.HiddenFor(model => model.script.scriptID)
+        @Html.Hidden("taskId", (object)ViewBag.task)
+        @Html.Hidden("id", (object)ViewBag.id)
+
+        <div class="form-horizontal editForm">
+            <div class="modal-header modal-header-primary">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true" id="assignmentModalClose">×</button>
+                <h2 class="modalHeading">Add script</h2>
+            </div>
+            <br />
+            <br />
+            <div style="margin-left: 20%">
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.script.effectiveDate, htmlAttributes: new { @class = "control-label col-md-2 drop10" })
+                    <div class="col-md-6" id="scriptSearch">
+                        @Html.EditorFor(model => model.script.effectiveDate, new { htmlAttributes = new { @class = "infoBox_scriptAdd datepicker",min="1900-01-01" } })
+                        @Html.ValidationMessageFor(model => model.script.effectiveDate, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.script.repeats, htmlAttributes: new { @class = "control-label col-md-2 drop10" })
+                    <div class="col-md-6" id="scriptSearch">
+                        @Html.EditorFor(model => model.script.repeats, new { htmlAttributes = new { @class = "infoBox_scriptAdd" } })
+                        @Html.ValidationMessageFor(model => model.script.repeats, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.Label(null,"Doctor last name", htmlAttributes: new { @class = "control-label col-md-2 drop10" })
+                    <div class="col-md-6" id="scriptSearch">
+                        @Html.EditorFor(model => model.doctor.doctor.drLastName, new { htmlAttributes = new { @class = "infoBox_scriptAdd" } })
+                        @Html.ValidationMessageFor(model => model.doctor.doctor.drLastName, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.script.practiceNo, htmlAttributes: new { @class = "control-label col-md-2 drop10" })
+                    <div class="col-md-6" id="scriptSearch">
+                        @Html.EditorFor(model => model.script.practiceNo, new { htmlAttributes = new { @class = "infoBox_scriptAdd" } })
+                        @Html.ValidationMessageFor(model => model.script.practiceNo, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group"></div>
+            </div>
+
+
+            <div class="col-md-12">
+
+                <div style="margin-bottom: 2%"></div>
+
+                <div id="theTable" class="row">
+                    @*@Html.Action("_ScriptItem", "Member", new { scriptID = Model.script.scriptID })*@
+                </div>
+                <div id="addscriptbutton" class="form-group">
+                    <div class="actionButton" style="margin-top: 1%!important">
+                        <input type="submit" value="Create Script" class="btn newEnquiry" style="width: 10%; margin-left: 42%!important; font-size: 11px" />
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    }
+
+    <!---->
+    <div id="additem" class="row" style="display:none;">
+        @using (Ajax.BeginForm("_AddScriptItemAjax", "Member", new AjaxOptions
+        {
+            OnSuccess = "OnSuccessItem",
+            OnFailure = "OnFailure",
+        }))
+
+        {
+            @Html.AntiForgeryToken()
+            @Html.Hidden("scriptsID")
+            <div class="form-horizontal editMember">
+                <table border="0" class="col-md-12 table scriptProduct_Table" cellpadding="0" cellspacing="0" style="border-top: none!important">
+                    <tr>
+                        <th>@Html.Label(null,"Product search", htmlAttributes: new { @class = "control-label editMember" })</th>
+                        <th>@Html.Label(null,"Product name", htmlAttributes: new { @class = "control-label" })</th>
+                        <th>@Html.LabelFor(model => model.item.directions, htmlAttributes: new { @class = "control-label" })</th>
+                        <th>@Html.LabelFor(model => model.item.quantity, htmlAttributes: new { @class = "control-label" })</th>
+                        <th>@Html.LabelFor(model => model.item.icd10code, htmlAttributes: new { @class = "control-label" })</th>
+                    </tr>
+                    <tr>
+                        <td>@Html.TextBox("produName", null, new { @class = "infoBox_scriptModal", @onchange = "FillProduct()" })</td>
+                        <td>
+                            @Html.DropDownList("prodctName", new SelectList(Enumerable.Empty<SelectListItem>(), "nappiCode", "productName"), "**Select**", htmlAttributes: new { @class = "infoBox_scriptModal" })
+                        </td>
+                        <td>
+                            @Html.EditorFor(model => model.item.directions, new { htmlAttributes = new { @class = "infoBox_scriptModal" } })
+                            @Html.ValidationMessageFor(model => model.item.directions, "", new { @class = "text-danger" })
+                        </td>
+                        <td>
+                            @Html.EditorFor(model => model.item.quantity, new { htmlAttributes = new { @class = "infoBox_scriptModal", @type = "number", @min = "0" } })
+                            @Html.ValidationMessageFor(model => model.item.quantity, "", new { @class = "text-danger" })
+                        </td>
+                        <td>@Html.DropDownList("icd10", null, "**Select**", htmlAttributes: new { @class = "infoBox_scriptModal" })</td>
+                    </tr>
+                </table>
+
+                <br />
+                <br />
+                <div class="modalFooter_popup">
+                    <div class="col-md-offset-2 col-md-10">
+                        <input type="submit" value="Add" class="btn buttonRound_formCreate" style="width: 15%!important; margin-left: 0.2%!important" />
+                        <button type="button" class="btn buttonRound_scriptCancel" data-dismiss="modal" style="width: 15%!important;">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="form-group">
+        <div class="actionButton" style="margin-top: 0%!important">
+            <input type="submit" data-dismiss="modal" value="Complete" class="btn buttonRound_formCreate" style="width: 10%; margin-left: 43%!important; font-size: 11px; padding: 3px" />
+        </div>
+    </div>
+
+    <br style="margin-top: -5%!important" />
+</div>
+
+
+<script src="js/jquery.tablesorter.min.js"></script>
+<script src="~/Scripts/jquery-1.8.2.min.js"></script>
+<script src="~/Scripts/jquery.unobtrusive-ajax.js"></script>
+
+<!-- Search -->
+@section scripts{
+    <script>
+        function FillProduct() {
+            var stateId = $('#produName').val();
+            if ($('#produName').val().length >= 3) {
+                $.ajax({
+                    url: '/Member/FillProduct',
+                    type: "GET",
+                    dataType: "JSON",
+                    data: { prodName: stateId },
+                    success: function (options) {
+                        $("#prodctName").html(""); // clear before appending new list
+                        $.each(options, function (i, option) {
+                            $("#prodctName").append(
+                                $('<option></option>').val(option.nappiCode).html(option.productName));
+                        });
+                    }
+                });
+            }
+        }
+
+        function OnSuccess(response) {
+            var message = "script Id: " + response.scriptID;
+            $('#script_scriptID').val(response.scriptID);
+            $('#scriptsID').val(response.scriptID);
+            $("#additem").show();
+            $("#addscriptbutton").hide();
+            //alert(message);
+        }
+
+        function OnSuccessItem(response) {
+            var message = "script item: " + response.item.itemNo;
+            $("#theTable").load("/Member/_ScriptItem?scriptID=" + response.item.scriptID);
+            $('#prodctName').val("");
+            $('#produName').val("");
+            $('#item_directions').val("");
+            $('#item_quantity').val("");
+        }
+
+        function OnFailure(response) {
+            alert("Error occured");
+        }
+
+
+
+        var $rows = $('#table tr');
+        $('#search').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $rows.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+
+
+        function sortTable(n) {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("table");
+            switching = true;
+            dir = "asc";
+
+            while (switching) {
+                switching = false;
+                rows = table.getElementsByTagName("TR");
+
+                for (i = 1; i < (rows.length - 1); i++) {
+
+                    shouldSwitch = false;
+
+                    x = rows[i].getElementsByTagName("TD")[n];
+                    y = rows[i + 1].getElementsByTagName("TD")[n];
+
+                    if (dir == "asc") {
+                        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                            //if so, mark as a switch and break the loop:
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (dir == "desc") {
+                        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                            //if so, mark as a switch and break the loop:
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+                if (shouldSwitch) {
+                    /*If a switch has been marked, make the switch
+                    and mark that a switch has been done:*/
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                    //Each time a switch is done, increase this count by 1:
+                    switchcount++;
+                } else {
+                    /*If no switching has been done AND the direction is "asc",
+                    set the direction to "desc" and run the while loop again.*/
+                    if (switchcount == 0 && dir == "asc") {
+                        dir = "desc";
+                        switching = true;
+                    }
+                }
+            }
+        }
+
+        $(function () {
+            $('.go_back').click(function (e) {
+                e.preventDefault();
+                history.go(-1);
+            });
+        });
+
+        $(function () {
+            $('.Complete').click(function (e) {
+                e.preventDefault();
+                history.go(-1);
+            });
+        });
+
+        $(document).ready(function () {
+            $('#table').DataTable({
+                columnDefs: [{
+                    targets: [0],
+                    orderData: [0, 1]
+                }, {
+                    targets: [1],
+                    orderData: [1, 0]
+                }, {
+                    targets: [4],
+                    orderData: [4, 0]
+                }]
+            });
+        });
+
+        // Javascript to enable link to tab
+        var url = document.location.toString();
+        if (url.match('#')) {
+            $('.nav-tabs a[href="#' + url.split('#')[1] + '"]').tab('show');
+        }
+
+        // Change hash for page-reload
+        $('.nav-tabs a').on('shown.bs.tab', function (e) {
+            window.location.hash = e.target.hash;
+        })
+
+        $(".nav-tabs a").click(function () { });
+
+    </script>
+}

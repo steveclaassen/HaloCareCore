@@ -1,0 +1,238 @@
+﻿@model HaloCareCore.Models.Questionnaire.NutritionAndLifestyle
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "nutritionAndLifestyle_Create";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+
+
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .input-group-addon {
+        visibility: hidden;
+    }
+
+    textarea#generalComments {
+        display: block;
+        width: 370%;
+        max-width: 1500px !important;
+        height: 100px;
+        max-height: 250px;
+        padding: 6px 6px;
+        line-height: 1.428571429;
+        color: #003366;
+        vertical-align: middle;
+        border: 1px solid #f4f4f4;
+        background-color: transparent;
+        border-radius: 2px;
+        margin-left: -5%;
+        -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+        box-shadow: 1px 1px 1px 0px rgba(0,0,0,0.20);
+        -webkit-transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+        transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+        outline: none !important;
+        font-family: 'Century Gothic';
+        font-size: 100%;
+        font-weight: 200;
+        margin-top: -10%;
+    }
+
+    .field-validation-error:before {
+        font-family: FontAwesome;
+        content: "\f06a\00a0";
+        animation: pulse 2s ease infinite;
+    }
+</style>
+
+<link href="~/Content/css/select2.min.css" rel="stylesheet" />
+<script src="~/Scripts/select2.min.js"></script>
+
+<!--pageHeader-->
+<nav id="global-nav" class="nav">
+    <div class="pull-left title">
+        <h1 class="site-title_patientProfile">
+            <span><i class="fab fa-nutritionix"></i></span>&emsp; Nutrition and Lifestyle
+        </h1>
+    </div>
+    <div class="pull-right title">
+        <h1 class="site-title_userID pull-right">
+            <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+        </h1>
+        <h1 class="site-title_userID pull-right">
+            @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+            {
+                <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+            }
+        </h1>
+        <h1 class="site-waffleIcon pull-right">
+            <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+        </h1>
+    </div>
+</nav>
+
+<div class="dashboardContainer zero-padding">
+    <div class="patientDashboard_View">
+        <!--breadCrumbs-->
+        <ul class="breadcrumbs_patientDashboard">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+            <li><a class="go_back"> Care Plan</a></li>
+            <li><a href="#">Nutrition and Lifestyle</a></li>
+        </ul>
+        <!--Left navSlider -->
+        @Html.Partial("_navSlider_blank", new { })
+        <!--navCollection-->
+        <div class="navCollection_patientDashboard">
+            @Html.Partial("_navCollection")
+        </div>
+        <!--profileInformation-->
+        <div class="profileBar">
+            @Html.Action("_profileBar_edit", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })
+        </div>
+    </div>
+
+    <div class="profilebar-spacer-assignment"></div>
+
+    <div class="patientDashboard_container">
+
+        <h4 class="summaryHeading">Nutrition and Lifestyle</h4>
+        <hr class="fancyruler">
+        <br />
+        <br />
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+
+            <div class="form-horizontal createForm">
+
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                <div class="form-group">
+                    <div class="col-md-10">
+                        @Html.HiddenFor(model => model.dependentID, new { htmlAttributes = new { @class = "form-control-attachments" } })
+                        @Html.HiddenFor(model => model.programId, new { htmlAttributes = new { @class = "form-control-attachments" } })
+
+                    </div>
+                </div>
+
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.dietHistory, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.DropDownListFor(model => model.dietHistory, new List<SelectListItem>
+                       {
+                        new SelectListItem() { Text = "• YES", Value = "yes"},
+                        new SelectListItem() { Text = "• No", Value = "No"},
+                        new SelectListItem() { Text = "• N/A", Value = "N/A"},
+
+
+                        }, "Select", new { @class = "questionDrop", @id = "dietHistory", @style = "width: 400px; margin-left: 0.8%", @required = "required" })
+
+                        @Html.ValidationMessageFor(model => model.dietHistory, "", new { @class = "text-danger", @style = "font-size: 110%;margin-left: 1%" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.healthyEatingHabits, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.DropDownListFor(model => model.healthyEatingHabits, new List<SelectListItem>
+                       {
+                        new SelectListItem() { Text = "• YES", Value = "yes"},
+                        new SelectListItem() { Text = "• No", Value = "No"},
+                        new SelectListItem() { Text = "• N/A", Value = "N/A"},
+
+
+                        }, "Select", new { @class = "questionDrop", @id = "healthyEatingHabits", @style = "width: 400px; margin-left: 0.8%", @required = "required" })
+
+                        @Html.ValidationMessageFor(model => model.healthyEatingHabits, "", new { @class = "text-danger", @style = "font-size: 110%;margin-left: 1%" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.exerciseAndActivity, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.DropDownListFor(model => model.exerciseAndActivity, new List<SelectListItem>
+                       {
+                        new SelectListItem() { Text = "• YES", Value = "yes"},
+                        new SelectListItem() { Text = "• No", Value = "No"},
+                        new SelectListItem() { Text = "• N/A", Value = "N/A"},
+
+
+                        }, "Select", new { @class = "questionDrop", @id = "exerciseAndActivity", @style = "width: 400px; margin-left: 0.8%", @required = "required" })
+
+                        @Html.ValidationMessageFor(model => model.exerciseAndActivity, "", new { @class = "text-danger", @style = "font-size: 110%;margin-left: 1%" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.weightManagementAddressed, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.DropDownListFor(model => model.weightManagementAddressed, new List<SelectListItem>
+                       {
+                        new SelectListItem() { Text = "• YES", Value = "yes"},
+                        new SelectListItem() { Text = "• No", Value = "No"},
+                        new SelectListItem() { Text = "• N/A", Value = "N/A"},
+
+
+                        }, "Select", new { @class = "questionDrop", @id = "weightManagementAddressed", @style = "width: 400px; margin-left: 0.8%", @required = "required" })
+
+                        @Html.ValidationMessageFor(model => model.weightManagementAddressed, "", new { @class = "text-danger", @style = "font-size: 110%;margin-left: 1%" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.generalComments, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        <div class="checkbox">
+                            @Html.TextAreaFor(model => model.generalComments)
+                            @Html.ValidationMessageFor(model => model.generalComments, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+
+                    <div class="form-group">
+                        <div class="fixedBack" style="margin-left: 40%">
+                            <input value="Back" class="btn buttonRound_formBack go_back" onclick="backKey()" style="width: 15%!important" />
+                            <input type="submit" value="Save" class="btn buttonRound_formCreate" onclick="storageKey()" style="width: 15%" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/bundles/jqueryui"></script>
+    <style src="~/Content/themes/base/css" )
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.7.1/js/bootstrap-datepicker.min.js"></script>
+    <!-- general -->
+    <script>
+        //date-picker
+        $(function () {
+
+            $('.input-group.date').datepicker({
+                format: "dd M yyyy",
+                showButtonPanel: true,
+                autoclose: true,
+            });
+        });
+    </script>
+    <!-- local-storage-redirect -->
+    <script>
+        function backKey() {
+            localStorage.setItem("back_podiatry_diabetes", Date.now());
+        }
+        function storageKey() {
+            localStorage.setItem("create_podiatry_diabetes", Date.now());
+        }
+    </script>
+}
+

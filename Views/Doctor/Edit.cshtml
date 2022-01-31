@@ -1,0 +1,407 @@
+﻿@model HaloCareCore.Models.DoctorViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Edit";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .error-alert {
+        width: 100%;
+        margin: 0 auto;
+        background-color: rgba(217, 83, 79, 0.1);
+        padding: 10px;
+        border-left-color: #d9534f !important;
+        border: 1px solid transparent;
+        border-left-width: 5px;
+        border-radius: 3px;
+        margin: 0 auto;
+        font-family: 'Open Sans', sans-serif;
+        font-size: 12px;
+        margin: 0 0 5px 0;
+        margin-top: -10px;
+        margin-bottom: 20px;
+    }
+
+        .error-alert span {
+            color: #d9534f;
+            text-align: center;
+        }
+
+    .form-control-new {
+        display: block;
+        max-width: 800px !important;
+        width: 100%;
+        max-height: 100px;
+        height: 30px;
+        margin-top: -5px;
+        margin-left: 10px;
+        padding: 6px 6px;
+        line-height: 1.428571429;
+        color: #003366;
+        border-radius: 0px;
+        border: none;
+        border-bottom: 1px solid #efefef;
+        background-color: transparent !important;
+        font-family: 'Century Gothic' !important;
+    }
+
+        .form-control-new:hover {
+            transition: border-bottom ease-in-out 0.2s;
+            border-bottom: 1px solid #c4c4c4;
+        }
+
+        .form-control-new:focus {
+            border-bottom: 1px solid #c4c4c4;
+        }
+
+    .subject {
+        width: 10%;
+        text-indent: 10px !important;
+    }
+
+    .warning-alert {
+        color: #d9534f;
+    }
+</style>
+<javascript>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+    <script src="https://www.jqueryscript.net/demo/jQuery-Plugin-For-Sortable-Bootstrap-Tables-Bootstrap-Sortable/Scripts/bootstrap-sortable.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/js/standalone/selectize.js"></script>
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.default.css">
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet" />
+    <link href='http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.min.css' rel='stylesheet' type='text/css'>
+</javascript>
+
+<div class="fullScreen_container zero-padding">
+
+    <!--pageHeader-->
+    <nav id="global-nav" class="nav">
+        <div class="pull-left title">
+            <h1 class="site-title_patientProfile">
+                <span><i class="fas fa-user-md"></i>&emsp; Doctors</span>
+            </h1>
+        </div>
+        <div class="pull-right title">
+            <h1 class="site-title_userID pull-right">
+                <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+            </h1>
+            <h1 class="site-title_userID pull-right">
+                @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                {
+                    <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                }
+            </h1>
+            <h1 class="site-waffleIcon pull-right">
+                <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+            </h1>
+        </div>
+    </nav>
+    <!--breadCrumbs-->
+    <ul class="breadcrumbs_fullScreens">
+        <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+        <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+        <li><a href="@Url.Action("Index", "Doctor", new {})">Doctors</a></li>
+        <li><a href="#">@ViewBag.Title</a></li>
+    </ul>
+    <!--navCollection-->
+    <div class="navCollection_fullScreens">
+        @Html.Partial("_navCollection")
+    </div>
+
+    <div style="margin-bottom: 1%"></div>
+
+    @using (Ajax.BeginForm("Edit", "Doctor", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "divPath", OnSuccess = "hideModal(); alert('Saved');" }, new { id = "doctor-edit" }))
+    {
+        <div class="hidden-fields">
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+            @Html.HiddenFor(model => model.doctor.doctorID)
+            @Html.HiddenFor(model => model.doctor.createdBy)
+            @Html.HiddenFor(model => model.doctor.createdDate)
+            @Html.HiddenFor(model => model.doctorsInformation.DoctorID)
+            @Html.HiddenFor(model => model.doctorsInformation.CreatedBy)
+            @Html.HiddenFor(model => model.doctorsInformation.CreatedDate)
+            <input type="hidden" name="hidden-mobile" id="hidden-mobile" />
+            <input type="hidden" name="hidden-mobile2" id="hidden-mobile2" />
+            <input type="hidden" name="hidden-home" id="hidden-home" />
+            <input type="hidden" name="hidden-home2" id="hidden-home2" />
+            <input type="hidden" name="hidden-work" id="hidden-work" />
+            <input type="hidden" name="hidden-work2" id="hidden-work2" />
+            <input type="hidden" name="hidden-fax" id="hidden-fax" />
+        </div>
+
+        <div class="form-horizontal">
+            <div class="col-md-12 row">
+                <div class="heading-spacer"></div>
+                <div class="col-md-6"><div class="page-heading">Contact details</div></div>
+                <hr class="heading-ruler">
+            </div>
+            <div class="col-md-12">
+                <div class="col-md-12"><div id="error-invalid" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; A contact number requires 10 digits and cannot contain any special characters!</span></div></div></div>
+            </div>
+            <table id="doctor-table" class="table doctor-settings-table">
+                <tr>
+                    <td width="8%" class="row-heading subject">@Html.DisplayNameFor(model => model.doctorsInformation.ContactName) <span id="doctor-title-warning" class="pull-right warning-alert hidden"><i class="fas fa-exclamation-triangle"></i></span></td>
+                    <td width="2%"></td>
+                    <td class="row-information">@Html.EditorFor(model => model.doctorsInformation.ContactName, new { htmlAttributes = new { @class = "form-control-new", autocomplete = "off" } })</td>
+                    <td width="30%"></td>
+                </tr>
+                <tr>
+                    <td class="row-heading subject">@Html.DisplayNameFor(model => model.doctorsInformation.MobileNumber) <span id="doctor-fname-warning" class="pull-right warning-alert hidden"><i class="fas fa-exclamation-triangle"></i></span></td>
+                    <td><span id="doctor-mobile-warning" class="pulser hidden"><i class="fas fa-exclamation-triangle" style="font-size: 10px"></i></span></td>
+                    <td class="row-information"> @Html.EditorFor(model => model.doctorsInformation.MobileNumber, new { htmlAttributes = new { @class = "form-control-new", autocomplete = "off", @onchange = "MobileNumber(this)" } }) </td>
+                    <td id="mobile-number" name="mobile-number" style="color: #b94a48 !important; font-size: 75% !important;"></td>
+                </tr>
+                <tr>
+                    <td class="row-heading subject">@Html.DisplayNameFor(model => model.doctorsInformation.HomeNumber) <span id="doctor-lname-warning" class="pull-right warning-alert hidden"><i class="fas fa-exclamation-triangle"></i></span></td>
+                    <td><span id="doctor-home-warning" class="pulser hidden"><i class="fas fa-exclamation-triangle" style="font-size: 10px"></i></span></td>
+                    <td class="row-information">@Html.EditorFor(model => model.doctorsInformation.HomeNumber, new { htmlAttributes = new { @class = "form-control-new", autocomplete = "off", @onchange = "HomeNumber(this)" } })</td>
+                    <td id="home-number" name="home-number" style="color: #b94a48 !important; font-size: 75% !important;"></td>
+                </tr>
+                <tr>
+                    <td class="row-heading subject">@Html.DisplayNameFor(model => model.doctorsInformation.Email) <span id="doctor-lname-warning" class="pull-right warning-alert hidden"><i class="fas fa-exclamation-triangle"></i></span></td>
+                    <td width="2%"></td>
+                    <td class="row-information">@Html.EditorFor(model => model.doctorsInformation.Email, new { htmlAttributes = new { @class = "form-control-new", autocomplete = "off" } })</td>
+                    <td>@Html.ValidationMessageFor(model => model.doctorsInformation.Email, " ", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 1%", @id = "doctor-lastname-error" })</td>
+
+                </tr>
+                <tr>
+                    <td class="row-heading subject">@Html.DisplayNameFor(model => model.doctorsInformation.WorkNumber) <span id="doctor-lname-warning" class="pull-right warning-alert hidden"><i class="fas fa-exclamation-triangle"></i></span></td>
+                    <td><span id="doctor-work-warning" class="pulser hidden"><i class="fas fa-exclamation-triangle" style="font-size: 10px"></i></span></td>
+                    <td class="row-information">@Html.EditorFor(model => model.doctorsInformation.WorkNumber, new { htmlAttributes = new { @class = "form-control-new", autocomplete = "off", @onchange = "WorkNumber(this)" } })</td>
+                    <td id="work-number" name="work-number" style="color: #b94a48 !important; font-size: 75% !important;"></td>
+                </tr>
+                <tr>
+                    <td class="row-heading subject">@Html.DisplayNameFor(model => model.doctorsInformation.Fax) <span id="doctor-lname-warning" class="pull-right warning-alert hidden"><i class="fas fa-exclamation-triangle"></i></span></td>
+                    <td><span id="doctor-fax-warning" class="pulser hidden"><i class="fas fa-exclamation-triangle" style="font-size: 10px"></i></span></td>
+                    <td class="row-information">@Html.EditorFor(model => model.doctorsInformation.Fax, new { htmlAttributes = new { @class = "form-control-new", autocomplete = "off", @onchange = "FaxNumber(this)" } })</td>
+                    <td id="fax-number" name="fax-number" style="color: #b94a48 !important; font-size: 75% !important;"></td>
+                </tr>
+            </table>
+        </div>
+        <div class="form-group">
+            <div style="text-align: center!important">
+                <input id="submit" type="submit" value="Submit" class="btn create-button" onclick="storageKey()" style="width: 15%" /><br />
+                <input id="back" value="Back" class="btn reset-button go_back" onclick="backKey()" style="width: 15%!important" />
+            </div>
+        </div>
+
+    }
+</div>
+
+@section scripts{
+    <script src="~/bundles/jqueryval"></script>
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/js/standalone/selectize.js"></script>
+    <script>
+        initSelectize();
+        function initSelectize() {
+            $('#doctor_language').selectize({
+                persist: true,
+                preload: true,
+                maxItems: 1,
+                delimiter: ',',
+                valueField: 'id',
+                labelField: 'name',
+                searchField: ['name'],
+                hideSelected: true,
+                plugins: ['remove_button'],
+                render: {
+                    option: function (item, escape) {
+                        return '<span class="name">' + escape(item.name) + '</span>';
+
+                    }
+                }
+            }),
+                $('#doctor_sex').selectize({
+                    persist: true,
+                    preload: true,
+                    maxItems: 1,
+                    delimiter: ',',
+                    valueField: 'id',
+                    labelField: 'name',
+                    searchField: ['name'],
+                    hideSelected: true,
+                    plugins: ['remove_button'],
+                    render: {
+                        option: function (item, escape) {
+                            return '<span class="name">' + escape(item.name) + '</span>';
+
+                        }
+                    }
+                })
+        }
+    </script>
+    <!-- phone-number-validation - hcare-1198 - hcare-1181-->
+    <script type="text/javascript">
+        function MobileNumber(input) {
+            $('#mobile-number').html('');
+            $("#error-invalid").addClass("hidden");
+            $("#doctor-mobile-warning").addClass("hidden");
+            $("#hidden-mobile").val('');
+
+            var mobile = $('#doctorsInformation_MobileNumber').val();
+            var phoneno = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
+
+            if (input.value.match(phoneno)) {
+                return true;
+            }
+            else {
+                $('#mobile-number').html('<span><i class="fas fa-exclamation-circle"></i> </span>Invalid contact number!');
+                $("#doctorsInformation_MobileNumber").focus();
+                $("#error-invalid").removeClass("hidden");
+                $("#doctor-mobile-warning").removeClass("hidden");
+                $("#hidden-mobile").val(mobile);
+            }
+
+            if ($('#doctorsInformation_MobileNumber').val().length > 10) {
+                $('#mobile-number').html('<span><i class="fas fa-exclamation-circle"></i> </span>Invalid contact number!');
+                $("#doctorsInformation_MobileNumber").focus();
+                $("#error-invalid").removeClass("hidden");
+                $("#doctor-mobile-warning").removeClass("hidden");
+                $("#hidden-mobile").val(mobile);
+            }
+
+            if ($('#doctorsInformation_MobileNumber').val().length == 0) {
+                $('#mobile-number').html('');
+                $("#error-invalid").addClass("hidden");
+                $("#doctor-mobile-warning").addClass("hidden");
+            }
+        }
+        function HomeNumber(input) {
+            $('#home-number').html('');
+            $("#error-invalid").addClass("hidden");
+            $("#doctor-home-warning").addClass("hidden");
+            $("#hidden-home").val('');
+
+            var home = $('#doctorsInformation_HomeNumber').val();
+            var phoneno = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
+
+            if (input.value.match(phoneno)) {
+                return true;
+            }
+            else {
+                $('#home-number').html('<span><i class="fas fa-exclamation-circle"></i> </span>Invalid contact number!');
+                $("#doctorsInformation_HomeNumber").focus();
+                $("#error-invalid").removeClass("hidden");
+                $("#doctor-home-warning").removeClass("hidden");
+                $("#hidden-home").val(home);
+            }
+
+            if ($('#doctorsInformation_HomeNumber').val().length > 10) {
+                $('#home-number').html('<span><i class="fas fa-exclamation-circle"></i> </span>Invalid contact number!');
+                $("#doctorsInformation_HomeNumber").focus();
+                $("#error-invalid").removeClass("hidden");
+                $("#doctor-home-warning").removeClass("hidden");
+
+                $("#hidden-home").val(home);
+            }
+
+            if ($('#doctorsInformation_HomeNumber').val().length == 0) {
+                $('#home-number').html('');
+                $("#error-invalid").addClass("hidden");
+                $("#doctor-home-warning").addClass("hidden");
+            }
+        }
+        function WorkNumber(input) {
+            $('#work-number').html('');
+            $("#error-invalid").addClass("hidden");
+            $("#doctor-work-warning").addClass("hidden");
+            $("#hidden-work").val('');
+
+            var work = $('#doctorsInformation_WorkNumber').val();
+            var phoneno = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
+
+            if (input.value.match(phoneno) && input.value.substring(0, 1) == 0) {
+                return true;
+            }
+            else {
+                $('#work-number').html('<span><i class="fas fa-exclamation-circle"></i> </span>Invalid contact number!');
+                $("#doctorsInformation_WorkNumber").focus();
+                $("#error-invalid").removeClass("hidden");
+                $("#doctor-work-warning").removeClass("hidden");
+                $("#hidden-work").val(work);
+            }
+
+            if ($('#doctorsInformation_WorkNumber').val().length > 10) {
+                $('#work-number').html('<span><i class="fas fa-exclamation-circle"></i> </span>Invalid contact number!');
+                $("#doctorsInformation_WorkNumber").focus();
+                $("#error-invalid").removeClass("hidden");
+                $("#doctor-work-warning").removeClass("hidden");
+                $("#hidden-work").val(work);
+            }
+
+            if ($('#doctorsInformation_WorkNumber').val().length == 0) {
+                $('#work-number').html('');
+                $("#error-invalid").addClass("hidden");
+                $("#doctor-work-warning").addClass("hidden");
+
+            }
+        }
+        function FaxNumber(input) {
+            $('#fax-number').html('');
+            $("#error-invalid").addClass("hidden");
+            $("#doctor-fax-warning").addClass("hidden");
+            $("#hidden-fax").val('');
+
+            var fax = $('#doctorsInformation_Fax').val();
+            var phoneno = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
+
+            if (input.value.match(phoneno) && input.value.substring(0, 1) == 0) {
+                return true;
+            }
+            else {
+                $('#fax-number').html('<span><i class="fas fa-exclamation-circle"></i> </span>Invalid contact number!');
+                $("#doctorsInformation_Fax").focus();
+                $("#error-invalid").removeClass("hidden");
+                $("#doctor-fax-warning").removeClass("hidden");
+                $("#hidden-fax").val(fax);
+            }
+
+            if ($('#doctorsInformation_Fax').val().length > 10) {
+                $('#fax-number').html('<span><i class="fas fa-exclamation-circle"></i> </span>Invalid contact number!');
+                $("#doctorsInformation_Fax").focus();
+                $("#error-invalid").removeClass("hidden");
+                $("#doctor-fax-warning").removeClass("hidden");
+                $("#hidden-fax").val(fax);
+            }
+
+            if ($('#doctorsInformation_Fax').val().length == 0) {
+                $('#fax-number').html('');
+                $("#error-invalid").addClass("hidden");
+                $("#doctor-fax-warning").addClass("hidden");
+            }
+        }
+
+        $("#submit").click(function () {
+            if ($("#hidden-mobile").val().length > 0) {
+                $("#doctorsInformation_MobileNumber").focus();
+                return false;
+            }
+            if ($("#hidden-home").val().length > 0) {
+                $("#doctorsInformation_HomeNumber").focus();
+                return false;
+            }
+            if ($("#hidden-work").val().length > 0) {
+                $("#doctorsInformation_WorkNumber").focus();
+                return false;
+            }
+            if ($("#hidden-fax").val().length > 0) {
+                $("#doctorsInformation_Fax").focus();
+                return false;
+            }
+        });
+    </script>
+}
+

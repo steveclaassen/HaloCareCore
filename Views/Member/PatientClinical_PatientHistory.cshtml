@@ -205,7 +205,7 @@
             <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
         </h1>
         <h1 class="site-title_userID pull-right">
-            @if (@HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+            @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
             {
                 <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
             }
@@ -5486,7 +5486,7 @@
                                                         <div class="panel panel-default">
                                                             <div class="panel-heading clickable panel-collapsed" id="podiatry_diabetes">
                                                                 <h3 class="panel-title">
-                                                                    @Html.Label("Paediatric - < 12years /< 35 kg:")
+                                                                    @Html.Label(null,"Paediatric - < 12years /< 35 kg:")
                                                                     @if (Model.summary.paediatrics.Count() > 0)
                                                                     {
                                                                         if (Model.summary.paediatrics != null)

@@ -1,0 +1,183 @@
+﻿@model HaloCareCore.Models.EnrolmentViewModel
+
+@{
+    ViewBag.Title = "profileInformation_MemberFile";
+    Layout = "~/Views/Shared/_LayoutMember.cshtml";
+}
+<comment>
+    <!--
+        24 July 2019 -- HCare-767 (Display ICD-10 code from the dependant profile i.o. from the Program table on Patient Dashboard etc.)
+        Updated the code in _profileBar to read the ICD10 code from the dependant table rather than the program table.
+
+        12 May 2020 -- HCare-1033(Advanced Search Risk Rating per condition)
+        AS per a discussion with Rozaan, the initial view must not show a color based on the rating - It is only once you enter the profile that you will see the risk rating of the member by the color.
+    -->
+</comment>
+
+<div class="staticBar_Edit">
+    @*<div style="margin-top: 2%"></div>*@
+    <div class="patientDetails">
+        <div class="row member-name">
+            <!-- name/age -->
+            @*@if (!String.IsNullOrEmpty(Model.RiskRating))
+            {
+                if (Model.RiskRating.ToLower() == "g")
+                {
+                    <a class="memberName riskRating-green" title="@Model.RiskReason @Model.HypoRisk" href="#">
+                        <span style="font-size: 30%; vertical-align: super"><i class="fas fa-star"></i></span>
+                        @Html.DisplayFor(model => model.dependent.Title_UC)
+                        @Html.DisplayFor(model => model.dependent.firstName_UC)
+                        @Html.DisplayFor(model => model.dependent.lastName_UC),
+                        @Html.DisplayFor(model => model.dependent.initials_UC)
+                        <span style="font-size: 70%">@Html.DisplayFor(model => model.dependent.dependantAge)</span>
+                    </a>
+                }
+                else if (Model.RiskRating.ToLower() == "y")
+                {
+                    <a class="memberName riskRating-yellow" title="@Model.RiskReason @Model.HypoRisk" href="#">
+                        <span style="font-size: 30%; vertical-align: super"><i class="fas fa-star"></i></span>
+                        @Html.DisplayFor(model => model.dependent.Title_UC)
+                        @Html.DisplayFor(model => model.dependent.firstName_UC)
+                        @Html.DisplayFor(model => model.dependent.lastName_UC),
+                        @Html.DisplayFor(model => model.dependent.initials_UC)
+                        <span style="font-size: 70%">@Html.DisplayFor(model => model.dependent.dependantAge)</span>
+                    </a>
+                }
+                else if (Model.RiskRating.ToLower() == "r")
+                {
+                    <a class="memberName riskRating-red" title="@Model.RiskReason @Model.HypoRisk" href="#">
+                        <span style="font-size: 30%; vertical-align: super"><i class="fas fa-star"></i></span>
+                        @Html.DisplayFor(model => model.dependent.Title_UC)
+                        @Html.DisplayFor(model => model.dependent.firstName_UC)
+                        @Html.DisplayFor(model => model.dependent.lastName_UC),
+                        @Html.DisplayFor(model => model.dependent.initials_UC)
+                        <span style="font-size: 70%">@Html.DisplayFor(model => model.dependent.dependantAge)</span>
+                    </a>
+                }
+                else
+                {
+                    <a class="memberName" href="#">
+                        @Html.DisplayFor(model => model.dependent.Title_UC)
+                        @Html.DisplayFor(model => model.dependent.firstName_UC)
+                        @Html.DisplayFor(model => model.dependent.lastName_UC),
+                        @Html.DisplayFor(model => model.dependent.initials_UC)
+                        <span style="font-size: 70%">@Html.DisplayFor(model => model.dependent.dependantAge)</span>
+                    </a>
+                }
+            }
+            else
+            {*@
+                <a class="memberName" href="#">
+                    @Html.DisplayFor(model => model.dependent.Title_UC)
+                    @Html.DisplayFor(model => model.dependent.firstName_UC)
+                    @Html.DisplayFor(model => model.dependent.lastName_UC),
+                    @Html.DisplayFor(model => model.dependent.initials_UC)
+                    <span style="font-size: 70%">@Html.DisplayFor(model => model.dependent.dependantAge)</span>
+                </a>
+            @*}*@
+            <!-- gender-symbol -->
+        <a class="genderSymbol">
+            @if (Model.dependent.sex == "M")
+            {
+                @*<i class="fas fa-mars" style="color: dodgerblue"></i>*@
+                <img src="~/Content/Images/_2020/icons/symbol-male.png" class="gender-icon" title="male" />
+            }
+            else if (Model.dependent.sex == "F")
+            {
+                @*<i class="fas fa-venus" style="color: deeppink"></i>*@
+                <img src="~/Content/Images/_2020/icons/symbol-female.png" class="gender-icon" title="female" />
+            }
+            else
+            {
+                @*<i class="fas fa-mars-stroke-v" style="color: limegreen; transform: rotate(40deg)"></i>*@
+                <img src="~/Content/Images/_2020/icons/symbol-unknown.png" class="gender-icon" title="unknown" style="width: 1.1%" />
+            }
+
+        </a>
+        </div>
+        <!--member-search-->
+        <div class="row" style="margin-left: 2%!important; margin-top: -2.2%; margin-bottom: 0.7%">
+            <div class="col-md-6 pull-right">
+                <ul class="input-group" id="adv-search">
+
+                    @using (Html.BeginForm("Search", "Member", FormMethod.Post, new { id = "Search", @class = "navbar-right" }))
+                    {
+                        @Html.AntiForgeryToken()
+
+                        <ul class="nav navbar-nav navbar-right">
+                            <li class="focus">
+                                @Html.TextBox("SearchVar", null, new { @class = "form-control-patientSearch", @placeholder = "Search..." })
+                            </li>
+                            <div class="btn-group" role="group">
+                                <button type="submit" class="btn btn-search" style="height: 29px"><span class="glyphicon glyphicon-search" aria-hidden="true" title="Search"></span></button>
+                            </div>
+                        </ul>
+
+                    }
+
+                </ul>
+            </div>
+        </div>
+
+        <hr class="newDasbhoard_Ruler" />
+
+        <!---->
+        <div class="row col-md-12">
+            <!-- column-1 -->
+            <div class="col-md-6_custom">
+                <div class="memberInformation_memberNo">
+                    <!--HCare-695-->
+                    @Html.Label(null,"Member #: ", htmlAttributes: new { @class = "control-label-member_view" })
+                    @Html.DisplayFor(model => model.member.membershipNo)
+                </div>
+            </div>
+            <!-- column-2 -->
+            <div class="col-md-6_custom">
+                <div class="memberInformation_memberAge">
+                    @Html.Label(null,"Dependant: ", htmlAttributes: new { @class = "control-label-member_view" })
+                    @Html.DisplayFor(model => model.dependent.dependentCode)
+                </div>
+            </div>
+            <!-- column-3 -->
+            <div class="col-md-6_custom">
+                <div class="memberInformation_idNum">
+                    @Html.Label(null,"ID/Auth #: ", htmlAttributes: new { @class = "control-label-member_view" })
+                    @Html.DisplayFor(model => model.dependent.idNumber)
+                </div>
+            </div>
+            <!-- column-4 -->
+            <div class="col-md-6_custom">
+                <div class="memberInformation_memberAge">
+                    @Html.Label(null,"Scheme: ", htmlAttributes: new { @class = "control-label-member_view" })
+                    @Html.DisplayFor(model => model.MedicalAids[0].Name)
+                </div>
+            </div>
+            <!-- column-5 -->
+            <div class="col-md-6_custom">
+                <div class="memberInformation_memberAge">
+                    @Html.Label(null,"DOB: ", htmlAttributes: new { @class = "control-label-member_view" })
+                    @Html.DisplayFor(model => model.dependent.birthDate)
+                </div>
+            </div>
+            <!-- column-6 -->
+            <div class="col-md-6_custom">
+                <div class="memberInformation_memberAge">
+                    @Html.Label(null,"Employer group: ", htmlAttributes: new { @class = "control-label-member_view" })
+                    @if (Model.paypoint != null)
+                    {
+                        @Html.DisplayFor(model => model.paypoint)
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="~/bundles/jqueryval"></script>
+    <script src="~/Scripts/select2.min.js"></script>
+
+}

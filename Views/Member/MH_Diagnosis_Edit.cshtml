@@ -1,0 +1,328 @@
+﻿@model HaloCareCore.Models.ViewModels.MHDiagnosisViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Mental health";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<comment>
+    <!--
+
+    -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .select2-container {
+        border: none !important;
+    }
+
+        .select2-container:focus {
+            outline: none !important
+        }
+
+    .select2-container--default .select2-selection--single {
+        display: block !important;
+        max-width: 500px !important;
+        width: 100% !important;
+        max-height: 100px !important;
+        height: 30px !important;
+        margin-top: 5px !important;
+        margin-left: 10px !important;
+        padding: 6px 6px !important;
+        line-height: 1.428571429 !important;
+        color: #003366 !important;
+        border-radius: 0px !important;
+        border: none !important;
+        border-bottom: 1px solid #e8e6e6 !important;
+        background-color: transparent !important;
+        font-family: 'Century Gothic' !important;
+        -webkit-box-shadow: none !important;
+        box-shadow: none !important;
+    }
+
+        .select2-container--default .select2-selection--single:focus {
+            outline: none !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__placeholder {
+            color: white !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow b {
+            margin-top: -0px !important;
+        }
+
+    .field-validation-error:before {
+        font-family: FontAwesome;
+        content: "\f06a\00a0";
+        animation: pulse 2s ease infinite;
+    }
+
+    #datecheck:before,
+    #effdatecheck:before {
+        font-family: FontAwesome;
+        content: "\f06a\00a0";
+        animation: pulse 2s ease infinite;
+    }
+</style>
+<javascript>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css" integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">
+</javascript>
+
+<!---------------------------------------------------------------------- header ---------------------------------------------------------------------->
+<nav id="global-nav" class="nav">
+    <div class="pull-left title">
+        <h1 class="site-title_patientProfile">
+            <span><img src="~/Content/Images/_2020/icons/banner-icon/mental-health-white.png" /></span>&emsp; DSM5 questionnaire
+        </h1>
+    </div>
+    <div class="pull-right title">
+        <h1 class="site-title_userID pull-right">
+            <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+        </h1>
+        <h1 class="site-title_userID pull-right">
+            @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+            {
+                <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+            }
+        </h1>
+        <h1 class="site-waffleIcon pull-right">
+            <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+        </h1>
+    </div>
+</nav>
+
+<div class="dashboardContainer zero-padding">
+    <div class="patientDashboard_View">
+        <ul class="breadcrumbs_patientDashboard">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new { })">Home</a></li>
+            <li><a href="@Url.Action("patientClinical", "Member", new { DependentID = Context.Request.Query["DependentID"] })">Patient</a></li>
+            <li><a href="#">@ViewBag.Title</a></li>
+        </ul>
+
+        @Html.Partial("_navSlider_blank", new { DependentID = Context.Request.Query["DependentID"] })
+
+        <div class="navCollection_patientDashboard">
+            @Html.Partial("_navCollection")
+        </div>
+
+        <div class="profileBar">
+            @Html.Action("_profileBar_edit", "Member", new { DependentID = Model.DependantID })
+        </div>
+    </div>
+    <br />
+    <div class="profilebar-spacer"></div>
+
+    <div class="row patientDashboard_container">
+        <h4 class="tableHeading">Edit diagnosis</h4>
+        <hr class="fancyruler">
+        <br />
+
+        @using (Ajax.BeginForm("MH_Diagnosis_Edit", "Member", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "divPath", OnSuccess = "hideModal(); alert('Saved');" }, new { id = "diagnosis-edit" }))
+        {
+            <div class="hidden-fields">
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                @Html.HiddenFor(model => model.DependantID)
+                @Html.Hidden("pro", (object)ViewBag.Program)
+                @Html.HiddenFor(model => model.Id)
+                @Html.HiddenFor(model => model.CreatedBy)
+                @Html.HiddenFor(model => model.CreatedDate)
+                <input type="hidden" name="conditionCode" id="conditionCode" value="@ViewBag.MappingCode" />
+                <input type="hidden" name="conditionDescription" id="conditionDescription" value="@ViewBag.Condition" />
+                <input type="hidden" name="date-validation" id="date-validation" />
+            </div>
+            <div id="overlay-edit" class="overlay"></div>
+            <div class="form-horizontal editForm">
+                <div class="col-md-12">
+                    <div id="substance-abuse-notice" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; Substance abuse!</span></div></div>
+                    <div id="follow-up-dsm5" class="hidden"><div class="warning-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; Follow up!</span></div></div>
+                </div>
+
+                <div class="form-group">
+                    @Html.Label(null,"Condition", htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-9">
+                        @Html.DropDownListFor(model => model.MappingDescription, new SelectList(Model.ConditionList, "mappingCode", "Condition"), Model.MappingDescription, new { @disabled = "disabled", @onchange = "FillICD();" })
+                        <i class="fas fa-question-circle information-icon icon-move" data-toggle="tooltip" data-original-title="This field is disabled."></i>
+                        <br />@Html.ValidationMessageFor(model => model.MappingDescription, "", new { @class = "text-danger", @style = "font-size: 110%;margin-left: 1%" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.Label(null,"ICD-10", htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-9">
+                        @Html.DropDownListFor(model => model.ICD10Code, new SelectList(Model.ICD10List, "icd10", "icd10"), Model.ICD10Code, new { htmlAttributes = new { } })
+                        <i class="fas fa-question-circle information-icon icon-move" data-toggle="tooltip" data-original-title="This field is dependant on the condition selected"></i>
+                        <br />@Html.ValidationMessageFor(model => model.ICD10Code, "", new { @class = "text-danger", @style = "font-size: 110%;margin-left: 1%" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.EffectiveDate, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-9">
+                        <input class="form-control-new startDate" data-val="true" id="EffectiveDate" name="EffectiveDate" value="@string.Format("{0:yyyy-MM-dd}", Model.EffectiveDate)" type="date" min="1900-01-01" aria-required="true" aria-invalid="true" max="@DateTime.Now.ToString("yyyy-MM-dd")" onblur="DateCheck();">
+                        @Html.ValidationMessageFor(model => model.EffectiveDate, "", new { @class = "text-danger", @style = "font-size: 95%;margin-left: 1%" })
+                        <div id="effdatecheck" class="text-danger hidden" style="font-size: 95%;margin-left: 1%; margin-top: -1%"></div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.EndDate, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-9">
+                        <input class="form-control-new endDate" data-val="true" id="EndDate" name="EndDate" value="@string.Format("{0:yyyy-MM-dd}", Model.EndDate)" type="date" min="1900-01-01" aria-required="true" aria-invalid="true" max="" onblur="DateCheck();">
+                        @Html.ValidationMessageFor(model => model.EndDate, "", new { @class = "text-danger", @style = "font-size: 95%;margin-left: 1%" })
+                        <div id="enddatecheck" class="text-danger hidden" style="font-size: 95%;margin-left: 1%; margin-top: -1%"></div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Comment, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-9">
+                        <div class="">
+                            @Html.TextAreaFor(model => model.Comment, new { @placeholder = "comment", @class = "form-control-new" })
+                            @Html.ValidationMessageFor(model => model.Comment, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Active, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-9">
+                        <div class="checkbox">
+                            @Html.EditorFor(model => model.Active)
+                            @Html.ValidationMessageFor(model => model.Active, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div style="text-align: center!important">
+                        <input id="submit" type="submit" value="Save" class="btn create-button" onclick="ValidationCheck(); storageKey();" style="width: 15%" /><br />
+                        <input id="back" value="Back" class="btn reset-button go_back" onclick="backKey()" style="width: 15%!important" />
+                    </div>
+                </div>
+            </div>
+        }
+
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/bundles/jqueryval"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+
+    @if (ViewBag.Message != null)
+    {
+        <script type="text/javascript">
+
+        window.onload = function () {
+            toastr.options.positionClass = 'toast-bottom-right';
+            toastr.options.timeOut = 10000;
+
+            toastr.error("@ViewBag.Message");
+
+        }
+        </script>
+    }
+
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function () { $("#MappingDescription").select2({ multiple: false }); });
+        $(document).ready(function () { $("#ICD10Code").select2({ multiple: false }); });
+    </script>
+    <script>
+        function FillICD() {
+            var condition = $('#MappingDescription').val();
+            var depID = $('#DependantID').val();
+            var history = $('#history').val();
+            $.ajax({
+                url: '/Member/FillICD10_MH_Diagnosis',
+                type: "GET",
+                dataType: "JSON",
+                data: { condition: condition, dependantID: depID, history: history },
+                success: function (options) {
+                    $("#ICD10Code").html("");
+                    $.each(options, function (i, option) {
+                        $("#ICD10Code").append($('<option></option>').val(option.icd10).html(option.icd10));
+                    });
+                }
+            });
+
+            $('#conditionCode').val(condition);
+        }
+    </script>
+    <script>
+        $(document).ready(function () {
+            $('[data-toggle="tooltip"]').tooltip({
+                placement: 'top'
+            });
+        });
+    </script>
+    <script>
+        function DateCheck() {
+            var start = $("#EffectiveDate").val();
+            var end = $("#EndDate").val();
+            if (end == "") { }
+            else {
+                if (end < start) {
+                    $('#enddatecheck').removeClass('hidden');
+                    $('span[data-valmsg-for="EndDate"]').html('<span style="font-size: 12px"><i class="fas fa-exclamation-circle"></i> </span>Treatment end date cannot precede Effective date.');
+                    $('#date-validation').val('error');
+                }
+                else {
+                    $('#enddatecheck').addClass('hidden');
+                    $('#date-validation').val('');
+                    $("#submit").attr("disabled", false);
+                }
+            }
+        }
+
+        function ValidationCheck() {
+            $("#diagnosis-edit").submit(function (e) {
+                var datevalidation = $('#date-validation').val();
+                if (datevalidation.length > 0) {
+                    $('span[data-valmsg-for="EndDate"]').html('<span style="font-size: 12px"><i class="fas fa-exclamation-circle"></i> </span>Treatment end date cannot precede Effective date.');
+                    $("#EndDate").focus();
+                    event.preventDefault();
+                }
+            })
+        }
+    </script>
+    <script>
+        function backKey() {
+            localStorage.clear();
+            localStorage.removeItem("details_diagnosis");
+            localStorage.setItem("back_diagnosis", Date.now());
+        }
+        function editKey() {
+            localStorage.clear();
+            localStorage.removeItem("details_diagnosis");
+            localStorage.setItem("edit_diagnosis", Date.now());
+        }
+    </script>
+    <script>
+        $(document).ready(function () {
+            $("#diagnosis-edit").submit(function (e) {
+                if ($(this).valid()) {
+                    $("#submit").attr("disabled", true);
+                    return true;
+                }
+            });
+        });
+    </script>
+
+    @*<script>
+            function ConditionChange() {
+                var newcondition = $("#MappingDescription").val();
+                $("#condition-new").val(newcondition);
+            }
+            function ICD10Change() {
+                var newicd10 = $("#ICD10Code").val();
+                $("#icd10-new").val(newicd10);
+            }
+        </script>*@
+
+}

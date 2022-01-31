@@ -1,0 +1,70 @@
+﻿@model IEnumerable<HaloCareCore.Models.Script.Scripts>
+
+@{
+    ViewBag.Title = "ListScripts";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>List scripts</h2>
+
+<p>
+    @Html.ActionLink("Create New", "Create")
+</p>
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.effectiveDate)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.repeats)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.active)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.createdBy)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.createdDate)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.modifiedBy)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.modifiedDate)
+        </th>
+        <th></th>
+    </tr>
+
+@foreach (var item in Model) {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.effectiveDate)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.repeats)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.active)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.createdBy)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.createdDate)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.modifiedBy)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.modifiedDate)
+        </td>
+        <td>
+            @Html.ActionLink("Edit", "Edit", new { id=item.scriptID }) |
+            @Html.ActionLink("Details", "Details", new { id=item.scriptID }) |
+            @Html.ActionLink("Delete", "Delete", new { id=item.scriptID })
+        </td>
+    </tr>
+}
+
+</table>

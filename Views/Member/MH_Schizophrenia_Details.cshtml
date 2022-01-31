@@ -1,0 +1,284 @@
+﻿@model HaloCareCore.Models.Questionnaire.MH_SchizophreniaResponse
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Schizophrenia questionnaire";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<comment>
+    <!--
+        28 July 2020 -- HCare-1124(Mental Health Disease: QUESTIONNAIRE - SCHIZOPHRENIA)
+    -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+</style>
+
+<!---------------------------------------------------------------------- header ---------------------------------------------------------------------->
+<nav id="global-nav" class="nav">
+    <div class="pull-left title">
+        <h1 class="site-title_patientProfile">
+            <span><img src="~/Content/Images/_2020/icons/banner-icon/mental-health-white.png" /></span>&emsp; Schizophrenia questionnaire
+        </h1>
+    </div>
+    <div class="pull-right title">
+        <h1 class="site-title_userID pull-right">
+            <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+        </h1>
+        <h1 class="site-title_userID pull-right">
+            @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+            {
+                <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+            }
+        </h1>
+        <h1 class="site-waffleIcon pull-right">
+            <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+        </h1>
+    </div>
+</nav>
+
+<div class="dashboardContainer zero-padding">
+    <div class="patientDashboard_View">
+        <!------------------------------------------------------------------------ bread-crumbs ------------------------------------------------------------------------>
+        <ul class="breadcrumbs_patientDashboard">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new { })">Home</a></li>
+            <li><a href="@Url.Action("patientClinical", "Member", new { DependentID = Context.Request.Query["DependentID"] })">Patient</a></li>
+            <li><a href="#">@ViewBag.Title</a></li>
+        </ul>
+
+        <!--------------------------------------------------------------------- left-navigation-bar --------------------------------------------------------------------->
+        @Html.Partial("_navSlider_blank", new { DependentID = Context.Request.Query["DependentID"] })
+
+        <!----------------------------------------------------------------------- nav-collection ----------------------------------------------------------------------->
+        <div class="navCollection_patientDashboard">
+            @Html.Partial("_navCollection")
+        </div>
+
+        <!----------------------------------------------------------------------- patient-profile ----------------------------------------------------------------------->
+        <div class="profileBar">
+            @Html.Action("_profileBar_edit", "Member", new { DependentID = Model.DependantID })
+        </div>
+    </div>
+    <br />
+    <!----------------------------------------------------------------------- form ----------------------------------------------------------------------->
+    <div class="profilebar-spacer"></div>
+
+    <div id="schizophrenia-panel" class="patientDashboard_container">
+        <div class="col-md-12 row">
+            <div class="heading-spacer"></div>
+            <div class="col-md-6"><div class="page-heading">Details</div></div>
+            <hr class="heading-ruler">
+        </div>
+        <div class="col-md-6 row"></div>
+        <div class="col-md-12">
+            <div class="row">
+                <table class="table details-table table-hover" id="schizophrenia-details">
+                    <tbody>
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayNameFor(model => model.AssignmentID)</td>
+                            <td class="row-information">@Html.DisplayFor(model => model.AssignmentID)</td>
+                        </tr>
+
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayNameFor(model => model.Outcome)</td>
+                            <td class="row-information">
+                                <span class="@(Model.Outcome.ToLower() == "absent" ? "chk-absent fas fa-circle" : Model.Outcome.ToLower() == "mild" ? "chk-mild fas fa-circle" : Model.Outcome.ToLower() == "moderate" ? "chk-moderate fas fa-circle" : Model.Outcome.ToLower() == "severe" ? "chk-severe fas fa-circle" : "chk-followup fas fa-circle")"></span>
+                                &emsp;@Html.DisplayFor(model => model.Outcome)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayNameFor(model => model.TotalScore)</td>
+                            <td class="row-information">@Html.DisplayFor(model => model.TotalScore)</td>
+                        </tr>
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayNameFor(model => model.Comment)</td>
+                            <td class="row-information">@Html.DisplayFor(model => model.Comment)</td>
+                        </tr>
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayNameFor(model => model.CreatedDate)</td>
+                            <td class="row-information">@Html.DisplayFor(model => model.CreatedDate)</td>
+                        </tr>
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayNameFor(model => model.CreatedBy)</td>
+                            <td class="row-information">@Html.DisplayFor(model => model.CreatedBy)</td>
+                        </tr>
+                        @if (Model.ModifiedDate != null)
+                        {
+                            <tr>
+                                <td class="row-heading subject">@Html.DisplayNameFor(model => model.ModifiedDate)</td>
+                                <td class="row-information">@Html.DisplayFor(model => model.ModifiedDate)</td>
+                            </tr>
+                            <tr>
+                                <td class="row-heading subject">@Html.DisplayNameFor(model => model.ModifiedBy)</td>
+                                <td class="row-information">@Html.DisplayFor(model => model.ModifiedBy)</td>
+                            </tr>
+                        }
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayNameFor(model => model.Program)</td>
+                            <td class="row-information">@Html.DisplayFor(model => model.Program)</td>
+                        </tr>
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayNameFor(model => model.Active)</td>
+                            <td class="row-information"><span class="@(Model.Active == true ? "chk-yes fas fa-circle" : "chk-no fas fa-circle")"></span>&emsp;@((Model.Active == true) ? "Yes" : "No")</td>
+                        </tr>
+
+                    </tbody>
+                </table>
+
+
+                <br />
+                <br />
+                <div class="col-md-12 row">
+                    <div class="heading-spacer"></div>
+                    <div class="col-md-6"><div class="page-heading">Questionnaire results</div></div>
+                    <hr class="heading-ruler">
+                </div>
+
+                <table id="schizophrenia-table" class="table mental-health-table">
+                    <tr>
+                        <td style="width: 6%; text-align:center!important">Q1</td>
+                        <td style="width: 80%">
+                            How would you describe your mood over the last two weeks?
+                            <i class="fas fa-question-circle information-icon icon-move" data-toggle="tooltip" data-original-title="Do you keep reasonably cheerful or have you been very depressed or low spirited recently? In the last two weeks how often have you (own words) every day? All day?"></i>
+                        </td>
+                        <td style="width: 50%">
+                            <span class="@(Model.Depression.ToLower() == "absent" ? "chk-absent fas fa-circle" : Model.Depression.ToLower() == "mild" ? "chk-mild fas fa-circle" : Model.Depression.ToLower() == "moderate" ? "chk-moderate fas fa-circle" : Model.Depression.ToLower() == "severe" ? "chk-severe fas fa-circle" : "chk-followup fas fa-circle")"></span>
+                            &emsp;@Html.DisplayName(Model.Depression)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 5%; text-align:center!important">Q2</td>
+                        <td style="width: 80%">
+                            How do you see the future for yourself? Can you see any future? – or hopeless?
+                            <i class="fas fa-question-circle information-icon icon-move" data-toggle="tooltip" data-original-title="Have you given up or does there still seem some reason for trying?"></i>
+                        </td>
+                        <td style="width: 50%">
+                            <span class="@(Model.Hopelessness.ToLower() == "absent" ? "chk-absent fas fa-circle" : Model.Hopelessness.ToLower() == "mild" ? "chk-mild fas fa-circle" : Model.Hopelessness.ToLower() == "moderate" ? "chk-moderate fas fa-circle" : Model.Hopelessness.ToLower() == "severe" ? "chk-severe fas fa-circle" : "chk-followup fas fa-circle")"></span>
+                            &emsp;@Html.DisplayName(Model.Hopelessness)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 5%; text-align:center!important">Q3</td>
+                        <td style="width: 80%">
+                            What is your opinion of yourself, compared to other people?
+                            <i class="fas fa-question-circle information-icon icon-move" data-toggle="tooltip" data-original-title="Do you feel better, not as good, or about the same as others? Do you feel inferior or even worthless?"></i>
+                        </td>
+                        <td style="width: 50%">
+                            <span class="@(Model.SelfDepreciation.ToLower() == "absent" ? "chk-absent fas fa-circle" : Model.SelfDepreciation.ToLower() == "mild" ? "chk-mild fas fa-circle" : Model.SelfDepreciation.ToLower() == "moderate" ? "chk-moderate fas fa-circle" : Model.SelfDepreciation.ToLower() == "severe" ? "chk-severe fas fa-circle" : "chk-followup fas fa-circle")"></span>
+                            &emsp;@Html.DisplayName(Model.SelfDepreciation)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 5%; text-align:center!important">Q4</td>
+                        <td style="width: 80%">
+                            Do you have the feeling that you are being blamed for something or even wrongly accused?
+                        </td>
+                        <td style="width: 50%">
+                            <span class="@(Model.GuiltyIdeas.ToLower() == "absent" ? "chk-absent fas fa-circle" : Model.GuiltyIdeas.ToLower() == "mild" ? "chk-mild fas fa-circle" : Model.GuiltyIdeas.ToLower() == "moderate" ? "chk-moderate fas fa-circle" : Model.GuiltyIdeas.ToLower() == "severe" ? "chk-severe fas fa-circle" : "chk-followup fas fa-circle")"></span>
+                            &emsp;@Html.DisplayName(Model.GuiltyIdeas)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 5%; text-align:center!important">Q5</td>
+                        <td style="width: 80%">
+                            Do you tend to blame yourself for little things you may have done in the past?
+                            <i class="fas fa-question-circle information-icon icon-move" data-toggle="tooltip" data-original-title="Do you think that you deserve to be so concerned about this?"></i>
+                        </td>
+                        <td style="width: 50%">
+                            <span class="@(Model.PathologicalGuilt.ToLower() == "absent" ? "chk-absent fas fa-circle" : Model.PathologicalGuilt.ToLower() == "mild" ? "chk-mild fas fa-circle" : Model.PathologicalGuilt.ToLower() == "moderate" ? "chk-moderate fas fa-circle" : Model.PathologicalGuilt.ToLower() == "severe" ? "chk-severe fas fa-circle" : "chk-followup fas fa-circle")"></span>
+                            &emsp;@Html.DisplayName(Model.PathologicalGuilt)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 5%; text-align:center!important">Q6</td>
+                        <td style="width: 80%">
+                            When you have felt depressed over the last 2 weeks have you noticed the depression being worse at any particular time of day?
+                        </td>
+                        <td style="width: 50%">
+                            <span class="@(Model.MorningDepression.ToLower() == "absent" ? "chk-absent fas fa-circle" : Model.MorningDepression.ToLower() == "mild" ? "chk-mild fas fa-circle" : Model.MorningDepression.ToLower() == "moderate" ? "chk-moderate fas fa-circle" : Model.MorningDepression.ToLower() == "severe" ? "chk-severe fas fa-circle" : "chk-followup fas fa-circle")"></span>
+                            &emsp;@Html.DisplayName(Model.MorningDepression)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 5%; text-align:center!important">Q7</td>
+                        <td style="width: 80%">
+                            Do you wake earlier in the morning than is normal for you? How many times a week does this happen?
+                        </td>
+                        <td style="width: 50%">
+                            <span class="@(Model.EarlyWakening.ToLower() == "absent" ? "chk-absent fas fa-circle" : Model.EarlyWakening.ToLower() == "mild" ? "chk-mild fas fa-circle" : Model.EarlyWakening.ToLower() == "moderate" ? "chk-moderate fas fa-circle" : Model.EarlyWakening.ToLower() == "severe" ? "chk-severe fas fa-circle" : "chk-followup fas fa-circle")"></span>
+                            &emsp;@Html.DisplayName(Model.EarlyWakening)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 5%; text-align:center!important">Q8</td>
+                        <td style="width: 80%">
+                            Have you felt that life wasn’t worth living? Did you ever feel like ending it all?
+                        </td>
+                        <td style="width: 50%">
+                            <span class="@(Model.Suicidal.ToLower() == "absent" ? "chk-absent fas fa-circle" : Model.Suicidal.ToLower() == "mild" ? "chk-mild fas fa-circle" : Model.Suicidal.ToLower() == "moderate" ? "chk-moderate fas fa-circle" : Model.Suicidal.ToLower() == "severe" ? "chk-severe fas fa-circle" : "chk-followup fas fa-circle")"></span>
+                            &emsp;@Html.DisplayName(Model.Suicidal)
+                        </td>
+                    </tr>
+                    <tr id="suicide-cmt">
+                        <td style="width: 5%; text-align:center!important">Q9</td>
+                        <td style="width: 80%">
+                            What did you think you might do? Did you actually try?
+                        </td>
+                        <td style="width: 50%">
+                            @Html.DisplayName(Model.SuicidalCMT)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 5%; text-align:center!important" id="question-10">Q10</td>
+                        <td style="width: 80%">
+                            “Do you feel like crying?” “Do you feel depressed?”
+                        </td>
+                        <td style="width: 50%">
+                            <span class="@(Model.ObservedDepression.ToLower() == "absent" ? "chk-absent fas fa-circle" : Model.ObservedDepression.ToLower() == "mild" ? "chk-mild fas fa-circle" : Model.ObservedDepression.ToLower() == "moderate" ? "chk-moderate fas fa-circle" : Model.ObservedDepression.ToLower() == "severe" ? "chk-severe fas fa-circle" : "chk-followup fas fa-circle")"></span>
+                            &emsp;@Html.DisplayName(Model.ObservedDepression)
+                        </td>
+                    </tr>
+                </table>
+
+
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="text-center">
+                <input id="edit-other" value="Edit" class="btn edit-button" onclick="location.href = '@Url.Action("MH_Schizophrenia_Edit", "Member", new { id = Model.Id, pro = Context.Request.Query["pro"] })'; editKey();" style="width: 15%!important" /><br />
+                <input value="Back" class="btn reset-button go_back" onclick="backKey()" style="width: 15%!important" />
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $('[data-toggle="tooltip"]').tooltip({
+                placement: 'top'
+            });
+        });
+    </script>
+    <script>
+        function backKey() {
+            localStorage.clear();
+            localStorage.removeItem("details_schizophrenia");
+            localStorage.setItem("back_schizophrenia", Date.now());
+        }
+        function editKey() {
+            localStorage.clear();
+            localStorage.removeItem("details_schizophrenia");
+            localStorage.setItem("edit_schizophrenia", Date.now());
+        }
+
+    </script>
+}

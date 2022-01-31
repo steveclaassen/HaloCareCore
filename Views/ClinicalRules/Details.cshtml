@@ -1,0 +1,290 @@
+﻿@model HaloCareCore.Models.Management.ClinicalRules
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Details";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<comment>
+    <!--
+        14 May 2019 -- HCare-737 (Account Settings – Clinical rules (Related to HCare-417))
+        Added CSS to the Index, Create, Edit, Details for Risk Rating in settings.
+
+        I have added a search bar as well as a sort function that will allow the user to sort the columns.
+
+        I have added a new table to the database which lists the pathology fields and further provides a dropdown menu to navigate the rules easier for the user. I’ve also added a dropdown for the rule type
+        which is linked to the disease program. A search function can be used inside the dropdown menu as well. This same dropdown logic has been added to the edit view.
+
+        I have added a duplication check into the Create view so that a user can’t add a rule with the same name.
+
+    -->
+</comment>
+
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+</style>
+
+<div class="fullScreen_container zero-padding">
+
+    <!--pageHeader-->
+    <nav id="global-nav" class="nav">
+        <div class="pull-left title">
+            <h1 class="site-title_patientProfile">
+                <span><i class="fas fa-tags"></i>&emsp; Clinical rules</span>
+            </h1>
+        </div>
+        <div class="pull-right title">
+            <h1 class="site-title_userID pull-right">
+                <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+            </h1>
+            <h1 class="site-title_userID pull-right">
+                @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                {
+                    <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                }
+            </h1>
+            <h1 class="site-waffleIcon pull-right">
+                <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+            </h1>
+        </div>
+    </nav>
+
+    <!--breadCrumbs-->
+    <ul class="breadcrumbs_fullScreens">
+        <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+        <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+        <li><a href="@Url.Action("Index", "ManagementStatus", new {})">Management status</a></li>
+        <li><a href="#">Detail</a></li>
+    </ul>
+
+    <!--navCollection-->
+    <div class="navCollection_fullScreens">
+        @Html.Partial("_navCollection")
+    </div>
+
+    <div style="margin-bottom: 1%"></div>
+
+    <div class="row">
+        <h4 class="tableHeading">Clinical rule detail</h4>
+        <hr class="fancyruler">
+        <br />
+        <br />
+        <div style="margin-left: 5%">
+            <dl class="dl-horizontal editForm">
+                <dt>
+                    @Html.DisplayNameFor(model => model.ruleName)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.ruleName)
+                </dd>
+
+                <br />
+                <hr class="fancyruler" />
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.greater)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.greater)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.gtMessage)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.gtMessage)
+                </dd>
+
+                <br />
+                <hr class="fancyruler" />
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.less)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.less)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.ltMessage)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.ltMessage)
+                </dd>
+
+                <br />
+                <hr class="fancyruler" />
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.ruleType)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.ruleType)
+                </dd>
+
+                <br />
+                <hr class="fancyruler" />
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.male)
+                </dt>
+
+                <dd class="activeCheck">
+                    @if (Model.male)
+                    {
+                        <img src="~/Content/Images/Icons/Administration/AssignmentTrue.png" style="width: 20%; margin-left: -1%!important" />
+                    }
+                    else
+                    {
+                        <img src="~/Content/Images/Icons/Administration/AssignmentFalse.png" style="width: 20%; margin-left: -1%!important" />
+                    }
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.female)
+                </dt>
+
+                <dd class="activeCheck">
+                    @if (Model.female)
+                    {
+                        <img src="~/Content/Images/Icons/Administration/AssignmentTrue.png" style="width: 20%; margin-left: -1%!important" />
+                    }
+                    else
+                    {
+                        <img src="~/Content/Images/Icons/Administration/AssignmentFalse.png" style="width: 20%; margin-left: -1%!important" />
+                    }
+                </dd>
+
+                <br />
+                <hr class="fancyruler" />
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.createdBy)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.createdBy)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.createdDate)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.createdDate)
+                </dd>
+
+                <br />
+                <hr class="fancyruler" />
+
+                @if (Model.modifiedBy != null)
+                {
+                    <dt>
+                        @Html.DisplayNameFor(model => model.modifiedBy)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.modifiedBy)
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.modifiedDate)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.modifiedDate)
+                    </dd>
+
+                    <br />
+                    <hr class="fancyruler" />
+
+                }
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.pathologyField)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.pathologyField)
+                </dd>
+
+                <br />
+                <hr class="fancyruler" />
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.hasAssignment)
+                </dt>
+
+                <dd class="activeCheck">
+                    @if (Model.hasAssignment)
+                    {
+                        <img src="~/Content/Images/Icons/Administration/AssignmentTrue.png" style="width: 20%; margin-left: -1%!important" />
+                    }
+                    else
+                    {
+                        <img src="~/Content/Images/Icons/Administration/AssignmentFalse.png" style="width: 20%; margin-left: -1%!important" />
+                    }
+                </dd>
+
+                @if (Model.hasAssignment == true)
+                {
+                    <dt>
+                        @Html.DisplayNameFor(model => model.assignmentItem)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.assignmentItem)
+                    </dd>
+                }
+
+                <br />
+                <hr class="fancyruler" />
+                <dt>
+                    @Html.DisplayNameFor(model => model.Instruction)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.Instruction)
+                </dd>
+                <br />
+                <hr class="fancyruler" />
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.active)
+                </dt>
+
+                <dd class="activeCheck">
+                    @if (Model.active)
+                    {
+                        <img src="~/Content/Images/Icons/Administration/AssignmentTrue.png" style="width: 20%; margin-left: -1%!important" />
+                    }
+                    else
+                    {
+                        <img src="~/Content/Images/Icons/Administration/AssignmentFalse.png" style="width: 20%; margin-left: -1%!important" />
+                    }
+                </dd>
+
+            </dl>
+            <div class="fixedBack" style="margin-left: 35%">
+                <input value="Back" class="btn buttonRound_formBack go_back" style="width: 15%!important" />
+                <a href="@Url.Action("Edit", "ClinicalRules", new { id = Model.id })" value="Edit" class="btn buttonRound_formEdit" style="width: 15%!important">Edit</a>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+}

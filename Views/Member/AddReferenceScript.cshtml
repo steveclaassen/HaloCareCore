@@ -1,0 +1,228 @@
+﻿@model HaloCareCore.Models.ScriptReferenceView
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "AddReferenceScript";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+</style>
+
+<!--pageHeader-->
+<nav id="global-nav" class="nav">
+    <div class="pull-left title">
+        <h1 class="site-title_patientProfile">
+            <span><img src="~/Content/Images/memberProfile/topBar Icons/Medication_one.png" /></span>&emsp; Script detail
+        </h1>
+    </div>
+    <div class="pull-right title">
+        <h1 class="site-title_userID pull-right">
+            <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+        </h1>
+        <h1 class="site-title_userID pull-right">
+            @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+            {
+                <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+            }
+        </h1>
+        <h1 class="site-waffleIcon pull-right">
+            <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+        </h1>
+    </div>
+</nav>
+
+<div class="dashboardContainer zero-padding">
+    <div class="patientClinical_View">
+
+        <!--breadCrumbs-->
+        <ul class="breadcrumbs_patientDashboard">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+            <li><a href="@Url.Action("patientClinical", "Member", new {DependentID = Model.script.dependantId})">Patient</a></li>
+            <li><a href="#">Script reference</a></li>
+        </ul>
+
+        <!--Left navSlider -->
+        @Html.Partial("_navSliderX", new { DependentID = Context.Request.Query["DependentID"] })
+
+        <!--navCollection-->
+        <div class="navCollection_patientDashboard">
+            @Html.Partial("_navCollection")
+        </div>
+
+        <!--profileInformation-->
+        <div>
+            @Html.Action("_profileBar_edit", "Member", new { DependentID = Model.script.dependantId })
+        </div>
+    </div>
+
+    <div style="margin-bottom: 11%"></div>
+
+    <div class="patientClinical_container">
+        <h4 class="tableHeading">Attachment options</h4>
+        <hr class="fancyruler">
+
+        @using (Html.BeginForm("AddReferenceScript", "Member", FormMethod.Post, new { encType = "multipart/form-data" }))
+        {
+            @Html.AntiForgeryToken()
+
+            <div class="form-horizontal editForm">
+
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                @Html.HiddenFor(model => model.script.dependantId)
+
+                <div class="">
+                    <div class="col-md-12">
+                        <table class="table indexTable_assignments">
+                            <tr>
+                                <th>
+                                    Include <i class="fa fa-fw fa-sort"></i>
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.attachments[0].Link) <i class="fa fa-fw fa-sort"></i>
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.attachments[0].attachmentType) <i class="fa fa-fw fa-sort"></i>
+                                </th>
+                            </tr>
+                            @if (Model.attachments.Count() == 0)
+                            {
+                                <tr><td colspan="3" style="text-align: center!important">No records available</td></tr>
+                            }
+                            else
+                            {
+                                for (int i = 0; i < Model.attachments.Count(); i++)
+                                {
+                                    <tr>
+                                        <td class="scriptRef">
+                                            @Html.CheckBox(Model.attachments[i].attachmentID.ToString())
+                                            @Html.HiddenFor(modelItem => Model.attachments[i].Link)
+                                            @Html.HiddenFor(modelItem => Model.attachments[i].attachmentID)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => Model.attachments[i].Link)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => Model.attachments[i].attachmentType)
+                                        </td>
+                                    </tr>
+                                }
+                            }
+
+                        </table>
+                    </div>
+                    <hr class="fancyruler">
+                    <br />
+                    <div class="form-group" style="margin-left: 20%!important">
+                        @Html.LabelFor(model => model.script.reference, htmlAttributes: new { @class = "control-label col-md-2 drop" })
+                        <div class="col-md-10">
+                            @Html.EditorFor(model => model.script.reference, new { htmlAttributes = new { @class = "infoBox_Enrollment" } })
+                            @Html.ValidationMessageFor(model => model.script.reference, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-left: 20%!important">
+                        @Html.LabelFor(model => model.script.effectiveDate, htmlAttributes: new { @class = "control-label col-md-2 drop" })
+                        <div class="col-md-10">
+                            @Html.EditorFor(model => model.script.effectiveDate, new { htmlAttributes = new { @class = "infoBox_Enrollment" } })
+                            @Html.ValidationMessageFor(model => model.script.effectiveDate, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="form-group linkAttachment" style="margin-left: 20%">
+                        @Html.LabelFor(model => model.script.attachment, htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-6" style="margin-left: 1%">
+                            @Html.TextBox("file", "", new { type = "file" })
+                        </div>
+                    </div>
+                    <br />
+
+                    <div class="form-group">
+                        <div class="actionButton" style="margin-left: 45.2%; margin-bottom: -1.5%">
+                            <input type="submit" class="btn buttonRound_formCreate" style="width: 15%; margin-bottom: 1%" value="Attach" />
+                        </div>
+                    </div>
+                    <br />
+                </div>
+            </div>
+
+        }
+
+
+    </div>
+</div>
+
+
+<script src="js/jquery.tablesorter.min.js"></script>
+
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <script>
+        var $rows = $('#table tr');
+        $('#search').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $rows.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+        function sortTable(n) {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("table");
+            switching = true;
+            dir = "asc";
+
+            while (switching) {
+                switching = false;
+                rows = table.getElementsByTagName("TR");
+
+                for (i = 1; i < (rows.length - 1); i++) {
+
+                    shouldSwitch = false;
+
+                    x = rows[i].getElementsByTagName("TD")[n];
+                    y = rows[i + 1].getElementsByTagName("TD")[n];
+
+                    if (dir == "asc") {
+                        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                            //if so, mark as a switch and break the loop:
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (dir == "desc") {
+                        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                            //if so, mark as a switch and break the loop:
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+                if (shouldSwitch) {
+                    /*If a switch has been marked, make the switch
+                    and mark that a switch has been done:*/
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                    //Each time a switch is done, increase this count by 1:
+                    switchcount++;
+                } else {
+                    /*If no switching has been done AND the direction is "asc",
+                    set the direction to "desc" and run the while loop again.*/
+                    if (switchcount == 0 && dir == "asc") {
+                        dir = "desc";
+                        switching = true;
+                    }
+                }
+            }
+        }
+
+    </script>
+}
+

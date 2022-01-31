@@ -1,0 +1,827 @@
+﻿@model HaloCareCore.Models.AssignmentFullView
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "AssignmentDetails";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+<comment>
+    <!--
+        12 March 2019 -- HCare-650(Assignment Task: Status Change mandatory requirement)
+        Added if statements in frontend which will remove the complete button by default in an Assignment where the Task named “Status Change” is present. In order to COMPLETE the assignment,
+        the user will need to have completed the status change task FIRST which will then enable the “Complete” button.
+
+        02 May 2019 -- HCare-701(Disclaimer - Assignment not to be completed when disclaimer not done)
+        Added a check like HCare-650 which will make sure that if a Disclaimer is on the Assignment, it has to be completed before the user is able to continue
+
+        21 May 2019 -- HCare-738(Assignments ~ Complete button validation)
+        Needed to recode the validation for the Disclaimer / Management status tasks to accommodate the Assignments that are “Empty”. For example, the Outstanding Pathology Assignment had an inactive task and when created,
+        loaded an empty assignment. This made it difficult to validate and thus the “Complete” button was not available.
+        I’ve discussed with Mercia who also understands that the setup from the Assignment Types Task Linking must be done correctly in order to link the assignments and their tasks correctly.
+
+        -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .tooltip-wrapper {
+        display: inline-block; /* display: block works as well */
+    }
+
+        .tooltip-wrapper .btn[disabled] {
+            /* don't let button block mouse events from reaching wrapper */
+            pointer-events: none;
+        }
+
+        .tooltip-wrapper.disabled {
+            /* OPTIONAL pointer-events setting above blocks cursor setting, so set it here */
+            cursor: not-allowed;
+        }
+
+    .ui-autocomplete {
+        z-index: 2147483647;
+    }
+</style>
+
+<!--pageHeader-->
+<nav id="global-nav" class="nav">
+    <div class="pull-left title">
+        <h1 class="site-title_patientProfile">
+            <span><i class="fas fa-bell"></i></span>&emsp; Assignments
+        </h1>
+    </div>
+    <div class="pull-right title">
+        <h1 class="site-title_userID pull-right">
+            <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+        </h1>
+        <h1 class="site-title_userID pull-right">
+            @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+            {
+                <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+            }
+        </h1>
+        <h1 class="site-waffleIcon pull-right">
+            <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+        </h1>
+    </div>
+</nav>
+
+<div class="dashboardContainer zero-padding">
+    <div class="patientDashboard_View">
+
+        <!--breadCrumbs-->
+        <ul class="breadcrumbs_patientDashboard">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+            <li><a class="go_back">Overview</a></li>
+            <li><a href="#">Detail</a></li>
+        </ul>
+
+        <!--Left navSlider -->
+        @Html.Partial("_navSlider_blank", new { })
+
+        <!--navCollection-->
+        <div class="navCollection_patientDashboard">
+            @Html.Partial("_navCollection")
+        </div>
+
+        <!--profileInformation-->
+        <div class="profileBar">
+            @Html.Action("_profileBar_edit", "Member", new { DependentID = Model.assignment.dependentID, pro = Context.Request.Query["pro"] })
+        </div>
+    </div>
+
+    <div class="profilebar-spacer-assignment"></div>
+
+    <div class="patientDashboard_container">
+        <h4 class="summaryHeading">Assignment - @Html.DisplayFor(model => model.assignment.assignmentID)</h4>
+        <hr class="patientProfile_Ruler" />
+
+        <div style="margin-bottom: 0.5%!important"></div>
+
+        <div style="margin-left: 0%">
+
+            <div class="col-md-12 taskTableHeadings">
+                <div class="col-md-6" style="margin-left: 0.5%; margin-bottom: 0.5%">
+                    <div>
+                        <b>@Html.DisplayNameFor(model => model.assignment.effectiveDate)</b>&emsp;&emsp;&nbsp;&nbsp;
+                        @Html.DisplayFor(model => model.assignment.effectiveDate)
+                    </div>
+                    <div>
+                        <b>@Html.DisplayNameFor(model => model.assignment.assignmentType)</b>&emsp;
+                        @if (Model.items.Count != 0)
+                        {
+                            @Html.DisplayFor(model => model.items[0].itemTypeName)
+                        }
+                    </div>
+
+                </div>
+                <div class="col-md-6"></div>
+            </div>
+
+            <hr class="fancyruler">
+
+            <div class="col-md-12">
+                <div class="col-md-1"></div>
+                <div class="col-md-10">
+                    @if (Model.tasks.Count != 0)
+                    {
+                        <table class="table indexTaskTable">
+                            <tr>
+                                <th colspan="4" style="text-indent: 0px;">Tasks</th>
+                                <th>Task type</th>
+                                <th style="text-align: center!important">Completed</th>
+                            </tr>
+                            @foreach (var task in Model.tasks)
+                            {
+                                //HCare-1402
+                                //HCare-1192
+                                if (task.itemID.ToUpper() == "CP" && Model.programs.ProgramName != "MNTLH" && task.templateID.ToUpper().Contains("MH/QUESTIONNAIRE/DSM5"))
+                                {
+                                    continue;
+                                }
+                                if (task.taskType.Contains("Follow up") && Model.programs.ProgramName != "MNTLH") { continue; }
+                                <tr>
+                                    @Html.HiddenFor(taskitem => task.id)
+                                    <td colspan="4" class="taskAlignment">
+                                        @if (!String.IsNullOrEmpty(task.taskType))
+                                        {
+                                            if (task.taskType.Contains("Capture"))
+                                            {
+                                                if (task.taskType.ToLower().Contains("capture") && task.closed != true)
+                                                {
+                                                    <a data-toggle="modal" href="#myModal11-@Html.DisplayFor(taskitem => task.id)" class="" style="margin-left: 5px!important; width: 10%;">@Html.Raw(Html.Encode(task.requirement).Replace("/n", "<br />" + " ").Replace("/*", "<b>").Replace("*/", "</b>"))</a>
+                                                }
+                                                else if (task.taskType.ToLower().Contains("capture") && task.closed == true)
+                                                {
+                                                    <a data-toggle="modal" href="" class="completedTask" style="margin-left: 5px!important; width: 10%; color: slategray" title="task completed">@Html.Raw(Html.Encode(task.requirement).Replace("/n", "<br />" + " ").Replace("/*", "<b>").Replace("*/", "</b>"))</a>
+                                                }
+                                                <!-- Modal -->
+                                                <div class="modal fade" id="myModal11-@Html.DisplayFor(taskitem => task.id)" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+
+                                                    @if (Model.items.Count != 0)
+                                                    {
+                                                        <div class="modal-body">
+                                                            @if (Model.items[0].itemTypeName.ToUpper().Contains("PATHOLOGY"))
+                                                            {
+                                                                @Html.Action("_InsertPathology", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, pro = Context.Request.Query["pro"] })
+                                                            }
+                                                            else if (Model.items[0].itemTypeName.ToUpper().Contains("SCRIPT"))
+                                                            {
+                                                                @Html.Action("_AddScript", "Member", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, pro = Context.Request.Query["pro"] })
+                                                            }
+                                                            else if (task.templateID.ToUpper() == ("DOCTOR REFERRAL"))
+                                                            {
+                                                                <div class="modal-body">
+                                                                    @Html.Action("_DoctorReferral", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, task.templateID, pro = Context.Request.Query["pro"] })
+                                                                </div>
+                                                            }
+                                                            else if (task.templateID.ToUpper() == ("CASE MANAGER"))
+                                                            {
+                                                                <div class="modal-body">
+                                                                    @Html.Action("_AllocateCaseManager", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, task.templateID, pro = Context.Request.Query["pro"] })
+                                                                </div>
+                                                            }
+                                                        </div>
+                                                    }
+                                                </div>
+                                            }
+                                            else if (task.taskType.Contains("Upload"))
+                                            {
+                                                if (task.taskType.ToLower().Contains("upload") && task.closed != true)
+                                                {
+                                                    <a data-toggle="modal" href="#myModal2-@Html.DisplayFor(taskitem => task.id)" class="" style="margin-left: 5px!important; width: 10%">@Html.Raw(Html.Encode(task.requirement).Replace("/n", "<br />" + " ").Replace("/*", "<b>").Replace("*/", "</b>"))</a>
+                                                }
+                                                else if (task.taskType.ToLower().Contains("upload") && task.closed == true)
+                                                {
+                                                    <a data-toggle="modal" href="" class="completedTask" style="margin-left: 5px!important; width: 10%; color: slategray" title="task completed">@Html.Raw(Html.Encode(task.requirement).Replace("/n", "<br />" + " ").Replace("/*", "<b>").Replace("*/", "</b>"))</a>
+                                                }
+                                                <!-- Modal -->
+                                                <div class="modal fade" id="myModal2-@Html.DisplayFor(taskitem => task.id)" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                                                    <div class="">
+                                                        <div class="">
+                                                            <div class="">
+                                                                <div class="row">
+
+                                                                    @using (Html.BeginForm("InsertAttachment", "Clinical", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                                                                    {
+                                                                        @Html.AntiForgeryToken()
+                                                                        @Html.Hidden("taskId", task.id)
+                                                                        if (Model.items.Count > 0)
+                                                                        {
+                                                                            if (Model.items[0].itemTypeName.ToUpper().Contains("PATHOLOGY"))
+                                                                            {
+                                                                                @Html.Hidden("attType", "002")
+                                                                            }
+                                                                            else if (Model.items[0].itemTypeName.ToUpper().Contains("SCRIPT"))
+                                                                            {
+                                                                                @Html.Hidden("attType", "MS1")
+                                                                            }
+                                                                        }
+                                                                        @Html.HiddenFor(model => model.attachment.dependentID)
+                                                                        if (Model.items.Count > 0)
+                                                                        {
+                                                                            @Html.HiddenFor(model => model.items[0].itemTypeName)
+                                                                            @Html.Hidden("id", Model.items[0].assignmentID)
+                                                                            @Html.Hidden("appid", Model.items[0].assignmentItemId)
+                                                                            @Html.Hidden("logid", Model.items[0].logid)
+                                                                            @Html.Hidden("pro", Context.Request.Query["pro"])
+                                                                        }
+
+                                                                        <div class="assignmentModal_Attachments">
+
+                                                                            <div class="row form-horizontal">
+                                                                                <div class="modal-header modal-header-primary">
+                                                                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true" id="assignmentModalClose">×</button>
+                                                                                    <h2>Attachments</h2>
+                                                                                </div>
+                                                                                <br />
+                                                                                <br />
+                                                                                <br />
+
+                                                                                <div class="form-group editMember">
+                                                                                    <div class="col-md-4" style="margin-left: 8%">
+                                                                                        @Html.Label(null,"Attachment Name", htmlAttributes: new { @class = "control-label" })
+                                                                                    </div>
+                                                                                    <div class="col-md-6" style="margin-left: -10%">
+                                                                                        @Html.EditorFor(model => model.attachment.attachmentName, new { htmlAttributes = new { @class = "form-control-attachments", @placeholder = "Insert Attachment Name", @style = "width: 400px" } })
+                                                                                        @Html.ValidationMessageFor(model => model.attachment.attachmentName, "", new { @class = "text-danger" })
+                                                                                    </div>
+                                                                                </div>
+                                                                                <br />
+                                                                                <div class="form-group editMember">
+                                                                                    <div class="col-md-4" style="margin-left: 8%">
+                                                                                        @Html.LabelFor(model => model.attachment.Link, htmlAttributes: new { @class = "control-label" })
+                                                                                    </div>
+                                                                                    <div class="col-md-6" style="margin-left: 33%; margin-top: -2.5%">
+                                                                                        <input type="file" name="file" id="file" class="custom-file-input" />
+                                                                                        <br />
+                                                                                    </div>
+                                                                                </div>
+
+                                                                                <br />
+
+                                                                                <div style="margin-bottom: 2%!important"></div>
+
+                                                                                <div class="form-group">
+                                                                                    <div class="actionButton" style="margin-top: 1%!important; margin-bottom: 2%">
+                                                                                        <input type="submit" value="Save" class="btn buttonRound_scriptAdd" style="width: 15%; margin-left: 40%!important" />
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    }
+                                                                </div>
+                                                            </div>
+
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            }
+                                            else if (task.taskType.ToLower().Contains("email"))
+                                            {
+                                                if (task.taskType.ToLower().Contains("email") && task.closed != true)
+                                                {
+                                                    <a data-toggle="modal" href="#myModal5-@Html.DisplayFor(taskitem => task.id)" class="" style="margin-left: 5px!important; width: 10%">@Html.Raw(Html.Encode(task.requirement).Replace("/n", "<br />" + " ").Replace("/*", "<b>").Replace("*/", "</b>"))</a>
+                                                }
+                                                else if (task.taskType.ToLower().Contains("email") && task.closed == true)
+                                                {
+                                                    <a data-toggle="modal" href="" class="completedTask" style="margin-left: 5px!important; width: 10%; color: slategray" title="task completed">@Html.Raw(Html.Encode(task.requirement).Replace("/n", "<br />" + " ").Replace("/*", "<b>").Replace("*/", "</b>"))</a>
+                                                }
+                                                <!-- Modal -->
+                                                <div class="modal fade" id="myModal5-@Html.DisplayFor(taskitem => task.id)" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+                                                    <div class="">
+                                                        <div class="">
+                                                            @if (Model.items.Count != 0)
+                                                            {
+                                                                if (task.templateID.ToLower() == ("patient_email"))
+                                                                {
+                                                                    <div class="modal-body">
+                                                                        @Html.Action("_InsertEmail", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, pro = Context.Request.Query["pro"] })
+                                                                    </div>
+                                                                }
+                                                                else if (task.templateID.ToLower() == ("doctor_email")) // hcare-1392
+                                                                {
+                                                                    <div class="modal-body">
+                                                                        @Html.Action("_DoctorEmailAssignment", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, pro = Context.Request.Query["pro"] })
+                                                                    </div>
+                                                                }
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            }
+                                            else if (task.taskType.Contains("SMS"))
+                                            {
+                                                if (task.taskType.ToLower().Contains("sms") && task.closed != true)
+                                                {
+                                                    <a data-toggle="modal" href="#myModal5-@Html.DisplayFor(taskitem => task.id)" class="" style="margin-left: 5px!important; width: 10%; padding-right: 50%">@Html.Raw(Html.Encode(task.requirement).Replace("/n", "<br />" + " ").Replace("/*", "<b>").Replace("*/", "</b>"))</a>
+                                                }
+                                                else if (task.taskType.ToLower().Contains("sms") && task.closed == true)
+                                                {
+                                                    <a data-toggle="modal" href="" class="completedTask" style="margin-left: 5px!important; width: 10%; padding-right: 50%; color: slategray" title="task completed">@Html.Raw(Html.Encode(task.requirement).Replace("/n", "<br />" + " ").Replace("/*", "<b>").Replace("*/", "</b>"))</a>
+                                                }
+                                                <!-- Modal -->
+                                                <div class="modal fade" id="myModal5-@Html.DisplayFor(taskitem => task.id)" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+                                                    <div class="">
+                                                        <div class="">
+                                                            @if (Model.items.Count != 0)
+                                                            {
+                                                                @*<div class="modal-body">
+                                                                        @Html.Action("_InsertText", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, pro = Context.Request.Query["pro"] })
+                                                                    </div>*@
+
+                                                                if (task.templateID.ToLower() == ("patient_text"))
+                                                                {
+                                                                    <div class="modal-body">
+                                                                        @Html.Action("_InsertText", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, pro = Context.Request.Query["pro"] })
+                                                                    </div>
+                                                                }
+                                                                else if (task.templateID.ToLower() == ("welcome-text")) // hcare-1445
+                                                                {
+                                                                    <div class="modal-body">
+                                                                        @Html.Action("_WelcomeText", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, pro = Context.Request.Query["pro"] })
+                                                                    </div>
+                                                                }
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            }
+                                            else if (task.taskType.Contains("Auth"))
+                                            {
+                                                <a data-toggle="modal" href="@Url.Action("AuthoriseScript", "Scripts", new { id = task.comment }, null)" class="" style="margin-left: 5px!important; width: 10%">@Html.Raw(Html.Encode(task.requirement).Replace("/n", "<br />" + " ").Replace("/*", "<b>").Replace("*/", "</b>"))</a>
+                                            }
+                                            else if (task.taskType.ToLower().Contains("incomplete"))
+                                            {
+                                                <a data-toggle="modal" target="_blank" href="@Url.Action("patientClinical", "Member", new { DependentID = Model.assignment.dependentID, pro = Context.Request.Query["pro"] }, null)" class="" style="margin-left: 5px!important; width: 10%">@Html.Raw(Html.Encode(task.requirement).Replace("/n", "<br />" + " ").Replace("/*", "<b>").Replace("*/", "</b>"))</a>
+                                            }
+                                            else if (task.taskType.Contains("Question"))
+                                            {
+                                                if (task.templateID.ToUpper().Contains("DISCLAIMER") && task.closed != true
+                                                    || task.templateID.ToUpper().Contains("DOCTOR") && task.closed != true
+                                                    || task.templateID.ToUpper().Contains("DIABETES") && task.closed != true
+                                                    || task.templateID.ToUpper().Contains("ENROLMENT_NEW") && task.closed != true
+                                                    || task.templateID.ToUpper().Contains("QUESTIONNAIRE_GENERAL") && task.closed != true
+                                                    || task.templateID.ToUpper().Contains("QUESTIONNAIRE_HIV") && task.closed != true
+                                                    || task.templateID.ToUpper().Contains("PROGRAM/QUESTIONNAIRE/DIABETES") && task.closed != true
+                                                    || task.templateID.ToUpper().Contains("GENERAL/QUESTIONNAIRE/NEWBORN") && task.closed != true
+                                                    || task.templateID.ToUpper().Contains("MH/QUESTIONNAIRE/DSM5") && task.closed != true
+                                                    || task.templateID.ToUpper().Contains("MH/QUESTIONNAIRE/SCHIZOPHRENIA") && task.closed != true
+                                                    || task.templateID.ToUpper().Contains("MH/QUESTIONNAIRE/BIPOLAR") && task.closed != true
+                                                    || task.templateID.ToUpper().Contains("MH/QUESTIONNAIRE/DEPRESSION") && task.closed != true
+                                                    || task.templateID.ToUpper().Contains("GENERAL/QUESTIONNAIRE/PREGNANT") && task.closed != true)
+                                                {
+
+                                                    <a data-toggle="modal" href="#myModal5-@Html.DisplayFor(taskitem => task.id)" class="" style="margin-left: 5px!important; width: 10%; padding-right: 50%">@Html.Raw(Html.Encode(task.requirement).Replace("/n", "<br />" + " ").Replace("/*", "<b>").Replace("*/", "</b>"))</a>
+                                                }
+                                                else if (task.templateID.ToUpper().Contains("DISCLAIMER") && task.closed == true
+                                                    || task.templateID.ToUpper().Contains("DOCTOR") && task.closed == true
+                                                    || task.templateID.ToUpper().Contains("DIABETES") && task.closed == true
+                                                    || task.templateID.ToUpper().Contains("ENROLMENT_NEW") && task.closed == true
+                                                    || task.templateID.ToUpper().Contains("QUESTIONNAIRE_GENERAL") && task.closed == true
+                                                    || task.templateID.ToUpper().Contains("QUESTIONNAIRE_HIV") && task.closed == true
+                                                    || task.templateID.ToUpper().Contains("PROGRAM/QUESTIONNAIRE/DIABETES") && task.closed == true
+                                                    || task.templateID.ToUpper().Contains("GENERAL/QUESTIONNAIRE/NEWBORN") && task.closed == true
+                                                    || task.templateID.ToUpper().Contains("MH/QUESTIONNAIRE/DSM5") && task.closed == true
+                                                    || task.templateID.ToUpper().Contains("MH/QUESTIONNAIRE/SCHIZOPHRENIA") && task.closed == true
+                                                    || task.templateID.ToUpper().Contains("MH/QUESTIONNAIRE/BIPOLAR") && task.closed == true
+                                                    || task.templateID.ToUpper().Contains("MH/QUESTIONNAIRE/DEPRESSION") && task.closed == true
+                                                    || task.templateID.ToUpper().Contains("GENERAL/QUESTIONNAIRE/PREGNANT") && task.closed == true)
+                                                {
+
+                                                    <a data-toggle="modal" href="" class="completedTask" style="margin-left: 5px!important; width: 10%; padding-right: 50%; color: slategray" title="task completed">@Html.Raw(Html.Encode(task.requirement).Replace("/n", "<br />" + " ").Replace("/*", "<b>").Replace("*/", "</b>"))</a>
+                                                }
+                                                <!-- Modal -->
+                                                <div class="modal fade" id="myModal5-@Html.DisplayFor(taskitem => task.id)" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+
+                                                    <div class="">
+                                                        <div class="">
+                                                            @if (Model.items.Count != 0)
+                                                            {
+                                                                if (task.templateID.ToUpper() == ("DISCLAIMER"))
+                                                                {
+                                                                    <div class="modal-body">
+                                                                        @Html.Action("_PatientDisclaimer", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, task.templateID, pro = Context.Request.Query["pro"] })
+                                                                    </div>
+                                                                }
+                                                                else if (task.templateID.ToUpper() == ("DOCTOR"))
+                                                                {
+                                                                    <div class="modal-body">
+                                                                        @Html.Action("_DoctorQuestionnaire", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, task.templateID, pro = Context.Request.Query["pro"] })
+                                                                    </div>
+                                                                }
+                                                                else if (task.templateID.ToUpper() == ("DIABETES"))
+                                                                {
+                                                                    <div class="modal-body">
+                                                                        @Html.Action("_DiabetesQuestionnaire", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, task.templateID, pro = Context.Request.Query["pro"] })
+                                                                    </div>
+                                                                }
+                                                                else if (task.templateID.ToUpper() == ("ENROLMENT_NEW"))
+                                                                {
+                                                                    <div class="modal-body">
+                                                                        @Html.Action("_halocareDiabetesQuestionnaire", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, task.templateID, pro = Context.Request.Query["pro"] })
+                                                                    </div>
+                                                                }
+                                                                else if (task.templateID.ToUpper() == ("QUESTIONNAIRE_GENERAL"))
+                                                                {
+                                                                    <div class="modal-body">
+                                                                        @Html.Action("_GeneralQuestionnaire", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, task.templateID, pro = Context.Request.Query["pro"] })
+                                                                    </div>
+                                                                }
+                                                                else if (task.templateID.ToUpper() == ("QUESTIONNAIRE_HIV"))
+                                                                {
+                                                                    <div class="modal-body">
+                                                                        @Html.Action("_HIVQuestionnaire", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, task.templateID, pro = Context.Request.Query["pro"] })
+                                                                    </div>
+                                                                }
+                                                                else if (task.templateID.ToUpper() == ("PROGRAM/QUESTIONNAIRE/DIABETES"))
+                                                                {
+                                                                    <div class="modal-body">
+                                                                        @Html.Action("_newDiabetesQuestionnaire", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, task.templateID, pro = Context.Request.Query["pro"] })
+                                                                    </div>
+                                                                }
+                                                                else if (task.templateID.ToUpper() == ("GENERAL/QUESTIONNAIRE/NEWBORN"))
+                                                                {
+                                                                    <div class="modal-body">
+                                                                        @Html.Action("_NewBornQuestionnaire", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, task.templateID, pro = Context.Request.Query["pro"] })
+                                                                    </div>
+                                                                }
+                                                                else if (task.templateID.ToUpper() == ("MH/QUESTIONNAIRE/DSM5"))
+                                                                {
+
+                                                                    <div class="modal-body">
+                                                                        @Html.Action("_DSM5Questionnaire", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, task.templateID, pro = Context.Request.Query["pro"] })
+                                                                    </div>
+                                                                }
+                                                                else if (task.templateID.ToUpper() == ("MH/QUESTIONNAIRE/SCHIZOPHRENIA"))
+                                                                {
+                                                                    <div class="modal-body">
+                                                                        @Html.Action("_SchizophreniaQuestionnaire", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, task.templateID, pro = Context.Request.Query["pro"] })
+                                                                    </div>
+                                                                }
+                                                                else if (task.templateID.ToUpper() == ("MH/QUESTIONNAIRE/BIPOLAR"))
+                                                                {
+                                                                    <div class="modal-body">
+                                                                        @Html.Action("_BipolarQuestionnaire", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, task.templateID, pro = Context.Request.Query["pro"] })
+                                                                    </div>
+                                                                }
+                                                                else if (task.templateID.ToUpper() == ("MH/QUESTIONNAIRE/DEPRESSION"))
+                                                                {
+                                                                    <div class="modal-body">
+                                                                        @Html.Action("_DepressionQuestionnaire", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, task.templateID, pro = Context.Request.Query["pro"] })
+                                                                    </div>
+                                                                }
+                                                                else if (task.templateID.ToUpper() == ("GENERAL/QUESTIONNAIRE/PREGNANT"))
+                                                                {
+                                                                    <div class="modal-body">
+                                                                        @Html.Action("_QuestionnairePregnant", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, task.templateID, pro = Context.Request.Query["pro"] })
+                                                                    </div>
+                                                                }
+                                                                <!--IF you add a new questionnaire with template, you MUST include the new template ID in the IF ELSE above this div-->
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            }
+                                            else if (task.taskType.Contains("Status"))
+                                            {
+                                                if (task.taskType.ToLower().Contains("status") && task.closed != true)
+                                                {
+                                                    <a data-toggle="modal" href="#myModal5-@Html.DisplayFor(taskitem => task.id)" class="" style="margin-left: 5px!important; width: 10%; padding-right: 50%">@Html.Raw(Html.Encode(task.requirement).Replace("/n", "<br />" + " ").Replace("/*", "<b>").Replace("*/", "</b>"))</a>
+                                                }
+                                                else if (task.taskType.ToLower().Contains("status") && task.closed == true)
+                                                {
+                                                    <a data-toggle="modal" href="" class="completedTask" style="margin-left: 5px!important; width: 10%; padding-right: 50%; color: slategray" title="task completed">@Html.Raw(Html.Encode(task.requirement).Replace("/n", "<br />" + " ").Replace("/*", "<b>").Replace("*/", "</b>"))</a>
+                                                }
+                                                <!-- Modal -->
+                                                <div class="modal fade" id="myModal5-@Html.DisplayFor(taskitem => task.id)" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                                                    <div class="">
+                                                        <div class="">
+                                                            @if (Model.items.Count != 0)
+                                                            {
+                                                                <div class="modal-body">
+                                                                    @Html.Action("_ChangeStatus", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, pro = Context.Request.Query["pro"] })
+                                                                </div>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                            }
+                                            else if (task.taskType.Contains("Call"))
+                                            {
+                                                <a data-toggle="modal" href="#myModal88-@Html.DisplayFor(taskitem => task.id)" class="" style="margin-left: 5px!important; width: 10%; padding-right: 60%">@Html.Raw(Html.Encode(task.requirement).Replace("/n", "<br />" + " ").Replace("/*", "<b>").Replace("*/", "</b>"))</a>
+                                                <!-- Modal -->
+                                                <div class="modal fade" id="myModal88-@Html.DisplayFor(taskitem => task.id)" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                                                    <div class="">
+                                                        <div class="">
+                                                            @if (Model.items.Count != 0)
+                                                            {
+                                                                <div class="modal-body">
+                                                                    @Html.Action("_Call", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, pro = Context.Request.Query["pro"] })
+                                                                </div>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            }
+                                            else if (task.taskType.Contains("Clinical information"))
+                                            {
+                                                <a data-toggle="modal" href="#myModal5-@Html.DisplayFor(taskitem => task.id)" class="" style="margin-left: 5px!important; width: 10%">@Html.Raw(Html.Encode(task.requirement).Replace("/n", "<br />" + " ").Replace("/*", "<b>").Replace("*/", "</b>"))</a>
+                                                <!-- Modal -->
+                                                <div class="modal fade" id="myModal5-@Html.DisplayFor(taskitem => task.id)" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                                                    <div class="">
+                                                        <div class="">
+                                                            @if (Model.items.Count != 0)
+                                                            {
+                                                                if (task.templateID.ToUpper().Contains("DISCLAIMER"))
+                                                                {
+                                                                    <div class="modal-body">
+                                                                        @Html.Action("_PatientQuestionnaire", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, task.templateID, pro = Context.Request.Query["pro"] })
+                                                                    </div>
+                                                                }
+                                                                else if (task.templateID.ToUpper().Contains("DOCTOR"))
+                                                                {
+                                                                    <div class="modal-body">
+                                                                        @Html.Action("_DoctorQuestionnaire", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, task.templateID, pro = Context.Request.Query["pro"] })
+                                                                    </div>
+                                                                }
+                                                                else if (task.templateID.Contains("Investigate information and change to stage 4"))
+                                                                {
+                                                                    <div class="modal-body">
+                                                                        @Html.Action("_AllocateCaseManager", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, task.templateID, pro = Context.Request.Query["pro"] })
+                                                                    </div>
+                                                                }
+
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            }
+                                        }
+                                    </td>
+                                    <td style="width: 200px">@Html.DisplayFor(taskitem => task.taskType)</td>
+                                    <td style="width: 200px" class="taskCompleted">
+                                        @if (task.closed == true)
+                                        {
+                                            <img src="~/Content/Images/Navigation/5. Reports/reportCheck.png" style="width: 9%; margin: auto; display: block" />
+                                        }
+                                        else
+                                        {
+                                            <img src="~/Content/Images/Navigation/5. Reports/reportCheck_x.png" style="width: 9%; margin: auto; display: block" />
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </table>
+                    }
+                </div>
+                <div class="col-md-1"></div>
+
+            </div>
+        </div>
+
+        @using (Html.BeginForm("CloseAssignment", "Clinical"))
+        {
+            @Html.HiddenFor(model => model.assignment.assignmentID)
+            @Html.HiddenFor(model => model.assignment.dependentID)
+            @Html.Hidden("pro", Context.Request.Query["pro"])
+            if (Model.items.Count != 0)
+            {
+                @Html.HiddenFor(model => model.items[0].itemTypeName)
+            }
+            <div style="margin-bottom: 1%">
+                <!--<div class="form-group">
+                    <div style="margin-left: 31%">
+                        @Html.LabelFor(model => model.assignment.postponeToDate, htmlAttributes: new { @class = "control-label" })
+                    </div>
+                    <div style="margin-left: 29%">
+                        @Html.EditorFor(model => model.assignment.postponeToDate, new { htmlAttributes = new { @class = "infoBox_Enrollment datepicker" } })
+                        @Html.ValidationMessageFor(model => model.assignment.postponeToDate, "", new { @class = "text-danger" })
+                    </div>
+                </div>-->
+            </div>
+
+            <br />
+
+            <div class="form-group" style="text-align: center!important">
+                <!--HCare-738-->
+                @foreach (var item in Model.items)
+                {
+                    if (Model.tasks.Count > 0)
+                    {
+                        var disc = false;
+                        var sta = false;
+                        var discOnly = false;
+                        var staOnly = false;
+                        var CareMDS5 = false;//Hacre-1192
+                        foreach (var task in Model.tasks)
+                        {
+                            if (task.templateID.ToUpper().Contains("DISCLAIMER") && task.closed == true)
+                            {
+                                disc = true;
+                            }
+                            if (task.templateID.ToUpper().Contains("STATUSCHANGE") && task.closed == true)
+                            {
+                                sta = true;
+                            }
+                            if (task.templateID.ToUpper().Contains("DISCLAIMER"))
+                            {
+                                discOnly = true;
+                            }
+                            if (task.templateID.ToUpper().Contains("STATUS"))
+                            {
+                                staOnly = true;
+                            }
+                            if (task.templateID.ToUpper().Contains("MH/QUESTIONNAIRE/DSM5") && task.closed != true && Model.programs.ProgramName == "MNTLH")
+                            {
+                                CareMDS5 = true;
+                            }
+                        }
+
+                        if (Model.items[0].assignmentItemType == "CLIIN") /*hcare-1224*/
+                        {
+                            <input type="submit" class="btn create-button-large" name="submitButton" value="Complete" />
+                        }
+                        else if (disc && sta)
+                        {
+                            <input type="submit" class="btn create-button-large" name="submitButton" value="Complete" />
+                        }
+                        else if (discOnly && staOnly)
+                        {
+                            <div class="tooltip-wrapper disabled" data-title="Outstanding tasks (Please check Disclaimer or Change status)" style="width: 100%">
+                                <input type="submit" class="btn disabledComplete" name="submitButton" value="Complete" disabled />
+                            </div>
+
+                        }
+                        else if (disc || sta)
+                        {
+                            <input type="submit" class="btn create-button-large" name="submitButton" value="Complete" />
+                        }
+                        else if (discOnly || staOnly)
+                        {
+                            <div class="tooltip-wrapper disabled" data-title="Outstanding tasks (Please check Disclaimer or Change status)" style="width: 100%">
+                                <input type="submit" class="btn disabledComplete" name="submitButton" value="Complete" disabled />
+                            </div>
+                        }
+                        else if (disc == false && sta == false && CareMDS5 == false)
+                        {
+                            <input type="submit" class="btn create-button-large" name="submitButton" value="Complete" />
+                        }
+                    }
+                    else
+                    {
+                        <input type="submit" class="btn questionnaireButton" name="submitButton" value="Complete" />
+                    }
+                }
+
+                <br />
+                <input type="button" class="btn bck-button" value="Back" onclick="location.href='@Url.Action("patientAssignments", "Member", new { DependentID = Model.assignment.dependentID, pro=Context.Request.Query["pro"] }, null)'" />
+
+            </div>
+
+        }
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-12 text-success">
+                @ViewBag.Records
+            </div>
+        </div>
+
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!-- Modal -->
+<div class="modal fade" id="myModal3" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="">
+        <div class="">
+            @if (Model.items.Count != 0)
+            {
+                <div class="modal-body">
+                    @if (Model.items[0].itemTypeName.ToUpper().Contains("PATHOLOGY"))
+                    {
+                        @Html.Action("_ViewPathology", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.items[0].itemCapturedId, pro = Context.Request.Query["pro"] })
+                    }
+                    else if (Model.items[0].itemTypeName.ToUpper().Contains("SCRIPT"))
+                    {
+                        @Html.Action("_ViewScript", "Member", new { id = Model.items[0].itemCapturedId, pro = Context.Request.Query["pro"] })
+                    }
+
+                </div>
+            }
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!-- Modal -->
+<div class="modal fade" id="myModal2" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="">
+        <div class="">
+            <div class="">
+                <div class="row">
+
+                    @using (Html.BeginForm("InsertAttachment", "Clinical", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        @Html.Hidden("taskId", (object)ViewBag.task)
+                        @Html.Hidden("id", (object)ViewBag.id)
+                        if (Model.items.Count > 0)
+                        {
+                            if (Model.items[0].itemTypeName.ToUpper().Contains("PATHOLOGY"))
+                            {
+                                @Html.Hidden("attType", "002")
+                            }
+                            else if (Model.items[0].itemTypeName.ToUpper().Contains("SCRIPT"))
+                            {
+                                @Html.Hidden("attType", "MS1")
+                            }
+                        }
+                        @Html.HiddenFor(model => model.attachment.dependentID)
+                        if (Model.items.Count > 0)
+                        {
+                            @Html.HiddenFor(model => model.items[0].itemTypeName)
+                            @Html.Hidden("id", Model.items[0].assignmentID)
+                            @Html.Hidden("appid", Model.items[0].assignmentItemId)
+                            @Html.Hidden("logid", Model.items[0].logid)
+                        }
+                        @Html.Hidden("pro", Context.Request.Query["pro"])
+
+                        <div class="assignmentModal_Attachments">
+
+                            <div class="row form-horizontal">
+                                <div class="modal-header modal-header-primary">
+                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true" id="assignmentModalClose">×</button>
+                                    <h2>Attachments</h2>
+                                </div>
+                                <br />
+                                <br />
+                                <br />
+
+                                <div class="form-group editMember">
+                                    <div class="col-md-4" style="margin-left: 8%">
+                                        @Html.Label(null,"Attachment Name", htmlAttributes: new { @class = "control-label" })
+                                    </div>
+                                    <div class="col-md-6" style="margin-left: -10%">
+                                        @Html.EditorFor(model => model.attachment.attachmentName, new { htmlAttributes = new { @class = "form-control-attachments", @placeholder = "Insert Attachment Name", @style = "width: 400px" } })
+                                        @Html.ValidationMessageFor(model => model.attachment.attachmentName, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <br />
+                                <div class="form-group editMember">
+                                    <div class="col-md-4" style="margin-left: 8%">
+                                        @Html.LabelFor(model => model.attachment.Link, htmlAttributes: new { @class = "control-label" })
+                                    </div>
+                                    <div class="col-md-8" style="margin-left: 33%; margin-top: -2.5%">
+                                        <input type="file" name="file" id="file" class="custom-file-input" />
+                                        <br />
+                                    </div>
+                                </div>
+
+                                <br />
+
+                                <div style="margin-bottom: 2%!important"></div>
+
+                                <div class="form-group">
+                                    <div class="actionButton" style="margin-top: 1%!important; margin-bottom: 2%">
+                                        <input type="submit" value="Save" class="btn buttonRound_scriptAdd" style="width: 15%; margin-left: 43%!important" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+@section Scripts {
+    <script src="~/bundles/jqueryval"></script>
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="~/Scripts/select2.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.7.1/js/bootstrap-datepicker.min.js"></script>
+
+    <script>
+
+        $(document).ready(function () {
+            event.preventDefault();
+            jQuery.noConflict();
+            $('select[name="templates"]').change(function () {
+                $("#smsMessages_message").val($('select[name="templates"] option:selected').text());
+            }
+            );
+        });
+
+        $("#editLink").attr("disabled", true);
+
+        $(function () {
+            $('.tooltip-wrapper').tooltip({ position: "bottom" });
+        });
+
+    </script>
+
+}

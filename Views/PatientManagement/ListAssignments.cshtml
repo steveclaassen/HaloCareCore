@@ -1,0 +1,91 @@
+﻿@model IEnumerable<HaloCareCore.Models.Communications.Assignments>
+
+@{
+    ViewBag.Title = "ListAssignments";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h4>List Assignments</h4>
+
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.effectiveDate)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.assignmentType)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.postponementReason)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.createdBy)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.createdDate)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.modifiedBy)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.modifiedDate)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Active)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.comment)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.postpone)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.postponeToDate)
+        </th>
+        <th></th>
+    </tr>
+
+@foreach (var item in Model) {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.effectiveDate)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.assignmentType)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.postponementReason)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.createdBy)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.createdDate)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.modifiedBy)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.modifiedDate)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Active)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.comment)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.postpone)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.postponeToDate)
+        </td>
+        <td>
+            @Html.ActionLink("Edit", "Edit", new { id=item.assignmentID }) |
+            @Html.ActionLink("Details", "Details", new { id=item.assignmentID }) |
+            @Html.ActionLink("Delete", "Delete", new { id=item.assignmentID })
+        </td>
+    </tr>
+}
+
+</table>

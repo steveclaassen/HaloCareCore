@@ -1,0 +1,209 @@
+﻿
+@model HaloCareCore.Models.EnrolmentViewModel
+
+
+@{
+    ViewBag.Title = "ProfileInformation_viewMember";
+    Layout = "~/Views/Shared/_LayoutMember.cshtml";
+}
+
+
+<style>
+    .container_memberView {
+        max-width: 1500px;
+        width: 1400px;
+        margin-left: 0%;
+    }
+
+    .editButton:hover {
+        filter: drop-shadow(3px 3px 3px rgba(34, 34, 40, 0.50));
+    }
+
+
+    .memberInformation_dependantCode a:hover {
+        color: #f0ad4e!important;
+    }
+
+</style>
+
+<div class="container sidebarProfile" >
+    <!--profilePicture-->
+    @Html.HiddenFor(model => model.hasSteps)
+        <div class="profileImage">
+
+            @if (Model.dependent.sex == "M" && (DateTime.Now.Year - Model.dependent.birthDate.Year > 13))
+            {
+                <a class="editButton" href="@Url.Action("viewMember", "Member", new { DependentID = Model.dependent.DependantID }, null)" title="View Profile">
+                    <img src="~/Content/Images/memberProfile/Page Icons/memberView_ProfileX.png" />
+                </a>
+            }
+
+            else if (Model.dependent.sex == "F" && (DateTime.Now.Year - Model.dependent.birthDate.Year > 13))
+            {
+                <a class="editButton" href="@Url.Action("viewMember", "Member", new { DependentID = Model.dependent.DependantID }, null)" title="View Profile">
+                    <img src="~/Content/Images/memberProfile/Page Icons/memberView_ProfileAFX.png" />
+                </a>
+            }
+
+            else if (Model.dependent.sex == "M" && (DateTime.Now.Year - Model.dependent.birthDate.Year < 13))
+            {
+                <a class="editButton" href="@Url.Action("viewMember", "Member", new { DependentID = Model.dependent.DependantID }, null)" title="View Profile">
+                    <img src="~/Content/Images/memberProfile/Page Icons/memberView_ProfileIMX.png" />
+                </a>
+            }
+
+            else if (Model.dependent.sex == "F" && (DateTime.Now.Year - Model.dependent.birthDate.Year < 13))
+            {
+                <a class="editButton" href="@Url.Action("viewMember", "Member", new { DependentID = Model.dependent.DependantID }, null)" title="View Profile">
+                    <img src="~/Content/Images/memberProfile/Page Icons/memberView_ProfileIFX.png" />
+                </a>
+            }
+
+            else
+            {
+                <a class="editButton" href="@Url.Action("viewMember", "Member", new { DependentID = Model.dependent.DependantID }, null)" title="View Profile">
+                    <img src="~/Content/Images/memberProfile/Page Icons/memberView_ProfileX.png" />
+                </a>
+            }
+
+        </div>
+
+    <div class="container_memberView">
+
+        <!--profilePicture-->
+
+        <div class="col-md-12" style="margin-top: -8%; font-size: 11px; z-index: 5">
+
+            <div class="memberInformation">
+                <div class="row memberInformation_fullName">
+
+                    @Html.DisplayFor(model => model.dependent.firstName)
+                    @Html.DisplayFor(model => model.dependent.lastName),
+                    @Html.DisplayFor(model => model.dependent.initials)
+                </div>
+                <hr class="dashBoard_Ruler" style="margin-left: 1%; width: 1250px!important; margin-top: 0.5%">
+                <div class="row col-md-9">
+                    <div class="col-md-3">
+                        <div class="memberInformation_membershipNumber">
+                            @Html.Label(null,"Member #: ", htmlAttributes: new { @class = "control-label-member_view" })
+                            @Html.DisplayFor(model => model.member.membershipNo)
+                        </div>
+                        <div class="memberInformation_IDNumber">
+                            @Html.Label(null,"ID #: ", htmlAttributes: new { @class = "control-label-member_view" })
+                            @Html.DisplayFor(model => model.dependent.idNumber)
+                        </div>
+                        <div class="memberInformation_IDNumber">
+                            @Html.Label(null,"Status: ", htmlAttributes: new { @class = "control-label-member_view" })
+                            <b style="color: darkred; font-size: 10px">
+                                @if (Model.statuss.Count > 0)
+                                {@Html.DisplayFor(model => model.statuss[0].managementStatusCode)}
+                            </b>
+                        </div>
+                        <div class="memberInformation_Age">
+                            @Html.Label(null,"Age: ", htmlAttributes: new { @class = "control-label-member_view" })
+                            @Html.DisplayFor(model => model.dependent.dependantAge)
+                        </div>
+
+                    </div>
+                    <div class="col-md-2" style="width: 250px!important">
+                        <div class="memberInformation_dependantCode">
+                            @Html.Label(null,"Dependant Code: ", htmlAttributes: new { @class = "control-label-member_view" })
+                            @Html.DisplayFor(model => model.dependent.dependentCode)
+                        </div>
+                        <div class="memberInformation_dependantCode">
+                            @Html.Label(null,"Program: ", htmlAttributes: new { @class = "control-label-member_view" })
+
+                            @if (Model.programs.Count > 0)
+                            {
+                                @Html.DisplayFor(model => model.programs[0].programCode)
+                            }
+                            @if (Model.programs.Count > 1)
+                            {
+                                @Html.DisplayFor(model => model.programs[1].programCode)
+                            }
+
+                        </div>
+                        <div class="memberInformation_dependantCode">
+                            @Html.Label(null,"Case Manager: ", htmlAttributes: new { @class = "control-label-member_view" })
+
+                            <a href="@Url.Action("AddFromList", "CaseManager", new { DependentID = Model.dependent.DependantID })">@Html.DisplayFor(model => model.CaseManagers.caseManagerId)</a>
+
+
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="memberInformation_dependantCode">
+                            @Html.Label(null,"Scheme: ", htmlAttributes: new { @class = "control-label-member_view" })
+                            @Html.DisplayFor(model => model.MedicalAids[0].Name)
+                        </div>
+                        <div class="memberInformation_dependantCode">
+                            @Html.Label(null,"Option: ", htmlAttributes: new { @class = "control-label-member_view" })
+                            @Html.DisplayFor(model => model.plan)
+                        </div>
+                        <div class="memberInformation_dependantCode">
+                            @Html.Label(null,"Employer Group: ", htmlAttributes: new { @class = "control-label-member_view" })
+                            @if (Model.paypoint != null)
+                            {
+                                @Html.DisplayFor(model => model.paypoint)
+                            }
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="memberInformation_dependantCode">
+                            @Html.Label(null,"Doctor Detail: ", htmlAttributes: new { @class = "control-label-member_view" })
+                            @Html.DisplayFor(model => model.doctor.drFirstName) @Html.DisplayFor(model => model.doctor.drLastName) 
+                        </div>
+                        <div class="memberInformation_dependantCode">
+                            @Html.Label(null,"Practice #: ", htmlAttributes: new { @class = "control-label-member_view" })
+                            @Html.DisplayFor(model => model.doctor.practiceNo)
+                        </div>
+                        <div class="memberInformation_pharmacy">
+                            @Html.Label(null,"Pharmacy: ", htmlAttributes: new { @class = "control-label-member_view" })
+                            @if (Model.DProvider != null)
+                            {
+                                @Html.DisplayFor(model => model.DProvider.dispensingName)
+                            }
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="col-md-2">
+                    <div class="memberInformation_specialNote">
+                        @Html.Label(null,"Special Note: ", htmlAttributes: new { @class = "control-label-member_view" })
+                    </div>
+                    <div class="memberInformation_specialNote">
+                        @Html.DisplayFor(model => model.Notes.note)
+                    </div>
+                    @if (Model.Notes == null)
+                    {
+                        <div class="memberInformation_specialNoteAdd">
+                            @Html.ActionLink("Add", "AddNote", new { DependentID = Model.dependent.DependantID }, null)
+                        </div>
+                    }
+                    @if (Model.Notes != null)
+                    {
+                        <div class="memberInformation_specialNoteAdd">
+                            @Html.ActionLink("Edit", "EditNote", "Member", new { NoteId = Model.Notes.noteID }, null)
+                        </div>
+                    }
+
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="~/bundles/jqueryval"></script>
+    <script src="~/Scripts/select2.min.js"></script>
+}

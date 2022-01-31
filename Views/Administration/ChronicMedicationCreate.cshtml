@@ -1,0 +1,222 @@
+﻿@model HaloCareCore.Models.Validation.ChronicMedication
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Chronic condition NAPPI";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .field-validation-error:before {
+        font-family: FontAwesome;
+        content: "\f06a\00a0";
+        animation: pulse 2s ease infinite;
+    }
+
+    .error-alert {
+        width: 100%;
+        margin: 0 auto;
+        background-color: rgba(217, 83, 79, 0.1);
+        padding: 10px;
+        border-left-color: #d9534f !important;
+        border: 1px solid transparent;
+        border-left-width: 5px;
+        border-radius: 3px;
+        margin: 0 auto;
+        font-family: 'Open Sans', sans-serif;
+        font-size: 12px;
+        margin: 0 0 5px 0;
+        margin-top: -10px;
+        margin-bottom: 20px;
+    }
+
+        .error-alert span {
+            color: #d9534f;
+            text-align: center;
+        }
+</style>
+<javascript>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+</javascript>
+
+<div class="fullScreen_container">
+    <!----------------------------------------------------------------------------- html-top-navigation-panel  ---------------------------------------------------------------------------->
+    <navigation>
+        <nav id="global-nav" class="nav">
+            <div class="pull-left title">
+                <h1 class="site-title_patientProfile">
+                    <span><img src="~/Content/Images/_2020/icons/banner-icon/disclaimer-white.png" /></span>&emsp; Chronic condition NAPPI
+                </h1>
+            </div>
+            <div class="pull-right title">
+                <div class="site-title_userID pull-right">
+                    <div class="halocareLogoX"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+                </div>
+                <h1 class="site-title_userID pull-right">
+                    @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                    {
+                        <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                    }
+                </h1>
+                <h1 class="site-waffleIcon pull-right">
+                    <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+                </h1>
+            </div>
+        </nav>
+        <ul class="breadcrumbs_fullScreens">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+            <li><a href="@Url.Action("Index", "Administration", new {})">Settings</a></li>
+            <li><a href="#">@ViewBag.Title</a></li>
+        </ul>
+        <div class="navCollection_fullScreens">
+            @Html.Partial("_navCollection")
+        </div>
+        <div style="margin-bottom: 2%"></div>
+    </navigation>
+    <div class="container-tab">
+        <div class="row">
+            <div class="span12">
+                <div class="col-md-12 row">
+                    <div class="col-md-6"><h4 class="subHeading">Create new</h4></div>
+                    <hr class="fancyruler">
+                    @using (Html.BeginForm())
+                    {
+                        @Html.AntiForgeryToken()
+                        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                        <div class="hidden-fields">
+                            <input type="hidden" name="code-validation" id="code-validation" />
+                            <input type="hidden" name="description-validation" id="description-validation" />
+                            <input type="hidden" name="error-nappi" id="error-nappi" value="@ViewBag.NAPPI" />
+                            <input type="hidden" name="error-description" id="error-description" value="@ViewBag.Description" />
+                            <div class="col-md-12"><div id="duplicate-code-notice" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; Code already exists!</span></div></div></div>
+                            <div class="col-md-12"><div id="duplicate-description-notice" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; Description already exists!</span></div></div></div>
+                            <div class="col-md-12"><div id="error-duplicate-nappi" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; <b>NAPPI:</b> @ViewBag.NAPPI already exists!</span></div></div></div>
+                            <div class="col-md-12"><div id="error-duplicate-description" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; <b>Description:</b> @ViewBag.Description already exists!</span></div></div></div>
+                            <div class="col-md-12"><div id="error-duplicate" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; This combination, <b>NAPPI:</b> @ViewBag.NAPPI & <b>Description:</b> @ViewBag.Description already exists!</span></div></div></div>
+                        </div>
+                        <br />
+                        <br />
+                        <div class="form-horizontal editForm">
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.nappiStart, htmlAttributes: new { @class = "control-label col-md-2" })
+                                <div class="col-md-10">
+                                    @Html.EditorFor(model => model.nappiStart, new { htmlAttributes = new { @class = "form-control-new", @onblur = "CheckCode();", @required = "required" } })
+                                    @Html.ValidationMessageFor(model => model.nappiStart, "", new { @class = "text-danger", @style = "font-size: 90%; margin-left: 1%" })
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.description, htmlAttributes: new { @class = "control-label col-md-2" })
+                                <div class="col-md-10">
+                                    @Html.EditorFor(model => model.description, new { htmlAttributes = new { @class = "form-control-new", @onblur = "CheckName();", @required = "required" } })
+                                    @Html.ValidationMessageFor(model => model.description, "", new { @class = "text-danger", @style = "font-size: 90%; margin-left: 1%" })
+                                </div>
+                            </div>
+
+                            <div class="fixed-btn">
+                                <input id="submit" type="submit" value="Submit" class="btn create-button" style="width: 15%" /><br />
+                                <input type="text" value="Back" class="btn reset-button go_back" />
+                            </div>
+
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+    <script>
+        function CheckName() {
+            var name = $('#description').val();
+            name = name.toLowerCase().replace(/\s+/g, "");
+            $("#description-validation").val("");
+            $.ajax({
+                url: '/Administration/ChronicMedicationNameCheck',
+                type: "POST",
+                dataType: "JSON",
+                data: { description: name },
+                success: function (result) {
+                    var description = result.description;
+                    if (description.toLowerCase().replace(/\s+/g, "") == name.toLowerCase().replace(/\s+/g, "")) {
+                        $("#duplicate-description-notice").removeClass("hidden");
+                        $('span[data-valmsg-for="description"]').html('<span style="font-size: 12px"><i class="fas fa-exclamation-circle"></i> </span>Description already exists!');
+                        $("#description-validation").val(description);
+                    }
+                },
+                error: function (result) {
+                    $('span[data-valmsg-for="description"]').html('');
+                    $("#duplicate-description-notice").addClass("hidden");
+                }
+            });
+        }
+        $("#submit").click(function () {
+            if ($("#description-validation").val().length > 0) {
+                $("#description").focus();
+                return false;
+            }
+        });
+
+    </script>
+    <script>
+        function CheckCode() {
+            var code = $('#nappiStart').val();
+            code = code.trim();
+            $("#code-validation").val("");
+
+            $.ajax({
+                url: '/Administration/ChronicMedicationCodeCheck',
+                type: "POST",
+                dataType: "JSON",
+                data: { nappiStart: code },
+                success: function (result) {
+                    var cod3 = result.nappiStart;
+                    if (cod3.toLowerCase() == code.toLowerCase()) {
+                        $("#duplicate-code-notice").removeClass("hidden");
+                        $('span[data-valmsg-for="nappiStart"]').html('<span style="font-size: 12px"><i class="fas fa-exclamation-circle"></i> </span>Code already exists!');
+                        $("#code-validation").val(cod3);
+                    }
+                },
+                error: function (result) {
+                    $("#duplicate-code-notice").addClass("hidden");
+                    $('span[data-valmsg-for="nappiStart"]').html('');
+                }
+            });
+        }
+
+        $("#submit").click(function () {
+            if ($("#code-validation").val().length > 0) {
+                $("#nappiStart").focus();
+                return false;
+            }
+        });
+
+    </script>
+    <script>
+        function MainbackBtn() {
+            window.location.href = '@Url.Action("Index", "Administration")';
+        }
+    </script>
+    <script>
+        $(document).ready(function () {
+            var n1 = $('#error-nappi').val();
+            var d1 = $('#error-description').val();
+            if (n1.length > 0 && d1.length > 0) {
+                $("#error-duplicate").removeClass("hidden");
+            }
+            else if (n1.length > 0) {
+                $("#error-duplicate-nappi").removeClass("hidden");
+            }
+            else if (d1.length > 0) {
+                $("#error-duplicate-description").removeClass("hidden");
+            }
+        });
+    </script>
+}

@@ -1,0 +1,162 @@
+﻿@model HaloCareCore.Models.Questionnaire.QuestionnaireOther
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Pregnant";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<comment>
+    <!--
+    04 June 2020 -- HCare-968(Pregnancy information Questionnaire et al)
+    Request is to split Pregnancy out of the General/Other section of Patient Clinical/Patient History/General panel.
+    I have added three more views to allow for the separation of the fields (General vs Pregnancy) and amended the methods to accomodate the post requirements.
+        -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+</style>
+
+<!---------------------------------------------------------------------- header ---------------------------------------------------------------------->
+<nav id="global-nav" class="nav">
+    <div class="pull-left title">
+        <h1 class="site-title_patientProfile">
+            <span><img src="~/Content/Images/_2020/icons/banner-icon/pregnant-white.png" /></span>&emsp; Pregnant
+        </h1>
+    </div>
+    <div class="pull-right title">
+        <h1 class="site-title_userID pull-right">
+            <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+        </h1>
+        <h1 class="site-title_userID pull-right">
+            @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+            {
+                <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+            }
+        </h1>
+        <h1 class="site-waffleIcon pull-right">
+            <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+        </h1>
+    </div>
+</nav>
+
+<div class="dashboardContainer zero-padding">
+    <div class="patientDashboard_View">
+        <!------------------------------------------------------------------------ bread-crumbs ------------------------------------------------------------------------>
+        <ul class="breadcrumbs_patientDashboard">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new { })">Home</a></li>
+            <li><a href="@Url.Action("patientClinical", "Member", new { DependentID = Context.Request.Query["DependentID"] })">Patient</a></li>
+            <li><a href="#">@ViewBag.Title</a></li>
+        </ul>
+
+        <!--------------------------------------------------------------------- left-navigation-bar --------------------------------------------------------------------->
+        @Html.Partial("_navSlider", new { DependentID = Context.Request.Query["DependentID"] })
+
+        <!----------------------------------------------------------------------- nav-collection ----------------------------------------------------------------------->
+        <div class="navCollection_patientDashboard">
+            @Html.Partial("_navCollection")
+        </div>
+
+        <!----------------------------------------------------------------------- patient-profile ----------------------------------------------------------------------->
+        <div class="profileBar">
+            @Html.Action("_profileBar_edit", "Member", new { DependentID = Model.dependentID })
+        </div>
+    </div>
+    <br />
+    <!----------------------------------------------------------------------- form ----------------------------------------------------------------------->
+    <div class="profilebar-spacer"></div>
+
+    <div id="general-pregnant-panel" class="patientDashboard_container">
+        <div class="col-md-12 row">
+            <div class="heading-spacer"></div>
+            <div class="col-md-6"><div class="page-heading">Details</div></div>
+            <hr class="heading-ruler">
+        </div>
+        <div class="col-md-6 row"></div>
+        <div class="col-md-12">
+            <div class="row">
+                <table class="table details-table" id="pregnant-details">
+                    <tbody>
+                        <tr>
+                            <td class="row-heading">Created date</td>
+                            <td class="row-information">@Html.DisplayFor(model => model.createdDate)</td>
+                        </tr>
+                        <tr>
+                            <td class="row-heading">Created by</td>
+                            <td class="row-information">@Html.DisplayFor(model => model.createdBy)</td>
+                        </tr>
+                        <tr>
+                            <td class="row-heading">Pregnant</td>
+                            <td class="row-information"><span class="@(Model.Pregnant == true ? "check-yes far fa-check-circle" : "check-no far fa-times-circle")"></span>@((Model.Pregnant == true) ? " Yes" : " No")</td>
+                        </tr>
+                        @if (Model.Pregnant == true)
+                        {
+                            <tr>
+                                <td class="row-heading">Expected date of delivery</td>
+                                <td class="row-information">@Html.DisplayFor(model => model.EDD)</td>
+                            </tr>
+                        }
+                        <tr>
+                            <td class="row-heading">Treating doctor</td>
+                            <td class="row-information">@(!String.IsNullOrEmpty(Model.TreatingDoctor) ? @Model.TreatingDoctor : "-")</td>
+                        </tr>
+                        <tr>
+                            <td class="row-heading">Is doctor aware</td>
+                            <td class="row-information"><span class="@(Model.isDoctorAware == true ? "check-yes far fa-check-circle" : "check-no far fa-times-circle")"></span>@((Model.isDoctorAware == true) ? " Yes" : " No")</td>
+                        </tr>
+                        @if (Model.modifiedDate != null)
+                        {
+                            <tr>
+                                <td class="row-heading">Modified date</td>
+                                <td class="row-information">@Html.DisplayFor(model => model.modifiedDate)</td>
+                            </tr>
+                            <tr>
+                                <td class="row-heading">Modified by</td>
+                                <td class="row-information">@Html.DisplayFor(model => model.modifiedBy)</td>
+                            </tr>
+                        }
+                        @if (!String.IsNullOrEmpty(Model.generalComments))
+                        {
+                            <tr>
+                                <td class="row-heading">Comment</td>
+                                <td class="row-information">@Html.DisplayFor(model => model.generalComments)</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="text-center">
+                <input value="Back" class="btn bck-button go_back" onclick="backKey()" style="width: 15%!important" />
+                <input id="edit-other" value="Edit" class="btn edit-button" onclick="location.href = '@Url.Action("Clinical_General_Pregnant_Edit", "Member", new { id = Model.QuestionnaireOtherID, pro = Context.Request.Query["pro"] })'; editKey();" style="width: 15%!important" />
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <!-- local-storage-redirect -->
+    <script>
+        function backKey() {
+            localStorage.clear();
+            localStorage.removeItem("details_pregnant");
+            localStorage.setItem("back_pregnant", Date.now());
+        }
+        function editKey() {
+            localStorage.clear();
+            localStorage.removeItem("details_pregnant");
+            localStorage.setItem("edit_pregnant", Date.now());
+        }
+
+    </script>
+
+}
+

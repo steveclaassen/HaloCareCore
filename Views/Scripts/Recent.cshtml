@@ -1,0 +1,229 @@
+﻿@model IEnumerable<HaloCareCore.Models.Script.Scripts>
+
+@{
+    ViewBag.Title = "Recent";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<div class="topBar_informationNavigation"><h2 class="topBar_Header">Recent Scripts</h2></div>
+<div class="topBar_image">
+    <img src="~/Content/Images/memberProfile/topBar Icons/Script.png" style="width: 2.8%; margin-top: -0.2%" />
+</div>
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<div class="row contentBlock_pathology">
+    <div class="indexSearch" style="margin-top:-4%!important">
+        <label for="tableSearch" class="control-label"></label> <input type="text" class="form-control-search" id="search" onkeyup="myFunction()" placeholder="Search..." style="margin-top: 3.4%; margin-left: 88%; position: absolute" />
+        <div class="searchIcon">
+            <img src="~/Content/Images/memberProfile/Search_gray.png" style="width: 0.8%!important; margin-left: 96.5%; margin-top: 4%; position: absolute" />
+        </div>
+    </div>
+
+    <h4 style="color: #003366; margin-top: -2%">Recent Scripts <span style="color: #0081b3">Table</span></h4>
+
+
+    <hr class="fancyruler">
+    <p class="backButton_Navigation" style="margin-top: 1%!important; margin-left: 1%">@Html.ActionLink("Create New", "Create")</p>
+    <table class="table scriptTable" id="table">
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.scriptID)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.scriptType)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.effectiveDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.repeats)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.active)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.createdBy)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.createdDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.modifiedBy)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.modifiedDate)
+            </th>
+            <th>
+                @Html.DisplayName("1st Line")
+            </th>
+            <th>
+                @Html.DisplayName("2nd Line")
+            </th>
+            <th>
+                @Html.DisplayName("3rd Line")
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.prophylaxis)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.resistanceTest)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.practiceNo)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Status)
+            </th>
+            <th>
+                Action
+            </th>
+        </tr>
+
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.scriptID)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.scriptType)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.effectiveDate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.repeats)
+                </td>
+                <td class="scriptCheck">
+
+                    @if (item.active)
+                    {
+                        <img src="~/Content/Images/Navigation/5. Reports/reportCheck.png" />
+                    }
+                    else
+                    {
+                        <img src="~/Content/Images/Navigation/5. Reports/reportCheck_x.png" />
+                    }
+
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.createdBy)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.createdDate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.modifiedBy)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.modifiedDate)
+                </td>
+                <td class="tableCheck">
+
+                    @if (item.firstLine)
+                    {
+                        <img src="~/Content/Images/Navigation/5. Reports/tableCheck.png" />
+                    }
+                    else
+                    {
+                        <img src="~/Content/Images/Navigation/5. Reports/tableCheck_blank.png" />
+                    }
+
+                </td>
+                <td class="tableCheck">
+
+                    @if (item.secondLine)
+                    {
+                        <img src="~/Content/Images/Navigation/5. Reports/tableCheck.png" />
+                    }
+                    else
+                    {
+                        <img src="~/Content/Images/Navigation/5. Reports/tableCheck_blank.png" />
+                    }
+
+                </td>
+                <td class="tableCheck">
+
+                    @if (item.salvageTherapy)
+                    {
+                        <img src="~/Content/Images/Navigation/5. Reports/tableCheck.png" />
+                    }
+                    else
+                    {
+                        <img src="~/Content/Images/Navigation/5. Reports/tableCheck_blank.png" />
+                    }
+
+                </td>
+                <td class="tableCheck">
+
+                    @if (item.prophylaxis)
+                    {
+                        <img src="~/Content/Images/Navigation/5. Reports/tableCheck.png" />
+                    }
+                    else
+                    {
+                        <img src="~/Content/Images/Navigation/5. Reports/tableCheck_blank.png" />
+                    }
+
+                </td>
+                <td class="tableCheck">
+
+                    @if (item.resistanceTest)
+                    {
+                        <img src="~/Content/Images/Navigation/5. Reports/tableCheck.png" />
+                    }
+                    else
+                    {
+                        <img src="~/Content/Images/Navigation/5. Reports/tableCheck_blank.png" />
+                    }
+
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.practiceNo)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Status)
+                </td>
+                <td class="statusCode linkNav">
+                    @Html.ActionLink("Details", "Details", new { id = item.scriptID })
+                </td>
+            </tr>
+        }
+
+    </table>
+</div>
+<br />
+<br />
+
+<div class="backButton_Navigation" style="margin-left: -180px;">
+    @Html.ActionLink("Back", "Index", "Clinical")
+</div>
+
+<footer>
+    <img src="~/Content/Images/Navigation/4. Administration/Script.png" style="position:fixed; bottom:3%; right: 0; left: 0; margin-left: 96.2%; width: 1.5%">
+</footer>
+
+
+<!-- Search -->
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <script>
+
+        var $rows = $('#table tr');
+        $('#search').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $rows.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+    </script>
+}

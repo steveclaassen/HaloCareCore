@@ -1,0 +1,129 @@
+﻿@model IEnumerable<HaloCareCore.Models.Management.Users>
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "ListUsers";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+</style>
+<javascript>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js"></script>
+    <script src="https://www.jqueryscript.net/demo/jQuery-Plugin-For-Sortable-Bootstrap-Tables-Bootstrap-Sortable/Scripts/bootstrap-sortable.js"></script>
+</javascript>
+
+<div class="fullScreen_container zero-padding">
+
+    <!--pageHeader-->
+    <nav id="global-nav" class="nav">
+        <div class="pull-left title">
+            <h1 class="site-title_patientProfile">
+                <span><i class="fas fa-user-circle"></i>&emsp; Users</span>
+            </h1>
+        </div>
+        <div class="pull-right title">
+            <h1 class="site-title_userID pull-right">
+                <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+            </h1>
+            <h1 class="site-title_userID pull-right">
+                @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                {
+                    <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                }
+            </h1>
+            <h1 class="site-waffleIcon pull-right">
+                <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+            </h1>
+        </div>
+    </nav>
+    <!--breadCrumbs-->
+    <ul class="breadcrumbs_fullScreens">
+        <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+        <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+        <li><a href="@Url.Action("Index", "Administration", new {})">Settings</a></li>
+        <li><a href="#">Users</a></li>
+    </ul>
+    <!--navCollection-->
+    <div class="navCollection_fullScreens">
+        @Html.Partial("_navCollection")
+    </div>
+    <div style="margin-bottom: 2%"></div>
+
+    <div class="row">
+        <!--------------------------------------------------------------------------- new/search -------------------------------------------------------------------------->
+        <div class="col-md-12 row">
+            <div class="col-md-6">
+                <h4 class="subHeading">
+                    User overview
+                    <a class="create-new" href="@Url.Action("AddUser", "Account", new { })" style="font-size: 14px">Create new <span><i class="fa fa-plus-circle" style="font-size: 12px"></i></span></a>
+
+                </h4>
+            </div>
+            <!--------------------------------------------------------------------------- jq-search -------------------------------------------------------------------------->
+            <div class="col-md-6">
+                <div class="input-wrapper-new-search">
+                    <input type="text" class="form-control-new-search" id="search" onkeyup="myFunction()" placeholder="Search..." />
+                </div>
+            </div>
+        </div>
+
+        <table class="table riskRatingTable sortable" id="tableUser">
+            <thead>
+                <tr>
+                    <th>@Html.DisplayNameFor(model => model.username) <i class="fa fa-fw fa-sort"></i></th>
+                    <th>@Html.DisplayNameFor(model => model.userFirstName_UC) <i class="fa fa-fw fa-sort"></i></th>
+                    <th>@Html.DisplayNameFor(model => model.userLastName_UC) <i class="fa fa-fw fa-sort"></i></th>
+                    <th>@Html.DisplayNameFor(model => model.email) <i class="fa fa-fw fa-sort"></i></th>
+                    <th style="text-align: center!important; width: 7%">@Html.DisplayNameFor(model => model.Active)</th>
+                    <th style="text-align: center!important; width: 7%">Action</th>
+                </tr>
+            </thead>
+
+            @foreach (var item in Model)
+            {
+                <tbody id="user-search">
+                    <tr>
+                        <td><span class="@(item.Active == true ? "" : "active-false")"><span class="userAvatar" style="color: white!important; font-size: 11px">@Html.DisplayFor(modelItem => item.userInitial)</span> @Html.DisplayFor(modelItem => item.username)</span></td>
+                        <td class="row-information"><span class="@(item.Active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.userFirstName_UC)</span></td>
+                        <td class="row-information"><span class="@(item.Active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.userLastName_UC)</span></td>
+                        <td class="row-information"><span class="@(item.Active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.email)</span></td>
+                        <td class="row-information text-center"><span class="@(item.Active == true ? "chk-yes fas fa-circle" : "chk-no fas fa-circle")"></span></td>
+                        <td class="statusCode linkNav" style="text-align: center!important">
+                            @Html.ActionLink("Edit", "EditUser", new { id = item.userID }) |
+                            @Html.ActionLink("Details", "ViewUser", new { id = item.userID })
+                        </td>
+                    </tr>
+                </tbody>
+            }
+        </table>
+
+
+        <div class="fixedBack">
+            <input value="Back" class="btn buttonRound_formBack " onclick="MainbackBtn();" style="width: 15%" />
+        </div>
+
+    </div>
+</div>
+
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+    <script>
+        var $rows = $('#user-search tr');
+        $('#search').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $rows.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+
+        function MainbackBtn() {
+            window.location.href = '@Url.Action("Index", "Administration")';
+        }
+    </script>
+}

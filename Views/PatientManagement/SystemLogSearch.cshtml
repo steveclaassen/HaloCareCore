@@ -1,0 +1,565 @@
+﻿@model HaloCareCore.Models.ViewModels.SystemLogSearchVM
+@using HaloCareCore.Extensions
+
+@{
+    ViewBag.Title = "System logs";
+    Layout = "~/Views/Shared/_layout-view-x.cshtml";
+}
+
+<javascript>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+    <script src="https://www.jqueryscript.net/demo/jQuery-Plugin-For-Sortable-Bootstrap-Tables-Bootstrap-Sortable/Scripts/bootstrap-sortable.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/js/standalone/selectize.js"></script>
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.default.css">
+</javascript>
+<style>
+    .textbox-control-date {
+        max-width: 400px !important;
+        width: 300px;
+        max-height: 100px;
+        height: 30px;
+        margin-left: 10px;
+        padding: 6px 6px;
+        line-height: 1.428571429;
+        color: #003366;
+        border-radius: 0px !important;
+        border: none !important;
+        border-bottom: 1px solid #e8e6e6 !important;
+        background-color: transparent !important;
+        -webkit-box-shadow: none !important;
+        box-shadow: none !important;
+        margin-top: 4px;
+    }
+
+    .tooltip-inner {
+        width: 120px;
+        background: rgba(0,0,0,0.80);
+        color: #fff;
+        font-size: 10px;
+        font-weight: 100;
+        text-align: center;
+        border-radius: 6px;
+        padding: 5px 0;
+        z-index: 0;
+        -webkit-transition: opacity 0.5s;
+        transition: opacity 1.2s;
+    }
+
+    .tooltip-arrow {
+        border-bottom-color: rgba(0,0,0,0.80) !important;
+    }
+
+    .text-divider {
+        color: rgba(204, 204, 204, 0.80) !important;
+        margin-left: 2% !important;
+        font-size: 10px !important;
+        font-family: 'Century Gothic' !important;
+        font-weight: 100 !important;
+        margin: 4px;
+        line-height: 0;
+        text-align: center;
+    }
+
+    .text-validation {
+        color: #b94a48;
+        font-size: 10px;
+    }
+
+    .select2-container--default .select2-selection--single {
+        display: block !important;
+        max-width: 1500px !important;
+        width: 120% !important;
+        max-height: 100px;
+        height: auto;
+        margin-left: 5px;
+        padding: 3px 0px;
+        line-height: 1.428571429;
+        color: #003366;
+        border-radius: 0px !important;
+        border: none !important;
+        border-bottom: 1px solid #e8e6e6 !important;
+        background-color: transparent !important;
+        -webkit-box-shadow: none !important;
+        box-shadow: none !important;
+        outline: none !important;
+    }
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            background-color: #0081b3 !important;
+            color: white !important;
+            border: 1px solid transparent !important;
+            border-radius: 0px;
+            cursor: default;
+            float: left;
+            margin-right: 5px;
+            padding: 2px 6px 2px 6px !important;
+            line-height: 20px !important;
+            margin-top: -5px;
+        }
+
+    .select2-container .select2-selection--single .select2-selection__clear {
+        padding: 0 2px 0 5px;
+    }
+
+    .select2-container--open .select2-dropdown {
+        left: 10px !important;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__placeholder {
+        color: white !important;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__arrow b {
+        top: 35% !important;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        right: -75px !important;
+        width: 20px !important;
+    }
+
+    .select2-container--default .select2-selection--multiple {
+        display: block !important;
+        max-width: 1500px !important;
+        width: 120% !important;
+        max-height: 100px;
+        height: auto;
+        margin-left: 5px;
+        padding: 6px 0px;
+        line-height: 1.428571429;
+        color: #003366;
+        border-radius: 0px !important;
+        border: none !important;
+        border-bottom: 1px solid #e8e6e6 !important;
+        background-color: transparent !important;
+        -webkit-box-shadow: none !important;
+        box-shadow: none !important;
+    }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice {
+            background-color: #0081b3 !important;
+            color: white !important;
+            border: 1px solid transparent !important;
+            border-radius: 0px !important;
+            cursor: default;
+            float: left;
+            margin-right: 5px;
+            margin-top: 0px !important;
+            padding: 5px 6px 5px 0px !important;
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+            color: white !important;
+            cursor: pointer;
+            display: inline-block;
+            font-weight: bold;
+            margin-right: 2px;
+        }
+
+    .select2-container--open .select2-dropdown {
+        left: 10px !important;
+    }
+
+    .error-alert {
+        display: none;
+        background-color: rgba(217, 48, 78, 0.2);
+        padding: 10px 12px 10px 12px;
+        border: 1px solid transparent;
+        border-radius: 0px;
+        font: 100 12px 'Open Sans', sans-serif;
+        color: rgb(217, 48, 78);
+        margin: 0 0 0 0;
+        margin-top: -10px;
+        margin-bottom: -10px;
+        margin-left: -15px;
+        width: 102%;
+        vertical-align: middle;
+    }
+
+        .error-alert span a {
+            color: rgb(217, 48, 78);
+            margin-top: -5px;
+        }
+
+    .export-excel-icon {
+        padding: 0;
+    }
+
+    .tooltip-inner {
+        max-width: 220px;
+        width: 100%;
+    }
+
+    .search-form-control {
+        display: block;
+        max-width: 1000px !important;
+        width: 38%;
+        max-height: 100px;
+        height: 30px;
+        margin-top: 5px;
+        margin-left: 10px;
+        padding: 6px 6px;
+        line-height: 1.428571429;
+        color: #003366;
+        border-radius: 0px;
+        border: none;
+        border-bottom: 1px solid #e8e6e6;
+        background-color: transparent !important;
+        font-family: 'Century Gothic' !important;
+    }
+
+        .search-form-control:hover {
+            border-bottom: 1px solid #b0afaf;
+        }
+
+        .search-form-control:focus {
+            border-bottom: 1px solid #b0afaf;
+        }
+
+
+</style>
+
+<div id="loading-screen" class="hidden">
+    <div class="container-loader">
+        <div></div><div></div><div></div><div></div>
+        <span class="loading-text">LOADING...</span>
+    </div>
+    <div id="loading" class="loading"></div>
+</div>
+
+<div class="collapse in">
+    <div class="card card-body">
+        <div class="collapse-body">
+            <div class="settings-panel">
+
+                <ul class="bread-crumbs-full-screen" style="color: #808080 !important;">
+                    <li style="font-size: 10px; font-weight: 600">You are here:</li>
+                    <li><a href="@Url.Action("Index", "Home" , new { })">Home</a></li>
+                    <li><a href="@Url.Action("searchManagement", "PatientManagement" , new { })">Search</a></li>
+                    <li><a href="#">@ViewBag.Title</a></li>
+                </ul>
+                @if (User.Identity.IsAuthenticated)
+                {
+                    if (User.HasRole("6. Global user") || User.RoleHasAccess())
+                    {
+                        <div class="navCollection_fullScreens">
+                            <div class="buttonCollection">
+                                <div class="col-md-12">
+                                    <div class="col-md-4"></div>
+                                    <div class="col-md-4">
+                                        <div class="col-md-1"></div>
+                                        <div class="col-md-10">
+                                            <div class="col-md-2"></div>
+                                            <div class="col-md-2">
+                                                <a href="@Url.Action("Index", "Home" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Home"><span style="font-size: 12px" class="sub_icon fas fa-home"></span></a>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <a href="@Url.Action("Search", "Member" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Patient"><span style="font-size: 12px" class="sub_icon fas fa-user-circle"></span></a>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <a href="@Url.Action("searchManagement", "patientManagement" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Search"><span style="font-size: 12px" class="sub_icon fas fa-search"></span></a>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <a href="@Url.Action("Index", "Administration" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Settings"><span style="font-size: 12px" class="sub_icon fas fa-cog"></span></a>
+                                            </div>
+                                            <div class="col-md-2"></div>
+                                        </div>
+                                        <div class="col-md-1"></div>
+                                    </div>
+                                    <div class="col-md-4"></div>
+
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="navCollection_fullScreens">
+                            <div class="buttonCollection">
+                                <div class="col-md-12">
+                                    <div class="col-md-4"></div>
+                                    <div class="col-md-4">
+                                        <div class="col-md-1"></div>
+                                        <div class="col-md-10">
+                                            <div class="col-md-3"></div>
+                                            <div class="col-md-2">
+                                                <a href="@Url.Action("Index", "Home" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Home"><span style="font-size: 12px" class="sub_icon fas fa-home"></span></a>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <a href="@Url.Action("Search", "Member" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Patient"><span style="font-size: 12px" class="sub_icon fas fa-user-circle"></span></a>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <a href="@Url.Action("searchManagement", "patientManagement" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Search"><span style="font-size: 12px" class="sub_icon fas fa-search"></span></a>
+                                            </div>
+                                            <div class="col-md-3"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4"></div>
+
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                <span class="pull-right filter-button" type="button" title="filter" onclick="SearchFilter()"><span class="fas fa-filter"></span></span>
+                <div id="filter" class="collapse">
+                    <h4 class="table-heading">Search filter</h4>
+                    <hr class="fancyruler">
+                    @using (Html.BeginForm("SystemLogSearch", "PatientManagement", FormMethod.Post, new { id = "system-log-search" }))
+                    {
+                        <div id="search-validation" class="error-alert" style="margin-bottom: 12px"></div>
+                        <div id="account-details-error" class="account-options-alert hidden" style="margin-bottom: 12px"></div>
+                        <input id="post-return" value="@ViewBag.Post" hidden />
+                        <div style="margin-bottom: 10px"></div>
+
+                        <table class="table details-table">
+                            <tr>
+                                <td class="search-label">@Html.DisplayName("Table")</td>
+                                <td class="row-information">
+                                    @Html.DropDownListFor(model => model.SelectedTable, new SelectList(Model.Tables, "TableName", "TableName"), "Select", new { @onchange = "Table()" })<br />
+                                    <span id="table-name-error" class="text-danger" style="margin-left: 1%"></span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="search-label">@Html.DisplayName("Column")</td>
+                                <td class="row-information">
+                                    @Html.DropDownListFor(model => model.SelectedColumn, new SelectList(Enumerable.Empty<SelectListItem>(), "ColumnName", "ColumnName"), "Select", new { })
+                                    <span id="column-name-error" class="text-danger" style="margin-left: 1%"></span>
+
+                                    <span class="row" style="display: inline-flex; margin-left: 100px;">
+                                        <span class="column-loading"></span>
+                                    </span>
+
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="search-label">@Html.DisplayName("Record ID")</td>
+                                <td class="row-information">
+                                    <input id="record-id" name="record-id" class="search-form-control" />
+                                    <span id="record-id-error" class="text-danger" style="margin-left: 1%"></span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="search-label">@Html.DisplayName("Current value")</td>
+                                <td class="row-information">
+                                    <input id="current-value" name="current-value" class="search-form-control" />
+                                    <br /><span id="current-value-error" class="text-danger" style="margin-left: 1%"></span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="search-label">@Html.DisplayName("Date")</td>
+                                <td class="row-information">
+                                    <input class="text-box single-line input-validation-error textbox-control-date" data-val="true" data-val-date="The field must be a date." id="created-date" name="created-date" type="date" min="@DateTime.Now.ToString("1900-01-01")" max="@DateTime.Now.ToString("yyyy-MM-dd")" aria-required="true" aria-describedby="DOB-error" aria-invalid="true">
+                                    <i class="fas fa-question-circle information-icon icon-move" id="tooltip" data-toggle="tooltip" data-original-title="This field will use the created date of the entry and will include all entries from this date."></i>
+                                    <div id="created-date-validation" class="hidden" style="margin-top: 1%; margin-left: 5%;"><div class="text-validation"><span><i class="fas fa-exclamation-circle"></i>&nbsp; This field is required. </span></div></div>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <div class="search-footer pull-right">
+                            <input type="button" id="search-back" value="Back" class="btn modal-button-previous" onclick="location.href='@Url.Action("searchManagement", "PatientManagement", null)'" />
+                            <input type="submit" id="search-submit" value="Search" class="btn modal-button-next" onclick="TableCheck()" />
+                        </div>
+                        <hr class="settings-ruler" />
+                    }
+                </div>
+                @if (Model.filter == true) { }
+                else if (Model.Logs.Count > 0)
+                {
+                    <br />
+                    <br />
+                    <div id="table-results">
+                        <div class="col-md-12 row">
+                            <div class="col-md-6">
+                                <div class="page-heading">Search results  <span style="color: #ccc; font-size: 12px;">(@Model.Logs.Count() results)</span></div>
+                            </div>
+                            <!--------------------------------------------------------------------------- jq-search -------------------------------------------------------------------------->
+                            <div class="col-md-6 row">
+                                <div class="col-md-6">
+                                    <!-------------------------------------------------------------------------- excel export -------------------------------------------------------------------------->
+                                    @using (Html.BeginForm("SystemLogToExcel", "PatientManagement", FormMethod.Post))
+                                    {
+                                        <input name="table" id="table" value="@TempData["table"].ToString()" hidden />
+                                        <input name="column" id="column" value="@TempData["column"].ToString()" hidden />
+                                        <input name="recordid" id="recordid" value="@TempData["recordid"].ToString()" hidden />
+                                        <input name="currentvalue" id="currentvalue" value="@TempData["currentvalue"].ToString()" hidden />
+                                        <input name="createddate" id="createddate" value="@TempData["createddate"].ToString()" hidden />
+
+                                        <div class="form-group">
+                                            <input class="export-excel-icon" type="image" src="~/Content/Images/_2020/icons/microsoft-excel.png" title="export to excel" alt="Submit">
+                                        </div>
+                                    }
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="input-wrapper-new-search">
+                                        <input type="text" class="form-control-new-search" id="enquiry-search" onkeyup="myFunction()" placeholder="Search..." />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <table class="table pathology-search-table sortable" id="production-table">
+                            <thead>
+                                <tr>
+                                    <th>@Html.DisplayNameFor(mi => mi.Log.RecordID) <i class="fa fa-fw fa-sort"></i></th>
+                                    <th>@Html.DisplayNameFor(mi => mi.Log.EventType) <i class="fa fa-fw fa-sort"></i></th>
+                                    <th>@Html.DisplayNameFor(mi => mi.Log.TableName) <i class="fa fa-fw fa-sort"></i></th>
+                                    <th>@Html.DisplayNameFor(mi => mi.Log.ColumnName) <i class="fa fa-fw fa-sort"></i></th>
+                                    <th>@Html.DisplayNameFor(mi => mi.Log.NewValue) <i class="fa fa-fw fa-sort"></i></th>
+                                    <th>@Html.DisplayNameFor(mi => mi.Log.Created_date) <i class="fa fa-fw fa-sort"></i></th>
+                                </tr>
+                            </thead>
+                            @foreach (var item in Model.Logs)
+                            {
+                                <tbody id="enquiry-filter" class="tooltip-div">
+                                    <tr>
+                                        <td>@Html.DisplayFor(modelItem => item.RecordID)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.EventType)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.TableName)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.ColumnName)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.CurrentValue)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.CreatedDate)</td>
+                                    </tr>
+                                </tbody>
+                            }
+                        </table>
+                    </div>
+                    <br />
+
+                    <div id="results-button">
+                        <span class="@(Model.Logs.Count <= 12 ? "sf-footer" : "search-footer pull-right")">
+                            <input type="button" id="search-back-2" value="Back" class="btn modal-button-previous" onclick="location.href='@Url.Action("searchManagement", "PatientManagement", null)'" />
+                            <input type="button" onclick="location.href='@Url.Action("SystemLogSearch", "PatientManagement" , null)'" value="Filter" class="btn modal-button-default" />
+                        </span>
+                    </div>
+                }
+                else
+                {
+                    <div class="no-results-1"><img src="~/Content/Images/_2020/tables/no-results-3.png" /></div>
+                    <h4 class="no-results">No results found</h4>
+                    <div style="text-align: center">
+                        <input type="button" onclick="location.href='@Url.Action("SystemLogSearch", "PatientManagement" , null)'" value="Search" class="btn modal-button-default" />
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script src="~/bundles/jqueryval"></script>
+    <script>
+        window.onload = function () {}
+
+        $('#search-submit').click(function () {
+            $("form").submit(function () {
+                if ($(this).valid()) {  //<<< If validation passes
+                    $("#loading-screen").removeClass("hidden");
+                }
+            });
+        });
+
+        $(function () {
+            if ($('#post-return').val() == '' || $('#post-return').val() == null) {
+                $('#filter').addClass("in")
+            }
+            if ($('#post-return').val() == 'return') {
+                Collapse();
+            }
+        });
+
+        function Collapse() {
+            $('#filter').removeClass("in")
+        }
+
+        var len = @Model.Logs.Count;
+        if (len > 0) {
+            $('#filter').removeClass("in")
+        }
+
+        function SearchFilter() {
+            $('#filter').toggleClass("in");
+            $('#results-button').toggleClass("hidden");
+
+        }
+    </script>
+    <script>
+        $(function () {
+            $(".column-loading").hide();
+        });
+        function Table() {
+            $('#search-validation').fadeOut().html('');
+            $('#table-name-error').html('');
+            $(".search-footer").css({ "margin-top": "190px" });
+            $(".column-loading").show();
+
+            var table = $('#SelectedTable').val();
+            $.ajax({
+                url: '/PatientManagement/GetLogTableColumns',
+                type: "GET",
+                dataType: "JSON",
+                data: { table: table },
+                success: function (options) {
+                    $("#SelectedColumn").html("");
+                    $.each(options, function (i, option) {
+                        $("#SelectedColumn").append(
+                            $('<option></option>').val(option.ColumnName).html(option.ColumnName));
+                    });
+
+                    $(".column-loading").hide();
+
+                }
+            });
+        }
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function () { $("#SelectedTable").select2({ multiple: false, placeholder: "Select", allowClear: true }); });
+        $(document).ready(function () { $("#SelectedColumn").select2({ multiple: true, placeholder: "Select", allowClear: true }); });
+        $(document).ready(function () { $("#SelectedRecordID").select2({ multiple: false, placeholder: "Select", allowClear: true }); });
+    </script>
+    <script>
+        function Reset() {
+            $('#SelectedTable').val(null).trigger('change');
+            $('#SelectedColumn').val(null).trigger('change');
+            $("#record-id").val("");
+            $("#current-value").val("");
+            $("#created-date").val("");
+        }
+        function TableCheck() {
+            var value = $("#SelectedTable :selected").val();
+            if (value == null || value == '') {
+                $('#search-validation').fadeIn().html('&nbsp;&nbsp;<span style="font-size: 10px"><i class="fas fa-exclamation-circle"></i></span>&nbsp;Table selection is required!');
+                $('#table-name-error').html('<span style="font-size: 10px"><i class="fas fa-exclamation-circle"></i> </span>Table selection is required!');
+                $(".search-footer").css({ "margin-top": "150px" });
+
+                event.preventDefault();
+            }
+            else {
+                Collapse();
+                $('#table-results').hide()
+
+            }
+        }
+    </script>
+    <script>
+        $('#SelectedTable').val(null).trigger('change');
+        $('#SelectedColumn').val(null).trigger('change');
+        $("#record-id").val("");
+        $("#current-value").val("");
+        $("#created-date").val("");
+    </script>
+    <script>
+        $(document).ready(function () {
+            //$('[data-toggle="tooltip"]').tooltip({
+            //    placement: 'top'
+            //});
+            $("#tooltip").tooltip({
+                placement: 'top'
+            });
+        });
+    </script>
+}

@@ -1,0 +1,229 @@
+﻿@model HaloCareCore.Models.DoctorSearchVars
+@using HaloCareCore.Extensions
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "DoctorSearch";
+    Layout = "~/Views/Shared/_LayoutMember.cshtml";
+}
+
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    select[multiple] {
+        max-height: 1000px;
+        height: 67px;
+    }
+
+    .select2-container--default .select2-selection--multiple {
+        padding: 0 !important;
+        padding-left: 5px !important;
+    }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice {
+            margin-top: 5px !important;
+        }
+</style>
+
+<!--pageLoader-->
+<div id="loading-screen" class="hidden">
+    <div class="container-loader">
+        <div></div><div></div><div></div><div></div>
+        <span class="loading-text">LOADING...</span>
+    </div>
+    <div id="loading" class="loading"></div>
+</div>
+
+<div class="fullScreen_container">
+    <!--pageHeader-->
+    <nav id="global-nav" class="nav">
+        <div class="pull-left title">
+            <h1 class="site-title_patientProfile">
+                <span><i class="fas fa-search"></i>&emsp; Search</span>
+            </h1>
+        </div>
+        <div class="pull-right title">
+            <h1 class="site-title_userID pull-right">
+                <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+            </h1>
+            <h1 class="site-title_userID pull-right">
+                @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                {
+                    <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                }
+            </h1>
+            <h1 class="site-waffleIcon pull-right">
+                <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+            </h1>
+        </div>
+    </nav>
+
+    @using (Html.BeginForm())
+    {
+        <div class="">
+
+            <!--breadCrumbs-->
+            <ul class="breadcrumbs_fullScreens" style="margin-top: -2%">
+                <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+                <li><a href="@Url.Action("Index", "Home", new { })">Home</a></li>
+                <li><a href="#">Doctor search</a></li>
+            </ul>
+
+            <!--navCollection-->
+            @if (User.Identity.IsAuthenticated)
+            {
+                if (User.HasRole("6. Global user") || (User.HasRole("5. Super user")))
+                {
+                    <div class="navCollection_fullScreens">
+                        <div class="buttonCollection">
+                            <div class="col-md-12">
+                                <div class="col-md-4"></div>
+                                <div class="col-md-4">
+                                    <div class="col-md-2">
+                                        <a href="@Url.Action("Index", "Home", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Home"><span style="font-size: 15px" class="sub_icon fas fa-home"></span></a>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <a href="@Url.Action("OpenAssignments", "Clinical", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Assignments"><span style="font-size: 15px" class="sub_icon fas fa-bell"></span></a>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <a href="@Url.Action("Search", "Member", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Patient"><span style="font-size: 15px" class="sub_icon fas fa-user-circle"></span></a>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <span style="font-size: 15px; background: -webkit-linear-gradient(#e80a89, #f15b2a);-webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow (10px 10px 1px rgba(34, 34, 34, 0.50))" title="Search" class="sub_icon fas fa-search"></span>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <a href="@Url.Action("Index", "Administration", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Settings"><span style="font-size: 15px" class="sub_icon fas fa-cog"></span></a>
+                                    </div>
+
+                                </div>
+                                <div class="col-md-4"></div>
+
+                            </div>
+                        </div>
+                    </div>
+                }
+                else if (User.HasRole("4. Advisor"))
+                {
+                    <div class="navCollection_fullScreens">
+                        <div class="buttonCollection">
+                            <div class="col-md-12">
+                                <div class="col-md-4"></div>
+                                <div class="col-md-4">
+                                    <div class="col-md-1"></div>
+                                    <div class="col-md-2">
+                                        <a href="@Url.Action("Index", "Home", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Home"><span style="font-size: 15px" class="sub_icon fas fa-home"></span></a>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <a href="@Url.Action("OpenAssignments", "Clinical", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Assignments"><span style="font-size: 15px" class="sub_icon fas fa-bell"></span></a>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <a href="@Url.Action("Search", "Member", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Patient"><span style="font-size: 15px" class="sub_icon fas fa-user-circle"></span></a>
+                                    </div>
+                                    <!--<div class="col-md-2">
+                                        <a href="@Url.Action("OutstandingAuthorise", "Scripts", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Authorisation"><span style="font-size: 15px" class="sub_icon fas fa-check-circle"></span></a>
+                                    </div>-->
+                                    <div class="col-md-2">
+                                        <span style="font-size: 15px; background: -webkit-linear-gradient(#e80a89, #f15b2a);-webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow (10px 10px 1px rgba(34, 34, 34, 0.50))" title="Search" class="sub_icon fas fa-search"></span>
+                                    </div>
+                                    <div class="col-md-1"></div>
+                                </div>
+                                <div class="col-md-4"></div>
+
+                            </div>
+                        </div>
+                    </div>
+                }
+                else if (User.HasRole("1. Consultant") || (User.HasRole("2. Case manager") || (User.HasRole("3. Specialist"))))
+                {
+                    <div class="navCollection_fullScreens">
+                        <div class="buttonCollection">
+                            <div class="col-md-12">
+                                <div class="col-md-4"></div>
+                                <div class="col-md-4">
+                                    <div class="col-md-2"></div>
+                                    <div class="col-md-2">
+                                        <a href="@Url.Action("Index", "Home", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Home"><span style="font-size: 15px" class="sub_icon fas fa-home"></span></a>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <a href="@Url.Action("OpenAssignments", "Clinical", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Assignments"><span style="font-size: 15px" class="sub_icon fas fa-bell"></span></a>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <a href="@Url.Action("Search", "Member", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Patient"><span style="font-size: 15px" class="sub_icon fas fa-user-circle"></span></a>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <span style="font-size: 15px; background: -webkit-linear-gradient(#e80a89, #f15b2a);-webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow (10px 10px 1px rgba(34, 34, 34, 0.50))" title="Search" class="sub_icon fas fa-search"></span>
+                                    </div>
+                                    <div class="col-md-2"></div>
+                                </div>
+                                <div class="col-md-4"></div>
+
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+
+            <div style="margin-bottom: 2%"></div>
+
+            <h4 class="summaryHeading">Doctor search</h4>
+            <hr class="fancyruler">
+            <br />
+            <br />
+            <div class="form-group editForm">
+                <div class="form-group">
+                    <div class="form-horizontal editForm">
+                        @Html.HiddenFor(model => model.dependentID)
+
+                        <div class="form-group">
+                            <div class="col-md-12">
+                                <div class="col-md-6">
+                                    <div class="col-md-3">
+                                        @Html.Label(null,"Doctor full names", htmlAttributes: new { @class = "control-label col-md-12" })
+                                    </div>
+                                    <div class="col-md-9">
+                                        @Html.EditorFor(model => model.LastName, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="col-md-12">
+                                <div class="col-md-6">
+                                    <div class="col-md-3">
+                                        @Html.Label(null,"Doctor practice #", htmlAttributes: new { @class = "control-label col-md-12" })
+                                    </div>
+                                    <div class="col-md-9">
+                                        @Html.EditorFor(model => model.practiceNo, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+                <br />
+                <br />
+                <div class="form-group">
+                    <div class="actionButton" style="margin-left: 39%">
+                        <input value="Back" class="btn buttonRound_formBack go_back" style="width: 15%" />
+                        <input type="submit" value="Search" class="btn buttonRound_formCreate" style="width: 15%!important" />
+                    </div>
+                </div>
+                <br />
+            </div>
+
+
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script src="~/bundles/jqueryval"></script>
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+
+}

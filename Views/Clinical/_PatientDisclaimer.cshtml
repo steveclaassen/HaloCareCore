@@ -1,0 +1,1200 @@
+﻿@model HaloCareCore.Models.ViewModels.DisclaimerVM
+
+@{
+    ViewBag.Title = "Patient Disclaimer";
+    Layout = "~/Views/Shared/_LayoutModal.cshtml";
+}
+<comment>
+    <!-- 25 March 2019 -- HCare-675 (HaloCare Disclaimer Update) -->
+    <!-- 14 July 2020 -- HCare-864(Disclaimer update) -->
+    <!-- 25 August 2021 -- HCare-1363: corrections -->
+</comment>
+<style>
+    .acknowledgement-color p {
+        color: forestgreen;
+    }
+
+    textarea#DisclaimerResponse_Comment {
+        display: block;
+        max-width: 1500px !important;
+        width: 100% !important;
+        max-height: 100px !important;
+        height: auto !important;
+        margin: auto;
+        display: block;
+        padding: 6px 6px !important;
+        line-height: 1.428571429 !important;
+        color: #003366 !important;
+        border-radius: 0px !important;
+        border: none !important;
+        border-bottom: 1px solid #e8e6e6 !important;
+        background-color: transparent !important;
+        padding-left: 5px !important;
+        -webkit-box-shadow: none !important;
+        box-shadow: none !important;
+        -webkit-transition: none !important;
+        transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+        outline: none !important;
+        transition: 1s !important;
+    }
+
+    .field-validation-error:before {
+        font-family: FontAwesome;
+        content: "\f06a\00a0";
+    }
+
+    .language-select {
+        width: 100px;
+        border: 1px solid transparent;
+        box-shadow: none;
+        margin-bottom: 2%;
+        color: #ccc;
+    }
+
+    .contact-heading {
+        font: 400 20px Comfortaa;
+        color: #808080;
+        text-align: left;
+        padding: 20px 0px 0px 20px;
+    }
+
+    .question-validation {
+        color: #b94a48;
+        font-size: 14px;
+        display: block;
+        text-align: center;
+        padding: 10px 0;
+    }
+
+    .contact-panel {
+        /*background-color: rgb(204 204 204 / 0.10);*/
+        margin-bottom: 0px !important;
+    }
+
+    .selectize-control.single .selectize-input.has-items {
+        width: 350px !important;
+    }
+
+    .selectize-control.single .selectize-input [data-value] {
+        border-radius: 6px !important;
+        padding: 12px 8px 12px 12px !important;
+    }
+
+    .error-alert {
+        background-color: rgba(217, 48, 78, 0.2);
+        padding: 10px 12px 10px 12px;
+        border: 1px solid transparent;
+        border-radius: 0px;
+        font: 100 12px 'Open Sans', sans-serif;
+        color: rgb(217, 48, 78);
+        margin: 0 0 0 0;
+        margin-top: 0px;
+        margin-bottom: 2px;
+        margin-left: -15px;
+        width: 102%;
+        vertical-align: middle;
+        opacity: 0;
+    }
+
+        .error-alert span a {
+            color: rgb(217, 48, 78);
+            margin-top: -5px;
+        }
+</style>
+
+<div class="modal-content-disclaimer">
+    @using (Ajax.BeginForm("_PatientDisclaimer", "Clinical", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "divPath", OnSuccess = "hideModal(); alert('Saved');" }, new { id = "disclaimer" }))
+    {
+        <div class="hidden-fields">
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+            @Html.Hidden("taskId", (object)ViewBag.task)
+            @Html.Hidden("DependantID", (object)ViewBag.DependantID)
+            @Html.Hidden("id", (object)ViewBag.id)
+            @Html.Hidden("template", (object)ViewBag.templateID)
+            @Html.Hidden("pro", (object)ViewBag.pro)
+            @Html.AntiForgeryToken()
+        </div>
+
+        <div class="modal-dialog-disclaimer">
+            <div class="modal-header-disclaimer">
+                <div class="col-md-4"><h5 class="modal-title" id="modal-email"><img src="~/Content/Images/_2020/icons/banner-icon/disclaimer-white.png" class="logo-modal" /></h5></div>
+                <div class="col-md-4 div-center"><p class="div-header">Disclaimer</p></div>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body-disclaimer">
+                <div class="form-horizontal">
+                    <div class="col-md-12">
+                        <div class="col-md-6"></div>
+                        <div class="col-md-6">
+                            <select id="language" class="language-select pull-right">
+                                <option value="" disabled selected>Language</option>
+                                <option value="ENG">English</option>
+                                <option value="AFR">Afrikaans</option>
+                            </select>
+                        </div>
+                    </div>
+                    <table id="english-table" class="table disclaimer-table">
+                        @foreach (var item in Model.DisclaimerQuestions.Where(x => x.Title.ToLower().Contains("q")))
+                        {
+                            <tr>
+                                <td style="width: 5%; text-align:center!important">@Html.DisplayFor(modelItem => item.Title)</td>
+                                <td style="width: 80%">@Html.DisplayFor(modelItem => item.EnglishQuestion)</td>
+                                <td style="width: 2.5%">
+                                    <div class="col-md-4 disclaimer-checkbox">
+                                        @Html.CheckBox("disclaimer-yes-" + @item.Title) <label for="disclaimer-yes-@item.Title" title="yes"><span id="disclaimer-yes-@item.Title" class="grey"><i class="fas fa-circle question-button"></i></span></label>
+                                    </div>
+                                </td>
+                                <td style="width: 2.5%">
+                                    <div class="col-md-4 disclaimer-checkbox">
+                                        @Html.CheckBox("disclaimer-no-" + @item.Title) <label for="disclaimer-no-@item.Title" title="no"><span id="disclaimer-no-@item.Title" class="grey"><i class="fas fa-circle question-button"></i></span></label>
+                                    </div>
+                                </td>
+                                <td style="width: 2%">
+                                    @Html.ValidationMessage("disclaimer-yes-" + @item.Title, " ", new { @class = "text-danger", @style = "font-size: 80%;margin-left: 2%", @id = "error-yes-" + @item.Title })
+                                </td>
+                            </tr>
+                        }
+                    </table>
+                    <table id="afrikaans-table" class="table disclaimer-table hidden">
+                        @foreach (var item in Model.DisclaimerQuestions)
+                        {
+                            <tr>
+                                <td style="width: 5%; text-align:center!important">@Html.DisplayFor(modelItem => item.Title)</td>
+                                <td style="width: 80%">@Html.DisplayFor(modelItem => item.AfrikaansQuestion)</td>
+                                <td style="width: 2.5%">
+                                    <div class="col-md-4 disclaimer-checkbox">
+                                        @Html.CheckBox("disclaimer-yes-" + @item.Title) <label for="disclaimer-yes-@item.Title" title="yes"><span id="disclaimer-yes-@item.Title" class="grey"><i class="fas fa-circle question-button"></i></span></label>
+                                    </div>
+                                </td>
+                                <td style="width: 2.5%">
+                                    <div class="col-md-4 disclaimer-checkbox">
+                                        @Html.CheckBox("disclaimer-no-" + @item.Title) <label for="disclaimer-no-@item.Title" title="no"><span id="disclaimer-no-@item.Title" class="grey"><i class="fas fa-circle question-button"></i></span></label>
+                                    </div>
+                                </td>
+                                <td style="width: 2%">
+                                    @Html.ValidationMessage("disclaimer-yes-" + @item.Title, " ", new { @class = "text-danger", @style = "font-size: 80%;margin-left: 2%", @id = "error-yes-" + @item.Title })
+                                </td>
+                            </tr>
+                        }
+                    </table>
+                    <span id="question-error" class="hidden"></span>
+                    <div id="contact-information" class="form-group contact-panel hidden">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="contact-heading">Contact information</div>
+                                <hr class="settings-ruler" style="margin-bottom: 20px;" />
+                                <div class="hidden-fields">
+                                    <input type="hidden" name="v1-mobile" id="v1-mobile" />
+                                    <input type="hidden" name="v1-home" id="v1-home" />
+                                    <input type="hidden" name="v1-work" id="v1-work" />
+                                    <input type="hidden" name="v1-fax" id="v1-fax" />
+                                </div>
+                                <div id="c-contact-validation" class="error-alert hidden"></div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.ContactVM.contacts.contactName, htmlAttributes: new { @class = "control-label col-md-3" })
+                                        <div class="col-md-8">
+                                            @Html.EditorFor(model => model.ContactVM.contacts.contactName, new { htmlAttributes = new { @class = "form-control-new" } })
+                                            @Html.ValidationMessageFor(model => model.ContactVM.contacts.contactName, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.ContactVM.contacts.email, htmlAttributes: new { @class = "control-label col-md-3" })
+                                        <div class="col-md-8">
+                                            @Html.EditorFor(model => model.ContactVM.contacts.email, new { htmlAttributes = new { @class = "form-control-new" } })
+                                            @Html.ValidationMessageFor(model => model.ContactVM.contacts.email, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.ContactVM.contacts.cell, htmlAttributes: new { @class = "control-label col-md-3" })
+                                        <div class="col-md-8">
+                                            @Html.EditorFor(model => model.ContactVM.contacts.cell, new { htmlAttributes = new { @class = "form-control-new", @onblur = "validation2()" } })
+                                            @*@Html.ValidationMessageFor(model => model.ContactVM.contacts.cell, "", new { @class = "text-danger" })*@
+                                            <span id="c-mobile-val-error" class="text-danger" style="margin-left: 4%"></span>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.ContactVM.contacts.landLine, htmlAttributes: new { @class = "control-label col-md-3" })
+                                        <div class="col-md-8">
+                                            @Html.EditorFor(model => model.ContactVM.contacts.landLine, new { htmlAttributes = new { @class = "form-control-new", @onblur = "validation3()" } })
+                                            @*@Html.ValidationMessageFor(model => model.ContactVM.contacts.landLine, "", new { @class = "text-danger" })*@
+                                            <span id="c-home-val-error" class="text-danger" style="margin-left: 4%"></span>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.ContactVM.contacts.workNo, htmlAttributes: new { @class = "control-label col-md-3" })
+                                        <div class="col-md-8">
+                                            @Html.EditorFor(model => model.ContactVM.contacts.workNo, new { htmlAttributes = new { @class = "form-control-new", @onblur = "validation4()" } })
+                                            @*@Html.ValidationMessageFor(model => model.ContactVM.contacts.workNo, "", new { @class = "text-danger" })*@
+                                            <span id="c-work-val-error" class="text-danger" style="margin-left: 4%"></span>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.ContactVM.contacts.fax, htmlAttributes: new { @class = "control-label col-md-3" })
+                                        <div class="col-md-8">
+                                            @Html.EditorFor(model => model.ContactVM.contacts.fax, new { htmlAttributes = new { @class = "form-control-new", @onblur = "validation5()" } })
+                                            @*@Html.ValidationMessageFor(model => model.ContactVM.contacts.fax, "", new { @class = "text-danger" })*@
+                                            <span id="c-fax-val-error" class="text-danger" style="margin-left: 4%"></span>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.ContactVM.contacts.preferredMethodOfContact, htmlAttributes: new { @class = "control-label col-md-3" })
+                                        <div class="col-md-8">
+                                            @Html.DropDownListFor(model => model.ContactVM.contacts.preferredMethodOfContact, new SelectList(Model.PMOC, "pmocCode", "pmocDescription"), "Select", new { })
+                                            @Html.ValidationMessageFor(model => model.ContactVM.contacts.preferredMethodOfContact, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.ContactVM.address.line1, htmlAttributes: new { @class = "control-label col-md-3" })
+                                        <div class="col-md-8">
+                                            @Html.EditorFor(model => model.ContactVM.address.line1, new { htmlAttributes = new { @class = "form-control-new" } })
+                                            @Html.ValidationMessageFor(model => model.ContactVM.address.line1, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.ContactVM.address.line2, htmlAttributes: new { @class = "control-label col-md-3" })
+                                        <div class="col-md-8">
+                                            @Html.EditorFor(model => model.ContactVM.address.line2, new { htmlAttributes = new { @class = "form-control-new" } })
+                                            @Html.ValidationMessageFor(model => model.ContactVM.address.line2, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.ContactVM.address.line3, htmlAttributes: new { @class = "control-label col-md-3" })
+                                        <div class="col-md-8">
+                                            @Html.EditorFor(model => model.ContactVM.address.line3, new { htmlAttributes = new { @class = "form-control-new" } })
+                                            @Html.ValidationMessageFor(model => model.ContactVM.address.line3, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.ContactVM.address.province, htmlAttributes: new { @class = "control-label col-md-3" })
+                                        <div class="col-md-8">
+                                            @Html.EditorFor(model => model.ContactVM.address.province, new { htmlAttributes = new { @class = "form-control-new" } })
+                                            @Html.ValidationMessageFor(model => model.ContactVM.address.province, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.ContactVM.address.city, htmlAttributes: new { @class = "control-label col-md-3" })
+                                        <div class="col-md-8">
+                                            @Html.EditorFor(model => model.ContactVM.address.city, new { htmlAttributes = new { @class = "form-control-new" } })
+                                            @Html.ValidationMessageFor(model => model.ContactVM.address.city, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.ContactVM.address.zip, htmlAttributes: new { @class = "control-label col-md-3" })
+                                        <div class="col-md-8">
+                                            @Html.EditorFor(model => model.ContactVM.address.zip, new { htmlAttributes = new { @class = "form-control-new" } })
+                                            @Html.ValidationMessageFor(model => model.ContactVM.address.zip, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="nextofkin-information" class="form-group contact-panel hidden">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="contact-heading">Next of kin information</div>
+                                <hr class="settings-ruler" style="margin-bottom: 20px;" />
+                                <div class="hidden-fields">
+                                    @*<input type="hidden" name="nok-id" id="nok-id" value="@Model.NextOFKin.Id" />*@
+                                    <input type="hidden" name="first-name" id="first-name" value="@ViewBag.nokFirstName" />
+                                    <input type="hidden" name="last-name" id="last-name" value="@ViewBag.nokLastName" />
+                                    <input type="hidden" name="tel-number" id="tel-number" value="@ViewBag.nokTelephone" />
+                                    <input type="hidden" name="nok-email" id="nok-email" value="@ViewBag.nokEmail" />
+                                    <input type="hidden" name="nok-relation" id="nok-relation" value="@ViewBag.nokRelation" />
+                                    <input type="hidden" name="duplicate" id="duplicate" value="@ViewBag.validation" />
+                                    <input type="hidden" name="v-nok-duplicate" id="v-nok-duplicate" />
+                                    <input type="hidden" name="v1-nok-duplicate" id="v1-nok-duplicate" />
+                                    <input type="hidden" name="nok-telephone" id="nok-telephone" />
+                                </div>
+                                <div id="nok-contact-validation" class="error-alert hidden"></div>
+                                <div id="v-nok-duplicate-validation" class="error-alert hidden"></div>
+                                <div id="v1-nok-duplicate-validation" class="error-alert hidden"></div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.NextOFKin.FirstName, htmlAttributes: new { @class = "control-label col-md-3" })
+                                        <div class="col-md-8">
+                                            <input type="text" value="@ViewBag.nokFirstName" id="FirstName" name="FirstName" class="form-control-new" style="width: 95%" autocomplete="off" onblur="validation()" required />
+                                            @Html.ValidationMessage("FirstName", "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.NextOFKin.LastName, htmlAttributes: new { @class = "control-label col-md-3" })
+                                        <div class="col-md-8">
+                                            <input type="text" value="@ViewBag.nokLastName" id="LastName" name="LastName" class="form-control-new" style="width: 95%" autocomplete="off" onblur="validation()" required />
+                                            @Html.ValidationMessage("LastName", "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.NextOFKin.Telephone, htmlAttributes: new { @class = "control-label col-md-3" })
+                                        <div class="col-md-8">
+                                            <input type="text" value="@ViewBag.nokTelephone" id="Telephone" name="Telephone" class="form-control-new" style="width: 95%" autocomplete="off" onblur="validation1()" required />
+                                            @Html.ValidationMessage("Telephone", "", new { @class = "text-danger" })
+                                            <span id="telephone-val-error" class="text-danger" style="margin-left: 1%"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.NextOFKin.Email, htmlAttributes: new { @class = "control-label col-md-3" })
+                                        <div class="col-md-8">
+                                            <input type="email" value="@ViewBag.nokEmail" id="Email" name="Email" class="form-control-new" style="width: 95%" autocomplete="off" />
+                                            @Html.ValidationMessageFor(model => model.NextOFKin.Email, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.NextOFKin.Relation, htmlAttributes: new { @class = "control-label col-md-3" })
+                                        <div class="col-md-8">
+                                            <input type="text" value="@ViewBag.nokRelation" id="Relation" name="Relation" class="form-control-new" style="width: 95%" autocomplete="off" required />
+                                            @Html.ValidationMessage("Relation", "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="disclaimer-comment" class="hidden">
+                        <hr class="settings-ruler" />
+                        <table class="table disclaimer-comment-table">
+                            <tr>
+                                <td>
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.DisclaimerResponse.Comment, htmlAttributes: new { @class = "control-label col-md-1" })
+                                        <div class="col-md-11">
+                                            @Html.TextAreaFor(model => model.DisclaimerResponse.Comment, new { placeholder = "Your comment here..." })
+                                            @Html.ValidationMessageFor(model => model.DisclaimerResponse.Comment, "", new { @class = "text-danger", @style = "font-size: 95%;margin-left: 1%" })
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <hr class="settings-ruler" />
+                    <table class="table acknowledgement-table" style="margin-top: 2%">
+                        @foreach (var item in Model.AcknowledgementQuestions)
+                        {
+                            <tr>
+                                <td style="width: 5%"></td>
+                                <td style="width: 60%">@Html.DisplayFor(modelItem => item.EnglishQuestion)</td>
+                                <td style="width: 2.5%">
+                                    <div class="col-md-4 disclaimer-checkbox">
+                                        @Html.CheckBox("acknowledgement-yes-" + @item.Title) <label for="acknowledgement-yes-@item.Title" title="yes"><span id="acknowledgement-yes-@item.Title" class="disclaimer-yes"><i class="fas fa-circle question-button grey"></i></span></label>
+                                    </div>
+                                </td>
+                                <td style="width: 24.5%">
+                                    @Html.ValidationMessage("acknowledgement-yes-" + @item.Title, " ", new { @class = "text-danger", @style = "font-size: 80%;margin-left: 2%", @id = "aerror-yes-" + @item.Title })
+
+                                </td>
+                            </tr>
+                        }
+                    </table>
+                    <div class="text-center">
+                        @Html.ValidationMessage("error-message", "", new { @class = "text-danger", @style = "font-size: 120%" })
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div id="validation-error-x" class="error-alert hidden" style="margin-top: 5px; margin-bottom: 5px"></div>
+            </div>
+            <br />
+            <div class="modal-footer-disclaimer">
+                <input id="cancel-disclaimer" type="button" value="Cancel" class="btn modal-button" style="width: 10%" data-dismiss="modal" aria-label="Close" />
+                <input id="submit-disclaimer" type="submit" value="Submit" class="btn modal-button" style="width: 10%" onmouseover="ValidateForm()" />
+            </div>
+        </div>
+    }
+</div>
+<script src="js/jquery.tablesorter.min.js"></script>
+<script src="http://code.jquery.com/jquery.unobtrusive-ajax.min.js"></script>
+@section Scripts {
+    <script src="~/bundles/jqueryval"></script>
+    <script src="~/bundles/jqueryui"></script>
+    <style src="~/Content/themes/base/css")
+
+    <script>
+        $("[id^='disclaimer-yes']").prop("required", true);
+        $("[id^='disclaimer-no']").prop("required", true);
+        $("[id^='acknowledgement-yes']").prop("required", true);
+
+        // disclaimer-yes-validation
+        $('#disclaimer-yes-Q1').change(function () {
+            if (this.checked)
+                $('#disclaimer-yes-Q1 .fas').addClass('disclaimer-yes'),
+                    $('#disclaimer-no-Q1 .fas').removeClass('disclaimer-no'),
+                    document.getElementById("disclaimer-no-Q1").checked = false,
+                    document.getElementById("disclaimer-no-Q1").removeAttribute("required", true);
+            else
+                $('#disclaimer-yes-Q1 .fas').removeClass('disclaimer-yes'),
+                    document.getElementById("disclaimer-no-Q1").attr("required", true);
+
+        });
+        $('#disclaimer-yes-Q2').change(function () {
+            if (this.checked)
+                $('#disclaimer-yes-Q2 .fas').addClass('disclaimer-yes'),
+                    $('#disclaimer-no-Q2 .fas').removeClass('disclaimer-no'),
+                    document.getElementById("disclaimer-no-Q2").checked = false,
+                    document.getElementById("disclaimer-no-Q2").removeAttribute("required", true);
+            else
+                $('#disclaimer-yes-Q2 .fas').removeClass('disclaimer-yes'),
+                    document.getElementById("disclaimer-no-Q2").attr("required", true);
+
+        });
+        $('#disclaimer-yes-Q3').change(function () {
+            if (this.checked)
+                $('#disclaimer-yes-Q3 .fas').addClass('disclaimer-yes'),
+                    $('#disclaimer-no-Q3 .fas').removeClass('disclaimer-no'),
+                    document.getElementById("disclaimer-no-Q3").checked = false,
+                    document.getElementById("disclaimer-no-Q3").removeAttribute("required", true);
+            else
+                $('#disclaimer-yes-Q3 .fas').removeClass('disclaimer-yes'),
+                    document.getElementById("disclaimer-no-Q3").attr("required", true);
+
+        });
+        $('#disclaimer-yes-Q4').change(function () {
+            if (this.checked)
+                $('#disclaimer-yes-Q4 .fas').addClass('disclaimer-yes'),
+                    $('#disclaimer-no-Q4 .fas').removeClass('disclaimer-no'),
+                    document.getElementById("disclaimer-no-Q4").checked = false,
+                    document.getElementById("disclaimer-no-Q4").removeAttribute("required", true);
+            else
+                $('#disclaimer-yes-Q4 .fas').removeClass('disclaimer-yes'),
+                    document.getElementById("disclaimer-no-Q4").attr("required", true);
+
+        });
+        $('#disclaimer-yes-Q5').change(function () {
+            if (this.checked)
+                $('#disclaimer-yes-Q5 .fas').addClass('disclaimer-yes'),
+                    $('#disclaimer-no-Q5 .fas').removeClass('disclaimer-no'),
+                    document.getElementById("disclaimer-no-Q5").checked = false,
+                    document.getElementById("disclaimer-no-Q5").removeAttribute("required", true);
+            else
+                $('#disclaimer-yes-Q5 .fas').removeClass('disclaimer-yes'),
+                    document.getElementById("disclaimer-no-Q5").attr("required", true);
+
+        });
+        $('#disclaimer-yes-Q6').change(function () {
+            if (this.checked) {
+                $('#disclaimer-yes-Q6 .fas').addClass('disclaimer-yes');
+                $('#disclaimer-no-Q6 .fas').removeClass('disclaimer-no');
+                $('#disclaimer-yes-Q6').attr("required", false);
+                $('#disclaimer-no-Q6').attr("required", false);
+                document.getElementById("disclaimer-no-Q6").checked = false,
+                $('#contact-information').removeClass('hidden');
+                $('#nextofkin-information').removeClass('hidden');
+                $('#NextOFKin_FirstName').attr("required", true);
+                $('#NextOFKin_LastName').attr("required", true);
+                $('#NextOFKin_Telephone').attr("required", true);
+                $('#NextOFKin_Email').attr("required", true);
+                $('#NextOFKin_Relation').attr("required", true);
+            }
+            else {
+                $('#disclaimer-yes-Q6 .fas').removeClass('disclaimer-yes');
+                $('#disclaimer-yes-Q6').attr("required", true);
+                $('#disclaimer-no-Q6').attr("required", true);
+                $('#contact-information').addClass('hidden');
+                $('#nextofkin-information').addClass('hidden');
+                $('#NextOFKin_FirstName').attr("required", false);
+                $('#NextOFKin_LastName').attr("required", false);
+                $('#NextOFKin_Telephone').attr("required", false);
+                $('#NextOFKin_Email').attr("required", false);
+                $('#NextOFKin_Relation').attr("required", false);
+            }
+        });
+        $('#disclaimer-yes-Q7').change(function () {
+            if (this.checked)
+                $('#disclaimer-yes-Q7 .fas').addClass('disclaimer-yes'),
+                    $('#disclaimer-no-Q7 .fas').removeClass('disclaimer-no'),
+                    document.getElementById("disclaimer-no-Q7").checked = false,
+                    document.getElementById("disclaimer-no-Q7").removeAttribute("required", true);
+            else
+                $('#disclaimer-yes-Q7 .fas').removeClass('disclaimer-yes'),
+                    document.getElementById("disclaimer-no-Q7").attr("required", true);
+
+        });
+        $('#disclaimer-yes-Q8').change(function () {
+            if (this.checked)
+                $('#disclaimer-yes-Q8 .fas').addClass('disclaimer-yes'),
+                    $('#disclaimer-no-Q8 .fas').removeClass('disclaimer-no'),
+                    document.getElementById("disclaimer-no-Q8").checked = false,
+                    document.getElementById("disclaimer-no-Q8").removeAttribute("required", true);
+            else
+                $('#disclaimer-yes-Q8 .fas').removeClass('disclaimer-yes'),
+                    document.getElementById("disclaimer-no-Q8").attr("required", true);
+
+        });
+        $('#disclaimer-yes-Q9').change(function () {
+            if (this.checked)
+                $('#disclaimer-yes-Q9 .fas').addClass('disclaimer-yes'),
+                    $('#disclaimer-no-Q9 .fas').removeClass('disclaimer-no'),
+                    document.getElementById("disclaimer-no-Q9").checked = false,
+                    document.getElementById("disclaimer-no-Q9").removeAttribute("required", true);
+            else
+                $('#disclaimer-yes-Q9 .fas').removeClass('disclaimer-yes'),
+                    document.getElementById("disclaimer-no-Q9").attr("required", true);
+
+        });
+        $('#disclaimer-yes-Q10').change(function () {
+            if (this.checked)
+                $('#disclaimer-yes-Q10 .fas').addClass('disclaimer-yes'),
+                    $('#disclaimer-no-Q10 .fas').removeClass('disclaimer-no'),
+                    document.getElementById("disclaimer-no-Q10").checked = false,
+                    document.getElementById("disclaimer-no-Q10").removeAttribute("required", true);
+            else
+                $('#disclaimer-yes-Q10 .fas').removeClass('disclaimer-yes'),
+                    document.getElementById("disclaimer-no-Q10").attr("required", true);
+
+        });
+
+        // disclaimer-no-validation
+        $('#disclaimer-no-Q1').change(function () {
+            if (this.checked)
+                $('#disclaimer-no-Q1 .fas').addClass('disclaimer-no'),
+                    $('#disclaimer-yes-Q1 .fas').removeClass('disclaimer-yes'),
+                    document.getElementById("disclaimer-yes-Q1").checked = false,
+                    document.getElementById("disclaimer-yes-Q1").removeAttribute("required", true);
+
+            else
+                $('#disclaimer-no-Q1 .fas').removeClass('disclaimer-no'),
+                    document.getElementById("disclaimer-yes-Q1").attr("required", true);
+
+        });
+        $('#disclaimer-no-Q2').change(function () {
+            if (this.checked)
+                $('#disclaimer-no-Q2 .fas').addClass('disclaimer-no'),
+                    $('#disclaimer-yes-Q2 .fas').removeClass('disclaimer-yes'),
+                    document.getElementById("disclaimer-yes-Q2").checked = false,
+                    document.getElementById("disclaimer-yes-Q2").removeAttribute("required", true);
+
+            else
+                $('#disclaimer-no-Q2 .fas').removeClass('disclaimer-no'),
+                    document.getElementById("disclaimer-yes-Q2").attr("required", true);
+
+        });
+        $('#disclaimer-no-Q3').change(function () {
+            if (this.checked)
+                $('#disclaimer-no-Q3 .fas').addClass('disclaimer-no'),
+                    $('#disclaimer-yes-Q3 .fas').removeClass('disclaimer-yes'),
+                    document.getElementById("disclaimer-yes-Q3").checked = false,
+                    document.getElementById("disclaimer-yes-Q3").removeAttribute("required", true);
+
+            else
+                $('#disclaimer-no-Q3 .fas').removeClass('disclaimer-no'),
+                    document.getElementById("disclaimer-yes-Q3").attr("required", true);
+
+        });
+        $('#disclaimer-no-Q4').change(function () {
+            if (this.checked)
+                $('#disclaimer-no-Q4 .fas').addClass('disclaimer-no'),
+                    $('#disclaimer-yes-Q4 .fas').removeClass('disclaimer-yes'),
+                    document.getElementById("disclaimer-yes-Q4").checked = false,
+                    document.getElementById("disclaimer-yes-Q4").removeAttribute("required", true);
+
+            else
+                $('#disclaimer-no-Q4 .fas').removeClass('disclaimer-no'),
+                    document.getElementById("disclaimer-yes-Q4").attr("required", true);
+
+        });
+        $('#disclaimer-no-Q5').change(function () {
+            if (this.checked)
+                $('#disclaimer-no-Q5 .fas').addClass('disclaimer-no'),
+                    $('#disclaimer-yes-Q5 .fas').removeClass('disclaimer-yes'),
+                    document.getElementById("disclaimer-yes-Q5").checked = false,
+                    document.getElementById("disclaimer-yes-Q5").removeAttribute("required", true);
+
+            else
+                $('#disclaimer-no-Q5 .fas').removeClass('disclaimer-no'),
+                    document.getElementById("disclaimer-yes-Q5").attr("required", true);
+
+        });
+        $('#disclaimer-no-Q6').change(function () {
+            if (this.checked) {
+                $('#disclaimer-no-Q6 .fas').addClass('disclaimer-no');
+                $('#disclaimer-yes-Q6 .fas').removeClass('disclaimer-yes');
+                $('#disclaimer-yes-Q6').attr("required", false);
+                $('#disclaimer-no-Q6').attr("required", false);
+                document.getElementById("disclaimer-yes-Q6").checked = false,
+                $('#contact-information').removeClass('hidden');
+                $('#nextofkin-information').addClass('hidden');
+                $('#NextOFKin_FirstName').attr("required", false);
+                $('#NextOFKin_LastName').attr("required", false);
+                $('#NextOFKin_Telephone').attr("required", false);
+                $('#NextOFKin_Email').attr("required", false);
+                $('#NextOFKin_Relation').attr("required", false);
+            }
+            else {
+                $('#disclaimer-no-Q6 .fas').removeClass('disclaimer-no');
+                $('#disclaimer-yes-Q6').attr("required", true);
+                $('#disclaimer-no-Q6').attr("required", true);
+                $('#contact-information').addClass('hidden');
+                $('#nextofkin-information').addClass('hidden');
+            }
+        });
+        $('#disclaimer-no-Q7').change(function () {
+            if (this.checked)
+                $('#disclaimer-no-Q7 .fas').addClass('disclaimer-no'),
+                    $('#disclaimer-yes-Q7 .fas').removeClass('disclaimer-yes'),
+                    document.getElementById("disclaimer-yes-Q7").checked = false,
+                    document.getElementById("disclaimer-yes-Q7").removeAttribute("required", true);
+
+            else
+                $('#disclaimer-no-Q7 .fas').removeClass('disclaimer-no'),
+                    document.getElementById("disclaimer-yes-Q7").attr("required", true);
+
+        });
+        $('#disclaimer-no-Q8').change(function () {
+            if (this.checked)
+                $('#disclaimer-no-Q8 .fas').addClass('disclaimer-no'),
+                    $('#disclaimer-yes-Q8 .fas').removeClass('disclaimer-yes'),
+                    document.getElementById("disclaimer-yes-Q8").checked = false,
+                    document.getElementById("disclaimer-yes-Q8").removeAttribute("required", true);
+
+            else
+                $('#disclaimer-no-Q8 .fas').removeClass('disclaimer-no'),
+                    document.getElementById("disclaimer-yes-Q8").attr("required", true);
+
+        });
+        $('#disclaimer-no-Q9').change(function () {
+            if (this.checked)
+                $('#disclaimer-no-Q9 .fas').addClass('disclaimer-no'),
+                    $('#disclaimer-yes-Q9 .fas').removeClass('disclaimer-yes'),
+                    document.getElementById("disclaimer-yes-Q9").checked = false,
+                    document.getElementById("disclaimer-yes-Q9").removeAttribute("required", true);
+
+            else
+                $('#disclaimer-no-Q9 .fas').removeClass('disclaimer-no'),
+                    document.getElementById("disclaimer-yes-Q9").attr("required", true);
+
+        });
+        $('#disclaimer-no-Q10').change(function () {
+            if (this.checked)
+                $('#disclaimer-no-Q10 .fas').addClass('disclaimer-no'),
+                    $('#disclaimer-yes-Q10 .fas').removeClass('disclaimer-yes'),
+                    document.getElementById("disclaimer-yes-Q10").checked = false,
+                    document.getElementById("disclaimer-yes-Q10").removeAttribute("required", true);
+
+            else
+                $('#disclaimer-no-Q10 .fas').removeClass('disclaimer-no'),
+                    document.getElementById("disclaimer-yes-Q10").attr("required", true);
+
+        });
+
+        $('#disclaimer-yes-Q1').click(function () {
+            $("#error-yes-Q1").hide();
+        });
+        $('#disclaimer-no-Q1').click(function () {
+            $("#error-yes-Q1").hide();
+        });
+        $('#disclaimer-yes-Q2').click(function () {
+            $("#error-yes-Q2").hide();
+        });
+        $('#disclaimer-no-Q2').click(function () {
+            $("#error-yes-Q2").hide();
+        });
+        $('#disclaimer-yes-Q3').click(function () {
+            $("#error-yes-Q3").hide();
+        });
+        $('#disclaimer-no-Q3').click(function () {
+            $("#error-yes-Q3").hide();
+        });
+        $('#disclaimer-yes-Q4').click(function () {
+            $("#error-yes-Q4").hide();
+        });
+        $('#disclaimer-no-Q4').click(function () {
+            $("#error-yes-Q4").hide();
+        });
+        $('#disclaimer-yes-Q5').click(function () {
+            $("#error-yes-Q5").hide();
+        });
+        $('#disclaimer-no-Q5').click(function () {
+            $("#error-yes-Q5").hide();
+        });
+        $('#disclaimer-yes-Q6').click(function () {
+            $("#error-yes-Q6").hide();
+
+        });
+        $('#disclaimer-no-Q6').click(function () {
+            $("#error-yes-Q6").hide();
+        });
+        $('#disclaimer-yes-Q7').click(function () {
+            $("#error-yes-Q7").hide();
+        });
+        $('#disclaimer-no-Q7').click(function () {
+            $("#error-yes-Q7").hide();
+        });
+        $('#disclaimer-yes-Q8').click(function () {
+            $("#error-yes-Q8").hide();
+        });
+        $('#disclaimer-no-Q8').click(function () {
+            $("#error-yes-Q8").hide();
+        });
+        $('#disclaimer-yes-Q9').click(function () {
+            $("#error-yes-Q9").hide();
+        });
+        $('#disclaimer-no-Q9').click(function () {
+            $("#error-yes-Q9").hide();
+        });
+        $('#disclaimer-yes-Q10').click(function () {
+            $("#error-yes-Q10").hide();
+        });
+        $('#disclaimer-no-Q10').click(function () {
+            $("#error-yes-Q10").hide();
+        });
+
+        // comment-validation
+
+        $("[id^='disclaimer-yes']").change(function () {
+            var n = $('input:checkbox[id^="disclaimer-no"]:checked').length;
+            var q6_no = $('input:checkbox[id="disclaimer-no-Q6"]:checked').length;
+            if (n > 0) {
+                if (q6_no == 1 && n == 1) {
+                    $("[name='DisclaimerResponse.Comment']").attr("required", false);
+                    $('#disclaimer-comment').addClass('hidden');
+                }
+                else {
+                    $("[name='DisclaimerResponse.Comment']").attr("required", true);
+                        $('#disclaimer-comment').removeClass('hidden');
+                }
+            }
+            else {
+                $("[name='DisclaimerResponse.Comment']").attr("required", false),
+                    $('#disclaimer-comment').addClass('hidden');
+            }
+
+        });
+        $("[id^='disclaimer-no']").click(function () {
+            var nx = $('input:checkbox[id^="disclaimer-no"]:checked').length;
+            var q6_nox = $('input:checkbox[id="disclaimer-no-Q6"]:checked').length;
+            if (nx > 0) {
+                if (q6_nox == 1 && nx == 1) {
+                    $("[name='DisclaimerResponse.Comment']").attr("required", false);
+                    $('#disclaimer-comment').addClass('hidden');
+                }
+                else {
+                    $("[name='DisclaimerResponse.Comment']").attr("required", true),
+                        $('#disclaimer-comment').removeClass('hidden');
+                }
+            }
+            else {
+                $("[name='DisclaimerResponse.Comment']").attr("required", false),
+                    $('#disclaimer-comment').addClass('hidden');
+            }
+
+            $('span[data-valmsg-for="question-error"]').html('');
+        });
+
+        // acknowledgment-validation
+        $('#acknowledgement-yes-A1').change(function () {
+            if (this.checked)
+                $('#acknowledgement-yes-A1 .fas').removeClass('grey'),
+                    $('#acknowledgement-yes-A2 .fas').addClass('grey'),
+                    document.getElementById("acknowledgement-yes-A1").checked = true,
+                    document.getElementById("acknowledgement-yes-A2").checked = false,
+                    document.getElementById("acknowledgement-yes-A1").removeAttribute("required", true),
+                    document.getElementById("acknowledgement-yes-A2").removeAttribute("required", true),
+                    $('span[data-valmsg-for="error-message"]').html('');
+            else
+                $('#acknowledgement-yes-A1 .fas').addClass('grey'),
+                    document.getElementById("acknowledgement-yes-A1").checked = false,
+                    document.getElementById("acknowledgement-yes-A1").attr("required", true),
+                    document.getElementById("acknowledgement-yes-A2").attr("required", true);
+        });
+        $('#acknowledgement-yes-A2').change(function () {
+            if (this.checked)
+                $('#acknowledgement-yes-A2 .fas').removeClass('grey'),
+                    $('#acknowledgement-yes-A1 .fas').addClass('grey'),
+                    document.getElementById("acknowledgement-yes-A1").checked = false,
+                    document.getElementById("acknowledgement-yes-A2").checked = true,
+                    document.getElementById("acknowledgement-yes-A1").removeAttribute("required", true),
+                    document.getElementById("acknowledgement-yes-A2").removeAttribute("required", true),
+                    $('span[data-valmsg-for="error-message"]').html('');
+            else
+                $('#acknowledgement-yes-A2 .fas').addClass('grey'),
+                    document.getElementById("acknowledgement-yes-A2").checked = false,
+                    document.getElementById("acknowledgement-yes-A1").attr("required", true),
+                    document.getElementById("acknowledgement-yes-A2").attr("required", true);
+        });
+
+        $('#acknowledgement-yes-A1').click(function () {
+            $("#aerror-yes-A1").hide();
+            $("#aerror-yes-A2").hide();
+        });
+        $('#acknowledgement-yes-A2').click(function () {
+            $("#aerror-yes-A1").hide();
+            $("#aerror-yes-A2").hide();
+        });
+
+        var tags = @Html.Raw(Json.Encode(Model.AcknowledgementQuestions));
+        for (var i = 0; i < tags.length; i++) {
+            if (tags[i].Title == "A3") {
+            $('#acknowledgement-yes-A3').change(function () {
+            if (this.checked)
+                $('#acknowledgement-yes-A3 .fas').removeClass('grey'),
+                    $('#acknowledgement-yes-A2 .fas').addClass('grey'),
+                    $('#acknowledgement-yes-A1 .fas').addClass('grey'),
+                    document.getElementById("acknowledgement-yes-A1").checked = false,
+                    document.getElementById("acknowledgement-yes-A2").checked = false,
+                    document.getElementById("acknowledgement-yes-A3").checked = true,
+                    document.getElementById("acknowledgement-yes-A1").removeAttribute("required", false),
+                    document.getElementById("acknowledgement-yes-A2").removeAttribute("required", false),
+                    document.getElementById("acknowledgement-yes-A3").removeAttribute("required", true),
+                    $('span[data-valmsg-for="error-message"]').html('');
+            else
+                $('#acknowledgement-yes-A3 .fas').addClass('grey'),
+                    document.getElementById("acknowledgement-yes-A3").checked = false,
+                    document.getElementById("acknowledgement-yes-A1").attr("required", true),
+                    document.getElementById("acknowledgement-yes-A2").attr("required", true),
+                    document.getElementById("acknowledgement-yes-A2").attr("required", true);
+            });
+            };
+        }
+
+    </script>
+    <script>
+            $(document).ready(function () {
+                $("#submit-disclaimer").on('mouseover', function () {
+                var yay = $('input:checkbox[id^="disclaimer-yes"]:checked').length;
+                var nay = $('input:checkbox[id^="disclaimer-no"]:checked').length;
+                var tags = @Html.Raw(Json.Encode(Model.DisclaimerQuestions));
+                    var sum = yay + nay;
+                    if (sum < tags.length) {
+                        $('#question-error').removeClass('hidden').html('<span class="question-validation"><i class="fas fa-exclamation-circle"></i> Please note that all questions require an answer!</span>');
+                        return false;
+                    }
+                    if (sum == tags.length) {
+                        $('#question-error').addClass('hidden').html('');
+                        return true;
+                    }
+                });
+            });
+    </script>
+    <script>
+        $(document).ready(function () {
+            $("#submit-disclaimer").on('mouseover', function () {
+                var yes = $('input:checkbox[id^="acknowledgement-yes"]:checked').length;
+                if (yes < 1) {
+                    $('span[data-valmsg-for="error-message"]').html('<span style="font-size: 14px"><i class="fas fa-exclamation-circle"></i> Please answer one of the acknowledgement questions!</span>');
+                    return false;
+                }
+            });
+        });
+    </script>
+
+    <script>
+        $("#language").change(function () {
+            var lang = $(this).children("option:selected").val();
+            if (lang === "ENG") {
+                $("#english-table").removeClass('hidden');
+                $("#afrikaans-table").addClass('hidden');
+            }
+            if (lang === "AFR") {
+                $("#english-table").addClass('hidden');
+                $("#afrikaans-table").removeClass('hidden');
+            }
+
+        });
+    </script>
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/js/standalone/selectize.js"></script>
+    <!-- selectize dropdown menus -->
+    <script>
+        initSelectize();
+        function initSelectize() {
+            $('#ContactVM_contacts_preferredMethodOfContact').selectize({
+                persist: true,
+                preload: true,
+                maxItems: 1,
+                delimiter: ',',
+                valueField: 'id',
+                labelField: 'name',
+                searchField: ['name'],
+                //create: true,
+                hideSelected: true,
+                render: {
+                    option: function (item, escape) {
+                        return '<span class="name">' + escape(item.name) + '</span>';
+
+                    }
+                }
+            })
+        }
+    </script>
+    <script>
+        $(function () {
+            $("#FirstName").keyup(function () {
+                $("#first-name").val($("#FirstName").val());
+            });
+        })
+        $(function () {
+            $("#LastName").keyup(function () {
+                $("#last-name").val($("#LastName").val());
+            });
+        })
+        $(function () {
+            $("#Telephone").keyup(function () {
+                $("#tel-number").val($("#Telephone").val());
+            });
+        })
+        $(function () {
+            $("#Email").keyup(function () {
+                $("#nok-email").val($("#Email").val());
+            });
+        })
+        $(function () {
+            $("#Relation").keyup(function () {
+                $("#nok-relation").val($("#Relation").val());
+            });
+        })
+    </script>
+    <script>
+        function validation() {
+            $('#v-nok-duplicate-validation').addClass("hidden");
+            $('#submit-disclaimer').attr('disabled', false);
+            $('#v-nok-duplicate').val('');
+
+            var Id = $("#nok-id").val();
+            var firstname = $("#first-name").val();
+            var lastname = $("#last-name").val();
+
+            if (firstname.length > 0 && lastname.length > 0) {
+                $.ajax({
+                    url: '/Member/NOKValidation01',
+                    type: "POST",
+                    dataType: "JSON",
+                    data: { firstname: firstname, lastname: lastname },
+                    success: function (result) {
+                        var id = result.Id;
+                        var fname = result.FirstName;
+                        var lname = result.LastName;
+                        if (id != Id && fname.toLowerCase() == firstname.toLowerCase() && lname.toLowerCase() == lastname.toLowerCase()) {
+                            $('#v-nok-duplicate-validation').html('&emsp;<span style="font-size: 10px"><i class="fas fa-exclamation-triangle"></i></span> <b>Invalid: </b> First and last name already exists!').removeClass("hidden").animate({ opacity: 1 }, 500);
+                            $('#submit-disclaimer').attr('disabled', true);
+                            $('#v-nok-duplicate').val('duplicate');
+                        }
+                    },
+                    error: function (result) {
+                    }
+                });
+            }
+        }
+    </script>
+    <script>
+        function validation1(input) {
+            $('#submit-disclaimer').attr('disabled', false);
+            $('#nok-telephone').val('');
+            var telephone = $("#Telephone").val();
+            if (telephone.length > 0) {
+                $('#Telephone-error').html('');
+                $("#nok-contact-validation").addClass("hidden").html('');
+
+                $('#telephone-val-error').html('');
+                if (telephone.length > 12 || telephone.length < 10 || telephone.length == 11 || telephone.indexOf(' ') >= 0 || /^[0-9\ - ]*$/.test(telephone) == false) {
+                    $('#telephone-val-error').html('<span style="font-size: 10px"><i class="fas fa-exclamation-circle"></i></span>&nbsp;Invalid contact number!');
+                    $('#submit-disclaimer').attr('disabled', true);
+                    $('#nok-telephone').val('error');
+                }
+                else {
+                    $('#submit-disclaimer').attr('disabled', false);
+                }
+
+                if (telephone.length == 11 || telephone.length > 12 || telephone.length < 10) {
+                    $('#nok-contact-validation').removeClass("hidden").html('&emsp;<span style="font-size: 10px"><i class="fas fa-exclamation-triangle"></i></span> <b>Invalid:</b> A contact number requires 10-12 digits and cannot contain any special characters!').animate({ opacity: 1 }, 500);
+                }
+            }
+        }
+        function validation2(input) {
+            $('#submit-disclaimer').attr('disabled', false);
+            $('#v1-mobile').val('');
+            $('#c-contact-validation').addClass("hidden").html('');
+            $('#validation-error-x').addClass("hidden").html('').animate({ opacity: 0 }, 500);
+
+            $('#c-mobile-val-error').html('');
+
+            var mobilenumber = $("#ContactVM_contacts_cell").val();
+            if (mobilenumber.length > 0) {
+                $('#c-mobile-val-error').html('');
+                if (mobilenumber.length > 12 || mobilenumber.length < 10 || mobilenumber.length == 11 || mobilenumber.indexOf(' ') >= 0 || /^[0-9\ - ]*$/.test(mobilenumber) == false) {
+                    $('#c-mobile-val-error').html('<span style="font-size: 10px"><i class="fas fa-exclamation-circle"></i></span>&nbsp;Invalid contact number!');
+                    $('#submit-disclaimer').attr('disabled', true);
+                    $('#v1-mobile').val('error');
+
+                }
+                else {
+                    $('#submit-disclaimer').attr('disabled', false);
+                }
+            }
+
+            if (mobilenumber.length == 11 || mobilenumber.length > 12 || mobilenumber.length < 10) {
+                $('#c-contact-validation').removeClass("hidden").html('&emsp;<span style="font-size: 10px"><i class="fas fa-exclamation-triangle"></i></span> <b>Invalid:</b> A contact number requires 10-12 digits and cannot contain any special characters!').animate({ opacity: 1 }, 500);
+            }
+        }
+        function validation3(input) {
+            $('#submit-disclaimer').attr('disabled', false);
+            $('#v1-home').val('');
+            $('#c-contact-validation').addClass("hidden").html('');
+            $('#validation-error-x').addClass("hidden").html('').animate({ opacity: 0 }, 500);
+            $('#c-home-val-error').html('');
+
+            var hometelephone = $("#ContactVM_contacts_landLine").val();
+            if (hometelephone.length > 0) {
+                $('#c-home-val-error').html('');
+                if (hometelephone.length > 12 || hometelephone.length < 10 || hometelephone.length == 11 || hometelephone.indexOf(' ') >= 0 || /^[0-9\ - ]*$/.test(hometelephone) == false) {
+                    $('#c-home-val-error').html('<span style="font-size: 10px"><i class="fas fa-exclamation-circle"></i></span>&nbsp;Invalid contact number!');
+                    $('#submit-disclaimer').attr('disabled', true);
+                    $('#v1-home').val('error');
+                }
+                else {
+                    $('#submit-disclaimer').attr('disabled', false);
+                }
+            }
+
+            if (hometelephone.length == 11 || hometelephone.length > 12 || hometelephone.length < 10) {
+                $('#c-contact-validation').removeClass("hidden").html('&emsp;<span style="font-size: 10px"><i class="fas fa-exclamation-triangle"></i></span> <b>Invalid:</b> A contact number requires 10-12 digits and cannot contain any special characters!').animate({ opacity: 1 }, 500);
+            }
+        }
+        function validation4(input) {
+            $('#submit-disclaimer').attr('disabled', false);
+            $('#v1-work').val('');
+            $('#c-contact-validation').addClass("hidden").html('');
+            $('#validation-error-x').addClass("hidden").html('').animate({ opacity: 0 }, 500);
+            $('#c-work-val-error').html('');
+
+            var worktelephone = $("#ContactVM_contacts_workNo").val();
+            if (worktelephone.length > 0) {
+                $('#c-work-val-error').html('');
+                if (worktelephone.length > 12 || worktelephone.length < 10 || worktelephone.length == 11 || worktelephone.indexOf(' ') >= 0 || /^[0-9\ - ]*$/.test(worktelephone) == false) {
+                    $('#c-work-val-error').html('<span style="font-size: 10px"><i class="fas fa-exclamation-circle"></i></span>&nbsp;Invalid contact number!');
+                    $('#submit-disclaimer').attr('disabled', true);
+                    $('#v1-work').val('error');
+                }
+                else {
+                    $('#submit-disclaimer').attr('disabled', false);
+                }
+            }
+
+            if (worktelephone.length == 11 || worktelephone.length > 12 || worktelephone.length < 10) {
+                $('#c-contact-validation').removeClass("hidden").html('&emsp;<span style="font-size: 10px"><i class="fas fa-exclamation-triangle"></i></span> <b>Invalid:</b> A contact number requires 10-12 digits and cannot contain any special characters!').animate({ opacity: 1 }, 500);
+            }
+        }
+        function validation5(input) {
+            $('#submit-disclaimer').attr('disabled', false);
+            $('#v1-fax').val('');
+            $('#c-contact-validation').addClass("hidden").html('');
+            $('#validation-error-x').addClass("hidden").html('').animate({ opacity: 0 }, 500);
+            $('#c-fax-val-error').html('');
+
+            var faxnumber = $("#ContactVM_contacts_fax").val();
+            if (faxnumber.length > 0) {
+                $('#c-fax-val-error').html('');
+                if (faxnumber.length > 12 || faxnumber.length < 10 || faxnumber.length == 11 || faxnumber.indexOf(' ') >= 0 || /^[0-9\ - ]*$/.test(faxnumber) == false) {
+                    $('#c-fax-val-error').html('<span style="font-size: 10px"><i class="fas fa-exclamation-circle"></i></span>&nbsp;Invalid contact number!');
+                    $('#submit-disclaimer').attr('disabled', true);
+                    $('#v1-fax').val('error');
+                }
+                else {
+                    $('#submit-disclaimer').attr('disabled', false);
+                }
+            }
+
+            if (faxnumber.length == 11 || faxnumber.length > 12 || faxnumber.length < 10) {
+                $('#c-contact-validation').removeClass("hidden").html('&emsp;<span style="font-size: 10px"><i class="fas fa-exclamation-triangle"></i></span> <b>Invalid:</b> A contact number requires 10-12 digits and cannot contain any special characters!').animate({ opacity: 1 }, 500);
+            }
+        }
+
+        $(document).on('mousemove', function () {
+            var telephone = $("#Telephone").val();
+            if (telephone.length > 0) {
+                if (telephone.length > 12 || telephone.length < 10 || telephone.length == 11 || telephone.indexOf(' ') >= 0 || /^[0-9\ - ]*$/.test(telephone) == false) {
+                    $('#nok-telephone').val('error');
+                }
+                else {
+                    $('#nok-telephone').val('');
+                    $('#telephone-val-error').html('');
+                    $('#submit-disclaimer').attr('disabled', false);
+                }
+            }
+            var mobilenumber = $("#ContactVM_contacts_cell").val();
+            if (mobilenumber.length > 0) {
+                if (mobilenumber.length > 12 || mobilenumber.length < 10 || mobilenumber.length == 11 || mobilenumber.indexOf(' ') >= 0 || /^[0-9\ - ]*$/.test(mobilenumber) == false) {
+                    $('#v1-mobile').val('error');
+                }
+                else {
+                    $('#v1-mobile').val('');
+                    $('#c-mobile-val-error').html('');
+                    $('#submit-disclaimer').attr('disabled', false);
+                }
+            }
+            var worktelephone = $("#ContactVM_contacts_workNo").val();
+            if (worktelephone.length > 0) {
+                if (worktelephone.length > 12 || worktelephone.length < 10 || worktelephone.length == 11 || worktelephone.indexOf(' ') >= 0 || /^[0-9\ - ]*$/.test(worktelephone) == false) {
+                    $('#v1-work').val('error');
+                }
+                else {
+                    $('#v1-work').val('');
+                    $('#c-work-val-error').html('');
+                    $('#submit-disclaimer').attr('disabled', false);
+                }
+            }
+            var faxnumber = $("#ContactVM_contacts_fax").val();
+            if (faxnumber.length > 0) {
+                if (faxnumber.length > 12 || faxnumber.length < 10 || faxnumber.length == 11 || faxnumber.indexOf(' ') >= 0 || /^[0-9\ - ]*$/.test(faxnumber) == false) {
+                    $('#v1-fax').val('error');
+                }
+                else {
+                    $('#v1-fax').val('');
+                    $('#c-fax-val-error').html('');
+                    $('#submit-disclaimer').attr('disabled', false);
+                }
+            }
+            var hometelephone = $("#ContactVM_contacts_landLine").val();
+            if (hometelephone.length > 0) {
+                if (hometelephone.length > 12 || hometelephone.length < 10 || hometelephone.length == 11 || hometelephone.indexOf(' ') >= 0 || /^[0-9\ - ]*$/.test(hometelephone) == false) {
+                    $('#v1-home').val('error');
+                }
+                else {
+                    $('#v1-home').val('');
+                    $('#telephone-val-error').html('');
+                    $('#submit-disclaimer').attr('disabled', false);
+                }
+            }
+        });
+        function ValidateForm() {
+            var telephone = $("#nok-telephone").val();
+            var mobilenumber = $("#v1-mobile").val();
+            var hometelephone = $("#v1-home").val();
+            var worktelephone = $("#v1-work").val();
+            var faxnumber = $("#v1-fax").val();
+
+            if (telephone.length > 0 || mobilenumber.length > 0 || hometelephone.length > 0 || worktelephone.length > 0 || faxnumber.length > 0) {
+
+                $('#submit-disclaimer').attr('disabled', true);
+                $('#validation-error-x').removeClass("hidden").html('&emsp;<span style="font-size: 10px"><i class="fas fa-exclamation-triangle"></i></span> <b>Invalid:</b> Please review the telephone numbers in the above form.').animate({ opacity: 1 }, 500);
+            }
+            else {
+                $('#validation-error-x').addClass("hidden").html('').animate({ opacity: 0 }, 500);
+                $('#submit-disclaimer').attr('disabled', false);
+            }
+
+            if (telephone.length > 0) {
+                $('#telephone-val-error').html('<span style="font-size: 10px"><i class="fas fa-exclamation-circle"></i></span>&nbsp;Invalid contact number!');
+            }
+            if (mobilenumber.length > 0) {
+                $('#c-mobile-val-error').html('<span style="font-size: 10px"><i class="fas fa-exclamation-circle"></i></span>&nbsp;Invalid contact number!');
+            }
+            if (hometelephone.length > 0) {
+                $('#c-home-val-error').html('<span style="font-size: 10px"><i class="fas fa-exclamation-circle"></i></span>&nbsp;Invalid contact number!');
+            }
+            if (worktelephone.length > 0) {
+                $('#c-work-val-error').html('<span style="font-size: 10px"><i class="fas fa-exclamation-circle"></i></span>&nbsp;Invalid contact number!');
+            }
+            if (faxnumber.length > 0) {
+                $('#c-fax-val-error').html('<span style="font-size: 10px"><i class="fas fa-exclamation-circle"></i></span>&nbsp;Invalid contact number!');
+            }
+        }
+
+
+    </script>
+
+}

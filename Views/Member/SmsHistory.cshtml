@@ -1,0 +1,294 @@
+﻿@model IEnumerable<HaloCareCore.Models.Communications.SmsMessages>
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "SmsHistory";
+    Layout = "~/Views/Shared/_LayoutMember.cshtml";
+}
+
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+</style>
+
+<!--dateSort_JQ-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js"></script>
+<script src="https://www.jqueryscript.net/demo/jQuery-Plugin-For-Sortable-Bootstrap-Tables-Bootstrap-Sortable/Scripts/bootstrap-sortable.js"></script>
+
+<!--pageHeader-->
+<nav id="global-nav" class="nav">
+    <div class="pull-left title">
+        <h1 class="site-title_patientProfile">
+            <span><i class="fas fa-comment-alt"></i>&emsp; Text messages</span>
+        </h1>
+    </div>
+    <div class="pull-right title">
+        <h1 class="site-title_userID pull-right">
+            <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+        </h1>
+        <h1 class="site-title_userID pull-right">
+            @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+            {
+                <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+            }
+        </h1>
+        <h1 class="site-waffleIcon pull-right">
+            <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+        </h1>
+    </div>
+</nav>
+
+<div class="dashboardContainer zero-padding">
+    <div class="patientDashboard_View">
+
+        <!--breadCrumbs-->
+        <ul class="breadcrumbs_patientDashboard">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+            <li><a href="@Url.Action("patientCommunication", "Member", new { DependentID = Context.Request.Query["DependentID"] })">Patient</a></li>
+            <li><a href="#">Text history</a></li>
+        </ul>
+
+        <!--Left navSlider -->
+        @Html.Partial("_navSlider", new { DependentID = Context.Request.Query["DependentID"] })
+
+        <!--navCollection-->
+        <div class="navCollection_patientDashboard">
+            @Html.Partial("_navCollection")
+        </div>
+
+        <!--profileInformation-->
+        <div class="profileBar">
+            @Html.Action("_profileBar_edit", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })
+        </div>
+    </div>
+
+    <div class="profilebar-spacer"></div>
+
+    <div class="patientDashboard_container">
+        <h4 class="tableHeadingX">Text message history</h4>
+        <br />
+
+        <!--jQ_Search-->
+        <div class="row" style="margin-left: 18%!important">
+            <div class="col-md-6 pull-right">
+                <ul class="input-group" id="adv-search">
+
+                    <ul class="nav navbar-nav navbar-right">
+                        <li class="focus">
+                            <input type="text" class="form-control-patientSearch" id="search" onkeyup="myFunction()" placeholder="Search..." />
+                        </li>
+                        <div class="btn-group" role="group">
+                            <button type="submit" class="btn btn-search" style="height: 29px"><span class="glyphicon glyphicon-search" aria-hidden="true" title="Search"></span></button>
+                        </div>
+                    </ul>
+                </ul>
+            </div>
+        </div>
+
+        <table class="table statusHistory_Table sortable" id="table">
+            <thead>
+                <tr>
+                    <th style="width: 10%">
+                        @Html.DisplayNameFor(model => model.createdDate) <i class="fa fa-fw fa-sort"></i>
+                    </th>
+                    <th onclick="sortTable(1)" style="width: 10%">
+                        @Html.DisplayNameFor(model => model.cell_no) <i class="fa fa-fw fa-sort"></i>
+                    </th>
+                    <th onclick="sortTable(3)">
+                        @Html.DisplayNameFor(model => model.message) <i class="fa fa-fw fa-sort"></i>
+                    </th>
+                    <th onclick="sortTable(4)">
+                        @Html.DisplayName("Response") <i class="fa fa-fw fa-sort"></i>
+                    </th>
+                    <th style="width: 10%">
+                        @Html.DisplayNameFor(model => model.effectiveDate) <i class="fa fa-fw fa-sort"></i>
+                    </th>
+                    <th onclick="sortTable(5)" style="width: 10%">
+                        @Html.DisplayNameFor(model => model.createdBy) <i class="fa fa-fw fa-sort"></i>
+                    </th>
+                    <th onclick="sortTable(6)" style="text-align: center!important; width: 12%">
+                        @Html.DisplayNameFor(model => model.status) <i class="fa fa-fw fa-sort"></i>
+                    </th>
+                    <th onclick="sortTable(7)" style="text-align: center!important; width: 12%">
+                        @Html.DisplayNameFor(model => model.AttuneMessageStatus) <i class="fa fa-fw fa-sort"></i>
+                    </th>
+                </tr>
+            </thead>
+            @if (Model.Count() == 0)
+            {
+                <tr><td colspan="8" style="text-align: center!important; color: rgba(128, 128, 128, 0.50)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="color: rgba(128, 128, 128, 0.50)"></i></span> no records found</td></tr>
+            }
+            else
+            {
+                foreach (var item in Model)
+                {
+                    <tbody>
+                        <tr>
+                            <td data-dateformat="DD-MM-YYYY">
+                                @Html.DisplayFor(modelItem => item.createdDate)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.cell_no)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.message)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.responseString)
+                            </td>
+                            <td data-dateformat="DD-MM-YYYY">
+                                @Html.DisplayFor(modelItem => item.effectiveDate)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.createdBy)
+                            </td>
+                            <td style="text-align: center!important">
+                                @Html.DisplayFor(modelItem => item.status)
+                            </td>
+                            <td style="text-align: center!important">
+                                @Html.DisplayFor(modelItem => item.AttuneMessageStatus)
+                            </td>
+                        </tr>
+                    </tbody>
+                }
+            }
+        </table>
+        <div class="fixedBack" style="margin-left: 42%; margin-bottom: 1%">
+            <input value="Back" class="btn buttonRound_formBack go_back" style="width: 15%" />
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script src="~/bundles/jqueryval"></script>
+
+<!-- Search -->
+@section scripts{
+    <script>
+        /*Left navigationSlider*/
+        $("#menu-toggle").click(function (e) {
+            e.preventDefault();
+            $("#wrapper").toggleClass("active");
+        });
+
+        var $rows = $('#table tr');
+        $('#search').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $rows.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+
+
+        /*specialNote*/
+        $("#alert-toggle").click(function (e) {
+            e.preventDefault();
+            $("#alertWrapper").toggleClass("active");
+        });
+
+        /*goBack*/
+        $(function () {
+            $('.go_back').click(function (e) {
+                e.preventDefault();
+                history.go(-1);
+            });
+        });
+
+
+        /*tableSorting*/
+        function sortTable(n) {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("table");
+            switching = true;
+            dir = "asc";
+
+            while (switching) {
+                switching = false;
+                rows = table.getElementsByTagName("TR");
+
+                for (i = 1; i < (rows.length - 1); i++) {
+
+                    shouldSwitch = false;
+
+                    x = rows[i].getElementsByTagName("TD")[n];
+                    y = rows[i + 1].getElementsByTagName("TD")[n];
+
+                    if (dir == "asc") {
+                        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                            //if so, mark as a switch and break the loop:
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (dir == "desc") {
+                        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                            //if so, mark as a switch and break the loop:
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+                if (shouldSwitch) {
+                    /*If a switch has been marked, make the switch
+                    and mark that a switch has been done:*/
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                    //Each time a switch is done, increase this count by 1:
+                    switchcount++;
+                } else {
+                    /*If no switching has been done AND the direction is "asc",
+                    set the direction to "desc" and run the while loop again.*/
+                    if (switchcount == 0 && dir == "asc") {
+                        dir = "desc";
+                        switching = true;
+                    }
+                }
+            }
+        }
+
+        $('#zoomBtn').click(function () {
+            $('.zoom-btn-sm').toggleClass('scale-out');
+            if (!$('.zoom-card').hasClass('scale-out')) {
+                $('.zoom-card').toggleClass('scale-out');
+            }
+        });
+
+        $('.zoom-btn-sm').click(function () {
+            var btn = $(this);
+            var card = $('.zoom-card');
+            if ($('.zoom-card').hasClass('scale-out')) {
+                $('.zoom-card').toggleClass('scale-out');
+            }
+            if (btn.hasClass('zoom-btn-person')) {
+                card.css('background-color', '#d32f2f');
+            } else if (btn.hasClass('zoom-btn-doc')) {
+                card.css('background-color', '#fbc02d');
+            } else if (btn.hasClass('zoom-btn-tangram')) {
+                card.css('background-color', '#388e3c');
+            } else if (btn.hasClass('zoom-btn-report')) {
+                card.css('background-color', '#1976d2');
+            } else {
+                card.css('background-color', '#7b1fa2');
+            }
+        });
+
+
+        // Javascript to enable link to tab
+        var url = document.location.toString();
+        if (url.match('#')) {
+            $('.nav-tabs a[href="#' + url.split('#')[1] + '"]').tab('show');
+        }
+
+        // Change hash for page-reload
+        $('.nav-tabs a').on('shown.bs.tab', function (e) {
+            window.location.hash = e.target.hash;
+        })
+
+        $(".nav-tabs a").click(function () { });
+
+    </script>
+}

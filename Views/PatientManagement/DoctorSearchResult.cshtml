@@ -1,0 +1,245 @@
+﻿@model HaloCareCore.Models.DoctorSearchResults
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "DoctorSearchResult";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<comment>
+    <!--
+        17 August 2019 -- HCare-1148 (Error page when adding Dr details to a profile - correct program code)
+    -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    table.dataTable td.dataTables_empty, table.dataTable th.dataTables_empty {
+        text-align: center !important;
+    }
+</style>
+
+<!--dateSort_JQ-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js"></script>
+<script src="https://www.jqueryscript.net/demo/jQuery-Plugin-For-Sortable-Bootstrap-Tables-Bootstrap-Sortable/Scripts/bootstrap-sortable.js"></script>
+
+<div class="fullScreen_container zero-padding">
+    <!--pageHeader-->
+    <nav id="global-nav" class="nav">
+        <div class="pull-left title">
+            <h1 class="site-title_patientProfile">
+                <span><i class="fas fa-user-md"></i>&emsp; Doctors</span>
+            </h1>
+        </div>
+        <div class="pull-right title">
+            <h1 class="site-title_userID pull-right">
+                <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+            </h1>
+            <h1 class="site-title_userID pull-right">
+                @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                {
+                    <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                }
+            </h1>
+            <h1 class="site-waffleIcon pull-right">
+                <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+            </h1>
+        </div>
+    </nav>
+
+    <!--breadCrumbs-->
+    <ul class="breadcrumbs_fullScreens">
+        <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+        <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+        <li><a href="#">Doctor search</a></li>
+    </ul>
+
+    <!--navCollection-->
+    <div class="navCollection_fullScreens">
+        @Html.Partial("_navCollection")
+    </div>
+
+    <div style="margin-bottom: 2.5%"></div>
+
+    <h4 class="tableHeading" style="margin-bottom: -1%; ">Doctor search results</h4>
+
+    <!--jQ_Search-->
+    <div class="row tableSearch_doctorSearch">
+        <div class="col-md-6 pull-right">
+            <ul class="input-group" id="adv-search">
+
+                <ul class="nav navbar-nav navbar-right">
+                    <li class="focus">
+                        <input type="text" class="form-control-patientSearch" id="search" onkeyup="myFunction()" placeholder="Search..." />
+                    </li>
+                    <div class="btn-group" role="group">
+                        <button type="submit" class="btn btn-search" style="height: 30px"><span class="glyphicon glyphicon-search" aria-hidden="true" title="Search"></span></button>
+                    </div>
+                </ul>
+            </ul>
+        </div>
+    </div>
+
+    @*<div class="form-group doctorSearchExcel" id="btnExports">
+            <input type="image" src="~/Content/Images/memberProfile/patientProfile/excel.png" title="Export" alt="Submit" style="width: 100%">
+        </div>*@
+    <div style="margin-bottom: 1%"></div>
+    <br />
+    <br />
+
+
+    <table class="table administration_Table sortable" id="doctorTable">
+        <thead>
+            <tr>
+                <th style="width: 10%">
+                    @Html.DisplayNameFor(model => model.doctorResults[0].title) <i class="fa fa-fw fa-sort"></i>
+                </th>
+                <th style="width: 50%" onclick="doctorTable(1)">
+                    @Html.DisplayName("Full names") <i class="fa fa-fw fa-sort"></i>
+                </th>
+                <th onclick="doctorTable(6)">
+                    @Html.DisplayNameFor(model => model.doctorResults[0].practiceNo) <i class="fa fa-fw fa-sort"></i>
+                </th>
+                <th style="text-align: center!important;width:5%">
+                    @Html.DisplayNameFor(model => model.doctorResults[0].active)
+                </th>
+                <th style="text-align: center!important;width:10%">
+                    Action
+                </th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var item in Model.doctorResults)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.title)
+                    </td>
+
+                    <td>
+                        @Html.DisplayFor(modelItem => item.drLastName)
+                    </td>
+
+                    <td>
+                        @Html.DisplayFor(modelItem => item.practiceNo)
+                    </td>
+                    <td class="row-information" style="text-align:center!important"><span class="@(item.active == true ? "chk-yes fas fa-circle" : "chk-no fas fa-circle")"></span></td>
+
+                    <td class="statusCode linkNav" style="text-align: center!important">
+                        <input type="submit" class="link-button" value="View" onclick="location.href='@Url.Action("Details", "Doctor", new { id = item.doctorID })'" />
+                        @if (Model.DependentID != null)
+                        {
+                            @Html.ActionLink(" | Add to Profile", "AddDoctorToProfile", new { docID = item.doctorID, depId = Model.DependentID, doctorname = item.drFirstName + " " + item.drLastName, pro = Context.Request.Query["pro"] })
+                        }
+                    </td>
+
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <br />
+    <br />
+
+    <div class="fixedBack" style="margin-left: 44%">
+        <input value="Back" class="btn buttonRound_formBack go_back" style="width: 15%" />
+    </div>
+    <br />
+
+</div>
+
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#doctorTable').DataTable({
+                "iDisplayLength": 50,
+                "lengthMenu": [10, 25, 50, 100, 200],
+                "searching": false,
+                "ordering": false,
+                "info": true,
+
+            });
+
+            var table = $('#searchTable').dataTable();
+
+            $("#btnExports").click(function (e) {
+
+                e.preventDefault();
+                window.open('data:application/vnd.ms-excel,' + encodeURIComponent(table[0].outerHTML));
+
+            });
+
+        });
+    </script>
+
+    <script>
+
+        var $rows = $('#doctorTable tr');
+        $('#search').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $rows.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+
+        /*tableSorting*/
+        function doctorTable(n) {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("doctorTable");
+            switching = true;
+            dir = "asc";
+
+            while (switching) {
+                switching = false;
+                rows = table.getElementsByTagName("TR");
+
+                for (i = 1; i < (rows.length - 1); i++) {
+
+                    shouldSwitch = false;
+
+                    x = rows[i].getElementsByTagName("TD")[n];
+                    y = rows[i + 1].getElementsByTagName("TD")[n];
+
+                    if (dir == "asc") {
+                        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                            //if so, mark as a switch and break the loop:
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (dir == "desc") {
+                        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                            //if so, mark as a switch and break the loop:
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+                if (shouldSwitch) {
+                    /*If a switch has been marked, make the switch
+                    and mark that a switch has been done:*/
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                    //Each time a switch is done, increase this count by 1:
+                    switchcount++;
+                } else {
+                    /*If no switching has been done AND the direction is "asc",
+                    set the direction to "desc" and run the while loop again.*/
+                    if (switchcount == 0 && dir == "asc") {
+                        dir = "desc";
+                        switching = true;
+                    }
+                }
+            }
+        }
+
+
+
+    </script>
+}

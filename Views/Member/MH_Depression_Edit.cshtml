@@ -1,0 +1,975 @@
+﻿@model HaloCareCore.Models.Questionnaire.MH_DepressionResponse
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Depression questionnaire";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<comment>
+    <!--
+        04 August 2020 -- HCare-1125(Mental Health Disease: QUESTIONNAIRE - BIPOLAR)
+    -->
+</comment>
+<style>
+    .field-validation-error:before {
+        font-family: FontAwesome;
+        content: "\f06a\00a0";
+    }
+
+    .subtext {
+        color: #808080;
+        font-size: 14px;
+    }
+
+    .select2-container--default .select2-results__option--highlighted[aria-selected] .subtext {
+        color: #fff
+    }
+
+    .select2-container--default .select2-results__option--highlighted[aria-selected]:hover .subtext {
+        color: #fff
+    }
+
+    .select2-container--default .select2-selection--single {
+        display: block !important;
+        width: 420px !important;
+        max-height: 100px;
+        height: 30px;
+        margin-left: 10px;
+        padding: 6px 6px;
+        line-height: 1.428571429;
+        color: #003366;
+        border-radius: 0px !important;
+        border: none !important;
+        border-bottom: 1px solid #e8e6e6 !important;
+        background-color: transparent !important;
+        -webkit-box-shadow: none !important;
+        box-shadow: none !important;
+        outline: none !important
+    }
+
+        .select2-container--default .select2-selection--single .select2-selection__placeholder {
+            color: white !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow b {
+            margin-top: -5px !important;
+            margin-right: 50% !important;
+        }
+
+    .overlay {
+        height: 100%;
+        width: 0;
+        position: fixed;
+        z-index: 501;
+        top: 0;
+        left: 0;
+        background-color: rgb(0,0,0);
+        background-color: rgba(0,0,0, 0.5);
+        overflow-x: visible;
+    }
+
+    .warning {
+        display: none;
+        background: #fff;
+        color: #FFFFFF;
+        border: none;
+        border-radius: 10px;
+        position: fixed;
+        width: 500px;
+        left: 50%;
+        top: 12%;
+        margin-left: -258px;
+        padding: 0px;
+        box-sizing: border-box;
+        z-index: 502;
+    }
+
+    .assignment-header {
+        background: #E74D4F;
+        text-align: center;
+        padding: 10px 20px 10px 10px;
+        margin-top: 0px;
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;
+        border: 5px solid #E74D4F;
+    }
+
+    .assignment-logo {
+        color: white;
+        text-align: center;
+        font-size: 50px;
+    }
+
+    .assignment-heading {
+        padding: 10px;
+        font-family: Comfortaa;
+        color: rgb(0,0,0);
+        text-align: center;
+        font-size: 25px;
+        font-weight: bold;
+    }
+
+    .assignment-message {
+        color: rgb(0,0,0);
+        text-align: center;
+        padding: 10px 10px 10px 10px;
+    }
+
+    .warning-alert {
+        color: #FEAF20;
+        margin-top: 5px;
+    }
+</style>
+
+<!---------------------------------------------------------------------- header ---------------------------------------------------------------------->
+<nav id="global-nav" class="nav">
+    <div class="pull-left title">
+        <h1 class="site-title_patientProfile">
+            <span><img src="~/Content/Images/_2020/icons/banner-icon/mental-health-white.png" /></span>&emsp; Depression questionnaire
+        </h1>
+    </div>
+    <div class="pull-right title">
+        <h1 class="site-title_userID pull-right">
+            <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+        </h1>
+        <h1 class="site-title_userID pull-right">
+            @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+            {
+                <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+            }
+        </h1>
+        <h1 class="site-waffleIcon pull-right">
+            <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+        </h1>
+    </div>
+</nav>
+
+<div class="dashboardContainer zero-padding">
+    <div class="patientDashboard_View">
+        <ul class="breadcrumbs_patientDashboard">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new { })">Home</a></li>
+            <li><a href="@Url.Action("patientClinical", "Member", new { DependentID = Context.Request.Query["DependentID"] })">Patient</a></li>
+            <li><a href="#">@ViewBag.Title</a></li>
+        </ul>
+
+        @Html.Partial("_navSlider_blank", new { DependentID = Context.Request.Query["DependentID"] })
+
+        <div class="navCollection_patientDashboard">
+            @Html.Partial("_navCollection")
+        </div>
+
+        <div class="profileBar">
+            @Html.Action("_profileBar_edit", "Member", new { DependentID = Model.DependantID })
+        </div>
+    </div>
+    <br />
+    <div class="profilebar-spacer"></div>
+
+    <div id="general-pregnant-panel" class="patientDashboard_container">
+        <div class="col-md-12 row">
+            <div class="heading-spacer"></div>
+        </div>
+
+        @using (Ajax.BeginForm("MH_Depression_Edit", "Clinical", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "divPath", OnSuccess = "hideModal(); alert('Saved');" }, new { id = "depression-edit" }))
+        {
+            <div class="hidden-fields">
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                @Html.HiddenFor(model => model.DependantID)
+                @Html.Hidden("pro", (object)ViewBag.program)
+                @Html.HiddenFor(model => model.AssignmentID)
+                @Html.HiddenFor(model => model.TaskID)
+                @Html.HiddenFor(model => model.RiskID)
+                @Html.HiddenFor(model => model.CreatedBy)
+                @Html.HiddenFor(model => model.CreatedDate)
+            </div>
+            <div id="overlay-edit" class="overlay"></div>
+            <div class="form-horizontal">
+                <table id="depression-table" class="table mental-health-table">
+                    <tr>
+                        <td style="width: 6%; text-align:center!important">Q1</td>
+                        <td style="width: 80%">
+                            Depressed mood: Sadness, hopeless, helpless, worthless <span id="depression-depression-warning" class="pull-right warning-alert hidden"><i class="fas fa-exclamation-triangle"></i></span>
+                        </td>
+                        <td style="width: 50%">
+                            <select id="depression-depression" name="depression-depression" class="form-control select2" style="width: 100%;" required>
+                                <option value="@Model.DepressionSC" subtext="" selected="selected">@Model.Depression</option>
+                                <option value="0" subtext="No signs or symptoms.">Absent</option>
+                                <option value="1" subtext="These feeling states indicated only on questioning.">Mild</option>
+                                <option value="2" subtext="These feeling states spontaneously reported verbally.">Moderate</option>
+                                <option value="3" subtext="Communicates feeling states non-verbally – weeping; trembling voice.">Severe</option>
+                                <option value="4" subtext="These feeling states reported verbally only when questioned.">Urgent</option>
+                            </select>
+
+                            <input type="hidden" id="depression-depression-text" name="depression-depression-text" />
+                            <input type="hidden" id="depression-depression-score" name="depression-depression-score" />
+                        </td>
+                        <td style="width: 2%">@Html.ValidationMessage("depression-depression", " ", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 1%", @id = "depression-depression-error" })</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 6%; text-align:center!important">Q2</td>
+                        <td style="width: 80%">
+                            Feelings of guilt <span id="depression-guilt-warning" class="pull-right warning-alert hidden"><i class="fas fa-exclamation-triangle"></i></span>
+                        </td>
+                        <td style="width: 50%">
+                            <select id="depression-guilt" name="depression-guilt" class="form-control select2" style="width: 100%;" required>
+                                <option value="@Model.GuiltSC" subtext="" selected="selected">@Model.Guilt</option>
+                                <option value="0" subtext="No signs or symptoms.">Absent</option>
+                                <option value="1" subtext="Self reproach, feels he/she has let people down.">Mild</option>
+                                <option value="2" subtext="Ideas of guilt or rumination over past errors or sinful deeds.">Moderate</option>
+                                <option value="3" subtext="Present illness is a punishment. Delusions of guilt.">Severe</option>
+                                <option value="4" subtext="Hears accusatory or denunciatory voices and/or experiences threatening visual hallucinations.">Urgent</option>
+                            </select>
+
+                            <input type="hidden" id="depression-guilt-text" name="depression-guilt-text" />
+                            <input type="hidden" id="depression-guilt-score" name="depression-guilt-score" />
+                        </td>
+                        <td style="width: 2%">@Html.ValidationMessage("depression-guilt", " ", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 1%", @id = "depression-guilt-error" })</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 6%; text-align:center!important">Q3</td>
+                        <td style="width: 80%">
+                            Suicide <span id="depression-suicide-warning" class="pull-right warning-alert hidden"><i class="fas fa-exclamation-triangle"></i></span>
+                        </td>
+                        <td style="width: 50%">
+                            <select id="depression-suicide" name="depression-suicide" class="form-control select2" style="width: 100%;" required>
+                                <option value="@Model.SuicidalSC" subtext="" selected="selected">@Model.Suicidal</option>
+                                <option value="0" subtext="No signs or symptoms.">Absent</option>
+                                <option value="1" subtext="Feels life is not worth living.">Mild</option>
+                                <option value="2" subtext="Wishes he/she were dead or any thoughts of possible death to self.">Moderate</option>
+                                <option value="3" subtext="Ideas or gestures of suicide.">Severe</option>
+                                <option value="4" subtext="Attempts at suicide (any serious attempt).">Urgent</option>
+                            </select>
+
+                            <input type="hidden" id="depression-suicide-text" name="depression-suicide-text" />
+                            <input type="hidden" id="depression-suicide-score" name="depression-suicide-score" />
+                        </td>
+                        <td style="width: 2%">@Html.ValidationMessage("depression-suicide", " ", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 1%", @id = "depression-suicide-error" })</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 6%; text-align:center!important">Q4</td>
+                        <td style="width: 80%">
+                            Insomnia: early in the night <span id="depression-insomnia-early-night-warning" class="pull-right warning-alert hidden"><i class="fas fa-exclamation-triangle"></i></span>
+                        </td>
+                        <td style="width: 50%">
+                            <select id="depression-insomnia-early-night" name="depression-insomnia-early-night" class="form-control select2" style="width: 100%;" required>
+                                <option value="@Model.InsomniaEarlyNightSC" subtext="" selected="selected">@Model.InsomniaEarlyNight</option>
+                                <option value="0" subtext="No signs or symptoms.">Absent</option>
+                                <option value="1" subtext="Complains of occasional difficulty falling asleep, i.e. more than 1 ⁄2 hour.">Mild</option>
+                                <option value="2" subtext="Complains of nightly difficulty falling asleep.">Moderate</option>
+                            </select>
+
+                            <input type="hidden" id="depression-insomnia-early-night-text" name="depression-insomnia-early-night-text" />
+                            <input type="hidden" id="depression-insomnia-early-night-score" name="depression-insomnia-early-night-score" />
+                        </td>
+                        <td style="width: 2%">@Html.ValidationMessage("depression-insomnia-early-night", " ", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 1%", @id = "depression-insomnia-early-night-error" })</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 6%; text-align:center!important">Q5</td>
+                        <td style="width: 80%">
+                            Insomnia: middle of the night <span id="depression-insomnia-middle-night-warning" class="pull-right warning-alert hidden"><i class="fas fa-exclamation-triangle"></i></span>
+                        </td>
+                        <td style="width: 50%">
+                            <select id="depression-insomnia-middle-night" name="depression-insomnia-middle-night" class="form-control select2" style="width: 100%;" required>
+                                <option value="@Model.InsomniaMiddleNightSC" subtext="" selected="selected">@Model.InsomniaMiddleNight</option>
+                                <option value="0" subtext="No signs or symptoms.">Absent</option>
+                                <option value="1" subtext="Patient complains of being restless and disturbed during the night.">Mild</option>
+                                <option value="2" subtext="Waking during the night – any getting out of bed rates 2 (except for purposes of voiding).">Moderate</option>
+                            </select>
+
+                            <input type="hidden" id="depression-insomnia-middle-night-text" name="depression-insomnia-middle-night-text" />
+                            <input type="hidden" id="depression-insomnia-middle-night-score" name="depression-insomnia-middle-night-score" />
+                        </td>
+                        <td style="width: 2%">@Html.ValidationMessage("depression-insomnia-middle-night", " ", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 1%", @id = "depression-insomnia-middle-night-error" })</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 6%; text-align:center!important">Q6</td>
+                        <td style="width: 80%">
+                            Insomnia: early hours of the morning <span id="depression-insomnia-early-morning-warning" class="pull-right warning-alert hidden"><i class="fas fa-exclamation-triangle"></i></span>
+                        </td>
+                        <td style="width: 50%">
+                            <select id="depression-insomnia-early-morning" name="depression-insomnia-early-morning" class="form-control select2" style="width: 100%;" required>
+                                <option value="@Model.InsomniaEarlyMorningSC" subtext="" selected="selected">@Model.InsomniaEarlyMorning</option>
+                                <option value="0" subtext="No signs or symptoms.">Absent</option>
+                                <option value="1" subtext="Waking in early hours of the morning but goes back to sleep.">Mild</option>
+                                <option value="2" subtext="Unable to fall asleep again if he/she gets out of bed.">Moderate</option>
+                            </select>
+
+                            <input type="hidden" id="depression-insomnia-early-morning-text" name="depression-insomnia-early-morning-text" />
+                            <input type="hidden" id="depression-insomnia-early-morning-score" name="depression-insomnia-early-morning-score" />
+                        </td>
+                        <td style="width: 2%">@Html.ValidationMessage("depression-insomnia-early-morning", " ", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 1%", @id = "depression-insomnia-early-morning-error" })</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 6%; text-align:center!important">Q7</td>
+                        <td style="width: 80%">
+                            Work and activities <span id="depression-activity-warning" class="pull-right warning-alert hidden"><i class="fas fa-exclamation-triangle"></i></span>
+                        </td>
+                        <td style="width: 50%">
+                            <select id="depression-activity" name="depression-activity" class="form-control select2" style="width: 100%;" required>
+                                <option value="@Model.ActivitySC" subtext="" selected="selected">@Model.Activity</option>
+                                <option value="0" subtext="No signs or symptoms.">Absent</option>
+                                <option value="1" subtext="Thoughts and feelings of incapacity, fatigue or weakness related to activities, work or hobbies.">Mild</option>
+                                <option value="2" subtext="Loss of interest in activity, hobbies or work – either directly reported by the patient or indirect in listlessness, indecision and vacillation (feels he/she has to push self to work or activities).">Moderate</option>
+                                <option value="3" subtext="Decrease in actual time spent in activities or decrease in productivity. Rate 3 if the patient does not spend at least three hours a day in activities (job or hobbies) excluding routine chores.">Severe</option>
+                                <option value="4" subtext="Stopped working because of present illness. Rate 4 if patient engages in no activities except routine chores, or if patient fails to perform routine chores unassisted.">Urgent</option>
+                            </select>
+
+                            <input type="hidden" id="depression-activity-text" name="depression-activity-text" />
+                            <input type="hidden" id="depression-activity-score" name="depression-activity-score" />
+                        </td>
+                        <td style="width: 2%">@Html.ValidationMessage("depression-activity", " ", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 1%", @id = "depression-activity-error" })</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 6%; text-align:center!important">Q8</td>
+                        <td style="width: 80%">
+                            Slowness of thought and speech, impaired ability to concentrate, decreased motor activity <span id="depression-psychomotor-warning" class="pull-right warning-alert hidden"><i class="fas fa-exclamation-triangle"></i></span>
+                        </td>
+                        <td style="width: 50%">
+                            <select id="depression-psychomotor" name="depression-psychomotor" class="form-control select2" style="width: 100%;" required>
+                                <option value="@Model.PsychomotorSC" subtext="" selected="selected">@Model.Psychomotor</option>
+                                <option value="0" subtext="No signs or symptoms.">Absent</option>
+                                <option value="1" subtext="Slight retardation during the interview.">Mild</option>
+                                <option value="2" subtext="Obvious retardation during the interview.">Moderate</option>
+                                <option value="3" subtext="Interview difficult.">Severe</option>
+                                <option value="4" subtext="Complete stupor.">Urgent</option>
+                            </select>
+
+                            <input type="hidden" id="depression-psychomotor-text" name="depression-psychomotor-text" />
+                            <input type="hidden" id="depression-psychomotor-score" name="depression-psychomotor-score" />
+                        </td>
+                        <td style="width: 2%">@Html.ValidationMessage("depression-psychomotor", " ", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 1%", @id = "depression-psychomotor-error" })</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 6%; text-align:center!important">Q9</td>
+                        <td style="width: 80%">
+                            Agitation <span id="depression-agitation-warning" class="pull-right warning-alert hidden"><i class="fas fa-exclamation-triangle"></i></span>
+                        </td>
+                        <td style="width: 50%">
+                            <select id="depression-agitation" name="depression-agitation" class="form-control select2" style="width: 100%;" required>
+                                <option value="@Model.AgitationSC" subtext="" selected="selected">@Model.Agitation</option>
+                                <option value="0" subtext="No signs or symptoms.">Absent</option>
+                                <option value="1" subtext="Fidgetiness.">Mild</option>
+                                <option value="2" subtext="Do you play with hands and hair.">Moderate</option>
+                                <option value="3" subtext="Do you move about and difficult to sit still.">Severe</option>
+                                <option value="4" subtext="Do you wring your hands, nail biting, hair-pulling, biting of lips.">Urgent</option>
+                            </select>
+
+                            <input type="hidden" id="depression-agitation-text" name="depression-agitation-text" />
+                            <input type="hidden" id="depression-agitation-score" name="depression-agitation-score" />
+                        </td>
+                        <td style="width: 2%">@Html.ValidationMessage("depression-agitation", " ", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 1%", @id = "depression-agitation-error" })</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 6%; text-align:center!important">Q10</td>
+                        <td style="width: 80%">
+                            Anxiety psychic <span id="depression-anxiety-psychic-warning" class="pull-right warning-alert hidden"><i class="fas fa-exclamation-triangle"></i></span>
+                        </td>
+                        <td style="width: 50%">
+                            <select id="depression-anxiety-psychic" name="depression-anxiety-psychic" class="form-control select2" style="width: 100%;" required>
+                                <option value="@Model.AnxietyPsychicSC" subtext="" selected="selected">@Model.AnxietyPsychic</option>
+                                <option value="0" subtext="No signs or symptoms.">Absent</option>
+                                <option value="1" subtext="Feeling tense and irritability.">Mild</option>
+                                <option value="2" subtext="Worrying about minor matters.">Moderate</option>
+                                <option value="3" subtext="Apprehensive attitude apparent.">Severe</option>
+                                <option value="4" subtext="Fears expressed without questioning.">Urgent</option>
+                            </select>
+
+                            <input type="hidden" id="depression-anxiety-psychic-score" name="depression-anxiety-psychic-score" />
+                            <input type="hidden" id="depression-anxiety-psychic-text" name="depression-anxiety-psychic-text" />
+                        </td>
+                        <td style="width: 2%">@Html.ValidationMessage("depression-anxiety-psychic", " ", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 1%", @id = "depression-anxiety-psychic-error" })</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 6%; text-align:center!important">Q11</td>
+                        <td style="width: 80%">
+                            Do you have any symptoms of: gastro-intestinal – dry mouth, wind, indigestion, diarrhoea, cramps, belching cardio-vascular – palpitations, headaches respiratory – hyperventilation, sighing Increased urinary frequency
+                            sweating.
+                            <span id="depression-anxiety-somatic-warning" class="pull-right warning-alert hidden"><i class="fas fa-exclamation-triangle"></i></span>
+                        </td>
+                        <td style="width: 50%">
+                            <select id="depression-anxiety-somatic" name="depression-anxiety-somatic" class="form-control select2" style="width: 100%;" required>
+                                <option value="@Model.AnxietySomaticSC" subtext="" selected="selected">@Model.AnxietySomatic</option>
+                                <option value="0" subtext="No signs or symptoms.">Absent</option>
+                                <option value="1" subtext=" ">Mild</option>
+                                <option value="2" subtext=" ">Moderate</option>
+                                <option value="3" subtext=" ">Severe</option>
+                                <option value="4" subtext="Incapacitating">Urgent</option>
+                            </select>
+
+                            <input type="hidden" id="depression-anxiety-somatic-score" name="depression-anxiety-somatic-score" />
+                            <input type="hidden" id="depression-anxiety-somatic-text" name="depression-anxiety-somatic-text" />
+                        </td>
+                        <td style="width: 2%">@Html.ValidationMessage("depression-anxiety-somatic", " ", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 1%", @id = "depression-anxiety-somatic-error" })</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 6%; text-align:center!important">Q12</td>
+                        <td style="width: 80%">
+                            Somatic symptoms Gastro-intestinal <span id="depression-somatic-sym-gastro-warning" class="pull-right warning-alert hidden"><i class="fas fa-exclamation-triangle"></i></span>
+                        </td>
+                        <td style="width: 50%">
+                            <select id="depression-somatic-sym-gastro" name="depression-somatic-sym-gastro" class="form-control select2" style="width: 100%;" required>
+                                <option value="@Model.SomaticSymGastroSC" subtext="" selected="selected">@Model.SomaticSymGastro</option>
+                                <option value="0" subtext="No signs or symptoms.">Absent</option>
+                                <option value="1" subtext="Loss of appetite but eating without encouragement.">Mild</option>
+                                <option value="2" subtext="Difficulty eating without urging. Requests or requires laxatives or medication for bowels or medication for gastro-intestinal symptoms.">Moderate</option>
+                            </select>
+
+                            <input type="hidden" id="depression-somatic-sym-gastro-score" name="depression-somatic-sym-gastro-score" />
+                            <input type="hidden" id="depression-somatic-sym-gastro-text" name="depression-somatic-sym-gastro-text" />
+                        </td>
+                        <td style="width: 2%">@Html.ValidationMessage("depression-somatic-sym-gastro", " ", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 1%", @id = "depression-somatic-sym-gastro-error" })</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 6%; text-align:center!important">Q13</td>
+                        <td style="width: 80%">
+                            General somatic symptoms <span id="depression-somatic-sym-general-warning" class="pull-right warning-alert hidden"><i class="fas fa-exclamation-triangle"></i></span>
+                        </td>
+                        <td style="width: 50%">
+                            <select id="depression-somatic-sym-general" name="depression-somatic-sym-general" class="form-control select2" style="width: 100%;" required>
+                                <option value="@Model.SomaticSymGeneralSC" subtext="" selected="selected">@Model.SomaticSymGeneral</option>
+                                <option value="0" subtext="No signs or symptoms.">Absent</option>
+                                <option value="1" subtext="Heaviness in limbs, back or head. Backaches, headaches, muscle aches. Loss of energy and fatigability.">Mild</option>
+                                <option value="2" subtext="Any clear-cut symptoms.">Moderate</option>
+                            </select>
+
+                            <input type="hidden" id="depression-somatic-sym-general-score" name="depression-somatic-sym-general-score" />
+                            <input type="hidden" id="depression-somatic-sym-general-text" name="depression-somatic-sym-general-text" />
+                        </td>
+                        <td style="width: 2%">@Html.ValidationMessage("depression-somatic-sym-general", " ", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 1%", @id = "depression-somatic-sym-general-error" })</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 6%; text-align:center!important">Q14</td>
+                        <td style="width: 80%">
+                            Symptoms such as loss of libido and menstrual disturbances <span id="depression-sexology-warning" class="pull-right warning-alert hidden"><i class="fas fa-exclamation-triangle"></i></span>
+                        </td>
+                        <td style="width: 50%">
+                            <select id="depression-sexology" name="depression-sexology" class="form-control select2" style="width: 100%;" required>
+                                <option value="@Model.SexologySC" subtext="" selected="selected">@Model.Sexology</option>
+                                <option value="0" subtext="No signs or symptoms.">Absent</option>
+                                <option value="1" subtext=" ">Mild</option>
+                                <option value="2" subtext=" ">Severe</option>
+                            </select>
+
+                            <input type="hidden" id="depression-sexology-score" name="depression-sexology-score" />
+                            <input type="hidden" id="depression-sexology-text" name="depression-sexology-text" />
+                        </td>
+                        <td style="width: 2%">@Html.ValidationMessage("depression-sexology", " ", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 1%", @id = "depression-sexology-error" })</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 6%; text-align:center!important">Q15</td>
+                        <td style="width: 80%">
+                            Hypochondriasis <span id="depression-hypochondriasis-warning" class="pull-right warning-alert hidden"><i class="fas fa-exclamation-triangle"></i></span>
+                        </td>
+                        <td style="width: 50%">
+                            <select id="depression-hypochondriasis" name="depression-hypochondriasis" class="form-control select2" style="width: 100%;" required>
+                                <option value="@Model.HypochondriasisSC" subtext="" selected="selected">@Model.Hypochondriasis</option>
+                                <option value="0" subtext="No signs or symptoms.">Absent</option>
+                                <option value="1" subtext="Self-absorption (bodily).">Mild</option>
+                                <option value="2" subtext="Preoccupation with health.">Moderate</option>
+                                <option value="3" subtext="Frequent complaints, requests for help, doctor visits; etc.">Severe</option>
+                                <option value="4" subtext="Hypochondriacal delusions.">Urgent</option>
+                            </select>
+
+                            <input type="hidden" id="depression-hypochondriasis-score" name="depression-hypochondriasis-score" />
+                            <input type="hidden" id="depression-hypochondriasis-text" name="depression-hypochondriasis-text" />
+                        </td>
+                        <td style="width: 2%">@Html.ValidationMessage("depression-hypochondriasis", " ", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 1%", @id = "depression-hypochondriasis-error" })</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 6%; text-align:center!important">Q16</td>
+                        <td style="width: 80%">
+                            Loss of weight <span id="depression-weightloss-warning" class="pull-right warning-alert hidden"><i class="fas fa-exclamation-triangle"></i></span>
+                        </td>
+                        <td style="width: 50%">
+                            <select id="depression-weightloss" name="depression-weightloss" class="form-control select2" style="width: 100%;" required>
+                                <option value="@Model.WeightLossSC" subtext="" selected="selected">@Model.WeightLoss</option>
+                                <option value="0" subtext="No signs or symptoms.">Absent</option>
+                                <option value="1" subtext="Probable weight loss.">Mild</option>
+                                <option value="2" subtext="Definite weight loss.">Moderate</option>
+                                <option value="3" subtext="Not assessed.">Severe</option>
+                            </select>
+
+                            <input type="hidden" id="depression-weightloss-score" name="depression-weightloss-score" />
+                            <input type="hidden" id="depression-weightloss-text" name="depression-weightloss-text" />
+                        </td>
+                        <td style="width: 2%">@Html.ValidationMessage("depression-weightloss", " ", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 1%", @id = "depression-weightloss-error" })</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 6%; text-align:center!important">Q17</td>
+                        <td style="width: 80%">
+                            Insight <span id="depression-insight-warning" class="pull-right warning-alert hidden"><i class="fas fa-exclamation-triangle"></i></span>
+                        </td>
+                        <td style="width: 50%">
+                            <select id="depression-insight" name="depression-insight" class="form-control select2" style="width: 100%;" required>
+                                <option value="@Model.InsightSC" subtext="" selected="selected">@Model.Insight</option>
+                                <option value="0" subtext="Acknowledges being depressed and ill.">Absent</option>
+                                <option value="1" subtext="Acknowledges illness but attributes cause to bad food, climate, overwork, virus, need for rest, etc.">Mild</option>
+                                <option value="2" subtext="Denies being ill at all.">Moderate</option>
+                            </select>
+
+                            <input type="hidden" id="depression-insight-score" name="depression-insight-score" />
+                            <input type="hidden" id="depression-insight-text" name="depression-insight-text" />
+                        </td>
+                        <td style="width: 2%">@Html.ValidationMessage("depression-insight", " ", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 1%", @id = "depression-insight-error" })</td>
+                    </tr>
+                </table>
+
+                <div class="col-md-12 row">
+                    <div class="col-md-6"></div>
+                    <div class="col-md-6">
+                        <div class="pull-right createForm">
+                            @Html.LabelFor(model => model.Active, htmlAttributes: new { @class = "control-label col-md-9" })
+                            <div class="col-md-3">
+                                <div class="checkbox">
+                                    @Html.EditorFor(model => model.Active)
+                                    @Html.ValidationMessageFor(model => model.Active, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            @Html.LabelFor(model => model.FollowUp, htmlAttributes: new { @class = "control-label col-md-9" })
+                            <div class="col-md-3">
+                                <div class="checkbox">
+                                    @Html.EditorFor(model => model.FollowUp)
+                                    @Html.ValidationMessageFor(model => model.FollowUp, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div style="text-align: center!important">
+                        <input id="submit" type="submit" value="Save" class="btn create-button" onclick="storageKey()" style="width: 15%" /><br />
+                        <input id="back" value="Back" class="btn reset-button go_back" onclick="backKey()" style="width: 15%!important" />
+                    </div>
+                </div>
+            </div>
+        }
+
+        <div class="warning" id="suicide-warning">
+            <button type="button" class="warning-close yes" id="depression-warning-close"><span aria-hidden="true">&times;</span></button>
+            <div class="assignment-header">
+                <div class="assignment-logo"><i class="fas fa-exclamation-triangle"></i></div>
+            </div>
+            <div class="assignment-heading">ALERT!</div>
+            <div class="assignment-message"><b>Suicide alert: </b>Doctor referral assignment will be required!</div>
+            <div class="assignment-footer" style="text-align:center!important"><input id="submit" value="OK" class="btn alert-button yes" /></div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/bundles/jqueryval"></script>
+
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $('[data-toggle="tooltip"]').tooltip({
+                placement: 'right'
+            });
+        });
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function () {
+
+            $("#depression-suicide-text").val($("#depression-suicide :selected").text());
+            $("#depression-suicide-score").val($("#depression-suicide :selected").val());
+            $('#depression-suicide').on("select2:select", function (e) {
+                $("#depression-suicide-text").val($("#depression-suicide :selected").text());
+                $("#depression-suicide-score").val($(this).val());
+                $("#depression-suicide-error").hide();
+
+                if ($(this).val() > 0) {
+                    //AlertMessageDepression(),
+                    //openOverlay(),
+                    $("#depression-suicide-cmt").removeClass("hidden"),
+                        $("#depression-suicide-error").hide();
+                }
+                else {
+                    $("#suicide-cmt").addClass("hidden");
+                }
+
+                //follow-up-check
+                if ($("#depression-suicide :selected").text() == "Follow up") {
+                    $("#depression-suicide-warning").removeClass("hidden");
+
+                }
+                else {
+                    $("#depression-suicide-warning").addClass("hidden");
+                }
+            });
+
+            $("#depression-depression-text").val($("#depression-depression :selected").text());
+            $("#depression-depression-score").val($("#depression-depression :selected").val());
+            $('#depression-depression').on("select2:select", function (e) {
+                $("#depression-depression-text").val($("#depression-depression :selected").text());
+                $("#depression-depression-score").val($(this).val());
+                $("#depression-depression-error").hide();
+
+                //follow-up-check
+                if ($("#depression-depression :selected").text() == "Follow up") {
+                    $("#depression-depression-warning").removeClass("hidden");
+
+                }
+                else {
+                    $("#depression-depression-warning").addClass("hidden");
+                }
+            });
+
+            $("#depression-guilt-text").val($("#depression-guilt :selected").text());
+            $("#depression-guilt-score").val($("#depression-guilt :selected").val());
+            $('#depression-guilt').on("select2:select", function (e) {
+                $("#depression-guilt-text").val($("#depression-guilt :selected").text());
+                $("#depression-guilt-score").val($(this).val());
+                $("#depression-guilt-error").hide();
+
+                //follow-up-check
+                if ($("#depression-guilt :selected").text() == "Follow up") {
+                    $("#depression-guilt-warning").removeClass("hidden");
+
+                }
+                else {
+                    $("#depression-guilt-warning").addClass("hidden");
+                }
+            });
+
+            $("#depression-insomnia-early-night-text").val($("#depression-insomnia-early-night :selected").text());
+            $("#depression-insomnia-early-night-score").val($("#depression-insomnia-early-night :selected").val());
+            $('#depression-insomnia-early-night').on("select2:select", function (e) {
+                $("#depression-insomnia-early-night-text").val($("#depression-insomnia-early-night :selected").text());
+                $("#depression-insomnia-early-night-score").val($(this).val());
+                $("#depression-insomnia-early-night-error").hide();
+
+                //follow-up-check
+                if ($("#depression-insomnia-early-night :selected").text() == "Follow up") {
+                    $("#depression-insomnia-early-night-warning").removeClass("hidden");
+
+                }
+                else {
+                    $("#depression-insomnia-early-night-warning").addClass("hidden");
+                }
+            });
+
+            $("#depression-insomnia-middle-night-text").val($("#depression-insomnia-middle-night :selected").text());
+            $("#depression-insomnia-middle-night-score").val($("#depression-insomnia-middle-night :selected").val());
+            $('#depression-insomnia-middle-night').on("select2:select", function (e) {
+                $("#depression-insomnia-middle-night-text").val($("#depression-insomnia-middle-night :selected").text());
+                $("#depression-insomnia-middle-night-score").val($(this).val());
+                $("#depression-insomnia-middle-night-error").hide();
+
+                //follow-up-check
+                if ($("#depression-insomnia-middle-night :selected").text() == "Follow up") {
+                    $("#depression-insomnia-middle-night-warning").removeClass("hidden");
+
+                }
+                else {
+                    $("#depression-insomnia-middle-night-warning").addClass("hidden");
+                }
+            });
+
+            $("#depression-insomnia-early-morning-text").val($("#depression-insomnia-early-morning :selected").text());
+            $("#depression-insomnia-early-morning-score").val($("#depression-insomnia-early-morning :selected").val());
+            $('#depression-insomnia-early-morning').on("select2:select", function (e) {
+                $("#depression-insomnia-early-morning-text").val($("#depression-insomnia-early-morning :selected").text());
+                $("#depression-insomnia-early-morning-score").val($(this).val());
+                $("#depression-insomnia-early-morning-error").hide();
+
+                //follow-up-check
+                if ($("#depression-insomnia-early-morning :selected").text() == "Follow up") {
+                    $("#depression-insomnia-early-morning-warning").removeClass("hidden");
+
+                }
+                else {
+                    $("#depression-insomnia-early-morning-warning").addClass("hidden");
+                }
+            });
+
+            $("#depression-activity-text").val($("#depression-activity :selected").text());
+            $("#depression-activity-score").val($("#depression-activity :selected").val());
+            $('#depression-activity').on("select2:select", function (e) {
+                $("#depression-activity-text").val($("#depression-activity :selected").text());
+                $("#depression-activity-score").val($(this).val());
+                $("#depression-activity-error").hide();
+
+                //follow-up-check
+                if ($("#depression-activity :selected").text() == "Follow up") {
+                    $("#depression-activity-warning").removeClass("hidden");
+
+                }
+                else {
+                    $("#depression-activity-warning").addClass("hidden");
+                }
+            });
+
+            $("#depression-psychomotor-text").val($("#depression-psychomotor :selected").text());
+            $("#depression-psychomotor-score").val($("#depression-psychomotor :selected").val());
+            $('#depression-psychomotor').on("select2:select", function (e) {
+                $("#depression-psychomotor-text").val($("#depression-psychomotor :selected").text());
+                $("#depression-psychomotor-score").val($(this).val());
+                $("#depression-psychomotor-error").hide();
+
+                //follow-up-check
+                if ($("#depression-psychomotor :selected").text() == "Follow up") {
+                    $("#depression-psychomotor-warning").removeClass("hidden");
+
+                }
+                else {
+                    $("#depression-psychomotor-warning").addClass("hidden");
+                }
+            });
+
+            $("#depression-agitation-text").val($("#depression-agitation :selected").text());
+            $("#depression-agitation-score").val($("#depression-agitation :selected").val());
+            $('#depression-agitation').on("select2:select", function (e) {
+                $("#depression-agitation-text").val($("#depression-agitation :selected").text());
+                $("#depression-agitation-score").val($(this).val());
+                $("#depression-agitation-error").hide();
+
+                //follow-up-check
+                if ($("#depression-agitation :selected").text() == "Follow up") {
+                    $("#depression-agitation-warning").removeClass("hidden");
+
+                }
+                else {
+                    $("#depression-agitation-warning").addClass("hidden");
+                }
+            });
+
+            $("#depression-anxiety-psychic-text").val($("#depression-anxiety-psychic :selected").text());
+            $("#depression-anxiety-psychic-score").val($("#depression-anxiety-psychic :selected").val());
+            $('#depression-anxiety-psychic').on("select2:select", function (e) {
+                $("#depression-anxiety-psychic-text").val($("#depression-anxiety-psychic :selected").text());
+                $("#depression-anxiety-psychic-score").val($(this).val());
+                $("#depression-anxiety-psychic-error").hide();
+
+                //follow-up-check
+                if ($("#depression-anxiety-psychic :selected").text() == "Follow up") {
+                    $("#depression-anxiety-psychic-warning").removeClass("hidden");
+
+                }
+                else {
+                    $("#depression-anxiety-psychic-warning").addClass("hidden");
+                }
+            });
+
+            $("#depression-anxiety-somatic-text").val($("#depression-anxiety-somatic :selected").text());
+            $("#depression-anxiety-somatic-score").val($("#depression-anxiety-somatic :selected").val());
+            $('#depression-anxiety-somatic').on("select2:select", function (e) {
+                $("#depression-anxiety-somatic-text").val($("#depression-anxiety-somatic :selected").text());
+                $("#depression-anxiety-somatic-score").val($(this).val());
+                $("#depression-anxiety-somatic-error").hide();
+
+                //follow-up-check
+                if ($("#depression-anxiety-somatic :selected").text() == "Follow up") {
+                    $("#depression-anxiety-somatic-warning").removeClass("hidden");
+
+                }
+                else {
+                    $("#depression-anxiety-somatic-warning").addClass("hidden");
+                }
+            });
+
+            $("#depression-somatic-sym-gastro-text").val($("#depression-somatic-sym-gastro :selected").text());
+            $("#depression-somatic-sym-gastro-score").val($("#depression-somatic-sym-gastro :selected").val());
+            $('#depression-somatic-sym-gastro').on("select2:select", function (e) {
+                $("#depression-somatic-sym-gastro-text").val($("#depression-somatic-sym-gastro :selected").text());
+                $("#depression-somatic-sym-gastro-score").val($(this).val());
+                $("#depression-somatic-sym-gastro-error").hide();
+
+                //follow-up-check
+                if ($("#depression-somatic-sym-gastro :selected").text() == "Follow up") {
+                    $("#depression-somatic-sym-gastro-warning").removeClass("hidden");
+
+                }
+                else {
+                    $("#depression-somatic-sym-gastro-warning").addClass("hidden");
+                }
+            });
+
+            $("#depression-somatic-sym-general-text").val($("#depression-somatic-sym-general :selected").text());
+            $("#depression-somatic-sym-general-score").val($("#depression-somatic-sym-general :selected").val());
+            $('#depression-somatic-sym-general').on("select2:select", function (e) {
+                $("#depression-somatic-sym-general-text").val($("#depression-somatic-sym-general :selected").text());
+                $("#depression-somatic-sym-general-score").val($(this).val());
+                $("#depression-somatic-sym-general-error").hide();
+
+                //follow-up-check
+                if ($("#depression-somatic-sym-general :selected").text() == "Follow up") {
+                    $("#depression-somatic-sym-general-warning").removeClass("hidden");
+
+                }
+                else {
+                    $("#depression-somatic-sym-general-warning").addClass("hidden");
+                }
+            });
+
+            $("#depression-sexology-text").val($("#depression-sexology :selected").text());
+            $("#depression-sexology-score").val($("#depression-sexology :selected").val());
+            $('#depression-sexology').on("select2:select", function (e) {
+                $("#depression-sexology-text").val($("#depression-sexology :selected").text());
+                $("#depression-sexology-score").val($(this).val());
+                $("#depression-sexology-error").hide();
+
+                //follow-up-check
+                if ($("#depression-sexology :selected").text() == "Follow up") {
+                    $("#depression-sexology-warning").removeClass("hidden");
+
+                }
+                else {
+                    $("#depression-sexology-warning").addClass("hidden");
+                }
+            });
+
+            $("#depression-hypochondriasis-text").val($("#depression-hypochondriasis :selected").text());
+            $("#depression-hypochondriasis-score").val($("#depression-hypochondriasis :selected").val());
+            $('#depression-hypochondriasis').on("select2:select", function (e) {
+                $("#depression-hypochondriasis-text").val($("#depression-hypochondriasis :selected").text());
+                $("#depression-hypochondriasis-score").val($(this).val());
+                $("#depression-hypochondriasis-error").hide();
+
+                //follow-up-check
+                if ($("#depression-hypochondriasis :selected").text() == "Follow up") {
+                    $("#depression-hypochondriasis-warning").removeClass("hidden");
+
+                }
+                else {
+                    $("#depression-hypochondriasis-warning").addClass("hidden");
+                }
+            });
+
+            $("#depression-weightloss-text").val($("#depression-weightloss :selected").text());
+            $("#depression-weightloss-score").val($("#depression-weightloss :selected").val());
+            $('#depression-weightloss').on("select2:select", function (e) {
+                $("#depression-weightloss-text").val($("#depression-weightloss :selected").text());
+                $("#depression-weightloss-score").val($(this).val());
+                $("#depression-weightloss-error").hide();
+
+                //follow-up-check
+                if ($("#depression-weightloss :selected").text() == "Follow up") {
+                    $("#depression-weightloss-warning").removeClass("hidden");
+
+                }
+                else {
+                    $("#depression-weightloss-warning").addClass("hidden");
+                }
+            });
+
+            $("#depression-insight-text").val($("#depression-insight :selected").text());
+            $("#depression-insight-score").val($("#depression-insight :selected").val());
+            $('#depression-insight').on("select2:select", function (e) {
+                $("#depression-insight-text").val($("#depression-insight :selected").text());
+                $("#depression-insight-score").val($(this).val());
+                $("#depression-insight-error").hide();
+
+                //follow-up-check
+                if ($("#depression-insight :selected").text() == "Follow up") {
+                    $("#depression-insight-warning").removeClass("hidden");
+
+                }
+                else {
+                    $("#depression-insight-warning").addClass("hidden");
+                }
+            });
+
+
+        });
+    </script>
+    <script>
+        function openOverlay() {
+            document.getElementById("overlay-edit").style.width = "100%";
+        }
+
+        function closeOverlay() {
+            document.getElementById("overlay-edit").style.width = "0%";
+        }
+    </script>
+    <script>
+        function AlertMessageDepression(msg, myYes) {
+            var b = $("#suicide-warning");
+            b.find(".message").text(msg);
+            b.find(".yes").unbind().click(function () {
+                b.hide(),
+                    closeOverlay();
+            });
+            b.find(".yes").click(myYes);
+            b.show();
+            $("#depression-warning-close").focus();
+        }
+    </script>
+    <script>
+        $(function () {
+            $(".select2").select2({ matcher: matchCustom, templateResult: formatCustom });
+        })
+
+        function stringMatch(term, candidate) {
+            return candidate && candidate.toLowerCase().indexOf(term.toLowerCase()) >= 0;
+        }
+
+        function matchCustom(params, data) {
+            // If there are no search terms, return all of the data
+            if ($.trim(params.term) === '') {
+                return data;
+            }
+            // Do not display the item if there is no 'text' property
+            if (typeof data.text === 'undefined') {
+                return null;
+            }
+            // Match text of option
+            if (stringMatch(params.term, data.text)) {
+                return data;
+            }
+            // Match attribute "data-foo" of option
+            if (stringMatch(params.term, $(data.element).attr('subtext'))) {
+                return data;
+            }
+            // Return `null` if the term should not be displayed
+            return null;
+        }
+
+        function formatCustom(state) {
+            return $(
+                '<div><div>' + state.text + '</div><div class="subtext">'
+                + $(state.element).attr('subtext')
+                + '</div></div>'
+            );
+        }
+    </script>
+    <script>
+        function backKey() {
+            localStorage.clear();
+            localStorage.removeItem("create_depression");
+            localStorage.setItem("create_depression", Date.now());
+        }
+        function storageKey() {
+            localStorage.setItem("create_depression", Date.now());
+        }
+    </script>
+    <script>
+        // follow-up-check on load
+        if ($("#depression-suicide :selected").text() == "Follow up") { $("#depression-suicide-warning").removeClass("hidden"); } else { $("#depression-suicide-warning").addClass("hidden"); }
+        if ($("#depression-depression :selected").text() == "Follow up") { $("#depression-depression-warning").removeClass("hidden"); } else { $("#depression-depression-warning").addClass("hidden"); }
+        if ($("#depression-guilt :selected").text() == "Follow up") { $("#depression-guilt-warning").removeClass("hidden"); } else { $("#depression-guilt-warning").addClass("hidden"); }
+        if ($("#depression-insomnia-early-night :selected").text() == "Follow up") { $("#depression-insomnia-early-night-warning").removeClass("hidden"); } else { $("#depression-insomnia-early-night-warning").addClass("hidden"); }
+        if ($("#depression-insomnia-middle-night :selected").text() == "Follow up") { $("#depression-insomnia-middle-night-warning").removeClass("hidden"); } else { $("#depression-insomnia-middle-night-warning").addClass("hidden"); }
+        if ($("#depression-insomnia-early-morning :selected").text() == "Follow up") { $("#depression-insomnia-early-morning-warning").removeClass("hidden"); } else { $("#depression-insomnia-early-morning-warning").addClass("hidden"); }
+        if ($("#depression-activity :selected").text() == "Follow up") { $("#depression-activity-warning").removeClass("hidden"); } else { $("#depression-activity-warning").addClass("hidden"); }
+        if ($("#depression-psychomotor :selected").text() == "Follow up") { $("#depression-psychomotor-warning").removeClass("hidden"); } else { $("#depression-psychomotor-warning").addClass("hidden"); }
+        if ($("#depression-agitation :selected").text() == "Follow up") { $("#depression-agitation-warning").removeClass("hidden"); } else { $("#depression-agitation-warning").addClass("hidden"); }
+        if ($("#depression-anxiety-psychic :selected").text() == "Follow up") { $("#depression-anxiety-psychic-warning").removeClass("hidden"); } else { $("#depression-anxiety-psychic-warning").addClass("hidden"); }
+        if ($("#depression-anxiety-somatic :selected").text() == "Follow up") { $("#depression-anxiety-somatic-warning").removeClass("hidden"); } else { $("#depression-anxiety-somatic-warning").addClass("hidden"); }
+        if ($("#depression-somatic-sym-gastro :selected").text() == "Follow up") { $("#depression-somatic-sym-gastro-warning").removeClass("hidden"); } else { $("#depression-somatic-sym-gastro-warning").addClass("hidden"); }
+        if ($("#depression-somatic-sym-general :selected").text() == "Follow up") { $("#depression-somatic-sym-general-warning").removeClass("hidden"); } else { $("#depression-somatic-sym-general-warning").addClass("hidden"); }
+        if ($("#depression-sexology :selected").text() == "Follow up") { $("#depression-sexology-warning").removeClass("hidden"); } else { $("#depression-sexology-warning").addClass("hidden"); }
+        if ($("#depression-hypochondriasis :selected").text() == "Follow up") { $("#depression-hypochondriasis-warning").removeClass("hidden"); } else { $("#depression-hypochondriasis-warning").addClass("hidden"); }
+        if ($("#depression-weightloss :selected").text() == "Follow up") { $("#depression-weightloss-warning").removeClass("hidden"); } else { $("#depression-weightloss-warning").addClass("hidden"); }
+        if ($("#depression-insight :selected").text() == "Follow up") { $("#depression-insight-warning").removeClass("hidden"); } else { $("#depression-insight-warning").addClass("hidden"); }
+
+    </script>
+
+}

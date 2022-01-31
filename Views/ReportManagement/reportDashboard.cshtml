@@ -1,0 +1,113 @@
+﻿
+@{
+    ViewBag.Title = "reportDashboard";
+    Layout = "~/Views/Shared/_LayoutReport_Menu.cshtml";
+}
+
+
+
+<style>
+    .indexnav {
+        margin-top: 100px;
+    }
+
+    body {
+        background-image: url('../../Content/Images/Backgrounds/homePage/homePage_one.png');
+        background-size: 100%;
+    }
+
+
+</style>
+
+
+<div class="topBar_reports">
+    <h2>Report Management</h2>
+    <img src="~/Content/Images/memberProfile/topBar Icons/Reports.png" style="margin-top: 0.3%"/>
+</div>
+
+<br />
+<br />
+<br />
+<br />
+
+
+<!--Navigation Icons-->
+
+<h2 style="color: #003366; font-size: 250%; text-align: center; margin-bottom: 10%"><i>Report<span style="color: #0081b3"> Management</span></i></h2>
+
+<div class="container indexnav">
+    <div class="row">
+        <div class="col-md-12">
+
+            <!--Client-->
+            <div class="col-md-3">
+                <a href="@Url.Action("operationsDiseaseManagement", "ReportManagement", null)">
+                    <img src="~/Content/Images/Navigation/5. Reports/patientList.png" style="width: 25%; margin-top: 14%; margin-bottom: 5%" />
+                    <div class="col-xs-12 homenavbtns">
+                        <h8>Operations<br /><span>Dashboard</span></h8>
+                    </div>
+                </a>
+            </div>
+
+            <!--executiveBoard-->
+            <div class="col-md-3">
+                <a href="@Url.Action("executiveDashboard", "ReportManagement", null)">
+                    <img src="~/Content/Images/Navigation/5. Reports/executiveDashboard.png" style="width: 20%; margin-top: 14%; margin-bottom: 4.6%" />
+                    <div class="col-xs-12 homenavbtns">
+                        <h8>Executive<br /><span>Dashboard</span></h8>
+                    </div>
+                </a>
+            </div>
+
+            <!--Performance-->
+
+            <div class="col-md-3">
+                <a href="@Url.Action("performanceDashboard", "ReportManagement", null)">
+                    <img src="~/Content/Images/Navigation/5. Reports/performance_Two.png" style="width: 21%; margin-top: 16%; margin-bottom: 5.5%" />
+                    <div class="col-xs-12 homenavbtns">
+                        <h8>Performance<br /><span>Dashboard</span></h8>
+                    </div>
+                </a>
+            </div>
+
+            <!--Analytics-->
+
+            <div class="col-md-3">
+                <a href="@Url.Action("analyticsDiseaseManagement", "ReportManagement", null)">
+                    <img src="~/Content/Images/Navigation/5. Reports/Analytics.png" style="width: 25%; margin-top: 17.8%; margin-bottom: 6.5%" />
+                    <div class="col-xs-12 homenavbtns">
+                        <h8>Analytics<br /><span>Dashboard</span></h8>
+                    </div>
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+
+<footer>
+    <img src="~/Content/Images/memberProfile/Page Icons/Reportsx.png" style="position:fixed; bottom:3.2%; right: 0; left: 0; margin-left: 96%; width: 1.5%">
+</footer>
+
+<footer class="backButton_image" style="position: fixed; bottom: 50px; left: 0; right: 0; width: 80%; margin-left: 10%">
+    <a href="@Url.Action("Index", "Home")"
+            <span id="surround" >
+                <span id="initial"><img src="~/Content/Images/memberProfile/Page Icons/back_gray.png" /></span>
+                <span id="onhover"><img src="~/Content/Images/memberProfile/Page Icons/back_blue.png" /></span>
+            </span>
+            </a>
+</footer>
+
+<script>
+
+    $(function () {
+        $('.go_back').click(function (e) {
+            e.preventDefault();
+            history.go(-1);
+        });
+    });
+
+</script>
+

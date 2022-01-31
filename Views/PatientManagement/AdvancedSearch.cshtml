@@ -1,0 +1,526 @@
+﻿@model HaloCareCore.Models.AdvancedSearchView
+@using HaloCareCore.Extensions
+@using System.Configuration
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "AdvancedSearch";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<comment>
+    <!--
+        12 March 2019 -- HCARE-684 (Advanced Search: Please investigate the removal of the GUID on the Advance Search export to excel)
+        I have formatted the export in the PatientManagementController.cs to accommodate for the removal of the GUID and adjusted the columns accordingly for the remaining export. Tested on local.
+
+        01 April 2019 -- HCare-643 (Add fields to Search results report)
+        File/Page: PatientManagement/SearchResults.cshtml & MemberRepository.cs
+        Description: Added Birthday, MemberStatus Modified by and Modified date to the Excel export function.
+        Margo noticed that the dependant code is not pulling with the leading zero so I adjusted the export to excel method by adding a different one using Excel Package. This was then edited to format the date columns as well as ensure that the export includes the leading zeros in the dependant code as well as the membership numbers. I also tested that when you filter the advanced search, that the correct information is pulled on the export. All is working correctly.
+
+        22 May 2019 -- HCare-741 (Advance search - pathology readings)
+        As part of the Advanced Search for pathology readings(hbA1C & Viral load with effective dates), I've added the time to the effective dates so that we can pull the latest Pathology entry in the advanced search.
+        All effective dates in the pathology table now have a date and time in stamp in the database.
+
+        26 July 2019 -- HCare-768 (Management status displayed incorrectly on patient dashboard)
+        Added an active check to the patient dashboard where the managment status is displayed in the Disease Management block. This is also corrected in the advanced search in order to pull the correct data related to the management status should a status be deactivated.
+
+        21 January 2020 -- HCare-927 (Loader (when waiting) changes in system)
+        Updated loader which has been set to the views as per the Service Request. Users to advise should the need this added to a view.
+
+        12 May 2020 -- HCare-1033 (Advance search risk rating per condition)
+        Updated the SQL script in the MemberRepository to pull the top 1 risk id linked to the dependant and program in order to seperate the risk ratings per program. This will be displayed in the excel export of advanced search.
+        Also included an overall risk rating which takes the 'worst' rating and adds it to a new column. The overall rating will be applied to all dependant entries as per the discussion with Rozaan.
+        Included is the MemberFileView which will initially show an unrated member and if you access the individual programs, the member's name will change color as per the risk rating per program criteria as well.
+
+        02 June 2020 -- HCare-931 (Frail Care excel export)
+        Added Frail care questions to the Advanced search export - Will take the top 1 associated frail care data as per the rest of that report.
+
+    -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    select[multiple] {
+        max-height: 1000px;
+        height: 67px;
+    }
+
+    .select2-container--default .select2-selection--multiple {
+        padding: 0 !important;
+        padding-left: 5px !important;
+    }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice {
+            margin-top: 5px !important;
+        }
+</style>
+
+<!--pageLoader-->
+<div id="loading-screen" class="hidden">
+    <div class="container-loader">
+        <div></div><div></div><div></div><div></div>
+        <span class="loading-text">LOADING...</span>
+    </div>
+    <div id="loading" class="loading"></div>
+</div>
+
+<div class="fullScreen_container">
+    <!--pageHeader-->
+    <nav id="global-nav" class="nav">
+        <div class="pull-left title">
+            <h1 class="site-title_patientProfile">
+                <span><i class="fas fa-search"></i>&emsp; Search</span>
+            </h1>
+        </div>
+        <div class="pull-right title">
+            <h1 class="site-title_userID pull-right">
+                <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+            </h1>
+            <h1 class="site-title_userID pull-right">
+                @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                {
+                    <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                }
+            </h1>
+            <h1 class="site-waffleIcon pull-right">
+                <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+            </h1>
+        </div>
+    </nav>
+
+    @using (Html.BeginForm())
+    {
+        <div class="">
+
+            <!--breadCrumbs-->
+            <ul class="breadcrumbs_fullScreens" style="margin-top: -2%">
+                <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+                <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+                <li><a href="#">Advanced search</a></li>
+            </ul>
+
+            <!--navCollection-->
+            @if (User.Identity.IsAuthenticated)
+            {
+                if (User.HasRole("6. Global user") || (User.HasRole("5. Super user")))
+                {
+                    <div class="navCollection_fullScreens">
+                        <div class="buttonCollection">
+                            <div class="col-md-12">
+                                <div class="col-md-4"></div>
+                                <div class="col-md-4">
+                                    <div class="col-md-2">
+                                        <a href="@Url.Action("Index", "Home", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Home"><span style="font-size: 15px" class="sub_icon fas fa-home"></span></a>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <a href="@Url.Action("OpenAssignments", "Clinical", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Assignments"><span style="font-size: 15px" class="sub_icon fas fa-bell"></span></a>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <a href="@Url.Action("Search", "Member", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Patient"><span style="font-size: 15px" class="sub_icon fas fa-user-circle"></span></a>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <span style="font-size: 15px; background: -webkit-linear-gradient(#e80a89, #f15b2a);-webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow (10px 10px 1px rgba(34, 34, 34, 0.50))" title="Search" class="sub_icon fas fa-search"></span>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <a href="@Url.Action("Index", "Administration", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Settings"><span style="font-size: 15px" class="sub_icon fas fa-cog"></span></a>
+                                    </div>
+
+                                </div>
+                                <div class="col-md-4"></div>
+
+                            </div>
+                        </div>
+                    </div>
+                }
+                else if (User.HasRole("4. Advisor"))
+                {
+                    <div class="navCollection_fullScreens">
+                        <div class="buttonCollection">
+                            <div class="col-md-12">
+                                <div class="col-md-4"></div>
+                                <div class="col-md-4">
+                                    <div class="col-md-1"></div>
+                                    <div class="col-md-2">
+                                        <a href="@Url.Action("Index", "Home", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Home"><span style="font-size: 15px" class="sub_icon fas fa-home"></span></a>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <a href="@Url.Action("OpenAssignments", "Clinical", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Assignments"><span style="font-size: 15px" class="sub_icon fas fa-bell"></span></a>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <a href="@Url.Action("Search", "Member", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Patient"><span style="font-size: 15px" class="sub_icon fas fa-user-circle"></span></a>
+                                    </div>
+                                    <!--<div class="col-md-2">
+                                        <a href="@Url.Action("OutstandingAuthorise", "Scripts", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Authorisation"><span style="font-size: 15px" class="sub_icon fas fa-check-circle"></span></a>
+                                    </div>-->
+                                    <div class="col-md-2">
+                                        <span style="font-size: 15px; background: -webkit-linear-gradient(#e80a89, #f15b2a);-webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow (10px 10px 1px rgba(34, 34, 34, 0.50))" title="Search" class="sub_icon fas fa-search"></span>
+                                    </div>
+                                    <div class="col-md-1"></div>
+                                </div>
+                                <div class="col-md-4"></div>
+
+                            </div>
+                        </div>
+                    </div>
+                }
+                else if (User.HasRole("1. Consultant") || (User.HasRole("2. Case manager") || (User.HasRole("3. Specialist"))))
+                {
+                    <div class="navCollection_fullScreens">
+                        <div class="buttonCollection">
+                            <div class="col-md-12">
+                                <div class="col-md-4"></div>
+                                <div class="col-md-4">
+                                    <div class="col-md-2"></div>
+                                    <div class="col-md-2">
+                                        <a href="@Url.Action("Index", "Home", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Home"><span style="font-size: 15px" class="sub_icon fas fa-home"></span></a>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <a href="@Url.Action("OpenAssignments", "Clinical", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Assignments"><span style="font-size: 15px" class="sub_icon fas fa-bell"></span></a>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <a href="@Url.Action("Search", "Member", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Patient"><span style="font-size: 15px" class="sub_icon fas fa-user-circle"></span></a>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <span style="font-size: 15px; background: -webkit-linear-gradient(#e80a89, #f15b2a);-webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow (10px 10px 1px rgba(34, 34, 34, 0.50))" title="Search" class="sub_icon fas fa-search"></span>
+                                    </div>
+                                    <div class="col-md-2"></div>
+                                </div>
+                                <div class="col-md-4"></div>
+
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+
+            <div style="margin-bottom: 2%"></div>
+
+            <h4 class="summaryHeading">Advanced search</h4>
+            <hr class="fancyruler">
+            <br />
+            <br />
+            <div class="form-group editForm">
+                <div class="form-horizontal">
+
+                    <div class="form-group">
+                        <div class="col-md-12">
+                            <div class="col-md-6">
+                                <div class="col-md-3">
+                                    @Html.Label(null,"Medical scheme", htmlAttributes: new { @class = "control-label col-md-12" })
+                                </div>
+                                <div class="col-md-9">
+                                    @*@Html.ListBox("medicalAidID", null, "**Select**")*@
+                                    @Html.DropDownList("medicalAidID", null, "", htmlAttributes: new { @class = "infoBox_editMember" })
+
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="col-md-3">
+                                    @Html.Label(null,"Status", htmlAttributes: new { @class = "control-label col-md-12" })
+                                </div>
+                                <div class="col-md-9 statusPill">
+                                    @*@Html.ListBox("statusCode", null, "**Select**")*@
+                                    @Html.DropDownList("statusCode", null, "", htmlAttributes: new { @class = "infoBox_editMember" })
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="col-md-12">
+                            <div class="col-md-6">
+                                <div class="col-md-3">
+                                    @Html.Label(null,"From date", htmlAttributes: new { @class = "control-label col-md-12" })
+                                </div>
+                                <div class="col-md-9">
+                                    @Html.EditorFor(model => model.dateFrom, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="col-md-3">
+                                    @Html.Label(null,"To date", htmlAttributes: new { @class = "control-label col-md-12" })
+                                </div>
+                                <div class="col-md-9">
+                                    @Html.EditorFor(model => model.dateTo, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="col-md-12">
+                            <div class="col-md-6">
+                                <div class="col-md-3">
+                                    @Html.Label(null,"Program search", htmlAttributes: new { @class = "control-label col-md-12" })
+                                </div>
+                                <div class="col-md-9">
+                                    @*@Html.ListBox("programID", null, "**Select**")*@
+                                    @Html.DropDownList("programID", null, "", htmlAttributes: new { @class = "infoBox_editMember" })
+
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="col-md-3">
+                                    @Html.Label(null,"Gender", htmlAttributes: new { @class = "control-label col-md-12" })
+                                </div>
+                                <div class="col-md-9">
+                                    @*@Html.ListBox("sex", null, "**Select**")*@
+                                    @Html.DropDownList("sex", null, "", htmlAttributes: new { @class = "infoBox_editMember" })
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="col-md-12">
+                            <div class="col-md-6">
+                                <div class="col-md-3">
+                                    @Html.Label(null,"Case manager", htmlAttributes: new { @class = "control-label col-md-12" })
+                                </div>
+                                <div class="col-md-9">
+                                    @*@Html.ListBox("caseManager", null, "**Select**")*@
+                                    @Html.DropDownList("caseManager", null, "", htmlAttributes: new { @class = "infoBox_editMember" })
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="fancyruler" style="margin-bottom: 2%; margin-top: 2%">
+
+                    <div class="form-group">
+                        <div class="col-md-12">
+                            <div class="col-md-6">
+                                <div class="col-md-3">
+                                    @Html.Label(null,"Member #", htmlAttributes: new { @class = "control-label col-md-12" })
+                                </div>
+                                <div class="col-md-9">
+                                    @Html.EditorFor(model => model.membershipNumber, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="col-md-3">
+                                    @Html.Label(null,"ID #", htmlAttributes: new { @class = "control-label col-md-12" })
+                                </div>
+                                <div class="col-md-9">
+                                    @Html.EditorFor(model => model.idNumber, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="col-md-12">
+                            <div class="col-md-6">
+                                <div class="col-md-3">
+                                    @Html.Label(null,"Patient first name", htmlAttributes: new { @class = "control-label col-md-12" })
+                                </div>
+                                <div class="col-md-9">
+                                    @Html.EditorFor(model => model.memberName, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="col-md-3">
+                                    @Html.Label(null,"Patient last name", htmlAttributes: new { @class = "control-label col-md-12" })
+                                </div>
+                                <div class="col-md-9">
+                                    @Html.EditorFor(model => model.memberSurname, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="col-md-12">
+                            <div class="col-md-6">
+                                <div class="col-md-3">
+                                    @Html.Label(null,"Mobile #", htmlAttributes: new { @class = "control-label col-md-12" })
+                                </div>
+                                <div class="col-md-9">
+                                    @Html.EditorFor(model => model.cell, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="col-md-3">
+                                    @Html.Label(null,"Landline", htmlAttributes: new { @class = "control-label col-md-12" })
+                                </div>
+                                <div class="col-md-9">
+                                    @Html.EditorFor(model => model.telNo, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="fancyruler" style="margin-bottom: 2%; margin-top: 2%">
+
+                    <div class="form-group">
+                        <div class="col-md-12">
+                            <div class="col-md-6">
+                                <div class="col-md-3">
+                                    @Html.Label(null,"Doctor first name", htmlAttributes: new { @class = "control-label col-md-12" })
+                                </div>
+                                <div class="col-md-9">
+                                    @Html.EditorFor(model => model.doctorName, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="col-md-3">
+                                    @Html.Label(null,"Doctor last name", htmlAttributes: new { @class = "control-label col-md-12" })
+                                </div>
+                                <div class="col-md-9">
+                                    @Html.EditorFor(model => model.doctorSurname, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="col-md-12">
+                            <div class="col-md-6">
+                                <div class="col-md-3">
+                                    @Html.Label(null,"Doctor practice #", htmlAttributes: new { @class = "control-label col-md-12" })
+                                </div>
+                                <div class="col-md-9">
+                                    @Html.EditorFor(model => model.practiceNo, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+                <br />
+
+            </div>
+            <br />
+            <br />
+            <div class="form-group">
+                <div class="actionButton" style="margin-left: 39%">
+                    <input value="Back" class="btn buttonRound_formBack go_back" style="width: 15%" />
+                    <input type="submit" value="Search" class="btn buttonRound_formCreate" style="width: 15%!important" />
+                </div>
+            </div>
+            <br />
+        </div>
+
+    }
+</div>
+
+@section scripts{
+    <script src="~/bundles/jqueryval"></script>
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <script src="~/Scripts/select2.min.js"></script>
+
+    <!--page-loader-->
+    <script>
+        $("form").submit(function () {
+            if ($(this).valid()) {  //<<< If validation passes
+                $("#loading-screen").removeClass("hidden");
+            }
+        });
+    </script>
+    <script>
+        $(function () {
+            $('#mySkills').multiselect({
+                includeSelectAllOption: true
+            });
+        });
+
+    </script>
+
+    <script>
+        var $rows = $('#table tr');
+        $('#search').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $rows.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+
+        function sortTable(n) {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("table");
+            switching = true;
+            dir = "asc";
+
+            while (switching) {
+                switching = false;
+                rows = table.getElementsByTagName("TR");
+
+                for (i = 1; i < (rows.length - 1); i++) {
+
+                    shouldSwitch = false;
+
+                    x = rows[i].getElementsByTagName("TD")[n];
+                    y = rows[i + 1].getElementsByTagName("TD")[n];
+
+                    if (dir == "asc") {
+                        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                            //if so, mark as a switch and break the loop:
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (dir == "desc") {
+                        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                            //if so, mark as a switch and break the loop:
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+                if (shouldSwitch) {
+                    /*If a switch has been marked, make the switch
+                    and mark that a switch has been done:*/
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                    //Each time a switch is done, increase this count by 1:
+                    switchcount++;
+                } else {
+                    /*If no switching has been done AND the direction is "asc",
+                    set the direction to "desc" and run the while loop again.*/
+                    if (switchcount == 0 && dir == "asc") {
+                        dir = "desc";
+                        switching = true;
+                    }
+                }
+            }
+        }
+
+    </script>
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+
+    <script>
+        $(document).ready(function () { $("#medicalAidID").select2({ multiple: true, placeholder: "--Select--", allowClear: true }); });
+        $(document).ready(function () { $("#statusCode").select2({ multiple: true, placeholder: "--Select--", allowClear: true }); });
+        $(document).ready(function () { $("#programID").select2({ multiple: true, placeholder: "--Select--", allowClear: true }); });
+        $(document).ready(function () { $("#sex").select2({ multiple: true, placeholder: "--Select--", allowClear: true }); });
+        $(document).ready(function () { $("#caseManager").select2({ multiple: true, placeholder: "--Select--", allowClear: true }); });
+        $(document).ready(function () { $("#riskRating").select2({ multiple: true, placeholder: "--Select--", allowClear: true }); });
+
+    </script>
+
+
+}
+
+

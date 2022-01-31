@@ -1,0 +1,666 @@
+﻿@model HaloCareCore.Models.EnrolmentViewModel
+
+@{
+    ViewBag.Title = "profileInformation";
+    Layout = "~/Views/Shared/_LayoutMember.cshtml";
+}
+<comment>
+    <!--
+        05 April 2019 -- HCare-695 (HaloCare Risk rating (new request for Brandon))
+        Linked the new Risk rating history table to the EnrolmentViewModel and used if statements to determine the color of the member number as per the SR. Additionally the
+        description  of the reason will display once you hover over the member number as well.
+        15 April 2019 -- HCare-695(HaloCare Risk rating (new request for Brandon))
+        Amendement to the initial SR to change the member number back and rather change the color of the patient, Title, Name and Age as well as include a star icon
+        15 April 2019 -- HCare-706(Display member's Title in front of the Name on the profile)
+        Members title has been added to the profile bar as per the request.
+
+        24 July 2019 -- HCare-767 (Display ICD-10 code from the dependant profile i.o. from the Program table on Patient Dashboard etc.)
+        Updated the code in _profileBar to read the ICD10 code from the dependant table rather than the program table.
+
+        31 October 2019 -- HCare-854 (Programs showing at the top...)
+        Added the programs to a collapsible which will populate should the user click the information icon under multiple programs label. This will ONLY occur when the user has more than two programs registered to their profile.
+
+        11 November 2019 -- HCare-884 (Management status showing top... (linked to HCare-854))
+        Added a list icon to replace the management status section should there be more than 2 status registered to the patient. A tooltip will appear showing the status should the user hovers over the area.
+
+        15 November 2019 -- HCare-871 (Please consolidate the Top Patient Information Bar so that the same one is used across all pages that display it.)
+        Ran a search on the project to look for the second patient information bar and replaced with the one. This particular one is called _profileBar_edit.
+
+        09 January 2019 -- HCare-913(Gender symbol change)
+        Added a new set of icons in order to change the Unknown symbol as per the SR
+
+        01 April 2020 -- HCare-1002(Hospital data)
+        Added hospitalisation auths to model to allow a check to be placed on dependants history of Hospital auths. If yes, a red cross will show next to the Gender in the member profile bar.
+
+    -->
+</comment>
+<style>
+    /**HCare-1014**/
+    .staging-icon {
+        width: 1.25%;
+        position: relative;
+        margin-left: 0.4%;
+        margin-top: -0.10%;
+    }
+
+    /*        .modal-backdrop {
+        display: none;
+    }*/
+
+    .heading-detail {
+        font-family: 'Century Gothic' !important;
+        font-size: 20px;
+        font-weight: bold;
+        color: dimgray;
+        margin-left: 6% !important;
+    }
+
+    .label-detail-wf {
+        font-family: 'Century Gothic' !important;
+        font-size: 12px;
+        font-weight: bold;
+        color: dimgray;
+        margin-left: 8% !important;
+        margin-bottom: 0px;
+        text-transform: unset;
+    }
+
+    .display-detail-wf {
+        font-family: 'Century Gothic' !important;
+        font-size: 14px;
+        color: dimgray;
+        margin-left: 8% !important;
+        text-transform: unset;
+    }
+
+    .label-details-wf {
+        font-family: 'Century Gothic' !important;
+        font-size: 12px;
+        font-weight: bold;
+        color: dimgray;
+        margin-left: 5% !important;
+        margin-bottom: 0px;
+        text-transform: unset;
+    }
+
+    .display-details-wf {
+        font-family: 'Century Gothic' !important;
+        font-size: 14px;
+        color: dimgray;
+        margin-left: 5% !important;
+        text-transform: unset;
+    }
+
+    .tb-indicator .tooltiptext {
+        width: 120px;
+        background: rgba(0,0,0,0.80);
+        color: #fff;
+        font-size: 10px;
+        font-weight: 100;
+        text-align: center;
+        border-radius: 6px;
+        padding: 5px 5px;
+        position: absolute;
+        z-index: 1;
+        opacity: 0;
+        -webkit-transition: opacity 0.5s;
+        transition: opacity 1.2s;
+    }
+
+    .tb-indicator:hover .tooltiptext {
+        opacity: 1;
+    }
+</style>
+
+<!--profilePicture-->
+@Html.HiddenFor(model => model.hasSteps)
+
+<div class="hidden-fields">
+    <input type="text" id="dependantid" name="dependantid" value="@Model.dependent.DependantID" hidden />
+    <input type="text" id="programid" name="programid" value="@Model.PopUp.program" hidden />
+    <input type="text" id="program-pop" name="program-pop" value="@Model.PopUp.program_pop_type" hidden />
+    <input type="text" id="profile-pop" name="profile-pop" value="@Model.PopUp.profile_pop_type" hidden />
+    <input type="text" id="program-check" name="program-check" value="@Model.PopUp.program_pop_checkbox" hidden />
+    <input type="text" id="profile-check" name="profile-check" value="@Model.PopUp.profile_pop_checkbox" hidden />
+    <input type="text" id="user-name" name="user-name" value="@ViewBag.UserName" hidden />
+</div>
+
+<div class="staticBar_Edit">
+    @*<div style="margin-top: 2%"></div>*@
+    <div class="patientDetails">
+        <div class="row member-name">
+            <!-- name/age -->
+            @if (!String.IsNullOrEmpty(Model.RiskRating))
+            {
+                if (Model.RiskRating.ToLower() == "g" && Model.RiskProgram == Model.programcode)
+                {
+                    <a class="memberName riskRating-green" title="@Model.RiskReason @Model.HypoRisk" href="@Url.Action("EditMember", "Member", new { DependentID = Model.dependent.DependantID, pro = Context.Request.Query["pro"] }, null)">
+                        <span style="font-size: 30%; vertical-align: super"><i class="fas fa-star"></i></span>
+                        @Html.DisplayFor(model => model.dependent.Title_UC)
+                        @Html.DisplayFor(model => model.dependent.firstName_UC)
+                        @Html.DisplayFor(model => model.dependent.lastName_UC),
+                        @Html.DisplayFor(model => model.dependent.initials_UC)
+                        <span style="font-size: 70%">@Html.DisplayFor(model => model.dependent.dependantAge)</span>
+                    </a>
+
+                }
+                else if (Model.RiskRating.ToLower() == "y" && Model.RiskProgram == Model.programcode)
+                {
+                    <a class="memberName riskRating-yellow" title="@Model.RiskReason @Model.HypoRisk" href="@Url.Action("EditMember", "Member", new { DependentID = Model.dependent.DependantID, pro = Context.Request.Query["pro"] }, null)">
+                        <span style="font-size: 30%; vertical-align: super"><i class="fas fa-star"></i></span>
+                        @Html.DisplayFor(model => model.dependent.Title_UC)
+                        @Html.DisplayFor(model => model.dependent.firstName_UC)
+                        @Html.DisplayFor(model => model.dependent.lastName_UC),
+                        @Html.DisplayFor(model => model.dependent.initials_UC)
+                        <span style="font-size: 70%">@Html.DisplayFor(model => model.dependent.dependantAge)</span>
+                    </a>
+                }
+                else if (Model.RiskRating.ToLower() == "r" && Model.RiskProgram == Model.programcode)
+                {
+                    <a class="memberName riskRating-red" title="@Model.RiskReason @Model.HypoRisk" href="@Url.Action("EditMember", "Member", new { DependentID = Model.dependent.DependantID, pro = Context.Request.Query["pro"] }, null)">
+                        <span style="font-size: 30%; vertical-align: super"><i class="fas fa-star"></i></span>
+                        @Html.DisplayFor(model => model.dependent.Title_UC)
+                        @Html.DisplayFor(model => model.dependent.firstName_UC)
+                        @Html.DisplayFor(model => model.dependent.lastName_UC),
+                        @Html.DisplayFor(model => model.dependent.initials_UC)
+                        <span style="font-size: 70%">@Html.DisplayFor(model => model.dependent.dependantAge)</span>
+                    </a>
+                }
+                else
+                {
+                    <a class="memberName" href="@Url.Action("EditMember", "Member", new { DependentID = Model.dependent.DependantID , pro = Context.Request.Query["pro"]}, null)">
+                        @Html.DisplayFor(model => model.dependent.Title_UC)
+                        @Html.DisplayFor(model => model.dependent.firstName_UC)
+                        @Html.DisplayFor(model => model.dependent.lastName_UC),
+                        @Html.DisplayFor(model => model.dependent.initials_UC)
+                        <span style="font-size: 70%">@Html.DisplayFor(model => model.dependent.dependantAge)</span>
+                    </a>
+                }
+            }
+            else
+            {
+                <a class="memberName" href="@Url.Action("EditMember", "Member", new { DependentID = Model.dependent.DependantID, pro = Context.Request.Query["pro"] }, null)">
+                    @Html.DisplayFor(model => model.dependent.Title_UC)
+                    @Html.DisplayFor(model => model.dependent.firstName_UC)
+                    @Html.DisplayFor(model => model.dependent.lastName_UC),
+                    @Html.DisplayFor(model => model.dependent.initials_UC)
+                    <span style="font-size: 70%">@Html.DisplayFor(model => model.dependent.dependantAge)</span>
+                </a>
+            }
+            <!--gender-symbol-->
+            <a class="gender-icon">
+                @if (Model.dependent.sex == "M")
+                {
+                    <i class="fas fa-mars gender-icon-male"></i>
+
+                }
+                else if (Model.dependent.sex == "F")
+                {
+                    <i class="fas fa-venus gender-icon-female"></i>
+                }
+                else
+                {
+                    <img src="~/Content/Images/_2020/icons/symbol-unknown.png" class="gender-icon" />
+                }
+            </a>
+            @if (Model.programcode == "DIABD")
+            {
+                if (Model.hba1c != null)
+                {
+                    if (!String.IsNullOrEmpty(Model.RiskRating))
+                    {
+                        if (Model.RiskRating.ToLower() == "g" && Model.RiskProgram == Model.programcode)
+                        {
+                            if (Convert.ToDouble(Model.hba1c) >= 5.5 && Convert.ToDouble(Model.hba1c) <= 7)
+                            {
+                                <a class="memberName riskRating-green" title="@Model.hbEffective">
+                                    <span>@Html.DisplayFor(model => model.hba1c)</span>
+                                    <span style="font-size: 50%">HbA1c</span>
+                                </a>
+                            }
+                            else
+                            {
+                                <a class="memberName riskRating-purple" title="@Model.hbEffective">
+                                    <span>@Html.DisplayFor(model => model.hba1c)</span>
+                                    <span style="font-size: 50%">HbA1c</span>
+                                </a>
+                            }
+                        }
+                        else if (Model.RiskRating.ToLower() == "y" && Model.RiskProgram == Model.programcode)
+                        {
+
+                            if (Convert.ToDouble(Model.hba1c) >= 6 && Convert.ToDouble(Model.hba1c) <= 8)
+                            {
+                                <a class="memberName riskRating-yellow" title="@Model.hbEffective">
+                                    <span>@Html.DisplayFor(model => model.hba1c)</span>
+                                    <span style="font-size: 50%">HbA1c</span>
+                                </a>
+                            }
+                            else
+                            {
+                                <a class="memberName riskRating-purple" title="@Model.hbEffective">
+                                    <span>@Html.DisplayFor(model => model.hba1c)</span>
+                                    <span style="font-size: 50%">HbA1c</span>
+                                </a>
+                            }
+                        }
+                        else if (Model.RiskRating.ToLower() == "r" && Model.RiskProgram == Model.programcode)
+                        {
+                            if (Convert.ToDouble(Model.hba1c) >= 8 && Convert.ToDouble(Model.hba1c) <= 8.5)
+                            {
+                                <a class="memberName riskRating-red" title="@Model.hbEffective">
+                                    <span>@Html.DisplayFor(model => model.hba1c)</span>
+                                    <span style="font-size: 50%">HbA1c</span>
+                                </a>
+                            }
+                            else
+                            {
+                                <a class="memberName riskRating-purple" title="@Model.hbEffective">
+                                    <span>@Html.DisplayFor(model => model.hba1c)</span>
+                                    <span style="font-size: 50%">HbA1c</span>
+                                </a>
+
+                            }
+                        }
+                        else
+                        {
+                            <a class="memberName riskRating-purple" title="@Model.hbEffective">
+                                <span>@Html.DisplayFor(model => model.hba1c)</span>
+                                <span style="font-size: 50%">
+                                    HbA1c
+                                </span>
+                            </a>
+
+                        }
+
+                    }
+                    else
+                    {
+                        <a class="memberName riskRating-purple" title="@Model.hbEffective">
+                            <span>@Html.DisplayFor(model => model.hba1c)</span>
+                            <span style="font-size: 50%">
+                                HbA1c
+                            </span>
+                        </a>
+
+                    }
+                }
+            }
+            @if (Model.wfQueue != null)
+            {
+                <a class="icon-button" href="#@Model.wfQueue.Id" data-toggle="modal">
+                    <i class="fas fa-notes-medical"></i>
+                </a>
+            }
+            <!---HCare-1014  HIV Staging--->
+            @if (Model.PatientStagingHistory.stageCode != null)
+            {
+                <a class="stagingSymbol">
+                    @if (Model.PatientStagingHistory.stageCode == "1")
+                    {
+                        <img src="~/Content/Images/StagingNumbers/1024px-NYCS-bull-trans-1.svg.png" class="staging-icon" title="HIV Stage 1" />
+
+                    }
+                    else if (Model.PatientStagingHistory.stageCode == "2")
+                    {
+                        <img src="~/Content/Images/StagingNumbers/1200px-NYCS-bull-trans-2.svg.png" class="staging-icon" title="HIV Stage 2" />
+                    }
+                    else if (Model.PatientStagingHistory.stageCode == "3")
+                    {
+                        <img src="~/Content/Images/StagingNumbers/3.png.img.png" class="staging-icon" title="HIV Stage 3" />
+                    }
+                    else
+                    {
+                        <img src="~/Content/Images/StagingNumbers/6142783_0.png" class="staging-icon" title="HIV Stage 4" />
+                    }
+
+                </a>
+            }
+            <!--hospitalisation-indicator-->
+            <a>
+                @if (Model.hospitalAuths.Count() != 0)
+                {
+                    foreach (var item in Model.hospitalAuths)
+                    {
+                        if (item.authType.ToLower() != "none" && item.followUp != true)
+                        {
+                            <i class="fas fa-plus hospitalisation-icon"></i>
+                            break;
+                        }
+                    }
+                }
+            </a>
+            <!--tuberculosis-indicator - hcare-1276 -->
+            <a class="tb-indicator">
+                @if (Model.QuestionnaireOther != null)
+                {
+                    <p1 class="tb-bubble" title="TB screen result @Html.DisplayFor(model => model.QuestionnaireOther.TBScreenResult) | TB treatment start date: @Html.DisplayFor(model => model.QuestionnaireOther.tbTreatmentStartDate)">TB</p1>
+                }
+            </a>
+            <!--state-enrolled-indicator - hcare-1276 -->
+            <a class="se-indicator">
+                @if (Model.StateEnrolled != null)
+                {
+                    if (Model.StateEnrolled.Medication != null && Model.StateEnrolled.Medication.ToLower() == "state")
+                    {
+                        <p1 class="tb-bubble">State enrolled</p1>
+                    }
+                }
+            </a>
+            <!--information-popup - hcare-1374 -->
+            <a class="popup-profile">
+                <input type="checkbox" class="hidden" id="profile-popup" name="profile-popup">
+                <label for="profile-popup">
+                    <i id="profile-checkbox" class="fas fa-info-circle popup-default"></i>
+                </label>
+            </a>
+        </div>
+        <!--member-search-->
+        <div class="row" style="margin-left: 2%!important; margin-top: -2.2%; margin-bottom: 0.7%">
+            <div class="col-md-6 pull-right">
+                <ul class="input-group" id="adv-search">
+
+                    @using (Html.BeginForm("Search", "Member", FormMethod.Post, new { id = "Search", @class = "navbar-right" }))
+                    {
+                        @Html.AntiForgeryToken()
+
+                        <ul class="nav navbar-nav navbar-right">
+
+                            <li class="focus">
+                                @Html.TextBox("SearchVar", null, new { @class = "form-control-patientSearch", @placeholder = "Search..." })
+                            </li>
+
+                            <div class="btn-group" role="group">
+
+                                <button type="submit" class="btn btn-search" style="height: 29px"><span class="glyphicon glyphicon-search" aria-hidden="true" title="Search"></span></button>
+
+                            </div>
+
+                        </ul>
+
+                    }
+
+                </ul>
+            </div>
+        </div>
+        <hr class="newDasbhoard_Ruler" />
+        <div class="row col-md-12">
+            <!-- column-1 -->
+            <div class="col-md-6_custom">
+                <div class="memberInformation_memberNo">
+                    <!--HCare-695-->
+                    @Html.Label(null,"Member #: ", htmlAttributes: new { @class = "control-label-member_view" })
+                    @Html.DisplayFor(model => model.member.membershipNo)
+                </div>
+                <div class="memberInformation_memberAge">
+                    @Html.Label(null,"Dependant: ", htmlAttributes: new { @class = "control-label-member_view" })
+                    @Html.DisplayFor(model => model.dependent.dependentCode)
+                </div>
+                <div class="memberInformation_idNum">
+                    @Html.Label(null,"ID/Auth #: ", htmlAttributes: new { @class = "control-label-member_view" })
+                    @Html.DisplayFor(model => model.dependent.idNumber)
+                </div>
+            </div>
+            <!-- column-2 -->
+            <div class="col-md-6_custom">
+
+                <div class="memberInformation_memberAge">
+                    @Html.Label(null,"Scheme: ", htmlAttributes: new { @class = "control-label-member_view" })
+                    @Html.DisplayFor(model => model.MedicalAids[0].Name)
+                </div>
+                <div class="memberInformation_memberAge">
+                    @Html.Label(null,"Option: ", htmlAttributes: new { @class = "control-label-member_view" })
+                    @Html.DisplayFor(model => model.plan)
+                </div>
+                <div class="memberInformation_memberAge">
+                    @Html.Label(null,"Employer: ", htmlAttributes: new { @class = "control-label-member_view" })
+                    @if (Model.paypoint != null)
+                    {
+                        @Html.DisplayFor(model => model.paypoint)
+                    }
+                </div>
+            </div>
+            <!-- column-3 -->
+            <div class="col-md-5_custom">
+                <div class="memberInformation_memberAge">
+                    @Html.Label(null,"CM: ", htmlAttributes: new { @class = "control-label-member_view" })
+                    @if (Model.UserMemberHistories.Count != 0)
+                    {
+                        @Html.DisplayFor(model => model.UserMemberHistories[0].UserFullName)
+                    }
+                    else
+                    {
+                        @Html.Display("-")
+                    }
+                </div>
+                <div class="memberInformation_memberAge doctorName">
+                    @Html.Label(null,"Doctor: ", htmlAttributes: new { @class = "control-label-member_view" })
+                    @if (Model.doctor.doctorID != null)
+                    {
+                        @Html.DisplayFor(model => model.doctor.drName)
+                        if (Model.doctor.practiceNo != null)
+                        {
+                            @*<span style="font-size: 10px; font-weight: 100"> (#@Html.DisplayFor(model => model.doctor.practiceNo))</span>*@
+                            <span class="tooltiptext">(practice #@Html.DisplayFor(model => model.doctor.practiceNo))</span>
+                        }
+                    }
+                </div>
+                <div class="memberInformation_memberAge">
+                    @Html.Label(null,"Pharmacy: ", htmlAttributes: new { @class = "control-label-member_view" })
+                    @if (Model.DProvider != null)
+                    {
+                        @Html.DisplayFor(model => model.DProvider.dispensingName)
+                    }
+                </div>
+            </div>
+            <!-- column-4 -->
+            <div class="col-md-5_custom">
+                <div class="memberInformation_profileStatus">
+                    @Html.Label(null,"Patient status: ", htmlAttributes: new { @class = "control-label-member_view" }) <br />
+                    <span style="color: forestgreen">@Html.DisplayFor(model => model.patientStatusName)</span>
+                </div>
+            </div>
+            <!-- column-5 -->
+            <div class="col-md-6_custom">
+                @if (Model.programcode.ToLower().Contains("mntlh"))
+                {
+                    <div class="memberInformation_memberAge">
+                        @Html.Label(null,"Program(s): ", htmlAttributes: new { @class = "control-label-member_view" })<br />
+                        <table>
+                            @foreach (var prog in Model.programHistories)
+                            {
+                                <tr><td><b>@Html.DisplayFor(model => prog.ProgramCode) - @Html.DisplayFor(model => prog.ICD10Code)</b></td></tr>
+                            }
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="memberInformation_memberAge">
+                        @Html.Label(null,"Program(s): ", htmlAttributes: new { @class = "control-label-member_view" })<br />
+                        <table>
+                            @foreach (var prog in Model.programHistories)
+                            {
+                                <tr><td><b>@Html.DisplayFor(model => prog.ProgramCode) - @Html.DisplayFor(model => prog.ICD10Code)</b></td></tr>
+
+                            }
+                        </table>
+                    </div>
+                }
+            </div>
+            <!-- column-6 -->
+            <div class="col-md-6_custom">
+                @if (Model.statuss.Count != 0)
+                {
+                    if (Model.statuss.Count <= 2)
+                    {
+                        <div class="memberInformation_memberStatus">
+                            @Html.Label(null,"Management status: ", htmlAttributes: new { @class = "control-label-member_view" })<br />
+                            <table>
+                                @foreach (var stat in Model.statuss)
+                                {
+                                    <tr><td><b>@Html.DisplayFor(model => stat.managementStatusCode)</b></td></tr>
+                                }
+                            </table>
+                        </div>
+                    }
+                    else if (Model.statuss.Count > 2)
+                    {
+                        <div class="memberInformation_memberStatus multiStatus">
+                            @Html.Label(null,"Management status: ", htmlAttributes: new { @class = "control-label-member_view" })<br />
+                            <div>
+                                <p style="font-size: 12px" class="multiProgram">Multiple status</p>
+                                <div class="program-nav" id="sidebar">
+                                    <a id="program-toggle" href="#"><span id="program-icon"><i class="sub_icon fas fa-list-ul programIcon"></i></span></a>
+                                </div>
+                            </div>
+                            <span class="tooltipinfo">
+                                <table class="program-table-tooltip">
+                                    @foreach (var stat in Model.statuss)
+                                    {
+                                        <tr><td><b>@Html.DisplayFor(model => stat.managementStatusCode)</b></td></tr>
+                                    }
+                                </table>
+                            </span>
+                        </div>
+                    }
+                }
+            </div>
+            <!-- specialNote -->
+            <div class="special-note-icon row">
+                @Html.Partial("_specialNote")
+            </div>
+        </div>
+    </div>
+</div>
+    </div>
+
+
+@if (Model.wfQueue != null)
+{
+    <div class="modal" id="@Model.wfQueue.Id" role="dialog" aria-labelledby="@Model.wfQueue.Id" aria-hidden="true">
+        @using (Html.BeginForm("WorkflowTask", "Workflow", FormMethod.Post, new { id = "wf-task" }))
+        {
+            <div class="modal-content-assignment">
+
+                <div class="modal-dialog-assignment">
+                    <div class="modal-header-assignment">
+                        <div class="col-md-4"><h5 class="modal-title" id="modal-email"><img src="~/Content/Images/_2020/icons/create-new-assignment.png" class="logo-modal" /></h5></div>
+                        <div class="col-md-4 div-center"><p class="div-header">Workflow task</p></div>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    </div>
+                    <div class="modal-body" style="margin-left: -20px; margin-top: 10px; ">
+                        <div class="form-horizontal">
+
+                            <div class="hidden-fields">
+                                @Html.AntiForgeryToken()
+                                @Html.Hidden(Model.wfQueue.DependantID.ToString())
+                                <input type="hidden" name="id" value="@Model.wfQueue.Id" />
+                                <input type="hidden" name="queueid" value="@Model.wfQueue.QueueID" />
+                                <input type="hidden" name="dependantid" value="@Model.wfQueue.DependantID" />
+                                <input type="hidden" name="medicalaidid" value="@Model.wfQueue.MedicalAidID" />
+                                <input type="hidden" name="programid" value="@Model.wfQueue.ProgramID" />
+                                <input type="hidden" name="dependantcode" value="@Model.wfQueue.DependantCode" />
+                                <input type="hidden" name="userid" value="@Model.wfQueue.UserID" />
+                                <input type="hidden" name="title" value="@Model.wfQueue.Title" />
+                                <input type="hidden" name="firstname" value="@Model.wfQueue.UserFirstName" />
+                                <input type="hidden" name="lastname" value="@Model.wfQueue.UserLastName" />
+                                <input type="hidden" name="membernumber" value="@Model.wfQueue.MembershipNumber" />
+                                <input type="hidden" name="medicalaid" value="@Model.wfQueue.MedicalScheme" />
+                                <input type="hidden" name="program" value="@Model.wfQueue.Program" />
+                                <input type="hidden" name="mstatus" value="@Model.wfQueue.ManagementStatus" />
+                                <input type="hidden" name="riskrating" value="@Model.wfQueue.RiskRating" />
+                                <input type="hidden" name="instruction" value="@Model.wfQueue.Instruction" />
+                            </div>
+
+                            <h class="heading-detail">Member information</h>
+                            <hr class="modal-ruler-wf" />
+                            <div class="form-group">
+                                <div class="col-md-12">
+                                    <div class="col-md-6">
+                                        <div><p class="label-detail-wf">Title </p></div>
+                                        <div><span class="display-detail-wf">@Html.DisplayFor(model => Model.wfQueue.Title)</span></div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div><p class="label-detail-wf">Scheme </p></div>
+                                        <div><span class="display-detail-wf">@Html.DisplayFor(model => Model.wfQueue.MedicalScheme)</span></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-12">
+                                    <div class="col-md-6">
+                                        <div><p class="label-detail-wf">Member name </p></div>
+                                        <div><span class="display-detail-wf">@Html.DisplayFor(model => Model.wfQueue.UserFullName)</span></div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div><p class="label-detail-wf">Member number </p></div>
+                                        <div><span class="display-detail-wf">@Html.DisplayFor(model => Model.wfQueue.MembershipNumber) @Html.DisplayFor(model => Model.wfQueue.DependantCode)</span></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-12">
+                                    <div class="col-md-6">
+                                        <div><p class="label-detail-wf">Program </p></div>
+                                        <div><span class="display-detail-wf">@Html.DisplayFor(model => Model.wfQueue.Program)</span></div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div><p class="label-detail-wf">Management status </p></div>
+                                        <div><span class="display-detail-wf">@Html.DisplayFor(model => Model.wfQueue.ManagementStatus)</span></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr class="modal-ruler-wf" />
+                            <div class="form-group">
+                                <div class="col-md-12">
+                                    <div><p class="label-details-wf">Instruction </p></div>
+                                    <div><span class="display-details-wf">@Html.DisplayFor(model => Model.wfQueue.Instruction)</span></div>
+                                </div>
+                            </div>
+                            <br />
+                            <hr class="modal-ruler-wf" />
+                            <div class="form-group">
+                                <div class="col-md-12">
+                                    <div><p class="label-details-wf">Status </p></div>
+
+                                    <select id="status" name="status" class="dropdown-clean" style="width: 100%;" required>
+                                        <option value="@Html.DisplayFor(model => Model.wfQueue.Status)" subtext="" selected="selected">@Html.DisplayFor(model => Model.wfQueue.Status)</option>
+                                        <option value="Open" subtext="No signs or symptoms.">Open</option>
+                                        <option value="In progress" subtext="Slight reduction in social engagement with no impairment in social or interpersonal function.">In progress</option>
+                                        <option value="Closed" subtext="Clear reduction in social engagement with some functional sequelae, e.g., avoids some social engagements or conversations.">Closed</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer-assignment">
+                        <input id="wf-submit" type="submit" class="btn modal-button" value="Next" style="width: 15%" />
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+<div id="popup-warning-two" class="popup-box-short">
+    <div class="col-md-12">
+        <button type="button" class="popup-close-short" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <div class="popup-two-template"><span style="color: white; font-size: 14px"><i class="fas fa-info-circle"></i></span>&emsp;@Html.Raw(Html.Encode(Model.PopUp.profile_pop_template).Replace("(b)", "<b>").Replace("(/b)", "</b>"))</div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="~/bundles/jqueryval"></script>
+    <script src="~/Scripts/select2.min.js"></script>
+    <script src="~/Scripts/popup-templates.js"></script>
+
+    <script>
+        //hcare-1311
+        $('#wf-task').submit(function () {
+            $('#wf-submit').attr('disabled', true);
+        });
+    </script>
+}

@@ -1,0 +1,413 @@
+﻿@model HaloCareCore.Models.EnrolmentViewModel
+
+
+<style>
+    .container {
+        max-width: 1600px;
+        width: 1400px;
+        margin: auto;
+        display: block;
+        padding: 0;
+    }
+
+    * {
+        color: #003366;
+    }
+
+    .table tr th {
+        color: black !important;
+        font-weight: 600 !important;
+    }
+
+    .fullWidth_table {
+        max-width: 1250px !important;
+        width: 1250px !important;
+        margin: auto;
+        margin-bottom: 5% !important;
+        font-size: 10px !important;
+    }
+</style>
+
+
+
+<!--pageHeader-->
+<div class="container zero-padding">
+    <div class="topBar_reports img-responsive">
+        <h2>Patient Dashboard</h2>
+        <img src="~/Content/Images/memberProfile/passportIcon_member.png" style="width: 3%; margin-top: -0.2%;" />
+        <img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" style="width: 8%; float: right; margin-right: 100px; margin-top: 3px" />
+    </div>
+</div>
+
+<!--pageHeader-->
+<br>
+<!--Patient Clinical -->
+<h4 style="color: #003366; margin-top: -1%; margin-left: 2%; margin-bottom: 0.5%!important; font-size: 25px; font-family: 'Century Gothic'; font-weight: 300; font-style: normal;">Patient Dashboard</h4>
+
+<div class="row" style="margin-top: 0%!important">
+    <div class="form-horizontal">
+        <div class="col-md-12 col-sm-12 ">
+
+            <!--Pathology Details-->
+            <div class="row tablinks">
+                <div class="form-horizontal">
+                    <div class="row contentBlock">
+                        <br />
+                        <div class="form-horizontal dashBoardContent">
+                            <div class="row">
+                                <div class="col-md-1">
+                                    <img src="~/Content/Images/memberProfile/dashBoard/programIcon.png" style="width:50%; margin-left: 40%; margin-top: 20%" />
+                                </div>
+
+                                <div class="col-md-3" style="margin-top: 1.5%">
+                                    <h4 style="margin-top: 0%; margin-left: 2%; margin-bottom: 0%!important; font-size: 20px; font-family: 'Century Gothic'; font-weight: 300; font-style: normal;">Disease Management</h4>
+                                </div>
+
+                                <div class="row col-md-8" style="margin-top: -1.5%">
+                                    <!--programStatus-->
+                                    <div class="col-md-12">
+                                        <div class="col-md-2"></div>
+                                        <div class="col-md-5">
+                                            <div class="programInfo_memberDashboard">
+                                                <table>
+                                                    <tr>
+                                                        <th style="text-align: left!important">@Html.Label(null,"Program", htmlAttributes: new { @class = "control-label memberView" })</th>
+                                                    </tr>
+
+                                                    @if (Model.statuss.Count != 0)
+                                                    {
+                                                        if (Model.programs.Count != 0)
+                                                        {
+                                                            <tr>
+                                                                <td style="font-size: 13px; font-family: 'Century Gothic'">@Html.DisplayFor(model => model.programs[0].programCode)</td>
+                                                                <td style="font-size: 13px; font-family: 'Century Gothic'">(@Html.DisplayFor(model => model.programs[0].createdDate))</td>
+                                                            </tr>
+                                                        }
+                                                        if (Model.programs.Count > 1)
+                                                        {
+                                                            <tr>
+                                                                <td style="font-size: 13px; font-family: 'Century Gothic'">@Html.DisplayFor(model => model.programs[1].programCode)</td>
+                                                                <td style="font-size: 13px; font-family: 'Century Gothic'">(@Html.DisplayFor(model => model.programs[1].createdDate))</td>
+                                                            </tr>
+                                                        }
+
+                                                    }
+
+                                                </table>
+                                                <br />
+                                                <div class="statusCode linkNav" style="margin-left: 4%!important; font-size: 10px; font-family: 'Century Gothic'; margin-top: 2%">
+                                                    @Html.ActionLink("Add", "AddProgram", new { DependentID = Model.dependent.DependantID }) /
+                                                    @Html.ActionLink("View History", "ProgramHistory", new { DependentID = Model.dependent.DependantID }, null)
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+                                        <!--manageStatus-->
+                                        <div class="col-md-5">
+                                            <div class="programInfo_memberDashboard">
+                                                <table>
+                                                    <tr>
+                                                        <th style="text-align: left!important">@Html.Label(null,"Management Status", htmlAttributes: new { @class = "control-label memberView" })</th>
+                                                    </tr>
+                                                    @if (Model.statuss.Count != 0)
+                                                    {
+                                                        if (Model.statuss.Count != 0)
+                                                        {
+                                                            <tr>
+                                                                <td style="color: darkred; font-size: 13px; font-family: 'Century Gothic'">@Html.DisplayFor(model => model.statuss[0].managementStatusCode)</td>
+                                                                <td style="color: darkred; font-size: 13px; font-family: 'Century Gothic'">(@Html.DisplayFor(model => model.statuss[0].createdDate))</td>
+                                                            </tr>
+                                                        }
+                                                        if (Model.statuss.Count > 1)
+                                                        {
+                                                            <tr>
+                                                                <td style="font-size: 13px; font-family: 'Century Gothic'; column-width: 180px">@Html.DisplayFor(model => model.statuss[1].managementStatusCode)</td>
+                                                                <td style="font-size: 13px; font-family: 'Century Gothic'">(@Html.DisplayFor(model => model.statuss[1].createdDate))</td>
+                                                            </tr>
+                                                        }
+
+                                                        if (Model.statuss.Count > 2)
+                                                        {
+                                                            <tr>
+                                                                <td style="font-size: 13px; font-family: 'Century Gothic'">@Html.DisplayFor(model => model.statuss[2].managementStatusCode)</td>
+                                                                <td style="font-size: 13px; font-family: 'Century Gothic'">(@Html.DisplayFor(model => model.statuss[2].createdDate))</td>
+                                                            </tr>
+                                                        }
+
+                                                    }
+                                                </table>
+                                                <br />
+                                                <div class="statusCode linkNav" style="margin-left: 4%!important; font-size: 10px; font-family: 'Century Gothic'; margin-top: 2%">
+                                                    @Html.ActionLink("Add", "SetManagementStatus", "Member", new { DependentID = Model.dependent.DependantID }, null) /
+                                                    @Html.ActionLink("View History", "ManageStatus", "Member", new { DependentID = Model.dependent.DependantID }, null)
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <br />
+                            <hr class="fancyruler">
+                            <br />
+                            <!--managementDetails-->
+                            <div class="row">
+                                <div class="col-md-1">
+                                    <img src="~/Content/Images/memberProfile/dashBoard/managementDetails.png" style="width:60%; margin-left: 40%" />
+                                </div>
+                                <div class="col-md-3" style="margin-top: 0.5%">
+                                    <h4 style="margin-top: 0%; margin-left: 2%; margin-bottom: 0%!important; font-size: 20px; font-family: 'Century Gothic'; font-weight: 300; font-style: normal;">Management Details</h4>
+                                </div>
+
+                                <div class="row col-md-8" style="margin-top: -2%">
+                                    <div class="col-md-12">
+                                        <div class="col-md-2"></div>
+                                        <!--caseManager-->
+                                        <div class="col-md-5">
+                                            <div class="programInfo_memberDashboard">
+                                                <table>
+                                                    <tr>
+                                                        <th style="text-align: left!important">@Html.Label(null,"Case Manager", htmlAttributes: new { @class = "control-label memberView" })</th>
+                                                    </tr>
+
+                                                    <tr>
+                                                        @if (Model.CaseManagers != null)
+                                                        {
+                                                            <td style="font-size: 14px; font-family: 'Century Gothic'">@Html.DisplayFor(model => model.CaseManagers.caseManagerId)</td>
+                                                            <td style="font-size: 14px; font-family: 'Century Gothic'">(@Html.DisplayFor(model => model.CaseManagers.createdDate))</td>
+                                                        }
+                                                    </tr>
+
+                                                </table>
+                                                <br />
+                                                <div class="statusCode linkNav" style="margin-left: 4%!important; font-size: 10px; font-family: 'Century Gothic'; margin-top: 2%">
+                                                    @Html.ActionLink("Add", "AddFromList", "CaseManager", new { DependentID = Model.dependent.DependantID }, null) /
+                                                    @Html.ActionLink("View History", "CaseManagerHistory", "Member", new { DependentID = Model.dependent.DependantID }, null)
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!--Doctor-->
+                                        <div class="col-md-5">
+                                            <div class="programInfo_memberDashboard">
+                                                <table>
+                                                    <tr>
+                                                        <th style="text-align: left!important">@Html.Label(null,"Doctor Details", htmlAttributes: new { @class = "control-label memberView" })</th>
+                                                    </tr>
+
+                                                    <tr>
+                                                        @if (Model.doctor.practiceNo != null)
+                                                        {
+                                                            <td style="font-size: 14px; font-family: 'Century Gothic'; column-width: 180px">@Html.DisplayFor(modelItem => Model.doctor.drFirstName) @Html.DisplayFor(modelItem => Model.doctor.drLastName) </td>
+                                                            <td style="font-size: 14px; font-family: 'Century Gothic'">(@Html.DisplayFor(modelItem => Model.doctor.practiceNo))</td>
+                                                        }
+                                                    </tr>
+
+                                                    <tr>
+                                                        @if (Model.doctorContact != null)
+                                                        {
+                                                            <td style="font-size: 14px; font-family: 'Century Gothic'">Contact #: @Html.DisplayFor(modelItem => Model.doctorContact.cell)</td>
+                                                        }
+                                                    </tr>
+
+
+                                                </table>
+                                                <br />
+                                                <div class="statusCode linkNav" style="margin-left: 4%!important; font-size: 10px; font-family: 'Century Gothic'; margin-top: 2%">
+                                                    @Html.ActionLink("Add", "DoctorSearch", "PatientManagement", new { DependentID = Model.dependent.DependantID }, null) /
+                                                    @Html.ActionLink("View History", "ViewDoctorHistory", "Member", new { DependentID = Model.dependent.DependantID }, null)
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <br />
+                            <hr class="fancyruler">
+                            <!--medicalAid-->
+                            <div class="row">
+                                <br />
+                                <div class="col-md-1">
+                                    <img src="~/Content/Images/memberProfile/dashBoard/medicalAid.png" style="width:60%; margin-left: 40%; margin-top: 5%" />
+                                </div>
+                                <div class="col-md-3" style="margin-top: 1%">
+                                    <h4 style="margin-top: 0%; margin-left: 2%; margin-bottom: 0%!important; font-size: 20px; font-family: 'Century Gothic'; font-weight: 100!important; font-style: normal;">Medical scheme details</h4>
+                                </div>
+
+                                <div class="row col-md-8">
+                                    <div class="col-md-12">
+                                        <div class="col-md-2"></div>
+                                        <!--scheme-->
+                                        <div class="col-md-6" style="margin-left: 5px; margin-top: -1.5%!important; margin-bottom: -5%!important">
+
+
+
+                                            <div class="programInfo_memberDashboard">
+                                                <table>
+                                                    <tr>
+                                                        <td style="font-size: 14px; font-family: 'Century Gothic'; column-width: 200px">@Html.DisplayName("Scheme:")</td>
+                                                        <td style="font-size: 14px; font-family: 'Century Gothic'">&nbsp;&nbsp;(@Html.DisplayFor(model => model.MedicalAids[0].Name))</td>
+                                                    </tr>
+
+                                                    <tr>
+                                                        <td style="font-size: 14px; font-family: 'Century Gothic';">@Html.DisplayName("Option:")</td>
+                                                        <td style="font-size: 14px; font-family: 'Century Gothic'">&nbsp;&nbsp;&nbsp;@Html.DisplayFor(model => model.plan)</td>
+                                                    </tr>
+
+                                                    <tr>
+                                                        <td style="font-size: 14px; font-family: 'Century Gothic'">@Html.DisplayName("Pharmacy:")</td>
+                                                        @if (Model.DProvider != null)
+                                                        {
+                                                            <td style="font-size: 14px; font-family: 'Century Gothic'">&nbsp;&nbsp;&nbsp;@Html.DisplayFor(model => model.DProvider.dispensingName)</td>
+                                                        }
+                                                        else
+                                                        {
+                                                            <td style="font-size: 14px; font-family: 'Century Gothic'">&nbsp;&nbsp;&nbsp;@Html.DisplayFor(model => model.dependent.dispensingProvider)</td>
+                                                        }
+                                                    </tr>
+
+                                                    <tr>
+                                                        <td style="font-size: 14px; font-family: 'Century Gothic'">@Html.DisplayName("Employer Group:")</td>
+                                                        <td style="font-size: 14px; font-family: 'Century Gothic'">&nbsp;&nbsp;&nbsp;@Html.DisplayFor(model => model.paypoint)</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>&nbsp;</td>
+                                                    </tr>
+                                                </table>
+                                                <br />
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <br />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<br />
+
+
+
+<script src="//code.jquery.com/jquery-3.2.1.min.js"></script>
+@*<script src="@Url.Content("http://code.jquery.com/jquery-ui-1.8.11.js")" type="text/javascript"></script>*@
+<script src="js/jquery.tablesorter.min.js"></script>
+
+
+<!-- Search -->
+@section scripts{
+    <script>
+
+        var $rows = $('#table tr');
+        $('#search').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $rows.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+
+        $(function () {
+            $('.go_back').click(function (e) {
+                e.preventDefault();
+                history.go(-1);
+            });
+        });
+
+        /*tableSorting*/
+        function sortTable(n) {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("table");
+            switching = true;
+            dir = "asc";
+
+            while (switching) {
+                switching = false;
+                rows = table.getElementsByTagName("TR");
+
+                for (i = 1; i < (rows.length - 1); i++) {
+
+                    shouldSwitch = false;
+
+                    x = rows[i].getElementsByTagName("TD")[n];
+                    y = rows[i + 1].getElementsByTagName("TD")[n];
+
+                    if (dir == "asc") {
+                        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                            //if so, mark as a switch and break the loop:
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (dir == "desc") {
+                        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                            //if so, mark as a switch and break the loop:
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+                if (shouldSwitch) {
+                    /*If a switch has been marked, make the switch
+                    and mark that a switch has been done:*/
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                    //Each time a switch is done, increase this count by 1:
+                    switchcount++;
+                } else {
+                    /*If no switching has been done AND the direction is "asc",
+                    set the direction to "desc" and run the while loop again.*/
+                    if (switchcount == 0 && dir == "asc") {
+                        dir = "desc";
+                        switching = true;
+                    }
+                }
+            }
+        }
+
+        $('#zoomBtn').click(function () {
+            $('.zoom-btn-sm').toggleClass('scale-out');
+            if (!$('.zoom-card').hasClass('scale-out')) {
+                $('.zoom-card').toggleClass('scale-out');
+            }
+        });
+
+        $('.zoom-btn-sm').click(function () {
+            var btn = $(this);
+            var card = $('.zoom-card');
+            if ($('.zoom-card').hasClass('scale-out')) {
+                $('.zoom-card').toggleClass('scale-out');
+            }
+            if (btn.hasClass('zoom-btn-person')) {
+                card.css('background-color', '#d32f2f');
+            } else if (btn.hasClass('zoom-btn-doc')) {
+                card.css('background-color', '#fbc02d');
+            } else if (btn.hasClass('zoom-btn-tangram')) {
+                card.css('background-color', '#388e3c');
+            } else if (btn.hasClass('zoom-btn-report')) {
+                card.css('background-color', '#1976d2');
+            } else {
+                card.css('background-color', '#7b1fa2');
+            }
+        });
+
+        // Javascript to enable link to tab
+        var url = document.location.toString();
+        if (url.match('#')) {
+            $('.nav-tabs a[href="#' + url.split('#')[1] + '"]').tab('show');
+        }
+
+        // Change hash for page-reload
+        $('.nav-tabs a').on('shown.bs.tab', function (e) {
+            window.location.hash = e.target.hash;
+        })
+
+        $(".nav-tabs a").click(function () { });
+
+
+
+    </script>
+}

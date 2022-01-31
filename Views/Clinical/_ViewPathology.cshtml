@@ -1,0 +1,175 @@
+﻿@model HaloCareCore.Models.Patient.Pathology
+@{
+    Layout = "~/Views/Shared/_LayoutModal.cshtml";
+}
+<style>
+    .contentBlock_modal {
+        width: 110%!important;
+        background-color: #fff;
+        border: 1px solid #ddd;
+        box-shadow: 2px 2px 1px 0px rgba(0,0,0,0.38);
+        position: relative;
+        margin: auto;
+        display: block;
+        padding: 5px;
+        border-radius: 5px;
+        margin-top: 10% !important;
+        margin-left: -4.6%!important;
+    }
+
+    .pathologyTable {
+        max-width: 1500px !important;
+        width: 1500px !important;
+        margin: auto;
+        margin-bottom: 5% !important;
+        font-size: 10px !important;
+        margin-left: 0%;
+    }
+    .table tr th,
+    .table tr td {
+        text-align: left !important;
+    }
+</style>
+
+    <div class="row contentBlock_modal">
+        <h4 style="color: #003366; margin-top: 1%; margin-left: 2%; margin-bottom: 1%!important; font-size: 25px; font-family: 'Century Gothic'; font-weight: 300; font-style: normal;">Pathology</h4>
+        <hr class="fancyruler">
+        <div class="form-horizontal editMember">
+
+                <div class="row">
+                    <table class="table pathologyTable">
+                        <tr>
+                            <th style="width: 85px">
+                                @Html.DisplayNameFor(model => model.createdDate)
+                            </th>
+                            <th>
+                                @Html.DisplayName("CD4#")
+                            </th>
+                            <th>
+                                @Html.DisplayName("CD4%")
+                            </th>
+                            <th>
+                                @Html.DisplayName("V/Load")
+                            </th>
+                            <th>
+                                @Html.DisplayName("hB")
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.urea)
+                            </th>
+                            <th>
+                                @Html.DisplayName("Crea")
+                            </th>
+                            <th>
+                                @Html.DisplayName("HIV El")
+                            </th>
+                            <th>
+                                @Html.DisplayName("N/GTT")
+                            </th>
+                            <th>
+                                @Html.DisplayName("Ab/GTT")
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.bilirubin)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.alt)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.eGfr)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.systolicBP)/@Html.DisplayNameFor(model => model.diastolicBP)
+                            </th>
+                            <th>
+                                @Html.DisplayName("MauC Ratio")
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.hba1c)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.createdBy)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.labName)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.labReferenceNo)
+                            </th>
+                        </tr>
+
+                        
+                            <tr>
+                                <td>
+                                    @Html.DisplayFor(Model => Model.createdDate)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(Model => Model.CD4Count, "0.00")
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(Model => Model.CD4Percentage)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(Model => Model.viralLoad)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(Model => Model.haemoglobin)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(Model => Model.urea)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(Model => Model.creatinine)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(Model => Model.hivEliza)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(Model => Model.normGtt)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(Model => Model.abnGtt)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(Model => Model.bilirubin)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(Model => Model.alt)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(Model => Model.eGfr)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(Model => Model.systolicBP)/@Html.DisplayFor(Model => Model.diastolicBP)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(Model => Model.mauCreatRatio)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(Model => Model.hba1c)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(Model => Model.createdBy)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(model => model.labName)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(Model => Model.labReferenceNo)
+                                </td>
+                            </tr>
+                        
+
+                    </table>
+                </div>
+            </div>
+
+        <div class="form-group">
+            <div class="actionButton" style="margin-left: 48%!important">
+                <button type="button" class="btn buttonRound_scriptCancel" data-dismiss="modal" style="width: 15%!important">Close</button>
+            </div>
+        </div>
+
+        </div>
+
+

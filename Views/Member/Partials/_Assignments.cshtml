@@ -1,0 +1,270 @@
+﻿@model HaloCareCore.Models.AssignmentsView
+@{
+    ViewBag.Title = "AssignmentTab";
+    Layout = "~/Views/Shared/_LayoutModal.cshtml";
+
+}
+<style>
+
+    .container {
+        max-width: 1600px;
+        width: 1400px;
+        margin: auto;
+        display: block;
+        padding: 0;
+    }
+
+    * {
+        font-family: 'Roboto', sans-serif;
+        color: #003366;
+    }
+
+    .table tr th {
+        color: black !important;
+        font-family: 'Century Gothic' !important;
+        font-weight: 600 !important;
+        text-align: left !important;
+        font-size: 14px !important;
+    }
+
+    .table tr td {
+        text-align: left !important;
+        font-family: 'Century Gothic' !important;
+        color: #003366 !important;
+        font-size: 14px !important;
+    }
+
+    .fullWidth_table {
+        max-width: 1600px !important;
+        width: 1330px !important;
+        margin: auto;
+        margin-bottom: 5% !important;
+        font-size: 10px !important;
+        margin-left: -3.5% !important
+    }
+</style>
+
+
+<!--asignmentsTabs-->
+
+<div class="row" style="margin-top: 0%">
+    <div class="form-horizontal">
+        <div class="col-md-12 col-sm-12">
+            <div id="tabs6">
+
+                <ul class="nav navbar-nav tablinksMember">
+                    <li><a href="#tabs-1">Open Assignments</a></li>
+                    <li><a href="#tabs-2">Closed Assignments</a></li>
+                    <li><a href="#tabs-3">New Assignment</a></li>
+                </ul>
+
+                <!--pageHeader-->
+                <div class="container zero-padding">
+                    <div class="topBar_reports img-responsive">
+                        <h2>Assignments</h2>
+                        <img src="~/Content/Images/memberProfile/topBar Icons/openAssignments.png" style="width: 3.2%; margin-top: -0.5%;" />
+                        <img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" style="width: 8%; float: right; margin-right: 100px; margin-top: 3px" />
+                    </div>
+                </div>
+
+                <!--Open-->
+                <div class="row" style="margin-top:-22px;">&nbsp;</div>
+                <section id="tabs-1">
+                    <div class="row tablinks">
+                        <div class="form-horizontal">
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="row">
+                                        <table class="table fullWidth_table">
+                                            <tr>
+                                                <th>
+                                                    @Html.DisplayNameFor(model => model.activeAssignments[0].effectiveDate)
+                                                </th>
+                                                <th>
+                                                    @Html.DisplayNameFor(model => model.activeAssignments[0].assignmentType)
+                                                </th>
+                                                <th>
+                                                    @Html.DisplayNameFor(model => model.activeAssignments[0].createdBy)
+                                                </th>
+                                                <th>
+                                                    @Html.DisplayNameFor(model => model.activeAssignments[0].Instruction)
+                                                </th>
+                                                <th>
+                                                    Actions
+                                                </th>
+                                            </tr>
+                                            @foreach (var item in Model.activeAssignments)
+                                            {
+                                                <tr>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.effectiveDate)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.assignmentType)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.createdBy)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.Instruction)
+                                                    </td>
+                                                    <td class="statusCode linkNav">
+                                                        @Html.ActionLink("View", "AssignmentDetails", "Clinical", new { id = item.assignmentID }, null)
+                                                    </td>
+                                                </tr>
+                                            }
+
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <!--Closed-->
+                <section id="tabs-2">
+                    <div class="row tablinks">
+                        <div class="form-horizontal">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="row">
+                                        <table class="table fullWidth_table">
+                                            <tr>
+                                                <th>
+                                                    @Html.DisplayNameFor(model => model.closedAssignments[0].effectiveDate)
+                                                </th>
+                                                <th>
+                                                    @Html.DisplayNameFor(model => model.closedAssignments[0].assignmentType)
+                                                </th>
+                                                <th>
+                                                    @Html.DisplayNameFor(model => model.closedAssignments[0].createdBy)
+                                                </th>
+                                                <th>
+                                                    @Html.DisplayNameFor(model => model.closedAssignments[0].Instruction)
+                                                </th>
+                                                <th>
+                                                    Actions
+                                                </th>
+                                            </tr>
+                                            @foreach (var item in Model.closedAssignments)
+                                            {
+                                                <tr>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.effectiveDate)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.assignmentType)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.createdBy)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.Instruction)
+                                                    </td>
+                                                    <td class="statusCode linkNav">
+                                                        @Html.ActionLink("View", "EnquiryFullView", "Member", new { depId = Model.newAssignment.dependentID,  QueryID = item.assignmentID }, null)
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </table>
+                                    </div>
+                                </div>
+                                <br />
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <!--New-->
+                <section id="tabs-3">
+                    <div class="row tablinks">
+
+                        <div class="form-horizontal">
+                            @using (Html.BeginForm("AddAssignment", "Member", FormMethod.Post))
+                            {
+                                @Html.AntiForgeryToken()
+                                @Html.HiddenFor(model => model.newAssignment.dependentID)
+                                <div class="form-horizontal editMember">
+                                    <div class="row">
+                                        <div class="row contentBlock_Text">
+                                            Assignment Type
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="col-md-6" style="margin-left: 0.5%">
+                                                @Html.DropDownList("AssignmentType", null, "**Select**", htmlAttributes: new { @class = "infoBox_Enrollment" })
+                                            </div>
+                                            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                                        </div>
+                                        <div class="row contentBlock_Text">
+                                            Assignment Item Type
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="col-md-6" style="margin-left: 0.5%">
+                                                @Html.DropDownList("AssignmentItemType", null, "**Select**", htmlAttributes: new { @class = "infoBox_Enrollment" })
+                                            </div>
+                                            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                                        </div>
+                                        <div class="row contentBlock_Text">
+                                            Instruction
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="col-md-6">
+                                                @Html.TextAreaFor(model => model.newAssignment.Instruction, htmlAttributes: new { @class = "contentBlock_messageBox" })
+                                            </div>
+                                            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                                        </div>
+                                        <div class="row contentBlock_Text">
+                                            Effective Date
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="col-md-6">
+                                                @Html.EditorFor(model => model.newAssignment.effectiveDate, new { htmlAttributes = new { @class = "infoBox_Enrollment_datepicker", @id = "assignmentAutoDate" } })
+
+                                            </div>
+                                            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                                        </div>
+                                        <br />
+                                        <div class="form-group">
+                                            <div class="col-md-offset-2 col-md-10">
+                                                <input id="submitAssign" type="submit" value="Submit" class="btn buttonRound_scriptAdd" style="width: 8%; margin-left: 1%!important" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            }
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+    <br />
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+
+<script src="~/bundles/jqueryval"></script>
+
+@section scripts{
+    <script>
+
+        //AutoDate_EffectiveDate
+
+        $(document).ready(function () {
+            var date = new Date();
+
+            var day = date.getDate();
+            var month = date.getMonth() + 1;
+            var year = date.getFullYear();
+
+            if (month < 10) month = "0" + month;
+            if (day < 10) day = "0" + day;
+
+            var today = year + "-" + month + "-" + day;
+            $("#assignmentAutoDate").attr("value", today);
+        });
+
+    </script>
+}

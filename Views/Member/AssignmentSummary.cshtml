@@ -1,0 +1,843 @@
+﻿@model HaloCareCore.Models.PatientSummaryView
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "AssignmentSummary";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+</style>
+
+<!--dateSort_JQ-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js"></script>
+<script src="https://www.jqueryscript.net/demo/jQuery-Plugin-For-Sortable-Bootstrap-Tables-Bootstrap-Sortable/Scripts/bootstrap-sortable.js"></script>
+
+<!--pageHeader-->
+<nav id="global-nav" class="nav">
+    <div class="pull-left title">
+        <h1 class="site-title_patientProfile">
+            <span><i class="fas fa-user-circle"></i>&emsp; Patient summary</span>
+        </h1>
+    </div>
+    <div class="pull-right title">
+        <h1 class="site-title_userID pull-right">
+            <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+        </h1>
+        <h1 class="site-title_userID pull-right">
+            @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+            {
+                <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+            }
+        </h1>
+        <h1 class="site-waffleIcon pull-right">
+            <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+        </h1>
+    </div>
+</nav>
+
+iv class="dashboardContainer zero-padding">
+<div class="patientDashboard_View">
+    <!--breadCrumbs-->
+    <ul class="breadcrumbs_patientDashboard">
+        <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+        <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+        <li><a href="@Url.Action("OpenAssignments", "Clinical", new {})">Overview</a></li>
+        <li><a href="#">Patient summary</a></li>
+    </ul>
+    <!--Left navSlider -->
+    @Html.Partial("_navSlider", new { DependentID = Context.Request.Query["DependentID"] })
+    <!--navCollection-->
+    <div class="navCollection_patientDashboard">
+        @Html.Partial("_navCollection")
+    </div>
+    <!--profileInformation-->
+    <div class="profileBar">
+        @Html.Action("_profileBar_edit", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })
+    </div>
+</div>
+
+<div class="profilebar-spacer"></div>
+
+<div class="patientDashboard_container">
+
+    <h4 class="tableHeading">Assignment overview</h4>
+    <hr class="fancyruler">
+
+    <div class="assignmentTabs">
+        <!--newAssignments-->
+        <div class="tab-3">
+            <label for="tab3-1">New assignments</label>
+            <input id="tab3-1" name="tabs-three" type="radio" checked="checked">
+            <div class="row">
+                <table class="table compactAssignmentsTable sortable" id="tableOpen">
+                    <thead>
+                        <tr>
+                            <th>
+                                @Html.DisplayName("Effective date") <i class="fa fa-fw fa-sort"></i>
+                            </th>
+                            <th>
+                                @Html.DisplayName("Assignment ID") <i class="fa fa-fw fa-sort"></i>
+                            </th>
+                            <th onclick="openAssignment(1)">
+                                @Html.DisplayName("Category") <i class="fa fa-fw fa-sort"></i>
+                            </th>
+                            <th onclick="openAssignment(2)">
+                                @Html.DisplayName("Assignment type") <i class="fa fa-fw fa-sort"></i>
+                            </th>
+                            <th onclick="openAssignment(3)">
+                                @Html.DisplayName("Created by") <i class="fa fa-fw fa-sort"></i>
+                            </th>
+                            <th onclick="openAssignment(4)">
+                                @Html.DisplayName("Comment") <i class="fa fa-fw fa-sort"></i>
+                            </th>
+                            <th style="text-align: center!important">
+                                Action
+                            </th>
+                        </tr>
+                    </thead>
+                    @foreach (var item in Model.assignments.newAssignments)
+                    {
+                        <tbody>
+                            <tr>
+                                <td data-dateformat="DD-MM-YYYY">
+                                    @Html.DisplayFor(modelItem => item.effectiveDate)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.assignmentID)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.assignmentType)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.AssignmentItemType)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.createdBy)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.comment)
+                                </td>
+                                <td class="statusCode linkNav" style="text-align: center!important">
+                                    @Html.ActionLink("View", "AssignmentDetails", "Clinical", new { id = item.assignmentID }, null)
+                                </td>
+                            </tr>
+                        </tbody>
+                    }
+
+                </table>
+                <br />
+            </div>
+        </div>
+        <!--activeAssignments-->
+        <div class="tab-3">
+            <label for="tab3-2">Active assignments</label>
+            <input id="tab3-2" name="tabs-three" type="radio">
+            <div class="row">
+                <table class="table compactAssignmentsTable sortable" id="tableIP">
+                    <thead>
+                        <tr>
+                            <th>
+                                @Html.DisplayName("Effective date") <i class="fa fa-fw fa-sort"></i>
+                            </th>
+                            <th>
+                                @Html.DisplayName("Assignment ID") <i class="fa fa-fw fa-sort"></i>
+                            </th>
+                            <th onclick="ipAssignment(1)">
+                                @Html.DisplayName("Category") <i class="fa fa-fw fa-sort"></i>
+                            </th>
+                            <th onclick="ipAssignment(2)">
+                                @Html.DisplayName("Assignment type") <i class="fa fa-fw fa-sort"></i>
+                            </th>
+                            <th onclick="ipAssignment(3)">
+                                @Html.DisplayName("Created by") <i class="fa fa-fw fa-sort"></i>
+                            </th>
+                            <th onclick="ipAssignment(4)">
+                                @Html.DisplayName("Comment") <i class="fa fa-fw fa-sort"></i>
+                            </th>
+                            <th style="text-align: center!important">
+                                Action
+                            </th>
+                        </tr>
+                    </thead>
+
+                    @foreach (var item in Model.assignments.activeAssignments)
+                    {
+                        <tbody>
+                            <tr>
+                                <td data-dateformat="DD-MM-YYYY">
+                                    @Html.DisplayFor(modelItem => item.effectiveDate)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.assignmentID)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.assignmentType)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.AssignmentItemType)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.createdBy)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.comment)
+                                </td>
+                                <td class="statusCode linkNav" style="text-align: center!important">
+                                    @Html.ActionLink("View", "AssignmentDetails", "Clinical", new { id = item.assignmentID }, null)
+                                </td>
+                            </tr>
+                        </tbody>
+                    }
+
+                </table>
+            </div>
+
+        </div>
+        <!--closedAssignments-->
+        <div class="tab-3">
+            <label for="tab3-3">Closed assignments</label>
+            <input id="tab3-3" name="tabs-three" type="radio">
+            <div class="row">
+                <table class="table compactAssignmentsTable sortable" id="tableClosed">
+                    <thead>
+                        <tr>
+                            <th>
+                                @Html.DisplayName("Effective date") <i class="fa fa-fw fa-sort"></i>
+                            </th>
+                            <th onclick="closedAssignment(1)">
+                                @Html.DisplayName("Assignment type") <i class="fa fa-fw fa-sort"></i>
+                            </th>
+                            <th onclick="closedAssignment(2)">
+                                @Html.DisplayName("Created by") <i class="fa fa-fw fa-sort"></i>
+                            </th>
+                            <th onclick="closedAssignment(3)">
+                                @Html.DisplayName("Comment") <i class="fa fa-fw fa-sort"></i>
+                            </th>
+                            <th onclick="closedAssignment(4)">
+                                @Html.DisplayName("Resolved by") <i class="fa fa-fw fa-sort"></i>
+                            </th>
+                            <th>
+                                @Html.DisplayName("Resolved date")
+                            </th>
+                            <th style="text-align: center!important">
+                                Action
+                            </th>
+                        </tr>
+                    </thead>
+
+                    @foreach (var item in Model.assignments.closedAssignments)
+                    {
+                        <tbody>
+                            <tr>
+                                <td data-dateformat="DD-MM-YYYY">
+                                    @Html.DisplayFor(modelItem => item.effectiveDate)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.assignmentType)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.createdBy)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.comment)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.closedBy)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.closedDate)
+                                </td>
+                                <td class="statusCode linkNav" style="text-align: center!important">
+                                    @Html.ActionLink("View", "EnquiryFullView", "Member", new { QueryID = item.assignmentID }, null)
+                                </td>
+                            </tr>
+                        </tbody>
+
+                    }
+
+                </table>
+            </div>
+        </div>
+    </div>
+    <script>
+
+        $(document).ready(function () {
+            $('#tableOpen').dataTable({
+                "autoWidth": false,
+                "paging": true,
+                "ordering": true,
+                "order": [],
+                "info": true,
+                "filter": true,
+                "pageLength": 10,
+                "scrollY": 427,
+                "scrollX": true,
+                "columnDefs": [
+                    { "type": "date-dd-MMM-yyyy", targets: [1, 5] }
+                ]
+            });
+        });
+
+        /*openAssignment tableSorting*/
+        function openAssignment(n) {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("tableOpen");
+            switching = true;
+            dir = "asc";
+            while (switching) {
+                switching = false;
+                rows = table.rows;
+                for (i = 1; i < (rows.length - 1); i++) {
+                    shouldSwitch = false;
+                    x = rows[i].getElementsByTagName("TD")[n];
+                    y = rows[i + 1].getElementsByTagName("TD")[n];
+                    if (dir == "asc") {
+                        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (dir == "desc") {
+                        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+                if (shouldSwitch) {
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                    switchcount++;
+                } else {
+                    if (switchcount == 0 && dir == "asc") {
+                        dir = "desc";
+                        switching = true;
+                    }
+                }
+            }
+        }
+
+        /*ipAssignment tableSorting*/
+        function ipAssignment(n) {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("tableIP");
+            switching = true;
+            dir = "asc";
+            while (switching) {
+                switching = false;
+                rows = table.rows;
+                for (i = 1; i < (rows.length - 1); i++) {
+                    shouldSwitch = false;
+                    x = rows[i].getElementsByTagName("TD")[n];
+                    y = rows[i + 1].getElementsByTagName("TD")[n];
+                    if (dir == "asc") {
+                        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (dir == "desc") {
+                        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+                if (shouldSwitch) {
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                    switchcount++;
+                } else {
+                    if (switchcount == 0 && dir == "asc") {
+                        dir = "desc";
+                        switching = true;
+                    }
+                }
+            }
+        }
+
+        /*closedAssignments tableSorting*/
+        function closedAssignment(n) {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("tableClosed");
+            switching = true;
+            dir = "asc";
+            while (switching) {
+                switching = false;
+                rows = table.rows;
+                for (i = 1; i < (rows.length - 1); i++) {
+                    shouldSwitch = false;
+                    x = rows[i].getElementsByTagName("TD")[n];
+                    y = rows[i + 1].getElementsByTagName("TD")[n];
+                    if (dir == "asc") {
+                        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (dir == "desc") {
+                        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+                if (shouldSwitch) {
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                    switchcount++;
+                } else {
+                    if (switchcount == 0 && dir == "asc") {
+                        dir = "desc";
+                        switching = true;
+                    }
+                }
+            }
+        }
+    </script>
+</div>
+<div style="margin-bottom: 0.5%"></div>
+<!--pathologyOverivew-->
+<div class="tab-content">
+    <div class="pathologyOverview_container">
+        <h4 class="summaryHeading">Pathology overview</h4>
+        <hr class="patientProfile_Ruler" />
+        <br />
+        <!--pathology_Due/Outstanding/Next-->
+        <div class="row col-md-12">
+            <div class="col-md-4">
+                <div class="col-md-6" style="text-align: right">
+                    <h4 class="panelHeading">Pathology due:</h4>
+                </div>
+                <div class="row col-md-6" style="margin-top: 1.5%">
+                    <img src="~/Content/Images/memberProfile/Page Icons/pathologyWarning_Red.png" id="pathologyWarning" />
+                    <span style="color: darkred">01 February 2018</span>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="col-md-6" style="text-align: right">
+                    <h4 class="panelHeading">Pathology outstanding:</h4>
+                </div>
+                <div class="row col-md-6" style="margin-top: 1.5%">
+                    <img src="~/Content/Images/memberProfile/Page Icons/pathologyWarning_Yellow.png" id="pathologyWarning" />
+                    <span style="color: darkorange">01 February 2018</span>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="col-md-6" style="text-align: right">
+                    <h4 class="panelHeading">Next pathology:</h4>
+                </div>
+                <div class="row col-md-6" style="margin-top: 1.5%">
+                    <img src="~/Content/Images/memberProfile/Page Icons/pathologyWarning_Red.png" id="pathologyWarning" />
+                    <span style="color: darkred">01 February 2018</span>
+                </div>
+            </div>
+
+        </div>
+        <br />
+        <br />
+
+        <p>
+            <br />
+            <table class="table administration_Table sortable" id="pathTable">
+                <thead>
+                    <tr>
+                        <th>
+                            @Html.DisplayName("Created") <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th onclick="sortPath(1)">
+                            @Html.DisplayName("CD4 Count") <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th onclick="sortPath(2)">
+                            @Html.DisplayName("V/Load") <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th onclick="sortPath(3)">
+                            @Html.DisplayName("hB") <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th onclick="sortPath(4)">
+                            @Html.DisplayName("Urea") <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th onclick="sortPath(5)">
+                            @Html.DisplayName("Creat") <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th onclick="sortPath(6)">
+                            @Html.DisplayName("Eliza") <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th onclick="sortPath(7)">
+                            @Html.DisplayName("No/GTT") <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th onclick="sortPath(8)">
+                            @Html.DisplayName("Ab/GTT") <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th onclick="sortPath(9)">
+                            @Html.DisplayName("Bili") <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th onclick="sortPath(10)">
+                            @Html.DisplayName("ALT") <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th onclick="sortPath(11)">
+                            @Html.DisplayName("eGFR") <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th onclick="sortPath(12)">
+                            @Html.DisplayName("BP") <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th onclick="sortPath(13)">
+                            @Html.DisplayName("M/Crea") <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th onclick="sortPath(14)">
+                            @Html.DisplayName("Created By") <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th>
+                            @Html.DisplayName("Effective") <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th onclick="sortPath(15)">
+                            @Html.DisplayName("Lab") <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th onclick="sortPath(16)">
+                            @Html.DisplayName("Ref #") <i class="fa fa-fw fa-sort"></i>
+                        </th>
+
+                    </tr>
+                </thead>
+
+                @foreach (var item in Model.pathologies)
+                {
+                    <tbody>
+                        <tr>
+                            <td data-dateformat="DD-MM-YYYY">
+                                @Html.DisplayFor(modelItem => item.createdDate)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.CD4Count)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.viralLoad)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.haemoglobin)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.urea)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.creatinine)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.hivEliza)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.normGtt)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.abnGtt)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.bilirubin)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.alt)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.eGfr)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.systolicBP)/@Html.DisplayFor(modelItem => item.diastolicBP)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.mauCreatRatio)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.createdBy)
+                            </td>
+                            <td data-dateformat="DD-MM-YYYY">
+                                @Html.DisplayFor(modelItem => item.effectiveDate)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.labName)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.labReferenceNo)
+                            </td>
+                        </tr>
+                    </tbody>
+                }
+
+            </table>
+        </p>
+    </div>
+
+    <script>
+        /*Pathology tableSorting*/
+        function sortPath(n) {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("pathTable");
+            switching = true;
+            dir = "asc";
+            while (switching) {
+                switching = false;
+                rows = table.rows;
+                for (i = 1; i < (rows.length - 1); i++) {
+                    shouldSwitch = false;
+                    x = rows[i].getElementsByTagName("TD")[n];
+                    y = rows[i + 1].getElementsByTagName("TD")[n];
+                    if (dir == "asc") {
+                        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (dir == "desc") {
+                        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+                if (shouldSwitch) {
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                    switchcount++;
+                } else {
+                    if (switchcount == 0 && dir == "asc") {
+                        dir = "desc";
+                        switching = true;
+                    }
+                }
+            }
+        }
+    </script>
+
+</div>
+<div style="margin-bottom: 0.5%"></div>
+<!--scriptOverivew-->
+<div class="tab-content">
+
+    <div class="pathologyOverview_container">
+        <h4 class="summaryHeading">Script overview</h4>
+        <hr class="patientProfile_Ruler" />
+        <br />
+
+        <!--pathology_Due/Outstanding/Next-->
+        <div class="row col-md-12">
+            <div class="col-md-4">
+                <div class="col-md-6" style="text-align: right">
+                    <h4 class="panelHeading">Effective script:</h4>
+                </div>
+                <div class="row col-md-6" style="margin-top: 1.5%">
+                    <img src="~/Content/Images/memberProfile/Page Icons/pathologyWarning_Red.png" id="pathologyWarning" />
+                    <span style="color: darkred">01 February 2018</span>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="col-md-6" style="text-align: right">
+                </div>
+                <div class="row col-md-6">
+
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="col-md-6" style="text-align: right">
+                </div>
+                <div class="row col-md-6">
+
+                </div>
+            </div>
+
+        </div>
+        <br />
+        <br />
+
+        <p>
+            <br />
+            <table class="table pathologyOverviewTable sortable" id="tableScript">
+                <thead>
+                    <tr>
+                        <th onclick="sortScript(1)" style="width: 100px">
+                            @Html.DisplayName("Script ID") <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th onclick="sortScript(2)" style="width: 100px">
+                            @Html.DisplayName("NAPPI") <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th onclick="sortScript(3)" style="width: 300px">
+                            @Html.DisplayName("Product name") <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th onclick="sortScript(4)" style="width: 80px">
+                            @Html.DisplayName("Qty") <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th onclick="sortScript(5)">
+                            @Html.DisplayName("Medication instructions") <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th style="width: 100px">
+                            @Html.DisplayName("From date") <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th style="width: 100px">
+                            @Html.DisplayName("To date") <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th onclick="sortScript(6)" style="width: 140px">
+                            @Html.DisplayName("Item status") <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                    </tr>
+                </thead>
+                @if (Model.ScriptItems != null)
+                {
+                    foreach (var item in Model.ScriptItems)
+                    {
+                        <tbody>
+                            <tr>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.scriptID)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.nappiCode)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.productName)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.quantity)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.directions)
+                                </td>
+                                <td data-dateformat="DD-MM-YYYY">
+                                    @Html.DisplayFor(modelItem => item.fromDate)
+                                </td>
+                                <td data-dateformat="DD-MM-YYYY">
+                                    @Html.DisplayFor(modelItem => item.toDate)
+                                </td>
+                                <td>
+                                    @*@Html.DisplayFor(modelItem => Model.items[i].itemStatus)*@
+                                    @if (item.itemStatus == "Not yet authorised")
+                                    {
+                                        <span style="color: darkred; font-weight: bold">
+                                            Not yet authorised
+                                        </span>
+
+                                    }
+                                    else if (item.itemStatus == "Authorised")
+                                    {
+                                        <span style="color: forestgreen; font-weight: bold">
+                                            Authorised
+                                        </span>
+
+                                    }
+                                    else
+                                    {
+                                        <span style="color: black; font-weight: bold">
+                                            @Html.DisplayFor(modelItem => item.itemStatus)
+                                        </span>
+
+                                    }
+                                </td>
+                            </tr>
+                        </tbody>
+                    }
+                }
+
+            </table>
+        </p>
+    </div>
+
+    <script>
+        /*Script tableSorting*/
+        function sortScript(n) {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("tableScript");
+            switching = true;
+            dir = "asc";
+            while (switching) {
+                switching = false;
+                rows = table.rows;
+                for (i = 1; i < (rows.length - 1); i++) {
+                    shouldSwitch = false;
+                    x = rows[i].getElementsByTagName("TD")[n];
+                    y = rows[i + 1].getElementsByTagName("TD")[n];
+                    if (dir == "asc") {
+                        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (dir == "desc") {
+                        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+                if (shouldSwitch) {
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                    switchcount++;
+                } else {
+                    if (switchcount == 0 && dir == "asc") {
+                        dir = "desc";
+                        switching = true;
+                    }
+                }
+            }
+        }
+    </script>
+
+</div>
+</div>
+
+
+<script type="text/javascript" src="/path/to/jquery-latest.js"></script>
+<script type="text/javascript" src="/path/to/jquery.tablesorter.js"></script>
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+<script src="~/Scripts/jquery.unobtrusive-ajax.js"></script>
+
+
+@section scripts{
+    <script src="~/bundles/jqueryval"></script>
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $.fn.dataTable.moment('DD/MM/YY');
+
+            $('.indexTable').DataTable();
+        });
+    </script>
+
+    <script>
+        var $rows = $('#table tr');
+        $('#search').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $rows.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+
+
+        $("#save").on("click", function (e) {
+            e.preventDefault(); // prevent de default action, which is to submit
+            // save your value where you want
+            data.select = $("#exampleSelect").value();
+            // or call the save function here
+            // save();
+            $(this).prev().click();
+
+            // Javascript to enable link to tab
+            var url = document.location.toString();
+            if (url.match('#')) {
+                $('.nav-tabs a[href="#' + url.split('#')[1] + '"]').tab('show');
+            }
+
+            // Change hash for page-reload
+            $('.nav-tabs a').on('shown.bs.tab', function (e) {
+                window.location.hash = e.target.hash;
+            })
+
+            $(".nav-tabs a").click(function () { });
+
+    </script>
+}

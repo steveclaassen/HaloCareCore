@@ -1,0 +1,125 @@
+﻿@model IEnumerable<HaloCareCore.Models.OutstandingsView>
+
+@{
+    ViewBag.Title = "OutstandingPathologies";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+<div class="topBar_reports">
+    <h2>Outstanding Pathologies</h2>
+    <img src="~/Content/Images/memberProfile/topBar Icons/Script.png" style="width: 2.2%; margin-top: -0.1%" />
+</div>
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+
+<div class="row contentBlock_pathology" style="width: 125%; margin-left: -12%">
+    <div class="indexSearch" style="margin-top:-4%!important">
+        <label for="tableSearch" class="control-label"></label> <input type="text" class="form-control-search" id="search" onkeyup="myFunction()" placeholder="Search..." style="margin-top: 3.4%; margin-left: 88%; position: absolute" />
+        <div class="searchIcon">
+            <img src="~/Content/Images/memberProfile/Search_gray.png" style="width: 0.8%!important; margin-left: 96.5%; margin-top: 4%; position: absolute" />
+        </div>
+    </div>
+
+    <h4 style="color: #003366; margin-top: -2%">Outstanding Pathologies <span style="color: #0081b3">Table</span></h4>
+    @Html.ActionLink("Export to Excel", "ExportOutstandingPathologyToExcel", "Clinical", null)
+
+    <table class="table" id="table">
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.membershipNo)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.dependantCode)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.firstName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.lastName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.idNumber)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.schemeName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.status)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.overdue)
+            </th>
+            <th></th>
+        </tr>
+
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.membershipNo)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.dependantCode)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.firstName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.lastName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.idNumber)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.schemeName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.status)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.overdue)
+                </td>
+                <td>
+                    @Html.ActionLink("Create New", "CreatePathology", new { DependentID = item.dependantID })
+                </td>
+            </tr>
+        }
+
+    </table>
+</div>
+
+<br />
+<br />
+<br />
+
+<div class="backButton_image">
+    <span id="surround" class="go_back">
+        <span id="initial"><img src="~/Content/Images/memberProfile/Page Icons/back_gray.png" /></span>
+        <span id="onhover"><img src="~/Content/Images/memberProfile/Page Icons/back_blue.png" /></span>
+    </span>
+</div>
+
+<!-- Search -->
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <script>
+
+        var $rows = $('#table tr');
+        $('#search').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $rows.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+
+
+    </script>
+}

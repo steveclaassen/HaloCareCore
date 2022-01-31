@@ -1,0 +1,252 @@
+﻿@model HaloCareCore.Models.Management.PatientDiagnosis
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "diagnosis_Details";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<comment>
+    <!--
+        14 February 2019 -- HCare-607 (Halocare Bestmed Diabetes enrollment questionnaire)
+    -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .pulse {
+        animation: pulse 2s ease infinite;
+    }
+</style>
+
+<!--pageHeader-->
+<nav id="global-nav" class="nav">
+    <div class="pull-left title">
+        <h1 class="site-title_patientProfile">
+            <span><img src="~/Content/Images/memberProfile/topBar Icons/clincalHistory.png" /></span>&emsp; Patient diagnosis
+        </h1>
+    </div>
+    <div class="pull-right title">
+        <h1 class="site-title_userID pull-right">
+            <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+        </h1>
+        <h1 class="site-title_userID pull-right">
+            @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+            {
+                <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+            }
+        </h1>
+        <h1 class="site-waffleIcon pull-right">
+            <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+        </h1>
+    </div>
+</nav>
+
+<div class="dashboardContainer zero-padding">
+    <div class="patientDashboard_View">
+        <!--breadCrumbs-->
+        <ul class="breadcrumbs_patientDashboard">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+            <li><a class="go_back">Patient</a></li>
+            <li><a href="#">Patient diagnosis</a></li>
+        </ul>
+        <!--Left navSlider -->
+        @Html.Partial("_navSlider_blank", new { })
+        <!--navCollection-->
+        <div class="navCollection_patientDashboard">
+            @Html.Partial("_navCollection")
+        </div>
+        <!--profileInformation-->
+        <div class="profileBar">
+            @Html.Action("_profileBar_edit", "Member", new { DependentID = Model.DependantID })
+        </div>
+    </div>
+
+    <div class="profilebar-spacer-assignment"></div>
+
+    <div class="patientDashboard_container">
+
+        <h4 class="summaryHeading">Diagnosis detail</h4>
+        <hr class="fancyruler">
+        <br />
+        <br />
+        <div style="margin-left: 2%">
+            <dl class="dl-horizontal editForm">
+                <dt>
+                    @Html.DisplayNameFor(model => model.EffectiveDate)
+                </dt>
+                <dd>
+                    @if (Model.EffectiveDate == null)
+                    {
+                        <span class="pulse" style="color: rgba(204, 0, 0, 0.70)!important; font-size: 14px!important"><i class="fas fa-info-circle pulse" style="color: rgba(204, 0, 0, 0.70)!important"></i> Follow up required!</span>
+                    }
+                    else
+                    {
+                        @Html.DisplayFor(model => model.EffectiveDate)
+                    }
+                </dd>
+
+                <br />
+                <hr class="fancyruler" />
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.ProgramDescription)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.ProgramDescription)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.ProgramCode)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.ProgramCode)
+                </dd>
+
+                <br />
+                <hr class="fancyruler" />
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.CreatedBy)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.CreatedBy)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.CreatedDate)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.CreatedDate)
+                </dd>
+
+                <br />
+                <hr class="fancyruler" />
+
+                @if (Model.ModifiedBy != null)
+                {
+                    <dt>
+                        @Html.DisplayNameFor(model => model.ModifiedBy)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.ModifiedBy)
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.ModifiedDate)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.ModifiedDate)
+                    </dd>
+
+                    <br />
+                    <hr class="fancyruler" />
+
+                }
+                <dt>
+                    @Html.DisplayNameFor(model => model.Medication)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.Medication)
+                </dd>
+
+                @if (Model.Comment != null)
+                {
+                    <br />
+                    <hr class="fancyruler" />
+                    <dt>
+                        @Html.DisplayNameFor(model => model.Comment)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.Comment)
+                    </dd>
+                }
+
+                <br />
+                <hr class="fancyruler" />
+                <dt>
+                    @Html.DisplayNameFor(model => model.FollowUp)
+                </dt>
+
+                <dd class="detailsCheck">
+                    @if (Model.FollowUp == true)
+                    {
+                        <span style="font-size: 16px; color: forestgreen; text-align: center!important"><i class="far fa-check-circle"></i></span>
+                    }
+                    else
+                    {
+                        <span style="font-size: 16px; color: darkred; text-align: center!important"><i class="far fa-times-circle"></i></span>
+
+                    }
+                </dd>
+
+                <br />
+                <hr class="fancyruler" />
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.Active)
+                </dt>
+
+                <dd class="detailsCheck">
+                    @if (Model.Active == true)
+                    {
+                        <span style="font-size: 16px; color: forestgreen; text-align: center!important"><i class="far fa-check-circle"></i></span>
+                    }
+                    else
+                    {
+                        <span style="font-size: 16px; color: darkred; text-align: center!important"><i class="far fa-times-circle"></i></span>
+
+                    }
+                </dd>
+
+            </dl>
+
+            @if (Model.ProgramCode.ToLower() == "diabd")
+            {
+                <div class="fixedBack" style="margin-left: 40%">
+                    <input value="Back" class="btn buttonRound_formBack go_back" onclick="diabetesBack()" style="width: 15%!important" />
+                    <a href="@Url.Action("diagnosis_Edit", "Member", new { id = Model.Id, pro=Context.Request.Query["pro"]})" value="Edit" class="btn buttonRound_formEdit" style="width: 15%!important">Edit</a>
+                </div>
+            }
+            else if (Model.ProgramCode.ToLower() == "hivpr")
+            {
+                <div class="fixedBack" style="margin-left: 40%">
+                    <input value="Back" class="btn buttonRound_formBack go_back" onclick="hivBack()" style="width: 15%!important" />
+                    <a href="@Url.Action("diagnosis_Edit", "Member", new { id = Model.Id, pro=Context.Request.Query["pro"]})" value="Edit" class="btn buttonRound_formEdit" style="width: 15%!important">Edit</a>
+                </div>
+            }
+
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <script>
+        function diabetesBack() {
+            localStorage.setItem("back_diagnosis_diabetes", Date.now());
+        }
+        function diabetesCreate() {
+            localStorage.setItem("edit_diagnosis_diabetes", Date.now());
+        }
+        function hivBack() {
+            localStorage.setItem("back_diagnosis_hiv", Date.now());
+        }
+        function hivCreate() {
+            localStorage.setItem("edit_diagnosis_hiv", Date.now());
+        }
+    </script>
+}
+

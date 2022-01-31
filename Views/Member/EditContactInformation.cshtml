@@ -1,0 +1,681 @@
+﻿@model HaloCareCore.Models.ComsViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "EditContactInformation";
+    Layout = "~/Views/Shared/_LayoutMember.cshtml";
+}
+
+<comment>
+    <!--
+        02 August 2019 -- HCare-692 (Add to patients comms screen)
+        Added a new view in order to combine the Contact and Address Add & Edit views into a single Contact Information view.
+
+        14 August 2019
+        Addition to HCare-692 which was failed incorrectly - I have added validation to the PMOC dropdown so that when you select an option like email, the email field becomes mandatory etc. I have also added the active check that links the maintenance table to the add/edit contact information
+    -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .select2-container {
+        border: none !important;
+    }
+
+        .select2-container:focus {
+            outline: none !important
+        }
+
+    .select2-container--default .select2-selection--single {
+        display: block !important;
+        max-width: 500px !important;
+        width: 400px;
+        max-height: 100px;
+        height: 30px;
+        margin-left: 10px;
+        padding: 6px 6px;
+        line-height: 1.428571429;
+        color: #003366;
+        border-radius: 0px !important;
+        border: none !important;
+        border-bottom: 1px solid #e8e6e6 !important;
+        background-color: transparent !important;
+        -webkit-box-shadow: none !important;
+        box-shadow: none !important;
+    }
+
+        .select2-container--default .select2-selection--single .select2-selection__placeholder {
+            color: white !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow b {
+            margin-top: -5px !important;
+        }
+
+    .field-validation-error:before {
+        font-family: FontAwesome;
+        content: "\f06a\00a0";
+        animation: pulse 2s ease infinite;
+    }
+
+    .error-alert {
+        width: 100%;
+        margin: 0 auto;
+        background-color: rgba(217, 83, 79, 0.1);
+        padding: 10px;
+        border-left-color: #d9534f !important;
+        border: 1px solid transparent;
+        border-left-width: 5px;
+        border-radius: 3px;
+        margin: 0 auto;
+        font-family: 'Open Sans', sans-serif;
+        font-size: 12px;
+        margin: 0 0 5px 0;
+        margin-top: -10px;
+        margin-bottom: 20px;
+    }
+
+        .error-alert span {
+            color: #d9534f;
+            text-align: center;
+        }
+</style>
+<javascript>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js"></script>
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+</javascript>
+<!--pageHeader-->
+<nav id="global-nav" class="nav">
+    <div class="pull-left title">
+        <h1 class="site-title_patientProfile">
+            <span><i class="fa fa-phone-square"></i></span>&emsp; Contact information
+        </h1>
+    </div>
+    <div class="pull-right title">
+        <h1 class="site-title_userID pull-right">
+            <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+        </h1>
+        <h1 class="site-title_userID pull-right">
+            @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+            {
+                <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+            }
+        </h1>
+        <h1 class="site-waffleIcon pull-right">
+            <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+        </h1>
+    </div>
+</nav>
+
+<div class="dashboardContainer zero-padding">
+    <div class="patientDashboard_View">
+        <!--breadCrumbs-->
+        <ul class="breadcrumbs_patientDashboard">
+            <li style="font-size: 10px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+            <li><a href="@Url.Action("patientDashboard", "Member", new { DependentID = Context.Request.Query["DependentID"]})">Patient</a></li>
+            <li><a href="#">Edit contact information</a></li>
+        </ul>
+        <!--Left navSlider -->
+        @Html.Partial("_navSlider", new { DependentID = Context.Request.Query["DependentID"] })
+        <!--navCollection-->
+        <div class="navCollection_patientDashboard">
+            @Html.Partial("_navCollection")
+        </div>
+        <!--profileInformation-->
+        <div class="profileBar">
+            @Html.Action("_profileBar_edit", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })
+        </div>
+    </div>
+
+    <div class="profilebar-spacer"></div>
+
+    <div class="patientDashboard_container">
+        <div class="form-horizontal editForm">
+            <h4 class="formHeading">Edit contact information</h4>
+            <hr class="fancyruler">
+            @using (Html.BeginForm())
+            {
+                @Html.AntiForgeryToken()
+                <div class="hidden-fields">
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                    @Html.HiddenFor(model => model.memberInformation.contactID)
+                    @Html.HiddenFor(model => model.memberInformation.addressID)
+                    @Html.HiddenFor(model => model.memberInformation.dependantID)
+                    @Html.Hidden("pro", Context.Request.Query["pro"])
+                    <input type="hidden" name="hidden-mobile" id="hidden-mobile" />
+                    <input type="hidden" name="hidden-mobile2" id="hidden-mobile2" />
+                    <input type="hidden" name="hidden-home" id="hidden-home" />
+                    <input type="hidden" name="hidden-home2" id="hidden-home2" />
+                    <input type="hidden" name="hidden-work" id="hidden-work" />
+                    <input type="hidden" name="hidden-work2" id="hidden-work2" />
+                    <input type="hidden" name="hidden-fax" id="hidden-fax" />
+                    <div class="col-md-12"><div id="error-invalid" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; A contact number requires 10-12 digits and cannot contain any special characters!</span></div></div></div>
+                </div>
+                <br />
+                <div class="form-horizontal">
+                    <div class="col-md-12" style="margin-bottom: 5%!important">
+                        <div class="col-md-6">
+                            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                            <div class="form-group">
+                                @Html.Label(null, "Contact name", htmlAttributes: new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(model => model.memberInformation.Contacts.contactName, new { htmlAttributes = new { @class = "contactTextbox", @placeholder = "example: John Smith", @required = "required" } })
+                                    @Html.ValidationMessageFor(model => model.memberInformation.Contacts.contactName, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div id="warning_required_email" class="hidden">
+                                <i class="fas fa-asterisk pulser asterisk-warning-left"></i>
+                            </div>
+                            <div class="form-group">
+                                @Html.Label(null, "Email address", htmlAttributes: new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(model => model.memberInformation.Contacts.email, new { htmlAttributes = new { @class = "contactTextbox", @placeholder = "example: johnsmith@google.com" } })
+                                    @Html.ValidationMessageFor(model => model.memberInformation.Contacts.email, "", new { @class = "text-danger", @style = "font-size: 75%;margin-left: 2%", @id = "emailAdd" })
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                @Html.Label(null, "Additional email", htmlAttributes: new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(model => model.memberInformation.Contacts.ISeriesEmail, new { htmlAttributes = new { @class = "contactTextbox", @placeholder = "example: janedoe@google.com" } })
+                                    @Html.ValidationMessageFor(model => model.memberInformation.Contacts.ISeriesEmail, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+                            <div id="warning_required_mobile" class="hidden">
+                                <i class="fas fa-asterisk pulser asterisk-warning-left"></i>
+                            </div>
+                            <div class="form-group">
+                                @Html.Label(null, "Mobile number", htmlAttributes: new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(model => model.memberInformation.Contacts.cell, new { htmlAttributes = new { @class = "contactTextbox", @placeholder = "example: 0825556549", @type = "", @onchange = "MobileNumber(this)" } })
+                                    <span id="mobile-number" name="mobile-number" style="color: #b94a48; font-size: 75%; margin-left: 2%"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                @Html.Label(null, "Additional mobile", htmlAttributes: new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(model => model.memberInformation.Contacts.ISeriesCell, new { htmlAttributes = new { @class = "contactTextbox", @placeholder = "example: 0821116549", @type = "", @onchange = "MobileNumber2(this)" } })
+                                    <span id="mobile-number-2" name="mobile-number-2" style="color: #b94a48; font-size: 75%; margin-left: 2%"></span>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                @Html.Label(null, "Home number", htmlAttributes: new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(model => model.memberInformation.Contacts.landLine, new { htmlAttributes = new { @class = "contactTextbox", @placeholder = "example: 0115550001", @type = "", @onchange = "HomeNumber(this)" } })
+                                    <span id="home-number" name="home-number" style="color: #b94a48; font-size: 75%; margin-left: 2%"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                @Html.Label(null, "Additional home", htmlAttributes: new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(model => model.memberInformation.Contacts.ISeriesLandLine, new { htmlAttributes = new { @class = "contactTextbox", @placeholder = "example: 0821116549", @type = "", @onchange = "HomeNumber2(this)" } })
+                                    <span id="home-number-2" name="home-number-2" style="color: #b94a48; font-size: 75%; margin-left: 2%"></span>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                @Html.Label(null, "Work number", htmlAttributes: new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(model => model.memberInformation.Contacts.workNo, new { htmlAttributes = new { @class = "contactTextbox", @placeholder = "example: 0115550002", @type = "", @onchange = "WorkNumber(this)" } })
+                                    <span id="work-number" name="work-number" style="color: #b94a48; font-size: 75%; margin-left: 2%"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                @Html.Label(null, "Additional work", htmlAttributes: new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(model => model.memberInformation.Contacts.ISeriesWorkNo, new { htmlAttributes = new { @class = "contactTextbox", @placeholder = "example: 0821116549", @type = "", @onchange = "WorkNumber2(this)" } })
+                                    <span id="work-number-2" name="work-number-2" style="color: #b94a48; font-size: 75%; margin-left: 2%"></span>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                @Html.Label(null, "Fax number", htmlAttributes: new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(model => model.memberInformation.Contacts.fax, new { htmlAttributes = new { @class = "contactTextbox", @placeholder = "example: 0115550003", @type = "", @onchange = "FaxNumber(this)" } })
+                                    <span id="fax-number" name="fax-number" style="color: #b94a48; font-size: 75%; margin-left: 2%"></span>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                @Html.Label(null, "Preferred", htmlAttributes: new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.DropDownListFor(model => model.memberInformation.Contacts.preferredMethodOfContact, (IEnumerable<SelectListItem>)ViewBag.pmoc, "--Select--", new { @class = "contactTextbox" })
+                                    @Html.ValidationMessageFor(model => model.memberInformation.Contacts.preferredMethodOfContact, "", new { @class = "text-danger", @style = "font-size: 75%;margin-left: 2%" })
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div id="warning_required_add2" class="hidden">
+                                <i class="fas fa-asterisk pulser asterisk-warning-right"></i>
+                            </div>
+                            <div class="form-group">
+                                @Html.Label(null, "Street/Postal", htmlAttributes: new { @class = "control-label col-md-3" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(model => model.memberInformation.Address.line2, new { htmlAttributes = new { @class = "contactTextbox", @placeholder = "example: 241 Sidney Street" } })
+                                    @Html.ValidationMessageFor(model => model.memberInformation.Address.line2, "", new { @class = "text-danger", @style = "font-size: 75%;margin-left: 2%", @id = "address2" })
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.memberInformation.Address.line1, htmlAttributes: new { @class = "control-label col-md-3" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(model => model.memberInformation.Address.line1, new { htmlAttributes = new { @class = "contactTextbox", @placeholder = "example: Pretoria Country Club" } })
+                                    @Html.ValidationMessageFor(model => model.memberInformation.Address.line1, "", new { @class = "text-danger", @style = "font-size: 75%;margin-left: 2%", @id = "address1" })
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                @Html.Label(null, "Suburb/Province", htmlAttributes: new { @class = "control-label col-md-3" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(model => model.memberInformation.Address.province, new { htmlAttributes = new { @class = "contactTextbox", @placeholder = "example: Gauteng" } })
+                                    @Html.ValidationMessageFor(model => model.memberInformation.Address.province, "", new { @class = "text-danger", @style = "font-size: 75%;margin-left: 2%", @id = "address5" })
+                                </div>
+                            </div>
+
+                            <div id="warning_required_city" class="hidden">
+                                <i class="fas fa-asterisk pulser asterisk-warning-right"></i>
+                            </div>
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.memberInformation.Address.city, htmlAttributes: new { @class = "control-label col-md-3" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(model => model.memberInformation.Address.city, new { htmlAttributes = new { @class = "contactTextbox", @placeholder = "example: Pretoria" } })
+                                    @Html.ValidationMessageFor(model => model.memberInformation.Address.city, "", new { @class = "text-danger", @style = "font-size: 75%;margin-left: 2%", @id = "address4" })
+                                </div>
+                            </div>
+
+                            <div id="warning_required_zip" class="hidden">
+                                <i class="fas fa-asterisk pulser asterisk-warning-right"></i>
+                            </div>
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.memberInformation.Address.zip, htmlAttributes: new { @class = "control-label col-md-3" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(model => model.memberInformation.Address.zip, new { htmlAttributes = new { @class = "contactTextbox", @placeholder = "example: 0181" } })
+                                    @Html.ValidationMessageFor(model => model.memberInformation.Address.zip, "", new { @class = "text-danger", @style = "font-size: 75%;margin-left: 2%", @id = "address6" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="text-align: center!important">
+                        <input value="Back" class="btn buttonRound_formBack go_back" style="width: 8%!important" />
+                        <input id="submit" type="submit" value="Save" class="btn buttonRound_formCreate addContact" style="width: 8%!important" />
+                    </div>
+
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script src="~/bundles/jqueryval"></script>
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <!--Page redirect-->
+    <script>
+        $(document).ready(function () {
+            $(".addContact").on("click", function () {
+                localStorage.setItem("addContact", "clicked");
+            });
+        });
+    </script>
+    <!-- select-dropdowns -->
+    <script>
+        $(document).ready(function () { $("#pmoc").select2({ selectOnClose: true, multiple: false, placeholder: "Select" }); });
+    </script>
+    <!-- validation -->
+    <script>
+        $(document).ready(function () {
+            setInterval(function () {
+                if ($("#memberInformation_Contacts_preferredMethodOfContact").val().toLowerCase() == "e") {
+                    $("#memberInformation_Contacts_email").attr('required', true),
+                        $("#warning_required_email").removeClass('hidden'),
+                        $("#memberInformation_Address_line2-error").addClass('hidden'),
+                        $("#memberInformation_Address_city-error").addClass('hidden'),
+                        $("#memberInformation_Address_zip-error").addClass('hidden'),
+                        $("#memberInformation_Contacts_cell-error").addClass('hidden'),
+                        $("#mobileNo").removeClass('field-validation-error'),
+                        $("#address2").removeClass('field-validation-error'),
+                        $("#address4").removeClass('field-validation-error'),
+                        $("#address6").removeClass('field-validation-error');
+                }
+                else {
+                    $("#memberInformation_Contacts_email").attr('required', false),
+                        $("#warning_required_email").addClass('hidden'),
+                        $("#address").addClass('field-validation-error');
+
+                }
+            }, 0);
+
+            setInterval(function () {
+                if ($("#memberInformation_Contacts_preferredMethodOfContact").val().toLowerCase() == "m") {
+                    $("#memberInformation_Contacts_cell").attr('required', true),
+                        $("#warning_required_mobile").removeClass('hidden'),
+                        $("#memberInformation_Address_line2-error").addClass('hidden'),
+                        $("#memberInformation_Address_city-error").addClass('hidden'),
+                        $("#memberInformation_Address_province-error").addClass('hidden'),
+                        $("#memberInformation_Address_zip-error").addClass('hidden'),
+                        $("#memberInformation_Contacts_email-error").addClass('hidden'),
+                        $("#emailAdd").removeClass('field-validation-error'),
+                        $("#address2").removeClass('field-validation-error'),
+                        $("#address4").removeClass('field-validation-error'),
+                        $("#address6").removeClass('field-validation-error');
+                }
+                else {
+                    $("#memberInformation_Contacts_cell").attr('required', false),
+                        $("#warning_required_mobile").addClass('hidden');
+
+                }
+            }, 0);
+
+            setInterval(function () {
+                if ($("#memberInformation_Contacts_preferredMethodOfContact").val().toLowerCase() == "p") {
+                    $("#memberInformation_Address_line2").attr('required', true),
+                        $("#warning_required_add2").removeClass('hidden'),
+                        $("#memberInformation_Address_city").attr('required', true),
+                        $("#warning_required_city").removeClass('hidden'),
+                        $("#memberInformation_Address_zip").attr('required', true),
+                        $("#warning_required_zip").removeClass('hidden'),
+                        $("#memberInformation_Contacts_cell-error").addClass('hidden'),
+                        $("#mobileNo").removeClass('field-validation-error'),
+                        $("#memberInformation_Contacts_email-error").addClass('hidden'),
+                        $("#emailAdd").removeClass('field-validation-error');
+                }
+                else {
+                    $("#memberInformation_Address_line2").attr('required', false),
+                        $("#warning_required_add2").addClass('hidden'),
+                        $("#memberInformation_Address_city").attr('required', false),
+                        $("#warning_required_city").addClass('hidden'),
+                        $("#memberInformation_Address_zip").attr('required', false),
+                        $("#warning_required_zip").addClass('hidden');
+
+                }
+            }, 0);
+
+            setInterval(function () {
+                if ($("#memberInformation_Contacts_preferredMethodOfContact").val().toLowerCase() == "n") {
+                    $("#memberInformation_Address_line2-error").addClass('hidden'),
+                        $("#memberInformation_Address_city-error").addClass('hidden'),
+                        $("#memberInformation_Address_zip-error").addClass('hidden'),
+                        $("#memberInformation_Contacts_cell-error").addClass('hidden'),
+                        $("#mobileNo").removeClass('field-validation-error'),
+                        $("#address2").removeClass('field-validation-error'),
+                        $("#address4").removeClass('field-validation-error'),
+                        $("#address6").removeClass('field-validation-error'),
+                        $("#memberInformation_Contacts_email-error").addClass('hidden'),
+                        $("#emailAdd").removeClass('field-validation-error');
+                }
+            }, 0);
+        });
+
+    </script>
+    <!-- phone-number-validation - hcare-1198 -->
+    <script type="text/javascript">
+        //hcare-1274
+        function MobileNumber(input) {
+            $('#mobile-number').html('');
+            $("#error-invalid").addClass("hidden");
+            $("#hidden-mobile").val('');
+
+            var mobile = $('#memberInformation_Contacts_cell').val();
+
+            if (/^[0-9\ - ]*$/.test(mobile) == false) {
+                $('#mobile-number').html('<span><i class="fas fa-exclamation-circle"></i> </span>Invalid contact number!');
+                $("#error-invalid").removeClass("hidden");
+                $("#hidden-mobile").val(mobile);
+            }
+            if (mobile.indexOf(' ') >= 0) {
+                $('#mobile-number').html('<span><i class="fas fa-exclamation-circle"></i> </span>No spaces allowed!');
+                $("#hidden-mobile").val(mobile);
+            }
+            if ($('#memberInformation_Contacts_cell').val().length > 12 || $('#memberInformation_Contacts_cell').val().length < 10) {
+                $('#mobile-number').html('<span><i class="fas fa-exclamation-circle"></i> </span>Invalid contact number!');
+                $("#error-invalid").removeClass("hidden");
+                $("#hidden-mobile").val(mobile);
+            }
+            if ($('#memberInformation_Contacts_cell').val().length == 11) {
+                $('#mobile-number').html('<span><i class="fas fa-exclamation-circle"></i> </span>Invalid contact number!');
+                $("#error-invalid").removeClass("hidden");
+                $("#hidden-mobile").val(mobile);
+            }
+            if ($('#memberInformation_Contacts_cell').val().length == 0) {
+                $('#mobile-number').html('');
+                $("#error-invalid").addClass("hidden");
+            }
+        }
+        //hcare-1274
+        function MobileNumber2(input) {
+            $('#mobile-number-2').html('');
+            $("#error-invalid").addClass("hidden");
+            $("#hidden-mobile2").val('');
+
+            var mobile2 = $('#memberInformation_Contacts_ISeriesCell').val();
+
+            if (/^[0-9\ - ]*$/.test(mobile2) == false) {
+                $('#mobile-number-2').html('<span><i class="fas fa-exclamation-circle"></i> </span>Invalid contact number!');
+                $("#error-invalid").removeClass("hidden");
+                $("#hidden-mobile2").val(mobile2);
+            }
+            if (mobile2.indexOf(' ') >= 0) {
+                $('#mobile-number').html('<span><i class="fas fa-exclamation-circle"></i> </span>No spaces allowed!');
+                $("#hidden-mobile").val(mobile);
+            }
+
+            if ($('#memberInformation_Contacts_ISeriesCell').val().length > 12 || $('#memberInformation_Contacts_ISeriesCell').val().length < 10) {
+                $('#mobile-number-2').html('<span><i class="fas fa-exclamation-circle"></i> </span>Invalid contact number!');
+                $("#error-invalid").removeClass("hidden");
+                $("#hidden-mobile2").val(mobile2);
+            }
+            if ($('#memberInformation_Contacts_ISeriesCell').val().length == 11) {
+                $('#mobile-number-2').html('<span><i class="fas fa-exclamation-circle"></i> </span>Invalid contact number!');
+                $("#error-invalid").removeClass("hidden");
+                $("#hidden-mobile2").val(mobile2);
+            }
+
+            if ($('#memberInformation_Contacts_ISeriesCell').val().length == 0) {
+                $('#mobile-number-2').html('');
+                $("#error-invalid").addClass("hidden");
+            }
+        }
+        function HomeNumber(input) {
+            $('#home-number').html('');
+            $("#error-invalid").addClass("hidden");
+            $("#hidden-home").val('');
+
+            var home = $('#memberInformation_Contacts_landLine').val();
+            var phoneno = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
+
+            if (input.value.match(phoneno) && input.value.substring(0, 1) == 0) {
+                return true;
+            }
+            else {
+                $('#home-number').html('<span><i class="fas fa-exclamation-circle"></i> </span>Invalid contact number!');
+                $("#memberInformation_Contacts_landLine").focus();
+                $("#error-invalid").removeClass("hidden");
+                $("#hidden-home").val(home);
+            }
+
+            if ($('#memberInformation_Contacts_landLine').val().length > 10) {
+                $('#home-number').html('<span><i class="fas fa-exclamation-circle"></i> </span>Invalid contact number!');
+                $("#memberInformation_Contacts_landLine").focus();
+                $("#error-invalid").removeClass("hidden");
+                $("#hidden-home").val(home);
+            }
+
+            if ($('#memberInformation_Contacts_landLine').val().length == 0) {
+                $('#home-number').html('');
+                $("#error-invalid").addClass("hidden");
+            }
+        }
+        function HomeNumber2(input) {
+            $('#home-number-2').html('');
+            $("#error-invalid").addClass("hidden");
+            $("#hidden-home2").val('');
+
+            var home2 = $('#memberInformation_Contacts_ISeriesLandLine').val();
+            var phoneno = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
+
+            if (input.value.match(phoneno) && input.value.substring(0, 1) == 0) {
+                return true;
+            }
+            else {
+                $('#home-number-2').html('<span><i class="fas fa-exclamation-circle"></i> </span>Invalid contact number!');
+                $("#memberInformation_Contacts_ISeriesLandLine").focus();
+                $("#error-invalid").removeClass("hidden");
+                $("#hidden-home2").val(home2);
+            }
+
+            if ($('#memberInformation_Contacts_ISeriesLandLine').val().length > 10) {
+                $('#home-number-2').html('<span><i class="fas fa-exclamation-circle"></i> </span>Invalid contact number!');
+                $("#memberInformation_Contacts_ISeriesLandLine").focus();
+                $("#error-invalid").removeClass("hidden");
+                $("#hidden-home2").val(home2);
+            }
+
+            if ($('#memberInformation_Contacts_ISeriesLandLine').val().length == 0) {
+                $('#home-number-2').html('');
+                $("#error-invalid").addClass("hidden");
+            }
+        }
+        function WorkNumber(input) {
+            $('#work-number').html('');
+            $("#error-invalid").addClass("hidden");
+            $("#hidden-work").val('');
+
+            var work = $('#memberInformation_Contacts_workNo').val();
+            var phoneno = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
+
+            if (input.value.match(phoneno) && input.value.substring(0, 1) == 0) {
+                return true;
+            }
+            else {
+                $('#work-number').html('<span><i class="fas fa-exclamation-circle"></i> </span>Invalid contact number!');
+                $("#memberInformation_Contacts_workNo").focus();
+                $("#error-invalid").removeClass("hidden");
+                $("#hidden-work").val(work);
+            }
+
+            if ($('#memberInformation_Contacts_workNo').val().length > 10) {
+                $('#work-number').html('<span><i class="fas fa-exclamation-circle"></i> </span>Invalid contact number!');
+                $("#memberInformation_Contacts_workNo").focus();
+                $("#error-invalid").removeClass("hidden");
+                $("#hidden-work").val(work);
+            }
+
+            if ($('#memberInformation_Contacts_workNo').val().length == 0) {
+                $('#work-number').html('');
+                $("#error-invalid").addClass("hidden");
+            }
+        }
+        function WorkNumber2(input) {
+            $('#work-number-2').html('');
+            $("#error-invalid").addClass("hidden");
+            $("#hidden-work2").val('');
+
+            var work2 = $('#memberInformation_Contacts_ISeriesWorkNo').val();
+            var phoneno = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
+
+            if (input.value.match(phoneno) && input.value.substring(0, 1) == 0) {
+                return true;
+            }
+            else {
+                $('#work-number-2').html('<span><i class="fas fa-exclamation-circle"></i> </span>Invalid contact number!');
+                $("#memberInformation_Contacts_ISeriesWorkNo").focus();
+                $("#error-invalid").removeClass("hidden");
+                $("#hidden-work2").val(work2);
+            }
+
+            if ($('#memberInformation_Contacts_ISeriesWorkNo').val().length > 10) {
+                $('#work-number-2').html('<span><i class="fas fa-exclamation-circle"></i> </span>Invalid contact number!');
+                $("#memberInformation_Contacts_ISeriesWorkNo").focus();
+                $("#error-invalid").removeClass("hidden");
+                $("#hidden-work2").val(work2);
+            }
+
+            if ($('#memberInformation_Contacts_ISeriesWorkNo').val().length == 0) {
+                $('#work-number-2').html('');
+                $("#error-invalid").addClass("hidden");
+            }
+        }
+        function FaxNumber(input) {
+            $('#fax-number').html('');
+            $("#error-invalid").addClass("hidden");
+            $("#hidden-fax").val('');
+
+            var fax = $('#memberInformation_Contacts_fax').val();
+            var phoneno = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
+
+            if (input.value.match(phoneno) && input.value.substring(0, 1) == 0) {
+                return true;
+            }
+            else {
+                $('#fax-number').html('<span><i class="fas fa-exclamation-circle"></i> </span>Invalid contact number!');
+                $("#memberInformation_Contacts_fax").focus();
+                $("#error-invalid").removeClass("hidden");
+                $("#hidden-fax").val(fax);
+            }
+
+            if ($('#memberInformation_Contacts_fax').val().length > 10) {
+                $('#fax-number').html('<span><i class="fas fa-exclamation-circle"></i> </span>Invalid contact number!');
+                $("#memberInformation_Contacts_fax").focus();
+                $("#error-invalid").removeClass("hidden");
+                $("#hidden-fax").val(fax);
+            }
+
+            if ($('#memberInformation_Contacts_fax').val().length == 0) {
+                $('#fax-number').html('');
+                $("#error-invalid").addClass("hidden");
+            }
+        }
+
+        $("#submit").click(function () {
+            if ($("#hidden-mobile").val().length > 0) {
+                $("#memberInformation_Contacts_cell").focus();
+                document.body.scrollTop = 0;
+                document.documentElement.scrollTop = 0;
+                return false;
+            }
+            if ($("#hidden-mobile2").val().length > 0) {
+                $("#memberInformation_Contacts_ISeriesCell").focus();
+                document.body.scrollTop = 0;
+                document.documentElement.scrollTop = 0;
+                return false;
+            }
+            if ($("#hidden-home").val().length > 0) {
+                $("#memberInformation_Contacts_landLine").focus();
+                return false;
+            }
+            if ($("#hidden-home2").val().length > 0) {
+                $("#memberInformation_Contacts_ISeriesLandLine").focus();
+                return false;
+            }
+            if ($("#hidden-work").val().length > 0) {
+                $("#memberInformation_Contacts_workNo").focus();
+                return false;
+            }
+            if ($("#hidden-work2").val().length > 0) {
+                $("#memberInformation_Contacts_ISeriesWorkNo").focus();
+                return false;
+            }
+
+            if ($("#hidden-fax").val().length > 0) {
+                $("#memberInformation_Contacts_fax").focus();
+                return false;
+            }
+        });
+    </script>
+
+}

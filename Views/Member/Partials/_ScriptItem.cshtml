@@ -1,0 +1,71 @@
+﻿@model HaloCareCore.Models.ScriptCreationViewModel
+
+<style>
+    .scriptAdd_table {
+        max-width: 1300px !important;
+        width: 1230px!important;
+        margin: auto;
+        margin-bottom: 2% !important;
+        font-size: 10px;
+        margin-left: 0% !important;
+    }
+
+</style>
+
+
+<table id="tblitems" class="table administration_Table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.items[0].nappiCode)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.items[0].productName)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.items[0].quantity)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.items[0].directions)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.items[0].itemStatus)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.items[0].fromDate)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.items[0].toDate)
+        </th>
+    </tr>
+    @if (Model.items != null)
+    {
+
+        foreach (var item in Model.items)
+        {
+<tr>
+    <td class="nappicode">
+        <span>@Html.DisplayFor(modelItem => item.nappiCode)</span>
+    </td>
+    <td class="productname">
+        <span>@Html.DisplayFor(modelItem => item.productName)</span>
+    </td>
+    <td class="quantity">
+        <span>@Html.DisplayFor(modelItem => item.quantity)</span>
+    </td>
+    <td class="directions">
+        <span>@Html.DisplayFor(modelItem => item.directions)</span>
+    </td>
+    <td class="itemStatus">
+        <span>@Html.DisplayFor(modelItem => item.itemStatus)</span>
+    </td>
+    <td class="fromDate">
+        <span>@Html.DisplayFor(modelItem => item.fromDate)</span>
+    </td>
+    <td class="toDate">
+        <span>@Html.DisplayFor(modelItem => item.toDate)</span>
+    </td>
+</tr>
+        }
+    }
+
+</table>

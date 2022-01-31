@@ -1,0 +1,250 @@
+﻿@model HaloCareCore.Models.Management.HypoRiskRules
+
+@{
+    ViewBag.Title = "Details";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<comment>
+    <!--
+        14 May 2019 -- HCare-733 (Account Settings - Risk rating (Related to HCare-417))
+        Applied CSS to the new Risk rating views.
+        I have added a search bar as well as a sort function that will allow the user to sort the columns.
+
+        The Create view has an Age Less and Age more or equal to field. Only one of these must be populated at a single time. I have added jQuery to remove the second field should the first field have a value greater than 0.
+        The edit page must only show the populated Age and not the 0 age field.
+
+        08 October 2020 -- HCare-1185
+    -->
+</comment>
+
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+</style>
+
+<div class="fullScreen_container zero-padding">
+
+    <!--pageHeader-->
+    <nav id="global-nav" class="nav">
+        <div class="pull-left title">
+            <h1 class="site-title_patientProfile">
+                <span><i class="fas fa-exclamation-triangle"></i>&emsp; Diabetes risk rating</span>
+            </h1>
+        </div>
+        <div class="pull-right title">
+            <h1 class="site-title_userID pull-right">
+                <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+            </h1>
+            <h1 class="site-title_userID pull-right">
+                @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                {
+                    <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                }
+            </h1>
+            <h1 class="site-waffleIcon pull-right">
+                <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+            </h1>
+        </div>
+    </nav>
+
+    <!--breadCrumbs-->
+    <ul class="breadcrumbs_fullScreens">
+        <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+        <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+        <li><a href="@Url.Action("Index", "RiskRating", new {})">Risk rating</a></li>
+        <li><a href="#">Detail</a></li>
+    </ul>
+
+    <!--navCollection-->
+    <div class="navCollection_fullScreens">
+        @Html.Partial("_navCollection")
+    </div>
+
+    <div style="margin-bottom: 1%"></div>
+
+    <div class="row">
+        <h4 class="tableHeading">Hypo risk rule detail</h4>
+        <hr class="fancyruler">
+        <br />
+        <br />
+        <div style="margin-left: 5%">
+            <dl class="dl-horizontal editForm">
+                <dt>
+                    @Html.DisplayNameFor(model => model.effectiveDate)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.effectiveDate)
+                </dd>
+
+                <br />
+                <hr class="fancyruler" />
+
+                <dt>
+                    @Html.DisplayName("Age less than")
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.ltAge)
+                </dd>
+
+                <dt>
+                    @Html.DisplayName("Age more or equal to")
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.gtAge)
+                </dd>
+
+                <br />
+                <hr class="fancyruler" />
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.Insulin)
+                </dt>
+
+                <dd class="activeCheck">
+                    @if (Model.Insulin)
+                    {
+                        <img src="~/Content/Images/Icons/Administration/AssignmentTrue.png" style="width: 20%; margin-left: -1%!important" />
+                    }
+                    else
+                    {
+                        <img src="~/Content/Images/Icons/Administration/AssignmentFalse.png" style="width: 20%; margin-left: -1%!important" />
+                    }
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.Sulphonylureas)
+                </dt>
+
+                <dd class="activeCheck">
+                    @if (Model.Sulphonylureas)
+                    {
+                        <img src="~/Content/Images/Icons/Administration/AssignmentTrue.png" style="width: 20%; margin-left: -1%!important" />
+                    }
+                    else
+                    {
+                        <img src="~/Content/Images/Icons/Administration/AssignmentFalse.png" style="width: 20%; margin-left: -1%!important" />
+                    }
+                </dd>
+
+                <dt>
+                    @Html.DisplayName("Glucose below")
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.Glucose)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.Renal)
+                </dt>
+
+                <dd class="activeCheck">
+                    @if (Model.Renal)
+                    {
+                        <img src="~/Content/Images/Icons/Administration/AssignmentTrue.png" style="width: 20%; margin-left: -1%!important" />
+                    }
+                    else
+                    {
+                        <img src="~/Content/Images/Icons/Administration/AssignmentFalse.png" style="width: 20%; margin-left: -1%!important" />
+                    }
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.hypo)
+                </dt>
+
+                <dd class="activeCheck">
+                    @if (Model.hypo)
+                    {
+                        <img src="~/Content/Images/Icons/Administration/AssignmentTrue.png" style="width: 20%; margin-left: -1%!important" />
+                    }
+                    else
+                    {
+                        <img src="~/Content/Images/Icons/Administration/AssignmentFalse.png" style="width: 20%; margin-left: -1%!important" />
+                    }
+                </dd>
+
+                <br />
+                <hr class="fancyruler" />
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.createdBy)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.createdBy)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.createdDate)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.createdDate)
+                </dd>
+
+                <br />
+                <hr class="fancyruler" />
+
+                @if (Model.modifiedBy != null)
+                {
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.modifiedBy)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.modifiedBy)
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.modifiedDate)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.modifiedDate)
+                    </dd>
+
+                    <br />
+                    <hr class="fancyruler" />
+
+                }
+                <dt>
+                    @Html.DisplayNameFor(model => model.active)
+                </dt>
+
+                <dd class="activeCheck">
+                    @if (Model.active)
+                    {
+                        <img src="~/Content/Images/Icons/Administration/AssignmentTrue.png" style="width: 20%; margin-left: -1%!important" />
+                    }
+                    else
+                    {
+                        <img src="~/Content/Images/Icons/Administration/AssignmentFalse.png" style="width: 20%; margin-left: -1%!important" />
+                    }
+                </dd>
+
+            </dl>
+
+            <div class="fixedBack" style="margin-left: 40%">
+                <input value="Back" class="btn buttonRound_formBack go_back" onclick="backKey()" style="width: 15%!important" />
+                <a href="@Url.Action("Edit", "RiskRating", new { id = Model.id })" value="Edit" class="btn buttonRound_formEdit" style="width: 15%!important">Edit</a>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+    <script>
+        function backKey() {
+            localStorage.setItem("back_rrrules", Date.now());
+        }
+    </script>
+}

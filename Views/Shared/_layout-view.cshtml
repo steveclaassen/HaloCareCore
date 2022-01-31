@@ -46,7 +46,7 @@
                         <div class="logo-halocare"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
                     </h1>
                     <h1 class="site-title_userID pull-right">
-                        @if (@HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                        @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
                         {
                             <span class="user-avatar" style="color: white!important; font-size: 12px">@HttpContextAccessor.HttpContext.Session.GetString("Init")</span>
                         }

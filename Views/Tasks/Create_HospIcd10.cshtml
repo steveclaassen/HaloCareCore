@@ -1,0 +1,238 @@
+﻿@model HaloCareCore.Models.Validation.HospitalizationICD10types
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Create_HospIcd10";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .field-validation-error:before {
+        font-family: FontAwesome;
+        content: "\f06a\00a0";
+        animation: pulse 2s ease infinite;
+    }
+
+    .error-alert {
+        width: 100%;
+        margin: 0 auto;
+        background-color: rgba(217, 83, 79, 0.1);
+        padding: 10px;
+        border-left-color: #d9534f !important;
+        border: 1px solid transparent;
+        border-left-width: 5px;
+        border-radius: 3px;
+        margin: 0 auto;
+        font-family: 'Open Sans', sans-serif;
+        font-size: 12px;
+        margin: 0 0 5px 0;
+        margin-top: -10px;
+        margin-bottom: 20px;
+    }
+
+        .error-alert span {
+            color: #d9534f;
+            text-align: center;
+        }
+</style>
+<javascript>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+    <script src="https://www.jqueryscript.net/demo/jQuery-Plugin-For-Sortable-Bootstrap-Tables-Bootstrap-Sortable/Scripts/bootstrap-sortable.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/js/standalone/selectize.js"></script>
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.default.css">
+</javascript>
+<javascript>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+</javascript>
+<div class="fullScreen_container zero-padding">
+
+    <!--pageHeader-->
+    <nav id="global-nav" class="nav">
+        <div class="pull-left title">
+            <h1 class="site-title_patientProfile">
+                <span><i class="fas fa-clipboard-check"></i></span>&emsp; Hospital ICD10 Assignment types
+            </h1>
+        </div>
+        <div class="pull-right title">
+            <h1 class="site-title_userID pull-right">
+                <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+            </h1>
+            <h1 class="site-title_userID pull-right">
+                @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                {
+                    <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                }
+            </h1>
+            <h1 class="site-waffleIcon pull-right">
+                <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+            </h1>
+        </div>
+    </nav>
+    <!--breadCrumbs-->
+    <ul class="breadcrumbs_fullScreens">
+        <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+        <li><a href="@Url.Action("Index", "Administration", new {})">Settings</a></li>
+        <li><a href="@Url.Action("Index_AssignmentType", "Tasks", new {})">Assignment types</a></li>
+        <li><a href="#">Create</a></li>
+    </ul>
+    <!--navCollection-->
+    <div class="navCollection_fullScreens">
+        @Html.Partial("_navCollection")
+    </div>
+    <div style="margin-bottom: 1%"></div>
+
+    <div class="row">
+        <h4 class="tableHeading">Create new</h4>
+        <hr class="fancyruler">
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+            <div class="hidden-fields">
+                <input type="hidden" name="error-program" id="error-program" value="@ViewBag.Program" />
+                <input type="hidden" name="error-icd10" id="error-icd10" value="@ViewBag.ICD10" />
+                <input type="hidden" name="error-assignment" id="error-assignment" value="@ViewBag.Assignment" />
+                <div class="col-md-12"><div id="error-duplicate" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; This combination, <b>Program:</b> @ViewBag.Program, <b>ICD-10:</b> @ViewBag.ICD10 & <b>Assignment:</b> @ViewBag.Assignment already exists!</span></div></div></div>
+            </div>
+            <br />
+            <br />
+
+
+            <div class="form-horizontal editForm">
+                <div class="form-group">
+                    @Html.LabelFor(model => model.programCode, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.DropDownListFor(model => model.programCode, null, "Select", new { htmlAttributes = new { @class = "selectize-5" } })
+                        @Html.ValidationMessageFor(model => model.programCode, "", new { @class = "text-danger", @style = "font-size: 90%; margin-left: 1%" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.icdcode, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.DropDownListFor(model => model.icdcode, null, "Select", new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                        @Html.ValidationMessageFor(model => model.icdcode, "", new { @class = "text-danger", @style = "font-size: 90%; margin-left: 1%" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.assignmentItemType, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.DropDownListFor(model => model.assignmentItemType, null, "Select", new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                        @Html.ValidationMessageFor(model => model.assignmentItemType, "", new { @class = "text-danger", @style = "font-size: 90%; margin-left: 1%" })
+                    </div>
+                </div>
+
+                <div class="fixed-btn">
+                    <input id="submit" type="submit" value="Submit" class="btn create-button" onclick="storageKey();" style="width: 15%" /><br />
+                    <input id="ha-back" type="text" value="Back" class="btn reset-button go_back" />
+                </div>
+
+            </div>
+
+        }
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/js/standalone/selectize.js"></script>
+    <script>
+        initSelectize();
+        function initSelectize() {
+            $('#programCode').selectize({
+                persist: true,
+                preload: true,
+                maxItems: 1,
+                delimiter: ',',
+                valueField: 'id',
+                labelField: 'name',
+                searchField: ['name'],
+                hideSelected: true,
+                plugins: ['remove_button'],
+                render: {
+                    option: function (item, escape) {
+                        return '<span class="name">' + escape(item.name) + '</span>';
+                    }
+                },
+            }),
+                $('#icdcode').selectize({
+                    persist: true,
+                    preload: true,
+                    maxItems: 1,
+                    delimiter: ',',
+                    valueField: 'id',
+                    labelField: 'name',
+                    searchField: ['name'],
+                    hideSelected: true,
+                    plugins: ['remove_button'],
+                    render: {
+                        option: function (item, escape) {
+                            return '<span class="name">' + escape(item.name) + '</span>';
+                        }
+                    },
+                }),
+                $('#assignmentItemType').selectize({
+                    persist: true,
+                    preload: true,
+                    maxItems: 1,
+                    delimiter: ',',
+                    valueField: 'id',
+                    labelField: 'name',
+                    searchField: ['name'],
+                    hideSelected: true,
+                    plugins: ['remove_button'],
+                    render: {
+                        option: function (item, escape) {
+                            return '<span class="name">' + escape(item.name) + '</span>';
+                        }
+                    },
+                })
+        }
+    </script>
+
+
+    <script>
+        $(document).ready(function () {
+            var d = $('#error-program').val();
+            if (d.length > 0) {
+                $("#error-duplicate").removeClass("hidden");
+            }
+        });
+        $(document).ready(function () {
+            var d = $('#error-icd10').val();
+            if (d.length > 0) {
+                $("#error-duplicate").removeClass("hidden");
+            }
+        });
+        $(document).ready(function () {
+            var d = $('#error-assignment').val();
+            if (d.length > 0) {
+                $("#error-duplicate").removeClass("hidden");
+            }
+        });
+    </script>
+
+
+    <script>
+        function backKey() {
+            localStorage.setItem("ha-back", Date.now());
+        }
+        function storageKey() {
+            localStorage.setItem("ha-create", Date.now());
+        }
+    </script>
+
+
+}
+

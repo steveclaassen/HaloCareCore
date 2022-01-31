@@ -1,0 +1,106 @@
+﻿
+@{
+    ViewBag.Title = "operationsDiseaseManagement";
+    Layout = "~/Views/Shared/_LayoutReport_Menu.cshtml";
+}
+
+
+
+<style>
+    .indexnav {
+        margin-top: 100px;
+    }
+
+    body {
+        background-image: url('../../Content/Images/Backgrounds/homePage/homePage_one.png');
+        background-size: 100%;
+    }
+</style>
+
+
+<div class="topBar_reports">
+    <h2>Report Management</h2>
+    <img src="~/Content/Images/memberProfile/topBar Icons/Reports.png" style="width: 3%; margin-top: 0.4%" />
+</div>
+
+<br />
+<br />
+<br />
+<br />
+
+
+<!--Navigation Icons-->
+
+<h2 style="color: #003366; font-size: 250%; text-align: center; margin-bottom: 0%"><i>Disease<span style="color: #0081b3"> Management</span></i></h2>
+<h2 style="color: #003366; font-size: 100%; text-align: center; margin-bottom: 0%"><i>Select the Disease you require reporting for: </i></h2>
+
+
+<div class="container indexnav">
+    <div class="row">
+        <div class="col-md-12">
+
+            <!--HIV-->
+            <div class="col-md-6">
+                <a href="@Url.Action("hivClientDashboard", "ReportManagement", null)">
+                    <img src="~/Content/Images/Navigation/5. Reports/hivReport.png" style="width: 10%; margin-top: 2.2%; margin-bottom: 4%" />
+                    <div class="col-xs-12 homenavbtns">
+                        <h8>HIV/Aids <span>Dashboard</span></h8>
+                    </div>
+                </a>
+            </div>
+
+            <!--Diabetes-->
+            <div class="col-md-6">
+                <a href="@Url.Action("diabetesClientDashboard", "ReportManagement", null)">
+                    <img src="~/Content/Images/Navigation/5. Reports/diabetesX.png" style="width: 15%; margin-top: 2.2%; margin-bottom: 2.5%" />
+                    <div class="col-xs-12 homenavbtns">
+                        <h8>Diabetes <span>Dashboard</span></h8>
+                    </div>
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<footer>
+    <img src="~/Content/Images/memberProfile/Page Icons/Reportsx.png" style="position:fixed; bottom:3.2%; right: 0; left: 0; margin-left: 95.8%; width: 1.5%">
+</footer>
+
+<br />
+<br />
+<br />
+
+<div class="backButton_image" style="margin-top: 20%; margin-bottom: -10%">
+    <span id="surround" class="go_back">
+        <span id="initial"><img src="~/Content/Images/memberProfile/Page Icons/back_gray.png" style="width: 2%!important" /></span>
+        <span id="onhover"><img src="~/Content/Images/memberProfile/Page Icons/back_blue.png" style="width: 2%!important" /></span>
+    </span>
+</div>
+
+
+
+
+
+<!-- Search -->
+@section scripts{
+    <script>
+
+        $(function () {
+            $('.go_back').click(function (e) {
+                e.preventDefault();
+                history.go(-1);
+            });
+        });
+
+        var $rows = $('#table tr');
+        $('#search').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $rows.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+    </script>
+}

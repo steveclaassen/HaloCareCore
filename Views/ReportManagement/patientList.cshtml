@@ -1,0 +1,720 @@
+﻿
+@{
+    ViewBag.Title = "patientList";
+    Layout = "~/Views/Shared/_LayoutReport.cshtml";
+}
+
+
+<div class="topBar_reports">
+    <h2>Scheme Financial/Patient List</h2>
+    <img src="~/Content/Images/memberProfile/topBar Icons/patientList.png" />
+</div>
+<style>
+    .indexnav {
+        margin-top: 100px;
+    }
+
+    .reportInfo tbody > tr > td {
+        text-align: left;
+        border-top: none !important;
+    }
+</style>
+
+
+<!--sideNavigation Bar-->
+<div id=" container tabs">
+    <div class="nav-side-menu_Reports memberNav pull-left">
+        <div class="blank">&nbsp;</div>
+        <div class="blank">&nbsp;</div>
+        <div class="blank">&nbsp;</div>
+        <div class="blank">&nbsp;</div>
+
+        <div class="menu-list">
+
+            <ul id="menu-content" class="menu-content collapse out active">
+
+                <!--dashBoard-->
+                <li>
+                    <a href="@Url.Action("reportDashboard", "ReportManagement", null)"><i><img src="~/Content/Images/memberProfile/topBar Icons/Reports.png" style="width: 12%; margin-left: 6%; margin-right: 0%" /></i>&nbsp; Reports &nbsp;</a>
+                </li>
+
+                <!--reportOverview-->
+
+                <li data-toggle="collapse" data-target="#overview" class="collapsed">
+                    <a href="#"><i><img src="~/Content/Images/Icons/Reports/oncologyNav.png" style="width: 15%; margin-left: 4%; margin-right: 2%" /></i>Client &nbsp;&nbsp;<span class="caret" style="margin-left:10%; margin-top: 10%"></span></a>
+                </li>
+                <ul class="sub-menu collapse" id="overview">
+
+                    <li><a href="@Url.Action("clientReport", "ReportManagement", null)">Dashboard</a></li>
+                    <li data-toggle="collapse" data-target="#overviewGeneral" class="collapsed">
+                        <a href="#">Risk Reports<span class="caret"></span></a>
+                    </li>
+                    <ul class="sub-sub-menu collapse" id="overviewGeneral">
+                        <li><a href="@Url.Action("riskReport", "ReportManagement", null)">Home</a></li>
+                        <li><a href="@Url.Action("enrolmentReport", "ReportManagement", null)">Enrolments</a></li>
+                        <li><a href="@Url.Action("activeOnProgram", "ReportManagement", null)">Active on Program</a></li>
+                        <li><a href="@Url.Action("activeOnMedication", "ReportManagement", null)">Active on Medication</a></li>
+                        <li><a href="@Url.Action("#", "ReportManagement", null)">Not Tx Ready</a></li>
+                        <li><a href="@Url.Action("#", "ReportManagement", null)">Gender & Age</a></li>
+                        <li data-toggle="collapse" data-target="#RiskPP" class="collapsed">
+                            <a href="#">PEP<span class="caret"></span></a>
+                        </li>
+                        <ul class="sub-sub-sub-menu collapse" id="RiskPP">
+                            <li><a href="#">&nbsp;Condom Burst</a></li>
+                            <li><a href="#">&nbsp;Needle Stick</a></li>
+                            <li><a href="#">&nbsp;Enrolment</a></li>
+                            <li><a href="#">&nbsp;Not Disclosed</a></li>
+                            <li><a href="#">&nbsp;Unprotected Sex</a></li>
+                            <li><a href="#">&nbsp;Assault</a></li>
+                            <li><a href="#">&nbsp;Other</a></li>
+                        </ul>
+                        <li><a href="@Url.Action("#", "ReportManagement", null)">PrEP</a></li>
+                        <li><a href="@Url.Action("#", "ReportManagement", null)">CD4 & CD4%</a></li>
+                        <li><a href="@Url.Action("#", "ReportManagement", null)">CD4 Migration</a></li>
+                        <li><a href="@Url.Action("#", "ReportManagement", null)">Viral Load</a></li>
+                        <li><a href="@Url.Action("#", "ReportManagement", null)">VL Migration</a></li>
+                        <li><a href="@Url.Action("#", "ReportManagement", null)">Deactivated</a></li>
+                        <li><a href="@Url.Action("#", "ReportManagement", null)">Script</a></li>
+                    </ul>
+                    <li data-toggle="collapse" data-target="#overviewPatient" class="collapsed">
+                        <a href="#">Patient<span class="caret"></span></a>
+                    </li>
+                    <ul class="sub-sub-menu collapse" id="overviewPatient">
+                        <li><a href="@Url.Action("patientList", "ReportManagement", null)">Overview</a></li>
+
+                    </ul>
+                    <li data-toggle="collapse" data-target="#overviewProduction" class="collapsed">
+                        <a href="#">Operations<span class="caret"></span></a>
+                    </li>
+                    <ul class="sub-sub-menu collapse" id="overviewProduction">
+                        <li><a href="#">&nbsp;New</a></li>
+                        <li><a href="@Url.Action("operationsReport", "ReportManagement", null)">Overview</a></li>
+                        <li data-toggle="collapse" data-target="#operationSearch" class="collapsed">
+                            <a href="#">Search<span class="caret"></span></a>
+                        </li>
+                        <ul class="sub-sub-sub-menu collapse" id="operationSearch">
+                            <li><a href="#">&nbsp;Telephone</a></li>
+                            <li><a href="#">&nbsp;Emails</a></li>
+                            <li><a href="#">&nbsp;Notes</a></li>
+                            <li><a href="#">&nbsp;Enquiries</a></li>
+                            <li><a href="#">&nbsp;Text Messages</a></li>
+                            <li><a href="#">&nbsp;Assignments</a></li>
+                            <li><a href="#">&nbsp;Clinical</a></li>
+                            <li><a href="#">&nbsp;Educational</a></li>
+                        </ul>
+
+                    </ul>
+                </ul>
+
+                <!--boardReports-->
+
+                <li data-toggle="collapse" data-target="#hivaids" class="collapsed">
+                    <a href="#"><i><img src="~/Content/Images/memberProfile/topBar Icons/boardReports.png" style="width: 15%; margin-left: 4%; margin-right: 2%" /></i>Board &nbsp;&nbsp;<span class="caret" style="margin-left:10%; margin-top: 10%"></span></a>
+                </li>
+                <ul class="sub-menu collapse" id="hivaids">
+                    <li><a href="#">&nbsp;New</a></li>
+                    <li><a href="#">&nbsp;Overview</a></li>
+                </ul>
+
+
+                <!--productionReports-->
+
+                <li data-toggle="collapse" data-target="#diabetes" class="collapsed">
+                    <a href="#"><i><img src="~/Content/Images/memberProfile/topBar Icons/productionReports.png" style="width: 9%; margin-left: 6.5%; margin-right: 2%" /></i>&nbsp; Production &nbsp;<span class="caret" style="margin-left:12%; margin-top: 10%"></span></a>
+                </li>
+                <ul class="sub-menu collapse" id="diabetes">
+
+                    <li><a href="#">Dashboard</a></li>
+                    <li data-toggle="collapse" data-target="#diabetesClient" class="collapsed">
+                        <a href="#">Case Manager<span class="caret"></span></a>
+                    </li>
+                    <ul class="sub-sub-menu collapse" id="diabetesClient">
+                        <li><a href="#">&nbsp;Assignments</a></li>
+                        <li><a href="#">&nbsp;Enquiries</a></li>
+                        <li><a href="#">&nbsp;Notes</a></li>
+                        <li><a href="#">&nbsp;Prescriptions</a></li>
+                        <li><a href="#">&nbsp;Enrolments</a></li>
+                        <li><a href="#">&nbsp;Pathology</a></li>
+                        <li><a href="#">&nbsp;Attachments</a></li>
+                        <li><a href="#">&nbsp;SMS</a></li>
+
+
+                    </ul>
+                </ul>
+
+
+                <!--Analytics-->
+
+                <li data-toggle="collapse" data-target="#Analytics" class="collapsed">
+                    <a href="#"><i><img src="~/Content/Images/memberProfile/topBar Icons/Analytics.png" style="width: 13%; margin-left: 6%; margin-right: 0%" /></i>&nbsp; Analytics &nbsp;<span class="caret" style="margin-left:12%; margin-top: 10%"></span></a>
+                </li>
+                <ul class="sub-menu collapse" id="Analytics">
+                    <li><a href="@Url.Action("analyticalReport", "ReportManagement", null)">Overview</a></li>
+                </ul>
+
+                <!--oncologyDrop-->
+                <!--
+                                <li data-toggle="collapse" data-target="#oncology" class="collapsed">
+                                    <a href="#"><i><img src="~/Content/Images/Icons/Reports/oncologyNav.png" style="width: 15%" /></i>&nbsp; Oncology &nbsp;&nbsp;<span class="caret" style="margin-left:10%"></span></a>
+                                </li>
+                                <ul class="sub-menu collapse" id="oncology">
+
+                                    <li><a href="#">Dashboard</a></li>
+                                    <li data-toggle="collapse" data-target="#oncologyPatient" class="collapsed">
+                                        <a href="#">Patient<span class="caret"></span></a>
+                                    </li>
+                                    <ul class="sub-sub-menu collapse" id="oncologyPatient">
+                                        <li><a href="#">&nbsp;All</a></li>
+                                        <li><a href="#">&nbsp;Prescriptions</a></li>
+                                        <li><a href="#">&nbsp;Pathology</a></li>
+                                        <li><a href="#">&nbsp;Assignments</a></li>
+                                        <li><a href="#">&nbsp;Enquiries</a></li>
+                                        <li><a href="#">&nbsp;Documents</a></li>
+                                    </ul>
+                                    <li data-toggle="collapse" data-target="#oncologyProduction" class="collapsed">
+                                        <a href="#">Production<span class="caret"></span></a>
+                                    </li>
+                                    <ul class="sub-sub-menu collapse" id="oncologyProduction">
+                                        <li><a href="#">&nbsp;All</a></li>
+                                        <li><a href="#">&nbsp;Assignments</a></li>
+                                        <li><a href="#">&nbsp;Enquiries</a></li>
+                                        <li><a href="#">&nbsp;SMS</a></li>
+                                        <li><a href="#">&nbsp;Documents</a></li>
+                                        <li><a href="#">&nbsp;Patient Profiles</a></li>
+                                        <li><a href="#">&nbsp;Authorisations</a></li>
+                                    </ul>
+                                    <li data-toggle="collapse" data-target="#oncologyScheme" class="collapsed">
+                                        <a href="#">Scheme<span class="caret"></span></a>
+                                    </li>
+                                    <ul class="sub-sub-menu collapse" id="oncologyScheme">
+                                        <li><a href="#">&nbsp;All</a></li>
+                                        <li><a href="#">&nbsp;Active Patients</a></li>
+                                        <li><a href="#">&nbsp;Active by Gender</a></li>
+                                        <li><a href="#">&nbsp;New Registrations</a></li>
+                                        <li><a href="#">&nbsp;Status</a></li>
+                                        <li><a href="#">&nbsp;Pathology</a></li>
+                                    </ul>
+                                </ul>
+                -->
+                <!--Search-->
+                <!--
+                <li>
+                    <a href="@Url.Action("Index", "Projects", null)"><i><img src="~/Content/Images/Icons/Reports/searchNav.png" style="width: 15%" /></i>&nbsp; Search &nbsp;</a>
+                </li>
+                    -->
+
+
+
+            </ul>
+        </div>
+
+    </div>
+</div>
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+
+<!--searchFilter-->
+
+<br />
+<div class="form-horizontal">
+    <div class="form-group">
+        <div class="col-md-12">
+            <div class="col-md-6">
+                @Html.Label(null,"Medical Scheme", htmlAttributes: new { @class = "control-label col-md-3 pushR" })
+                <div class="col-md-5">
+                    @Html.Editor("Type", new { htmlAttributes = new { @class = "infoBox_Reports" } })
+                </div>
+            </div>
+            <div class="col-md-6">
+                @Html.Label(null,"Month", htmlAttributes: new { @class = "control-label col-md-3 pullR" })
+                <div class="col-md-5">
+                    @Html.Editor("Type", new { htmlAttributes = new { @class = "infoBox_Reports" } })
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-md-12">
+            <div class="col-md-6">
+                @Html.Label(null,"Type", htmlAttributes: new { @class = "control-label col-md-3 pushR" })
+                <div class="col-md-5">
+                    @Html.Editor("Type", new { htmlAttributes = new { @class = "infoBox_Reports" } })
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                @Html.Label(null,"Year", htmlAttributes: new { @class = "control-label col-md-3 pullR" })
+                <div class="col-md-5">
+                    @Html.Editor("Type", new { htmlAttributes = new { @class = "infoBox_Reports" } })
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-md-12">
+
+            <br />
+            <br />
+            <br />
+
+            <div class="form-group">
+                <div class="actionButton" style="margin-left: 48%; margin-bottom: -1.5%">
+                    <input type="submit" value="Search" class="btn buttonRound_approve" style="width: 10%!important" />
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<br />
+<br />
+<hr class="reportRuler">
+<br />
+
+<h2 style="color: #003366; font-size: 200%; text-align: center; margin-bottom: 2%"><i>Scheme<span style="color: #0081b3"> Financial/Patient Report</span></i></h2>
+<br />
+<!--reportLogo-->
+
+<div class="reportLogo">
+    <img src="~/Content/Images/haloCareLoginx.jpg" />
+</div>
+
+<!--reportInformation-->
+<br />
+<h2 style="color: #003366; font-size: 140%; margin-left: 1%"><i>HaloCare <span style="color: #0081b3"> Report</span></i></h2>
+<hr class="reportRuler">
+
+<table class="table reportInfo" id="table">
+    <tr>
+        <td>
+            <b>Medical Scheme:</b>
+        </td>
+        <td>
+            Spectramed Diabetes
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <b>Report Type:</b>
+        </td>
+        <td>
+            Scheme Financial / Patient Report
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <b>Period:</b>
+        </td>
+        <td>
+            01 January 2017 - 31 November 2017
+        </td>
+    </tr>
+
+
+</table>
+
+<br />
+<br />
+
+
+
+
+<!--programSummary-->
+<div class="row col-md-12">
+    <div class="col-md-6">
+        <h2 style="color: #003366; font-size: 140%; margin-left: 4%; text-align: center"><i>Program <span style="color: #0081b3"> Summary</span></i></h2>
+
+        <table class="table" id="table">
+            <tr>
+                <th>
+                    Program
+                </th>
+                <th>
+                    No. of Patients
+                </th>
+            </tr>
+            <tr>
+                <td>
+                    Active HAART
+                </td>
+                <td>
+                    31
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    MTC
+                </td>
+                <td>
+                    1
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Not Treatment Ready
+                </td>
+                <td>
+                    1
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Deactivated
+                </td>
+                <td>
+                    1
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    PEP
+                </td>
+                <td>
+                    1
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    PrEP
+                </td>
+                <td>
+                    1
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Grand Total
+                </td>
+                <td>
+                    41
+                </td>
+            </tr>
+
+        </table>
+    </div>
+    <br />
+
+    <div class="col-md-6">
+        <div class="chart-container" style="width: 60%; margin: auto; display: block">
+            <div class="pie-chart-container">
+                <canvas id="pie-chartcanvas-1"></canvas>
+            </div>
+
+        </div>
+    </div>
+    <br />
+    <br />
+
+</div>
+<br />
+<br />
+<!--patientList-->
+<h2 style="color: #003366; font-size: 150%; margin-left: 4%; text-align: center"><i>Patient <span style="color: #0081b3"> List</span></i></h2>
+
+<table class="table" id="table">
+    <tr>
+        <th>
+            Member Number
+        </th>
+        <th>
+            Dependant Code
+        </th>
+        <th>
+            Medical Scheme
+        </th>
+        <th>
+            Scheme Option
+        </th>
+        <th>
+            Program
+        </th>
+        <th>
+            Pay Point
+        </th>
+        <th>
+            Patient Status
+        </th>
+
+    </tr>
+
+
+    <tr>
+        <td>
+            123456
+        </td>
+        <td>
+            00
+        </td>
+        <td>
+            Steve's MedCross
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            Active HAART
+        </td>
+        <td>
+            xx
+        </td>
+        <td class="reportCheck">
+            <img src="~/Content/Images/Navigation/5. Reports/reportCheck.png" />
+        </td>
+
+
+    </tr>
+    <tr>
+        <td>
+            123456
+        </td>
+        <td>
+            00
+        </td>
+        <td>
+            Steve's MedCross
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            MTC
+        </td>
+        <td>
+            xx
+        </td>
+        <td class="reportCheck">
+            <img src="~/Content/Images/Navigation/5. Reports/reportCheck.png" />
+        </td>
+
+
+    </tr>
+    <tr>
+        <td>
+            123456
+        </td>
+        <td>
+            00
+        </td>
+        <td>
+            Steve's MedCross
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            Not Treatment Ready
+        </td>
+        <td>
+            xx
+        </td>
+        <td class="reportCheck">
+            <img src="~/Content/Images/Navigation/5. Reports/reportCheck.png" />
+        </td>
+
+
+    </tr>
+    <tr>
+        <td>
+            123456
+        </td>
+        <td>
+            00
+        </td>
+        <td>
+            Steve's MedCross
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            Deactivated
+        </td>
+        <td>
+            xx
+        </td>
+        <td class="reportCheck">
+            <img src="~/Content/Images/Navigation/5. Reports/reportCheck_x.png" />
+        </td>
+
+    </tr>
+    <tr>
+        <td>
+            123456
+        </td>
+        <td>
+            00
+        </td>
+        <td>
+            Steve's MedCross
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            PrEP
+        </td>
+        <td>
+            xx
+        </td>
+        <td class="reportCheck">
+            <img src="~/Content/Images/Navigation/5. Reports/reportCheck.png" />
+        </td>
+
+
+    </tr>
+
+
+</table>
+
+
+<br />
+<hr class="reportRuler">
+
+<br />
+<!-- Trigger the modal with a button -->
+
+<div class="exportIcon">
+    <a href="your#exportIcon" role="button" data-toggle="modal"> <i class="fa fa-cog fa-spin fa-1x fa-fw" style="color: #003366; font-size: 20px"></i></a>
+</div>
+
+
+
+<!-- Modal -->
+<div id="exportIcon" class="modal fade" role="dialog">
+    <div class="modal-dialog_reports">
+
+        <!-- Modal content-->
+        <div class="modal_Reports">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title" style="text-align: center">Report Options</h4>
+            </div>
+            <div class="modal-body">
+                <br />
+                <div class="form-horizontal">
+                    <div class="col-md-6">
+                        <div class="save">
+                            <a>
+                                <img src="~/Content/Images/Navigation/5. Reports/save.png" style="width: 40%; margin: auto; display: block; margin-bottom: -8%" /><br />
+                                <p style="text-align: center">Save</p>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="export">
+                            <a>
+                                <img src="~/Content/Images/Navigation/5. Reports/excel.png" style="width: 40%; margin: auto; display: block; margin-bottom: -8%" /> <br />
+                                <p style="text-align: center">Export</p>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <br />
+                <br />
+                <br />
+                <br />
+                <br />
+                <br />
+
+            </div>
+            <a>
+                <div class="modalFooter_reports">
+                    <p data-dismiss="modal">Cancel</p>
+                </div>
+            </a>
+        </div>
+
+    </div>
+</div>
+<br />
+
+
+<div class="backButton_Navigation" style="margin-left: 5%">
+    @Html.ActionLink("Back", "Index", "Home")
+</div>
+
+
+
+
+
+
+<script src="~/Scripts/Chart.min.js"></script>
+<script src="~/Scripts/jquery-3.1.1.min.js"></script>
+<script src="js/pie.js"></script>
+
+
+
+
+<script>
+    $(function () {
+
+        //get the pie chart canvas
+        var ctx1 = $("#pie-chartcanvas-1");
+
+        //pie chart data
+        var data1 = {
+            labels: ["Active HAART", "MTC", "Not Tx Ready", "PEP", "PrEP", "Intervention", "F/Intervention"],
+            datasets: [
+                {
+                    label: "Program Summary",
+                    data: [31, 1, 2, 3, 4, 5, 6],
+                    backgroundColor: [
+                        "#002e4d",
+                        "#006bb3",
+                        "#008ae6",
+                        "#1aa3ff",
+                        "#80ccff",
+                        "#99d6ff",
+                        "#e6f5ff"
+
+                    ],
+                    borderColor: [
+                        "#002e4d",
+                        "#006bb3",
+                        "#008ae6",
+                        "#1aa3ff",
+                        "#80ccff",
+                        "#99d6ff",
+                        "#e6f5ff"
+                    ],
+                    borderWidth: [1, 1, 1, 1, 1]
+                }
+            ]
+        };
+
+        //options
+        var options = {
+            responsive: true,
+
+
+
+
+            legend: {
+                display: true,
+                position: "bottom",
+                labels: {
+                    fontColor: "#333",
+                    fontSize: 10
+                }
+            }
+        };
+
+        //create Chart class object
+        var chart1 = new Chart(ctx1, {
+            type: "pie",
+            data: data1,
+            options: options
+        });
+
+    });
+
+</script>

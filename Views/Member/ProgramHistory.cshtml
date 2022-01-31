@@ -1,0 +1,156 @@
+﻿@model HaloCareCore.Models.ViewModels.ProgramHistoryViewModel
+@using Microsoft.AspNetCore.Identity
+@using HaloCareCore.Extensions
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "ProgramHistory";
+    Layout = "~/Views/Shared/_LayoutMember.cshtml";
+}
+
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+</style>
+
+<!--pageHeader-->
+<nav id="global-nav" class="nav">
+    <div class="pull-left title">
+        <h1 class="site-title_patientProfile">
+            <span><img src="~/Content/Images/memberProfile/topBar Icons/medicalStatus.png" /></span>&emsp; Program
+        </h1>
+    </div>
+    <div class="pull-right title">
+        <h1 class="site-title_userID pull-right">
+            <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+        </h1>
+        <h1 class="site-title_userID pull-right">
+            @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+            {
+                <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+            }
+        </h1>
+        <h1 class="site-waffleIcon pull-right">
+            <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+        </h1>
+    </div>
+</nav>
+
+<div class="dashboardContainer zero-padding">
+    <div class="patientDashboard_View">
+
+        <!--breadCrumbs-->
+        <ul class="breadcrumbs_patientDashboard">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Administration", new {})">Settings</a></li>
+            <li><a href="@Url.Action("patientDashboard", "Member", new {DependentID = Context.Request.Query["DependentID"] })">Patient</a></li>
+            <li><a href="#">History</a></li>
+        </ul>
+
+        <!--Left navSlider -->
+        @Html.Partial("_navSlider", new { DependentID = Context.Request.Query["DependentID"] })
+
+        <!--navCollection-->
+        <div class="navCollection_patientDashboard">
+            @Html.Partial("_navCollection")
+        </div>
+
+        <!--profileInformation-->
+        <div class="profileBar">
+            @Html.Action("_profileBar_edit", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })
+        </div>
+    </div>
+
+    <div class="profilebar-spacer"></div>
+
+    <div class="patientDashboard_container">
+        <br />
+        <div class="col-md-12 row">
+            <div class="col-md-6"><div class="page-heading">Program history</div></div>
+
+            <!--------------------------------------------------------------------------- jq-search -------------------------------------------------------------------------->
+            <div class="col-md-6 row">
+                <div class="input-wrapper-new-search">
+                    <input type="text" class="form-control-new-search" id="search" onkeyup="myFunction()" placeholder="Search..." />
+                </div>
+            </div>
+        </div>
+        <div style="margin-bottom:1%"></div>
+        <table class="table administration_Table" id="program-history">
+            <tr>
+                <th>@Html.DisplayNameFor(model => model.programHistories[0].CreatedDate)</th>
+                <th onclick="progHistTable(1)">@Html.DisplayNameFor(model => model.programHistories[0].ProgramCode) <i class="fa fa-fw fa-sort"></i></th>
+                <th>@Html.DisplayNameFor(model => model.programHistories[0].ICD10Code)</th>
+                <th>@Html.DisplayNameFor(model => model.programHistories[0].EffectiveDate)</th>
+                <th onclick="progHistTable(3)">@Html.DisplayNameFor(model => model.programHistories[0].CreatedBy) <i class="fa fa-fw fa-sort"></i></th>
+                <th style="text-align: center!important">@Html.DisplayNameFor(model => model.programHistories[0].Active)</th>
+                <!--Hcare-1071-->
+                @if (User.HasRole("5. Super user"))
+                {
+                    <th style="text-align: center!important">@Html.DisplayName("Action")</th>
+                }
+            </tr>
+            @foreach (var item in Model.programHistories)
+            {
+                <tr>
+                    <td>@Html.DisplayFor(modelItem => item.CreatedDate)</td>
+                    <td>@Html.DisplayFor(modelItem => item.ProgramCode)</td>
+                    <td>@Html.DisplayFor(modelItem => item.ICD10Code)</td>
+                    <td>@Html.DisplayFor(modelItem => item.EffectiveDate)</td>
+                    <td>@Html.DisplayFor(modelItem => item.CreatedBy)</td>
+                    <td style="text-align: center!important"><span class="@(item.Active == true ? "check-yes far fa-check-circle" : "check-no far fa-times-circle")" title="@item.Active"></span></td>
+                    <!--Hcare-1071-->
+                    @if (User.HasRole("5. Super user"))
+                    {
+                        <td style="text-align: center!important">
+                            <input type="submit" class="link-button" value="Edit" onclick="location.href='@Url.Action("EditProgram", "Member", new { itemId = item.Id, pro = Context.Request.Query["pro"] })'" />
+                        </td>
+                    }
+                </tr>
+            }
+        </table>
+
+        <div class="col-md-6"><div class="page-heading">Diagnosis history</div></div>
+        <table class="table administration_Table" id="progHistTable">
+            <tr>
+                <th>@Html.DisplayNameFor(model => model.diagnosisHistories[0].effectiveDate)</th>
+                <th>@Html.DisplayNameFor(model => model.diagnosisHistories[0].icdAdded)</th>
+                <th>@Html.DisplayNameFor(model => model.diagnosisHistories[0].icdUpdated)</th>
+                <th>@Html.DisplayNameFor(model => model.diagnosisHistories[0].icdRemoved)</th>
+            </tr>
+
+            @foreach (var item in Model.diagnosisHistories)
+            {
+                <tr>
+                    <td>@Html.DisplayFor(modelItem => item.effectiveDate)</td>
+                    <td>@Html.DisplayFor(modelItem => item.icdAdded)</td>
+                    <td>@Html.DisplayFor(modelItem => item.icdUpdated)</td>
+                    <td>@Html.DisplayFor(modelItem => item.icdRemoved)</td>
+                </tr>
+            }
+
+        </table>
+
+        <div class="form-group">
+            <div class="actionButton" style="margin-left: 45%; margin-bottom: 1%">
+                <input value="Back" class="btn buttonRound_formBack go_back" style="width: 15%!important" />
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $("#search").on("keyup", function () {
+                var value = $(this).val().toLowerCase();
+                $("#assignment-filter tr").filter(function () {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+            });
+        });
+    </script>
+}

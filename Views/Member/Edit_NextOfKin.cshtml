@@ -1,0 +1,405 @@
+﻿@model HaloCareCore.Models.Patient.NextOFKin
+@using HaloCareCore.Extensions
+
+@{
+    ViewBag.Title = "Next of kin";
+    Layout = "~/Views/Shared/_layout-view-x.cshtml";
+}
+
+<comment>
+    <!-- 12 Jul 2021 - hcare-1361 -->
+</comment>
+<style>
+    .field-validation-error:before {
+        font-family: FontAwesome;
+        content: "\f06a\00a0";
+        animation: pulse 2s ease infinite;
+    }
+
+    .error-alert {
+        background-color: rgba(217, 48, 78, 0.2);
+        padding: 10px 12px 10px 12px;
+        border: 1px solid transparent;
+        border-radius: 0px;
+        font: 100 12px 'Open Sans', sans-serif;
+        color: rgb(217, 48, 78);
+        margin: 0 0 0 0;
+        margin-top: 0px;
+        margin-bottom: 2px;
+        margin-left: -15px;
+        width: 102%;
+        vertical-align: middle;
+        opacity: 0;
+    }
+
+        .error-alert span a {
+            color: rgb(217, 48, 78);
+            margin-top: -5px;
+        }
+
+    .warning-alert {
+        background-color: #fff3cd;
+        padding: 10px 12px 10px 12px;
+        border: 1px solid transparent;
+        border-radius: 0px;
+        font: 100 12px 'Open Sans', sans-serif;
+        color: #FEAF20;
+        margin: 0 0 0 0;
+        margin-top: 0px;
+        margin-bottom: 2px;
+        margin-left: -15px;
+        width: 102%;
+        vertical-align: middle;
+        opacity: 0;
+    }
+
+        .warning-alert span a {
+            color: #FEAF20;
+            margin-top: -5px;
+        }
+</style>
+
+<div class="collapse in">
+    <div class="card card-body">
+        <div class="collapse-body">
+            <div class="search-information-data-panel">
+                <!---------------------------------------------------------------------------------- html-navigation ---------------------------------------------------------------------------------->
+                <navigation>
+                    <!-------------------------------------------------------------------------- bread-crumbs ------------------------------------------------------------------------->
+                    <ul class="bread-crumbs-full-screen" style="        color: #808080 !important;">
+                        <li style="font-size: 10px; font-weight: 600">You are here:</li>
+                        <li><a href="@Url.Action("Index", "Home" , new { })">Home</a></li>
+                        <li><a href="@Url.Action("patientCommunication", "Member", new { DependentID = Model.DependantID, pro = Model.ProgramID })">Patient</a></li>
+                        <li><a href="#">@ViewBag.Title</a></li>
+                    </ul>
+
+                    <!------------------------------------------------------------------------- nav-collection ------------------------------------------------------------------------>
+                    <div>
+                        @Html.Partial("_navCollection")
+                    </div>
+                </navigation>
+                <!-------------------------------------------------------------------------------------- html-body ------------------------------------------------------------------------------------>
+                <div class="container-tab">
+                    <div class="row">
+                        <br />
+                        @using (Html.BeginForm("Edit_NextOfKin", "Member", FormMethod.Post, new { enctype = "multipart/form-data", id = "nok-edit" }))
+                        {
+                            <div class="hidden-fields">
+                                @Html.AntiForgeryToken()
+                                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                                @Html.HiddenFor(model => model.Id)
+                                @Html.HiddenFor(model => model.DependantID)
+                                @Html.HiddenFor(model => model.ProgramID)
+                                @Html.HiddenFor(model => model.CreatedDate)
+                                @Html.HiddenFor(model => model.CreatedBy)
+                                <input type="hidden" name="hidden-telephone" id="hidden-telephone" />
+                                <input type="hidden" name="id" id="id" value="@Model.Id" />
+                                <input type="hidden" name="first-name" id="first-name" value="@Model.FirstName" />
+                                <input type="hidden" name="last-name" id="last-name" value="@Model.LastName" />
+                                <input type="hidden" name="tel-number" id="tel-number" value="@Model.Telephone" />
+                                <input type="hidden" name="email" id="email" value="@Model.Email" />
+                                <input type="hidden" name="relation" id="relation" value="@Model.Relation" />
+                                <input type="hidden" name="duplicate" id="duplicate" value="@ViewBag.validation" />
+
+                            </div>
+                            <div class="col-md-12 row">
+                                <div class="col-md-6">
+                                    <h4 class="table-heading">Edit</h4>
+                                </div>
+                                <div class="col-md-6 "></div>
+                                <hr class="setup-ruler">
+                                <div id="contact-validation" class="error-alert hidden"></div>
+                                <div id="duplicate-warning" class="warning-alert hidden"></div>
+                                <div id="duplicate-validation" class="error-alert hidden"></div>
+                            </div>
+                            <div class="col-md-12 row">
+                                <br />
+                                <div class="form-horizontal editForm">
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.FirstName, htmlAttributes: new { @class = "control-label col-md-2" })
+                                        <div class="col-md-8">
+                                            <input type="text" value="@Model.FirstName" id="FirstName" name="FirstName" class="form-control-new" style="width: 95%" autocomplete="off" onblur="validation()" required />
+                                            @Html.ValidationMessageFor(model => model.FirstName, "", new { @class = "text-danger", @style = "font-size: 80%;margin-left: 1%" })
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.LastName, htmlAttributes: new { @class = "control-label col-md-2" })
+                                        <div class="col-md-8">
+                                            <input type="text" value="@Model.LastName" id="LastName" name="LastName" class="form-control-new" style="width: 95%" autocomplete="off" onblur="validation()" required />
+                                            @Html.ValidationMessageFor(model => model.LastName, "", new { @class = "text-danger", @style = "font-size: 80%;margin-left: 1%" })
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.Telephone, htmlAttributes: new { @class = "control-label col-md-2" })
+                                        <div class="col-md-8">
+                                            <input type="text" value="@Model.Telephone" id="Telephone" name="Telephone" class="form-control-new" style="width: 95%" autocomplete="off" onblur="validation1(); validation2()" required />
+                                            @Html.ValidationMessageFor(model => model.Telephone, "", new { @class = "text-danger", @style = "font-size: 80%;margin-left: 1%" })
+                                            <span id="telephone-val-error" class="text-danger" style="margin-left: 1%"></span>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.Email, htmlAttributes: new { @class = "control-label col-md-2" })
+                                        <div class="col-md-8">
+                                            <input type="email" value="@Model.Email" id="Email" name="Email" class="form-control-new" style="width: 95%" autocomplete="off" onblur="validation1()" />
+                                            @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger", @style = "font-size: 80%;margin-left: 1%" })
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.Relation, htmlAttributes: new { @class = "control-label col-md-2" })
+                                        <div class="col-md-8">
+                                            <input type="text" value="@Model.Relation" id="Relation" name="Relation" class="form-control-new" style="width: 95%" autocomplete="off" onblur="validation1()" required />
+                                            @Html.ValidationMessageFor(model => model.Relation, "", new { @class = "text-danger", @style = "font-size: 80%;margin-left: 1%" })
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.Active, htmlAttributes: new { @class = "control-label col-md-2" })
+                                        <div class="col-md-10">
+                                            <div class="checkbox">
+                                                @Html.EditorFor(model => model.Active)
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="sf-footer">
+                                        <input type="button" id="nok-back" value="Back" class="btn modal-button-previous" onclick="location.href = '@Url.Action("patientCommunication", "Member", new { DependentID = Model.DependantID, pro = Model.ProgramID})'; backKey()" />
+                                        <input type="submit" id="nok-submit" value="Submit" class="btn modal-button-next" onclick="storageKey()" />
+                                    </div>
+
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script src="~/bundles/jqueryval"></script>
+    <script>
+        function backKey() {
+            localStorage.setItem("back_nok", Date.now());
+        }
+        function storageKey() {
+            localStorage.setItem("edit_nok", Date.now());
+        }
+    </script>
+    <script>
+        $('#nok-edit').keyup(function () {
+            $(this).find('#nok-submit').attr('disabled', false);
+        });
+        $('#nok-edit').submit(function () {
+            $(this).find('#nok-submit').attr('disabled', true);
+        });
+    </script>
+    <script>
+        $(function () {
+            $("#FirstName").keyup(function () {
+                $("#first-name").val($("#FirstName").val());
+            });
+        })
+        $(function () {
+            $("#LastName").keyup(function () {
+                $("#last-name").val($("#LastName").val());
+            });
+        })
+        $(function () {
+            $("#Telephone").keyup(function () {
+                $("#tel-number").val($("#Telephone").val());
+            });
+        })
+        $(function () {
+            $("#Email").keyup(function () {
+                $("#email").val($("#Email").val());
+            });
+        })
+        $(function () {
+            $("#Relation").keyup(function () {
+                $("#relation").val($("#Relation").val());
+            });
+        })
+    </script>
+    <script>
+        function validation() {
+            $('#duplicate-validation').addClass("hidden");
+            $('.modal-button-next').attr('disabled', false);
+            $('#duplicate').val('');
+
+            var Id = $("#id").val();
+            var firstname = $("#first-name").val();
+            var lastname = $("#last-name").val();
+            var telephone = $("#tel-number").val();
+            var relation = $("#relation").val();
+
+            $.ajax({
+                url: '/Member/NOKValidation01',
+                type: "POST",
+                dataType: "JSON",
+                data: { firstname: firstname, lastname: lastname},
+                success: function (result) {
+                    var id = result.Id;
+                    var fname = result.FirstName;
+                    var lname = result.LastName;
+                    var db_telephone = result.Telephone;
+                    var db_email = result.Email;
+                    var db_relation = result.Relation;
+                    if (id != Id && fname.toLowerCase() == firstname.toLowerCase() && lname.toLowerCase() == lastname.toLowerCase()) {
+                        $('#duplicate-validation').html('&emsp;<span style="font-size: 10px"><i class="fas fa-exclamation-triangle"></i></span> <b>Invalid: </b> First and last name already exists!').removeClass("hidden").animate({ opacity: 1 }, 500);
+                        $('.modal-button-next').attr('disabled', true);
+                        $('#duplicate').val('duplicate');
+                    }
+                },
+                error: function (result) {
+                }
+            });
+        }
+    </script>
+    <script>
+        function validation1() {
+            $('#duplicate-validation').addClass("hidden");
+            $('.modal-button-next').attr('disabled', false);
+            $('#duplicate').val('');
+
+            var Id = $("#id").val();
+            var firstname = $("#first-name").val();
+            var lastname = $("#last-name").val();
+            var telephone = $("#tel-number").val();
+            var email = $("#email").val();
+            var relation = $("#relation").val();
+
+            if (firstname.length > 0 && lastname.length > 0 && telephone.length > 0 && email.length > 0 && relation.length > 0) {
+                $.ajax({
+                    url: '/Member/NOKValidation04',
+                    type: "POST",
+                    dataType: "JSON",
+                    data: { firstname: firstname, lastname: lastname, telephone: telephone, email: email, relation: relation },
+                    success: function (result) {
+                        var id = result.Id;
+                        var fname = result.FirstName;
+                        var lname = result.LastName;
+                        var db_telephone = result.Telephone;
+                        var db_email = result.Email;
+                        var db_relation = result.Relation;
+                        if (id != Id && fname.toLowerCase() == firstname.toLowerCase() && lname.toLowerCase() == lastname.toLowerCase() && db_telephone == telephone && db_email.toLowerCase() == email.toLowerCase() && db_relation.toLowerCase() == relation.toLowerCase()) {
+                            $('#duplicate-validation').html('&emsp;<span style="font-size: 10px"><i class="fas fa-exclamation-triangle"></i></span> <b>Invalid: </b> Entry already exists!').removeClass("hidden").animate({ opacity: 1 }, 500);
+                            $('.modal-button-next').attr('disabled', true);
+                            $('#duplicate').val('duplicate');
+                        }
+                    },
+                    error: function (result) {
+                    }
+                });
+            }
+            if (firstname.length > 0 && lastname.length > 0 && telephone.length > 0 && email.length > 0 && relation.length == 0) {
+                $.ajax({
+                    url: '/Member/NOKValidation03',
+                    type: "POST",
+                    dataType: "JSON",
+                    data: { firstname: firstname, lastname: lastname, telephone: telephone, email: email },
+                    success: function (result) {
+                        var id = result.Id;
+                        var fname = result.FirstName;
+                        var lname = result.LastName;
+                        var db_telephone = result.Telephone;
+                        var db_email = result.Email;
+                        if (id != Id && fname.toLowerCase() == firstname.toLowerCase() && lname.toLowerCase() == lastname.toLowerCase() && db_telephone == telephone && db_email.toLowerCase() == email.toLowerCase()) {
+                            $('#duplicate-validation').html('&emsp;<span style="font-size: 10px"><i class="fas fa-exclamation-triangle"></i></span> <b>Invalid: </b> Entry with the same first name, last name, telephone number and email already exists!').removeClass("hidden").animate({ opacity: 1 }, 500);
+                            $('.modal-button-next').attr('disabled', true);
+                            $('#duplicate').val('duplicate');
+                        }
+                    },
+                    error: function (result) {
+                    }
+                });
+            }
+            if (firstname.length > 0 && lastname.length > 0 && telephone.length > 0 && email.length == 0 && relation.length == 0) {
+                $.ajax({
+                    url: '/Member/NOKValidation02',
+                    type: "POST",
+                    dataType: "JSON",
+                    data: { firstname: firstname, lastname: lastname, telephone: telephone },
+                    success: function (result) {
+                        var id = result.Id;
+                        var fname = result.FirstName;
+                        var lname = result.LastName;
+                        var db_telephone = result.Telephone;
+                        if (id != Id && fname.toLowerCase() == firstname.toLowerCase() && lname.toLowerCase() == lastname.toLowerCase() && db_telephone == telephone) {
+                            $('#duplicate-validation').html('&emsp;<span style="font-size: 10px"><i class="fas fa-exclamation-triangle"></i></span> <b>Invalid: </b> Entry with the same first name, last name and telephone number already exists!').removeClass("hidden").animate({ opacity: 1 }, 500);
+                            $('#duplicate-warning').html('').addClass("hidden").animate({ opacity: 0 }, 500);;
+                            $('.modal-button-next').attr('disabled', true);
+                            $('#duplicate').val('duplicate');
+                        }
+                    },
+                    error: function (result) {
+                    }
+                });
+            }
+        }
+    </script>
+    <script>
+        function validation2(input) {
+            var telephone = $("#Telephone").val();
+            if (telephone.length > 0) {
+                $('#Telephone-error').html('');
+                $("#contact-validation").addClass("hidden");
+                $('#duplicate-validation').html('');
+                $("#hidden-telephone").val('');
+                $('#telephone-val-error').html('');
+
+                var telephone = $('#Telephone').val();
+
+                if (/^[0-9\ - ]*$/.test(telephone) == false) {
+                    $('#telephone-val-error').html('<span style="font-size: 10px"><i class="fas fa-exclamation-circle"></i></span>&nbsp;Invalid contact number!');
+                    $('#contact-validation').html('&emsp;<span style="font-size: 10px"><i class="fas fa-exclamation-triangle"></i></span> <b>Invalid:</b> A contact number requires 10-12 digits and cannot contain any special characters!').removeClass("hidden").animate({ opacity: 1 }, 500);
+                    $("#hidden-telephone").val(telephone);
+                }
+                if (telephone.indexOf(' ') >= 0) {
+                    $('#telephone-val-error').html('<span style="font-size: 10px"><i class="fas fa-exclamation-circle"></i></span>&nbsp;No spaces allowed!');
+                    $("#hidden-telephone").val(telephone);
+                }
+                if ($('#Telephone').val().length > 12 || $('#Telephone').val().length < 10) {
+                    $('#telephone-val-error').html('<span style="font-size: 10px"><i class="fas fa-exclamation-circle"></i></span>&nbsp;Invalid contact number!');
+                    $('#contact-validation').html('&emsp;<span style="font-size: 10px"><i class="fas fa-exclamation-triangle"></i></span> <b>Invalid:</b> A contact number requires 10-12 digits and cannot contain any special characters!').removeClass("hidden").animate({ opacity: 1 }, 500);
+                    $("#hidden-telephone").val(telephone);
+                }
+                if ($('#Telephone').val().length == 11) {
+                    $('#telephone-val-error').html('<span style="font-size: 10px"><i class="fas fa-exclamation-circle"></i></span>&nbsp;Invalid contact number!');
+                    $('#contact-validation').html('&emsp;<span style="font-size: 10px"><i class="fas fa-exclamation-triangle"></i></span> <b>Invalid:</b> A contact number requires 10-12 digits and cannot contain any special characters!').removeClass("hidden").animate({ opacity: 1 }, 500);
+                    $("#hidden-telephone").val(telephone);
+                }
+                else {
+                    $('#contact-validation').html('').addClass("hidden");
+                }
+            }
+        }
+        $("#nok-submit").click(function () {
+            if ($("#hidden-telephone").val().length > 0) {
+                $("#Telephone").focus();
+                document.body.scrollTop = 0;
+                document.documentElement.scrollTop = 0;
+                $('#nok-submit').attr('disabled', true);
+
+                return false;
+            }
+        });
+    </script>
+    <script>
+        $(function () {
+            var duplicate = $("#duplicate").val();
+            if (duplicate == "level 4") {
+                $('#duplicate-validation').html('&emsp;<span style="font-size: 10px"><i class="fas fa-exclamation-triangle"></i></span> <b>Warning: </b> Entry already exists!').removeClass("hidden").animate({ opacity: 1 }, 500);
+            }
+            if (duplicate == "level 3") {
+                $('#duplicate-validation').html('&emsp;<span style="font-size: 10px"><i class="fas fa-exclamation-triangle"></i></span> <b>Warning: </b> First and last name, telephone and email already exists!').removeClass("hidden").animate({ opacity: 1 }, 500);
+            }
+            if (duplicate == "level 2") {
+                $('#duplicate-validation').html('&emsp;<span style="font-size: 10px"><i class="fas fa-exclamation-triangle"></i></span> <b>Warning: </b> First name, last name and telephone already exists!').removeClass("hidden").animate({ opacity: 1 }, 500);
+            }
+            if (duplicate == "level 1") {
+                $('#duplicate-validation').html('&emsp;<span style="font-size: 10px"><i class="fas fa-exclamation-triangle"></i></span> <b>Warning: </b> First and last name already exists!').removeClass("hidden").animate({ opacity: 1 }, 500);
+            }
+        })
+    </script>
+}

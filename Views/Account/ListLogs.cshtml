@@ -1,0 +1,172 @@
+﻿@model IEnumerable<HaloCareCore.Models.Admin.Log>
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+<!--HCare-134-->
+@{
+    ViewBag.Title = "ListLogs";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+</style>
+<div class="fullScreen_container zero-padding">
+
+    <!--pageHeader-->
+    <nav id="global-nav" class="nav">
+        <div class="pull-left title">
+            <h1 class="site-title_patientProfile">
+                <span><i class="fa fa-comments"></i>&emsp; Logs</span>
+            </h1>
+        </div>
+        <div class="pull-right title">
+            <h1 class="site-title_userID pull-right">
+                <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+            </h1>
+            <h1 class="site-title_userID pull-right">
+                @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                {
+                    <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                }
+            </h1>
+            <h1 class="site-waffleIcon pull-right">
+                <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+            </h1>
+        </div>
+    </nav>
+
+    <!--breadCrumbs-->
+    <ul class="breadcrumbs_fullScreens">
+        <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+        <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+        <li><a href="@Url.Action("Index", "Administration", new {})">Settings</a></li>
+        <li><a href="#">logs</a></li>
+    </ul>
+    <br /><br />
+    <!--jQ_Search-->
+    <div class="row tableSearch_patientOverview" style="margin-top: -2%; margin-bottom: 0.5%">
+        <div class="col-md-10 align-right">
+            @using (Html.BeginForm("ListLogs", "Account", FormMethod.Post, new { id = "Search", @class = "navbar-right" }))
+            {
+                @Html.AntiForgeryToken()
+
+                <ul class="nav navbar-nav input-group">
+                    <li class="focus">
+                        @Html.TextBox("SearchVar", null, new { @class = "form-control-patientSearch", @placeholder = "Search..." })
+                    </li>
+                    <div class="btn-group" role="group">
+                        <button type="submit" class="btn btn-search" style="height: 29px"><span class="glyphicon glyphicon-search" aria-hidden="true" title="Search"></span></button>
+                    </div>
+                </ul>
+
+            }
+
+        </div>
+    </div>
+
+    <table class="table riskRatingTable" id="tableUser">
+        <tr>
+            <th onclick="userTable(0)">@Html.DisplayNameFor(model => model.TableName)<i class="fa fa-fw fa-sort"></i></th>
+            <th onclick="userTable(1)">@Html.DisplayNameFor(model => model.ColumnName)</th>
+            <th onclick="userTable(2)">@Html.DisplayNameFor(model => model.OriginalValue)</th>
+            <th onclick="userTable(3)">@Html.DisplayNameFor(model => model.NewValue)</th>
+            <th onclick="userTable(4)">@Html.DisplayNameFor(model => model.Created_by)</th>
+            <th onclick="userTable(5)">@Html.DisplayNameFor(model => model.Created_date)</th>
+        </tr>
+
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.TableName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ColumnName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.OriginalValue)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.NewValue)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Created_by)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Created_date)
+                </td>
+            </tr>
+        }
+
+    </table>
+
+    @section scripts{
+        <script src="~/Scripts/layout-buttons-general.js"></script>
+
+        <script>
+
+            /*tableSearch*/
+            var $rows = $('#tableUser tr');
+            $('#search').keyup(function () {
+                var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+                $rows.show().filter(function () {
+                    var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                    return !~text.indexOf(val);
+                }).hide();
+            });
+
+            /*userTable Sorting*/
+            function userTable(n) {
+                var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+                table = document.getElementById("tableUser");
+                switching = true;
+                dir = "asc";
+
+                while (switching) {
+                    switching = false;
+                    rows = table.getElementsByTagName("TR");
+
+                    for (i = 1; i < (rows.length - 1); i++) {
+
+                        shouldSwitch = false;
+
+                        x = rows[i].getElementsByTagName("TD")[n];
+                        y = rows[i + 1].getElementsByTagName("TD")[n];
+
+                        if (dir == "asc") {
+                            if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                                //if so, mark as a switch and break the loop:
+                                shouldSwitch = true;
+                                break;
+                            }
+                        } else if (dir == "desc") {
+                            if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                                //if so, mark as a switch and break the loop:
+                                shouldSwitch = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (shouldSwitch) {
+                        /*If a switch has been marked, make the switch
+                        and mark that a switch has been done:*/
+                        rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                        switching = true;
+                        //Each time a switch is done, increase this count by 1:
+                        switchcount++;
+                    } else {
+                        /*If no switching has been done AND the direction is "asc",
+                        set the direction to "desc" and run the while loop again.*/
+                        if (switchcount == 0 && dir == "asc") {
+                            dir = "desc";
+                            switching = true;
+                        }
+                    }
+                }
+            }
+
+
+        </script>
+    }

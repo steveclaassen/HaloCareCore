@@ -1,0 +1,1936 @@
+﻿@model HaloCareCore.Models.ClinicalViewModel
+@using HaloCareCore.Extensions
+@using System.Globalization
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Patient clinical";
+    Layout = "~/Views/Shared/_LayoutMember.cshtml";
+}
+
+<comment>
+    <!--
+        14 February 2019 -- HCare-607 (Halocare Bestmed Diabetes enrollment questionnaire)
+        Added Diagnosis collapseable in order to Create, Edit and View diagnosis entries - BM
+
+        15 February 2109 -- HCare-607
+        * Added View function to ALL collapseables in the Patient Clinical/Patient History tab to allow the user to view the full details of the entry - BM
+        * Tested NEW Diabetes Questionnaire functions (Yes / No /Follow up / validations)
+
+        18 February 2109 -- HCare-607
+        * Tested Diabetes Questionnaire functions (Yes / No /Follow up / validations) on BOTH new and old Diabetes Questionnaire
+        * Updating frontend for comments fields to show X when 'None' is inserted as well as matching text alignment and changing NULL dates to "-" etc.
+
+        06 March 2019 -- HCare-607
+        Additions to the SR have been made, removing Disclaimer, spelling in the questionnaire and Patient History update. I have corrected and tested the patient history containers that poplulate
+        an attachment and follow up icon based on the questionnaire submit.
+
+        29 April 2019 -- HCare-711 (Patient Clinical (Patient pathology front end))
+        Arranged  and matched the columns for the patient pathology as per the SR HCare-711
+
+        02 May 2019 -- HCare-25 (Patient Clinical - Hospitalisation collapsable)
+        Frontend update made in order to not show follow up if Date is Null.
+
+        12 July 2019 -- HCare-753(Add amputation checkbox to front view)
+        Added Amputation check to the table on patient clinical/patient history/Amputation tab
+
+        26 September 2019 -- HCare-820(UI ~ Pathology table)
+        Corrected the display for eGFR as well as remove the zeros from the table in the patient clinical view.
+
+        25 November 2019 -- HCare-892(Inactivate medication entry from Patient history)
+        Added edit button to Medication entry which allows the user to update the Note, Comment and active status.
+
+        20 January 2020 -- HCare-851(LINKED TO HCARE-134: Module 3 - Pathology Display (Related to HCare-837 & HCare-834))
+        Pathology tab split based on program selection. This SR needed to include a different code for the tab layout as the previous code was preventing tabs within tabs as well as the redirect to the last tab. This has now been sorted.
+
+        03 February 2020 -- HCare-851(LINKED TO HCARE-134: Module 3 - Pathology Display (Related to HCare-837 & HCare-834))
+        Request to change the tables for the initial view of the pathology BACK to the vertical view in order to view the pathology field and effective date.
+
+        01 April 2020 -- HCare-896(General tab - Patient Clinical / patient history)
+        As per the SR - I have removed the program type from all the panels in the patient history section. This includes the general and program specific panels except Medication where it is required. 
+
+        01 April 2020 -- HCare-1009(Clinical rules - Patient Clinical > Summary)
+        Amended the Patient clinical Summary view to pull the clinical rules based on the table join. Needed to include the gtMessage and ltMessage as reference in the join as well as the programcode.
+        The user will test by trying to break the clinical rules which were created in the settings > clinical rules view and thereafter being able to view broken rules in the Patient Clinical > Summary view under the Clinical rules panel
+
+        01 April 2020 -- HCare-816(Pathology abnormal values display)
+        I am using the clinical rules table as well as the logic that has been setup for security and the clinical rules to compare the pathology data in each section, ie. General, Diabetes, HIV etc. to the rules table. If the value in the pathology result is greater or less than the
+        rule, the value will be highlighted in bold red in the pathology results tables.
+
+        02 April 2020 -- HCare-1007(Display dates in HaloCare (Hospitalisation)
+        Updated Model to add the column headings and the format the date in the hospitalisation view as per the SR logged.
+
+        25 April 2020 -- HCare-1025(Pathology history view error)
+        The error was being caused by the hivEliza field which is a string. The Pathology abnormal values display code was looking for a decimal value and because the word POSITIVE was placed into the hivEliza field, the view broke. I have removed the code for that field as well as abnGtt and normGtt which are also string fields.
+
+        08 May 2020 -- HCare-1022(Pathology history view error)
+        Updated the queries in repository to display the latest active value which is not NULL or empty or 0.00 and then to show all the active entries in the history.
+
+        14 May 2020 -- HCare-966(General Questionnaire: TB Screening question)
+        TB screening question has been added to the General Questionnaire. As per the discussion, this question needed to replace the older question of TB diagnosed leading into the date of screening and outcome with diagnosis date range.
+        The data is then pulled through to the Patient Clinical General tab as well as a column 'TB Screened' being exported to excel from advanced search.
+
+        27 May 2020 -- HCare-828(Patient Clinical Summary)
+        Remove spaces between headings on the summary page as per request.
+
+        01 June 2020 -- HCare-930 (Frail Care General Questionnaire)
+        Addition of Frail care questions added to the General questionnaire under the General/Other section. This information has also been added to the Patient Clinical / Patient History section under the "Other" panel.
+        The user will also have access to Add, Edit, View the additional information linked to the Frail care question via the Patient Clinical / Patient History section under the "Other" panel.
+
+        03 June 2020 -- HCare-1023(Clinical > Patient History > Clinical / Diabetes - HIV > Medicine)
+        As per the specification and SR - I have refactored the viewing requirements for the Medication panels in the Patient Clinical / Patient History section. In addition, the NEW History view has been added which follows the
+        requirement in the spec as well.
+
+        02 July 2020 -- HCare-1079(Pathology name changes)
+        Updated the headings in the pathology section as per requirement
+
+        16 July 2020 -- HCare-961(Check screen displays of these fields i.e. HDL/LDL etc.)
+        Changed patientClinical pathology section to read from the Model in order to control the display name from there.
+        Ran a search for each of the properties in the list to check the casing.
+
+        20 July 2020 -- HCare-897(Medication table / Script / Script History)
+        Removed item status from the tables as per the SR
+
+        14 August 2020 -- HCare-1136(PRJ-36 - Mental Health Disease: DOCTOR REFERRAL TAB)
+
+    -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    #plusSubmit {
+        position: relative;
+        z-index: 1;
+        left: -25px;
+        top: 1px;
+        color: #7B7B7B;
+        cursor: pointer;
+        width: 0;
+    }
+
+    .filterable {
+        margin-top: 15px;
+    }
+
+        .filterable .panel-heading .pull-right {
+            margin-top: -20px;
+        }
+
+        .filterable .filters input[disabled] {
+            background-color: transparent;
+            border: none;
+            cursor: auto;
+            box-shadow: none;
+            padding: 0;
+            height: auto;
+        }
+
+        .filterable .filters::-webkit-input-placeholder {
+            color: #ccc !important;
+        }
+
+        .filterable .filters::-moz-placeholder {
+            color: #ccc !important;
+        }
+
+        .filterable .filters:-ms-input-placeholder {
+            color: #ccc !important;
+        }
+
+    .reset:hover {
+        cursor: pointer;
+        background: -webkit-linear-gradient(#e80a89, #f15b2a);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        line-height: 25px;
+    }
+
+    .isDisabled {
+        color: currentColor;
+        cursor: no-drop !important;
+        opacity: 0.5;
+        text-decoration: none;
+    }
+
+    .max {
+        color: #b30000 !important;
+        font-weight: bold !important;
+    }
+
+    .min {
+        color: #e60000 !important;
+        font-weight: bold !important;
+    }
+</style>
+<javascript>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js"></script>
+    <script src="https://www.jqueryscript.net/demo/jQuery-Plugin-For-Sortable-Bootstrap-Tables-Bootstrap-Sortable/Scripts/bootstrap-sortable.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+</javascript>
+
+<!----------------------------------------------------------------------------- html-top-navigation-panel  ---------------------------------------------------------------------------->
+<nav id="global-nav" class="nav" style="z-index: 10000">
+    <div class="pull-left title">
+        <h1 class="site-title_patientProfile">
+            <span><i class="fas fa-file-medical-alt"></i>&emsp; Patient clinical</span>
+        </h1>
+    </div>
+    <div class="pull-right title">
+        <h1 class="site-title_userID pull-right">
+            <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+        </h1>
+        <h1 class="site-title_userID pull-right">
+            @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+            {
+                <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+            }
+        </h1>
+        <h1 class="site-waffleIcon pull-right">
+            <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+        </h1>
+    </div>
+</nav>
+
+<!-------------------------------------------------------------------------------------- html-body ------------------------------------------------------------------------------------>
+<div class="dashboardContainer zero-padding">
+    <div class="patientDashboard_View">
+        <!-- breadcrumbs -->
+        <ul class="breadcrumbs_patientDashboard">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+            <li><a href="@Url.Action("patientDashboard", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"]})">Patient</a></li>
+            <li><a href="#">@ViewBag.Title</a></li>
+        </ul>
+        <!-- navigation-collection -->
+        <div class="navCollection_patientDashboard">
+            @Html.Partial("_navCollection")
+        </div>
+        <!-- left-navigation-panel -->
+        @Html.Partial("_navSlider", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })
+        <!--profile-information-->
+        <div class="profileBar">
+            @Html.Action("_profileBar_edit", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })
+        </div>
+    </div>
+
+    <div class="profilebar-spacer"></div>
+
+    <div class="patientDashboard_container">
+        <h4 class="summaryHeading">Patient clinical</h4>
+        <hr class="patientProfile_Ruler" />
+        <div class="container-tab">
+            <div class="row">
+                <div class="hidden-fields">
+                    <input type="hidden" name="dependantID" id="dependantID" value="@TempData["dependantID"].ToString()" />
+                    <input type="hidden" name="program" id="program" value="@TempData["program"].ToString()" />
+                </div>
+                <div class="span12">
+                    <div class="container-tab">
+                        <!------------------------------------------------------------------------------------ tab-navigation ----------------------------------------------------------------------------------->
+                        <ul class="nav nav-pills nav-justified" role="tablist">
+                            <li role="presentation" class="tab-clinical"><a class="subtab-label" href="@Url.Action("PatientClinical_Summary", "Member", new { DependentID = Model.DependentID, pro = Context.Request.Query["pro"] })">Summary</a></li>
+                            <li role="presentation" class="tab-clinical active"><a class="subtab-label" href="@Url.Action("PatientClinical_Pathology", "Member", new { DependentID = Model.DependentID, pro = Context.Request.Query["pro"] })">Pathology</a></li>
+                            @*<li role="presentation" class="tab-clinical"><a class="subtab-label" href="@Url.Action("PatientClinical_Script", "Member", new { DependentID = Model.DependentID, pro = Context.Request.Query["pro"] })">Script</a></li>*@
+                            <li role="presentation" class="tab-clinical"><a class="subtab-label" href="@Url.Action("PatientClinical_PatientHistory", "Member", new { DependentID = Model.DependentID, pro = Context.Request.Query["pro"] })">Patient history</a></li>
+                            @*<li role="presentation" class="tab-clinical"><a class="subtab-label" href="@Url.Action("PatientClinical_ScriptHistory", "Member", new { DependentID = Model.DependentID, pro = Context.Request.Query["pro"] })">Script history</a></li>*@
+                        </ul>
+                        <!-------------------------------------------------------------------------------------- tab-panels ------------------------------------------------------------------------------------->
+                        <div class="tab-content">
+                            <!---------------------------------------------------------------------------------- tab-pathology ---------------------------------------------------------------------------------->
+                            <div role="tabpanel" class="tab-pane active" id="pathology">
+                                <div class="row">
+                                    <br />
+                                    <!--------------------------------------------------------------------------- create-pathology -------------------------------------------------------------------------->
+                                    <div class="row">
+                                        <h4 class="subHeading">
+                                            Patient pathology
+                                            <a class="create-new" href="@Url.Action("CreatePathology", "Clinical", new { DependentID = Model.DependentID, pro=Context.Request.Query["pro"] })" style="font-size: 14px">Create new <span><i class="fa fa-plus-circle" style="font-size: 12px"></i></span></a>
+
+                                        </h4>
+                                        <hr class="patientProfile_Ruler" />
+                                    </div>
+                                    <!-------------------------------------------------------------------------- sub-tab-navigation ------------------------------------------------------------------------->
+                                    <ul class="nav nav-pills" role="tablist">
+                                        <li role="presentation" class="subtab-clinical active"><a href="#pathology_general" aria-controls="pathology_general" class="subtab-label" data-toggle="tab" id="general_tab">General</a></li>
+                                        <li role="presentation" class="subtab-clinical"><a href="#pathology_hyperlipidaemia" aria-controls="pathology_hyperlipidaemia" class="subtab-label" data-toggle="tab" id="hyperlipidaemia_tab">Hyperlipidaemia</a></li>
+                                        @if (Model.programcode.ToLower() == "diabd")
+                                        {
+                                            <li role="presentation" class="subtab-clinical"><a href="#pathology_diabetes" aria-controls="pathology_diabetes" class="subtab-label" data-toggle="tab" id="diabetes_tab">Diabetes</a></li>
+                                        }
+                                        @if (Model.programcode.ToLower() == "hivpr")
+                                        {
+                                            <li role="presentation" class="subtab-clinical"><a href="#pathology_hiv" aria-controls="pathology_hiv" class="subtab-label" data-toggle="tab" id="hiv_tab">HIV</a></li>
+                                        }
+                                        @if (Model.programcode.ToLower() == "tbcul")
+                                        {
+                                            <li role="presentation" class="subtab-clinical"><a href="#pathology_tbcur" aria-controls="pathology_tbcur" class="subtab-label" data-toggle="tab" id="hiv_tab">Tuberculosis</a></li>
+                                        }
+                                        <li role="presentation" class="subtab-clinical"><a class="subtab-label" href="@Url.Action("Pathology_Search_Dependant", "Member", new { DependentID = Model.DependentID, pro = Context.Request.Query["pro"] })">Search</a></li>
+                                    </ul>
+                                </div>
+
+                                <!-------------------------------------------------------------------------------- tabs ------------------------------------------------------------------------------>
+                                <div class="tab-content">
+                                    <!------------ tab-pathology-general ------------->
+                                    <div role="tabpanel" class="tab-pane active" id="pathology_general">
+                                        <br />
+                                        <div class="row">
+                                            <table class="table pathology-clinical-table" id="pathology_general_table">
+                                                <thead>
+                                                    <tr>
+                                                        <th class="iSeriesTH" style="width: 30%"></th>
+                                                        <th style="text-align: center!important; width: 30%">
+                                                            Path date
+                                                        </th>
+                                                        <th style="text-align: center!important; width: 30%">
+                                                            Pathology value
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+                                                @foreach (var item in Model.generalPathologies)
+                                                {
+                                                    <tbody>
+                                                        <!-- blood pressure -->
+                                                        @if ((item.systolicBP == 0 || item.systolicBP.ToString() == "0.00" || item.systolicBP == null) && (item.diastolicBP == 0 || item.diastolicBP.ToString() == "0.00" || item.diastolicBP == null))
+                                                        {
+                                                            <tr>
+                                                                <td class="iSeriesTD">@Html.DisplayName("Blood pressure")</td>
+                                                                <td class="hcTable pathology-td"></td>
+                                                                <td class="hcTable pathology-td"></td>
+                                                            </tr>
+                                                        }
+                                                        else
+                                                        {
+                                                            <tr>
+                                                                <td class="iSeriesTD">@Html.DisplayName("Blood pressure")</td>
+                                                                <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.BPeffectiveDate)</td>
+                                                                <td class="hcTable pathology-td">
+                                                                    <!-- sistalic bp -->
+                                                                    @if (Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "systolicBP").Count() != 0)
+                                                                    {
+                                                                        foreach (var rule in Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "systolicBP").Where(x => x.ruleType == Model.programcode))
+                                                                        {
+                                                                            if (item.systolicBP > rule.greater && rule.greater != 0)
+                                                                            {
+                                                                                if (item.systolicBP == 0 || item.systolicBP.ToString() == "0.00")
+                                                                                {
+                                                                                }
+                                                                                else
+                                                                                {
+                                                                                    <span class="rule-broken">@Html.DisplayFor(modelItem => item.systolicBP)</span>
+                                                                                }
+                                                                                break;
+                                                                            }
+                                                                            else if (item.systolicBP < rule.less && rule.less != 0)
+                                                                            {
+                                                                                if (item.systolicBP == 0 || item.systolicBP.ToString() == "0.00")
+                                                                                {
+                                                                                }
+                                                                                else
+                                                                                {
+                                                                                    <span class="rule-broken">@Html.DisplayFor(modelItem => item.systolicBP)</span>
+                                                                                }
+                                                                                break;
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                if (item.systolicBP == 0 || item.systolicBP.ToString() == "0.00")
+                                                                                {
+                                                                                }
+                                                                                else
+                                                                                {
+                                                                                    @Html.DisplayFor(modelItem => item.systolicBP)
+                                                                                }
+                                                                                break;
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        if (item.systolicBP == 0 || item.systolicBP.ToString() == "0.00")
+                                                                        {
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            @Html.DisplayFor(modelItem => item.systolicBP)
+                                                                        }
+                                                                    }
+                                                                    /
+                                                                    <!-- diastalic bp -->
+                                                                    @if (Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "diastolicBP").Count() != 0)
+                                                                    {
+                                                                        foreach (var rule in Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "diastolicBP").Where(x => x.ruleType == Model.programcode))
+                                                                        {
+                                                                            if (item.diastolicBP > rule.greater && rule.greater != 0)
+                                                                            {
+                                                                                if (item.diastolicBP == 0 || item.diastolicBP.ToString() == "0.00")
+                                                                                {
+                                                                                }
+                                                                                else
+                                                                                {
+                                                                                    <span class="rule-broken">@Html.DisplayFor(modelItem => item.diastolicBP)</span>
+                                                                                }
+                                                                                break;
+                                                                            }
+                                                                            else if (item.diastolicBP < rule.less && rule.less != 0)
+                                                                            {
+                                                                                if (item.diastolicBP == 0 || item.diastolicBP.ToString() == "0.00")
+                                                                                {
+                                                                                }
+                                                                                else
+                                                                                {
+                                                                                    <span class="rule-broken">@Html.DisplayFor(modelItem => item.diastolicBP)</span>
+                                                                                }
+                                                                                break;
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                if (item.diastolicBP == 0 || item.diastolicBP.ToString() == "0.00")
+                                                                                {
+                                                                                }
+                                                                                else
+                                                                                {
+                                                                                    @Html.DisplayFor(modelItem => item.diastolicBP)
+                                                                                }
+                                                                                break;
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        if (item.diastolicBP == 0 || item.diastolicBP.ToString() == "0.00")
+                                                                        {
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            @Html.DisplayFor(modelItem => item.diastolicBP)
+                                                                        }
+                                                                    }
+                                                                </td>
+                                                            </tr>
+                                                        }
+                                                        <!-- ucreatinine -->
+                                                        @if (Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "ucreatinine").Count() != 0)
+                                                        {
+                                                            foreach (var rule in Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "ucreatinine"))
+                                                            {
+                                                                if (item.ucreatinine > rule.greater && rule.greater != 0)
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.ucreatinine)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important">@Html.DisplayFor(modelItem => item.ucreatinineeffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important" title="rule: @rule.ruleName | greater than: @rule.greater or less than: @rule.less">@Html.DisplayFor(modelItem => item.ucreatinine)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                                else if (item.ucreatinine < rule.less && rule.less != 0)
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.ucreatinine)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important">@Html.DisplayFor(modelItem => item.ucreatinineeffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important" title="rule: @rule.ruleName | greater than: @rule.greater or less than: @rule.less">@Html.DisplayFor(modelItem => item.ucreatinine)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                                else
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.ucreatinine)</td>
+                                                                        <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.ucreatinineeffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.ucreatinine)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            <tr>
+                                                                <td class="iSeriesTD">@Html.DisplayNameFor(model => item.ucreatinine)</td>
+                                                                <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.ucreatinineeffectiveDate)</td>
+                                                                <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.ucreatinine)</td>
+                                                            </tr>
+                                                        }
+                                                        <!-- ualbuminuria -->
+                                                        @if (Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "ualbuminuria").Count() != 0)
+                                                        {
+                                                            foreach (var rule in Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "ualbuminuria"))
+                                                            {
+                                                                if (item.ualbuminuria > rule.greater && rule.greater != 0)
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.ualbuminuria)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important">@Html.DisplayFor(modelItem => item.ualbuminuriaeffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important" title="rule: @rule.ruleName | greater than: @rule.greater or less than: @rule.less">@Html.DisplayFor(modelItem => item.ualbuminuria)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                                else if (item.ualbuminuria < rule.less && rule.less != 0)
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.ualbuminuria)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important">@Html.DisplayFor(modelItem => item.ualbuminuriaeffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important" title="rule: @rule.ruleName | greater than: @rule.greater or less than: @rule.less">@Html.DisplayFor(modelItem => item.ualbuminuria)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                                else
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.ualbuminuria)</td>
+                                                                        <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.ualbuminuriaeffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.ualbuminuria)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            <tr>
+                                                                <td class="iSeriesTD">@Html.DisplayNameFor(model => item.ualbuminuria)</td>
+                                                                <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.ualbuminuriaeffectiveDate)</td>
+                                                                <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.ualbuminuria)</td>
+                                                            </tr>
+                                                        }
+                                                        <!-- bilirubin -->
+                                                        @if (Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "bilirubin").Count() != 0)
+                                                        {
+                                                            foreach (var rule in Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "bilirubin"))
+                                                            {
+                                                                if (item.bilirubin > rule.greater && rule.greater != 0)
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.bilirubin)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important">@Html.DisplayFor(modelItem => item.bilirubineffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important" title="rule: @rule.ruleName | greater than: @rule.greater or less than: @rule.less">@Html.DisplayFor(modelItem => item.bilirubin)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                                else if (item.bilirubin < rule.less && rule.less != 0)
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.bilirubin)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important">@Html.DisplayFor(modelItem => item.bilirubineffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important" title="rule: @rule.ruleName | greater than: @rule.greater or less than: @rule.less">@Html.DisplayFor(modelItem => item.bilirubin)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                                else
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.bilirubin)</td>
+                                                                        <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.bilirubineffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.bilirubin)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            <tr>
+                                                                <td class="iSeriesTD">@Html.DisplayNameFor(model => item.bilirubin)</td>
+                                                                <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.bilirubineffectiveDate)</td>
+                                                                <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.bilirubin)</td>
+                                                            </tr>
+                                                        }
+                                                        <!-- ast -->
+                                                        @if (Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "ast").Count() != 0)
+                                                        {
+                                                            foreach (var rule in Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "ast"))
+                                                            {
+                                                                if (item.ast > rule.greater && rule.greater != 0)
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.ast)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important">@Html.DisplayFor(modelItem => item.asteffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important" title="rule: @rule.ruleName | greater than: @rule.greater or less than: @rule.less">@Html.DisplayFor(modelItem => item.ast)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                                else if (item.ast < rule.less && rule.less != 0)
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.ast)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important">@Html.DisplayFor(modelItem => item.asteffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important" title="rule: @rule.ruleName | greater than: @rule.greater or less than: @rule.less">@Html.DisplayFor(modelItem => item.ast)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                                else
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.ast)</td>
+                                                                        <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.asteffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.ast)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            <tr>
+                                                                <td class="iSeriesTD">@Html.DisplayNameFor(model => item.ast)</td>
+                                                                <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.asteffectiveDate)</td>
+                                                                <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.ast)</td>
+                                                            </tr>
+                                                        }
+                                                        <!-- alt -->
+                                                        @if (Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "alt").Count() != 0)
+                                                        {
+                                                            foreach (var rule in Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "alt"))
+                                                            {
+                                                                if (item.alt > rule.greater && rule.greater != 0)
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.alt)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important">@Html.DisplayFor(modelItem => item.alteffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important" title="rule: @rule.ruleName | greater than: @rule.greater or less than: @rule.less">@Html.DisplayFor(modelItem => item.alt)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                                else if (item.alt < rule.less && rule.less != 0)
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.alt)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important">@Html.DisplayFor(modelItem => item.alteffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important" title="rule: @rule.ruleName | greater than: @rule.greater or less than: @rule.less">@Html.DisplayFor(modelItem => item.alt)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                                else
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.alt)</td>
+                                                                        <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.alteffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.alt)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            <tr>
+                                                                <td class="iSeriesTD">@Html.DisplayNameFor(model => item.alt)</td>
+                                                                <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.alteffectiveDate)</td>
+                                                                <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.alt)</td>
+                                                            </tr>
+                                                        }
+                                                        <!-- s-urea -->
+                                                        @if (Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "urea").Count() != 0)
+                                                        {
+                                                            foreach (var rule in Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "urea"))
+                                                            {
+                                                                if (item.urea > rule.greater && rule.greater != 0)
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.urea)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important">@Html.DisplayFor(modelItem => item.ureaeffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important" title="rule: @rule.ruleName | greater than: @rule.greater or less than: @rule.less">@Html.DisplayFor(modelItem => item.urea)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                                else if (item.urea < rule.less && rule.less != 0)
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.urea)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important">@Html.DisplayFor(modelItem => item.ureaeffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important" title="rule: @rule.ruleName | greater than: @rule.greater or less than: @rule.less">@Html.DisplayFor(modelItem => item.urea)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                                else
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.urea)</td>
+                                                                        <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.ureaeffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.urea)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            <tr>
+                                                                <td class="iSeriesTD">@Html.DisplayNameFor(model => item.urea)</td>
+                                                                <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.ureaeffectiveDate)</td>
+                                                                <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.urea)</td>
+                                                            </tr>
+                                                        }
+                                                        <!-- s-creatinine -->
+                                                        @if (Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "creatinine").Count() != 0)
+                                                        {
+                                                            foreach (var rule in Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "creatinine"))
+                                                            {
+                                                                if (item.creatinine > rule.greater && rule.greater != 0)
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.creatinine)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important">@Html.DisplayFor(modelItem => item.creatinineeffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important" title="rule: @rule.ruleName | greater than: @rule.greater or less than: @rule.less">@Html.DisplayFor(modelItem => item.creatinine)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                                else if (item.creatinine < rule.less && rule.less != 0)
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.creatinine)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important">@Html.DisplayFor(modelItem => item.creatinineeffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important" title="rule: @rule.ruleName | greater than: @rule.greater or less than: @rule.less">@Html.DisplayFor(modelItem => item.creatinine)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                                else
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.creatinine)</td>
+                                                                        <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.creatinineeffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.creatinine)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            <tr>
+                                                                <td class="iSeriesTD">@Html.DisplayNameFor(model => item.creatinine)</td>
+                                                                <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.creatinineeffectiveDate)</td>
+                                                                <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.creatinine)</td>
+                                                            </tr>
+                                                        }
+                                                        <!-- egfr -->
+                                                        @if (Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "egfr").Count() != 0)
+                                                        {
+                                                            foreach (var rule in Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "egfr"))
+                                                            {
+                                                                if (item.eGfr > rule.greater && rule.greater != 0)
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.eGfr)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important">@Html.DisplayFor(modelItem => item.eGfreffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important" title="rule: @rule.ruleName | greater than: @rule.greater or less than: @rule.less">@Html.DisplayFor(modelItem => item.eGfr)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                                else if (item.eGfr < rule.less && rule.less != 0)
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.eGfr)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important">@Html.DisplayFor(modelItem => item.eGfreffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important" title="rule: @rule.ruleName | greater than: @rule.greater or less than: @rule.less">@Html.DisplayFor(modelItem => item.eGfr)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                                else
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.eGfr)</td>
+                                                                        <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.eGfreffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.eGfr)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            <tr>
+                                                                <td class="iSeriesTD">@Html.DisplayNameFor(model => item.eGfr)</td>
+                                                                <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.eGfreffectiveDate)</td>
+                                                                <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.eGfr)</td>
+                                                            </tr>
+                                                        }
+                                                        <!-- maucreatratio -->
+                                                        @if (Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "maucreatratio").Count() != 0)
+                                                        {
+                                                            foreach (var rule in Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "maucreatratio"))
+                                                            {
+                                                                if (item.mauCreatRatio > rule.greater && rule.greater != 0)
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.mauCreatRatio)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important">@Html.DisplayFor(modelItem => item.mauCreatRatioeffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important" title="rule: @rule.ruleName | greater than: @rule.greater or less than: @rule.less">@Html.DisplayFor(modelItem => item.mauCreatRatio)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                                else if (item.mauCreatRatio < rule.less && rule.less != 0)
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.mauCreatRatio)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important">@Html.DisplayFor(modelItem => item.mauCreatRatioeffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important" title="rule: @rule.ruleName | greater than: @rule.greater or less than: @rule.less">@Html.DisplayFor(modelItem => item.mauCreatRatio)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                                else
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.mauCreatRatio)</td>
+                                                                        <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.mauCreatRatioeffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.mauCreatRatio)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            <tr>
+                                                                <td class="iSeriesTD">@Html.DisplayNameFor(model => item.mauCreatRatio)</td>
+                                                                <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.mauCreatRatioeffectiveDate)</td>
+                                                                <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.mauCreatRatio)</td>
+                                                            </tr>
+                                                        }
+                                                        <!-- fev1 -->
+                                                        @if (Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "fev1").Count() != 0)
+                                                        {
+                                                            foreach (var rule in Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "fev1"))
+                                                            {
+                                                                if (item.FEV1 > rule.greater && rule.greater != 0)
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.FEV1)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important">@Html.DisplayFor(modelItem => item.FEV1effectiveDate)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important" title="rule: @rule.ruleName | greater than: @rule.greater or less than: @rule.less">@Html.DisplayFor(modelItem => item.FEV1)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                                else if (item.FEV1 < rule.less && rule.less != 0)
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.FEV1)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important">@Html.DisplayFor(modelItem => item.FEV1effectiveDate)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important" title="rule: @rule.ruleName | greater than: @rule.greater or less than: @rule.less">@Html.DisplayFor(modelItem => item.FEV1)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                                else
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.FEV1)</td>
+                                                                        <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.FEV1effectiveDate)</td>
+                                                                        <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.FEV1)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            <tr>
+                                                                <td class="iSeriesTD">@Html.DisplayNameFor(model => item.FEV1)</td>
+                                                                <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.FEV1effectiveDate)</td>
+                                                                <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.FEV1)</td>
+                                                            </tr>
+                                                        }
+                                                        <!-- eosinophylia -->
+                                                        @if (Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "eosinophylia").Count() != 0)
+                                                        {
+                                                            foreach (var rule in Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "eosinophylia"))
+                                                            {
+                                                                if (item.Eosinophylia > rule.greater && rule.greater != 0)
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.Eosinophylia)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important">@Html.DisplayFor(modelItem => item.EosinophyliaeffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important" title="rule: @rule.ruleName | greater than: @rule.greater or less than: @rule.less">@Html.DisplayFor(modelItem => item.Eosinophylia)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                                else if (item.Eosinophylia < rule.less && rule.less != 0)
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.Eosinophylia)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important">@Html.DisplayFor(modelItem => item.EosinophyliaeffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important" title="rule: @rule.ruleName | greater than: @rule.greater or less than: @rule.less">@Html.DisplayFor(modelItem => item.Eosinophylia)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                                else
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.Eosinophylia)</td>
+                                                                        <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.EosinophyliaeffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.Eosinophylia)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            <tr>
+                                                                <td class="iSeriesTD">@Html.DisplayNameFor(model => item.Eosinophylia)</td>
+                                                                <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.EosinophyliaeffectiveDate)</td>
+                                                                <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.Eosinophylia)</td>
+                                                            </tr>
+                                                        }
+                                                        <!-- haemoglobin -->
+                                                        @if (Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "haemoglobin").Count() != 0)
+                                                        {
+                                                            foreach (var rule in Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "haemoglobin"))
+                                                            {
+                                                                if (item.haemoglobin > rule.greater && rule.greater != 0)
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.haemoglobin)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important">@Html.DisplayFor(modelItem => item.haemoglobineffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important" title="rule: @rule.ruleName | greater than: @rule.greater or less than: @rule.less">@Html.DisplayFor(modelItem => item.haemoglobin)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                                else if (item.haemoglobin < rule.less && rule.less != 0)
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.haemoglobin)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important">@Html.DisplayFor(modelItem => item.haemoglobineffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important" title="rule: @rule.ruleName | greater than: @rule.greater or less than: @rule.less">@Html.DisplayFor(modelItem => item.haemoglobin)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                                else
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.haemoglobin)</td>
+                                                                        <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.haemoglobineffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.haemoglobin)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            <tr>
+                                                                <td class="iSeriesTD">@Html.DisplayNameFor(model => item.haemoglobin)</td>
+                                                                <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.haemoglobineffectiveDate)</td>
+                                                                <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.haemoglobin)</td>
+                                                            </tr>
+                                                        }
+                                                    </tbody>
+                                                }
+                                            </table>
+                                            <br />
+                                            <div class="text-center">
+                                                <a href="@Url.Action("pathologyHistory_general", "Member", new { DependentID = Model.DependentID, pro = Context.Request.Query["pro"] })" class="btn pathology-history">History</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!--------- tab-pathology-hyperlipidaemia -------->
+                                    <div role="tabpanel" class="tab-pane" id="pathology_hyperlipidaemia">
+                                        <br />
+                                        <div class="row">
+                                            <table class="table pathology-clinical-table" id="pathology_hyperlipidaemia_table">
+                                                <thead>
+                                                    <tr>
+                                                        <th class="iSeriesTH" style="width: 33%"></th>
+                                                        <th style="text-align: center!important; width: 33%">
+                                                            Path date
+                                                        </th>
+                                                        <th style="text-align: center!important; width: 33%">
+                                                            Pathology value
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+                                                @foreach (var item in Model.hyperlipidaemiaPathologies)
+                                                {
+                                                    <tbody>
+                                                        <!-- cholestrol -->
+                                                        @if (Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "totalcholestrol").Count() != 0)
+                                                        {
+                                                            foreach (var rule in Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "totalcholestrol"))
+                                                            {
+                                                                if (item.totalCholestrol > rule.greater && rule.greater != 0)
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.totalCholestrol)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important">@Html.DisplayFor(modelItem => item.totalCholestroleffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important" title="rule: @rule.ruleName | greater than: @rule.greater or less than: @rule.less">@Html.DisplayFor(modelItem => item.totalCholestrol)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                                else if (item.totalCholestrol < rule.less && rule.less != 0)
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.totalCholestrol)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important">@Html.DisplayFor(modelItem => item.totalCholestroleffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important" title="rule: @rule.ruleName | greater than: @rule.greater or less than: @rule.less">@Html.DisplayFor(modelItem => item.totalCholestrol)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                                else
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.totalCholestrol)</td>
+                                                                        <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.totalCholestroleffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.totalCholestrol)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            <tr>
+                                                                <td class="iSeriesTD">@Html.DisplayNameFor(model => item.totalCholestrol)</td>
+                                                                <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.totalCholestroleffectiveDate)</td>
+                                                                <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.totalCholestrol)</td>
+                                                            </tr>
+                                                        }
+                                                        <!-- triglycerides -->
+                                                        @if (Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "triglycerides").Count() != 0)
+                                                        {
+                                                            foreach (var rule in Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "triglycerides"))
+                                                            {
+                                                                if (item.triglycerides > rule.greater && rule.greater != 0)
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.triglycerides)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important">@Html.DisplayFor(modelItem => item.triglycerideseffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important" title="rule: @rule.ruleName | greater than: @rule.greater or less than: @rule.less">@Html.DisplayFor(modelItem => item.triglycerides)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                                else if (item.triglycerides < rule.less && rule.less != 0)
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.triglycerides)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important">@Html.DisplayFor(modelItem => item.triglycerideseffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important" title="rule: @rule.ruleName | greater than: @rule.greater or less than: @rule.less">@Html.DisplayFor(modelItem => item.triglycerides)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                                else
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.triglycerides)</td>
+                                                                        <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.triglycerideseffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.triglycerides)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            <tr>
+                                                                <td class="iSeriesTD">@Html.DisplayNameFor(model => item.triglycerides)</td>
+                                                                <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.triglycerideseffectiveDate)</td>
+                                                                <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.triglycerides)</td>
+                                                            </tr>
+                                                        }
+                                                        <!-- ldl -->
+                                                        @if (Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "ldl").Count() != 0)
+                                                        {
+                                                            foreach (var rule in Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "ldl"))
+                                                            {
+                                                                if (item.ldl > rule.greater && rule.greater != 0)
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.ldl)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important">@Html.DisplayFor(modelItem => item.ldleffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important" title="rule: @rule.ruleName | greater than: @rule.greater or less than: @rule.less">@Html.DisplayFor(modelItem => item.ldl)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                                else if (item.ldl < rule.less && rule.less != 0)
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.ldl)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important">@Html.DisplayFor(modelItem => item.ldleffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important" title="rule: @rule.ruleName | greater than: @rule.greater or less than: @rule.less">@Html.DisplayFor(modelItem => item.ldl)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                                else
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.ldl)</td>
+                                                                        <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.ldleffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.ldl)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            <tr>
+                                                                <td class="iSeriesTD">@Html.DisplayNameFor(model => item.ldl)</td>
+                                                                <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.ldleffectiveDate)</td>
+                                                                <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.ldl)</td>
+                                                            </tr>
+                                                        }
+                                                        <!-- hdl -->
+                                                        @if (Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "hdl").Count() != 0)
+                                                        {
+                                                            foreach (var rule in Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "hdl"))
+                                                            {
+                                                                if (item.hdl > rule.greater && rule.greater != 0)
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.hdl)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important">@Html.DisplayFor(modelItem => item.hdleffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important" title="rule: @rule.ruleName | greater than: @rule.greater or less than: @rule.less">@Html.DisplayFor(modelItem => item.hdl)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                                else if (item.hdl < rule.less && rule.less != 0)
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.hdl)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important">@Html.DisplayFor(modelItem => item.hdleffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important" title="rule: @rule.ruleName | greater than: @rule.greater or less than: @rule.less">@Html.DisplayFor(modelItem => item.hdl)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                                else
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.hdl)</td>
+                                                                        <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.hdleffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.hdl)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            <tr>
+                                                                <td class="iSeriesTD">@Html.DisplayNameFor(model => item.hdl)</td>
+                                                                <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.hdleffectiveDate)</td>
+                                                                <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.hdl)</td>
+                                                            </tr>
+                                                        }
+                                                    </tbody>
+                                                }
+                                            </table>
+                                            <br />
+                                            <div class="text-center">
+                                                <a href="@Url.Action("pathologyHistory_hyperlipidaemia", "Member", new { DependentID = Model.DependentID, pro = Context.Request.Query["pro"] })" class="btn pathology-history">History</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!------------ tab-pathology-diabetes ------------>
+                                    <div role="tabpanel" class="tab-pane" id="pathology_diabetes">
+                                        <br />
+                                        <div class="row">
+                                            <table class="table pathology-clinical-table" id="pathology_hiv_table">
+                                                <thead>
+                                                    <tr>
+                                                        <th class="iSeriesTH" style="width: 30%"></th>
+                                                        <th style="text-align: center!important; width: 30%">
+                                                            Path date
+                                                        </th>
+                                                        <th style="text-align: center!important; width: 30%">
+                                                            Pathology value
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+                                                @foreach (var item in Model.diabetesPathologies)
+                                                {
+                                                    <tbody>
+                                                        <!-- hba1c -->
+                                                        @if (Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "hba1c").Count() != 0)
+                                                        {
+                                                            foreach (var rule in Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "hba1c"))
+                                                            {
+                                                                if (item.hba1c > rule.greater && rule.greater != 0)
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.hba1c)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important">@Html.DisplayFor(modelItem => item.hba1ceffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important" title="rule: @rule.ruleName | greater than: @rule.greater or less than: @rule.less">@Html.DisplayFor(modelItem => item.hba1c)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                                else if (item.hba1c < rule.less && rule.less != 0)
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.hba1c)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important">@Html.DisplayFor(modelItem => item.hba1ceffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important" title="rule: @rule.ruleName | greater than: @rule.greater or less than: @rule.less">@Html.DisplayFor(modelItem => item.hba1c)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                                else
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.hba1c)</td>
+                                                                        <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.hba1ceffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.hba1c)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            <tr>
+                                                                <td class="iSeriesTD">@Html.DisplayNameFor(model => item.hba1c)</td>
+                                                                <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.hba1ceffectiveDate)</td>
+                                                                <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.hba1c)</td>
+                                                            </tr>
+                                                        }
+                                                        <!-- normal-gtt -->
+                                                        <tr>
+                                                            <td class="iSeriesTD">@Html.DisplayNameFor(model => item.normGtt)</td>
+                                                            <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.normGtteffectiveDate)</td>
+                                                            <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.normGtt)</td>
+                                                        </tr>
+                                                        <!-- abnormal-gtt -->
+                                                        <tr>
+                                                            <td class="iSeriesTD">@Html.DisplayNameFor(model => item.abnGtt)</td>
+                                                            <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.abnGtteffectiveDate)</td>
+                                                            <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.abnGtt)</td>
+                                                        </tr>
+                                                        <!-- glucose -->
+                                                        @if (Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "glucose").Count() != 0)
+                                                        {
+                                                            foreach (var rule in Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "glucose"))
+                                                            {
+                                                                if (item.glucose > rule.greater && rule.greater != 0)
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.glucose)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important">@Html.DisplayFor(modelItem => item.glucoseeffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important" title="rule: @rule.ruleName | greater than: @rule.greater or less than: @rule.less">@Html.DisplayFor(modelItem => item.glucose)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                                else if (item.glucose < rule.less && rule.less != 0)
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.glucose)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important">@Html.DisplayFor(modelItem => item.glucoseeffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important" title="rule: @rule.ruleName | greater than: @rule.greater or less than: @rule.less">@Html.DisplayFor(modelItem => item.glucose)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                                else
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.glucose)</td>
+                                                                        <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.glucoseeffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.glucose)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            <tr>
+                                                                <td class="iSeriesTD">@Html.DisplayNameFor(model => item.glucose)</td>
+                                                                <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.glucoseeffectiveDate)</td>
+                                                                <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.glucose)</td>
+                                                            </tr>
+                                                        }
+                                                        <!-- ucreatinine -->
+                                                        @if (Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "ucreatinine").Count() != 0)
+                                                        {
+                                                            foreach (var rule in Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "ucreatinine"))
+                                                            {
+                                                                if (item.ucreatinine > rule.greater && rule.greater != 0)
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.ucreatinine)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important">@Html.DisplayFor(modelItem => item.ucreatinineeffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important" title="rule: @rule.ruleName | greater than: @rule.greater or less than: @rule.less">@Html.DisplayFor(modelItem => item.ucreatinine)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                                else if (item.ucreatinine < rule.less && rule.less != 0)
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.ucreatinine)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important">@Html.DisplayFor(modelItem => item.ucreatinineeffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important" title="rule: @rule.ruleName | greater than: @rule.greater or less than: @rule.less">@Html.DisplayFor(modelItem => item.ucreatinine)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                                else
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.ucreatinine)</td>
+                                                                        <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.ucreatinineeffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.ucreatinine)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            <tr>
+                                                                <td class="iSeriesTD">@Html.DisplayNameFor(model => item.ucreatinine)</td>
+                                                                <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.ucreatinineeffectiveDate)</td>
+                                                                <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.ucreatinine)</td>
+                                                            </tr>
+                                                        }
+                                                        <!-- ualbuminuria -->
+                                                        @if (Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "ualbuminuria").Count() != 0)
+                                                        {
+                                                            foreach (var rule in Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "ualbuminuria"))
+                                                            {
+                                                                if (item.ualbuminuria > rule.greater && rule.greater != 0)
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.ualbuminuria)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important">@Html.DisplayFor(modelItem => item.ualbuminuriaeffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important" title="rule: @rule.ruleName | greater than: @rule.greater or less than: @rule.less">@Html.DisplayFor(modelItem => item.ualbuminuria)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                                else if (item.ualbuminuria < rule.less && rule.less != 0)
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.ualbuminuria)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important">@Html.DisplayFor(modelItem => item.ualbuminuriaeffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important" title="rule: @rule.ruleName | greater than: @rule.greater or less than: @rule.less">@Html.DisplayFor(modelItem => item.ualbuminuria)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                                else
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.ualbuminuria)</td>
+                                                                        <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.ualbuminuriaeffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.ualbuminuria)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            <tr>
+                                                                <td class="iSeriesTD">@Html.DisplayNameFor(model => item.ualbuminuria)</td>
+                                                                <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.ualbuminuriaeffectiveDate)</td>
+                                                                <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.ualbuminuria)</td>
+                                                            </tr>
+                                                        }
+                                                        <!-- bilirubin -->
+                                                        @if (Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "bilirubin").Count() != 0)
+                                                        {
+                                                            foreach (var rule in Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "bilirubin"))
+                                                            {
+                                                                if (item.bilirubin > rule.greater && rule.greater != 0)
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.bilirubin)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important">@Html.DisplayFor(modelItem => item.bilirubineffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important" title="rule: @rule.ruleName | greater than: @rule.greater or less than: @rule.less">@Html.DisplayFor(modelItem => item.bilirubin)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                                else if (item.bilirubin < rule.less && rule.less != 0)
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.bilirubin)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important">@Html.DisplayFor(modelItem => item.bilirubineffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important" title="rule: @rule.ruleName | greater than: @rule.greater or less than: @rule.less">@Html.DisplayFor(modelItem => item.bilirubin)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                                else
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.bilirubin)</td>
+                                                                        <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.bilirubineffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.bilirubin)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            <tr>
+                                                                <td class="iSeriesTD">@Html.DisplayNameFor(model => item.bilirubin)</td>
+                                                                <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.bilirubineffectiveDate)</td>
+                                                                <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.bilirubin)</td>
+                                                            </tr>
+                                                        }
+                                                        <!-- ast -->
+                                                        @if (Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "ast").Count() != 0)
+                                                        {
+                                                            foreach (var rule in Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "ast"))
+                                                            {
+                                                                if (item.ast > rule.greater && rule.greater != 0)
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.ast)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important">@Html.DisplayFor(modelItem => item.asteffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important" title="rule: @rule.ruleName | greater than: @rule.greater or less than: @rule.less">@Html.DisplayFor(modelItem => item.ast)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                                else if (item.ast < rule.less && rule.less != 0)
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.ast)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important">@Html.DisplayFor(modelItem => item.asteffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important" title="rule: @rule.ruleName | greater than: @rule.greater or less than: @rule.less">@Html.DisplayFor(modelItem => item.ast)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                                else
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.ast)</td>
+                                                                        <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.asteffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.ast)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            <tr>
+                                                                <td class="iSeriesTD">@Html.DisplayNameFor(model => item.ast)</td>
+                                                                <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.asteffectiveDate)</td>
+                                                                <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.ast)</td>
+                                                            </tr>
+                                                        }
+                                                        <!-- alt -->
+                                                        @if (Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "alt").Count() != 0)
+                                                        {
+                                                            foreach (var rule in Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "alt"))
+                                                            {
+                                                                if (item.alt > rule.greater && rule.greater != 0)
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.alt)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important">@Html.DisplayFor(modelItem => item.alteffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important" title="rule: @rule.ruleName | greater than: @rule.greater or less than: @rule.less">@Html.DisplayFor(modelItem => item.alt)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                                else if (item.alt < rule.less && rule.less != 0)
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.alt)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important">@Html.DisplayFor(modelItem => item.alteffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important" title="rule: @rule.ruleName | greater than: @rule.greater or less than: @rule.less">@Html.DisplayFor(modelItem => item.alt)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                                else
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.alt)</td>
+                                                                        <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.alteffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.alt)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            <tr>
+                                                                <td class="iSeriesTD">@Html.DisplayNameFor(model => item.alt)</td>
+                                                                <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.alteffectiveDate)</td>
+                                                                <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.alt)</td>
+                                                            </tr>
+                                                        }
+                                                        <!-- s-urea -->
+                                                        @if (Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "urea").Count() != 0)
+                                                        {
+                                                            foreach (var rule in Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "urea"))
+                                                            {
+                                                                if (item.urea > rule.greater && rule.greater != 0)
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.urea)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important">@Html.DisplayFor(modelItem => item.ureaeffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important" title="rule: @rule.ruleName | greater than: @rule.greater or less than: @rule.less">@Html.DisplayFor(modelItem => item.urea)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                                else if (item.urea < rule.less && rule.less != 0)
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.urea)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important">@Html.DisplayFor(modelItem => item.ureaeffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important" title="rule: @rule.ruleName | greater than: @rule.greater or less than: @rule.less">@Html.DisplayFor(modelItem => item.urea)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                                else
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.urea)</td>
+                                                                        <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.ureaeffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.urea)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            <tr>
+                                                                <td class="iSeriesTD">@Html.DisplayNameFor(model => item.urea)</td>
+                                                                <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.ureaeffectiveDate)</td>
+                                                                <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.urea)</td>
+                                                            </tr>
+                                                        }
+                                                        <!-- s-creatinine -->
+                                                        @if (Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "creatinine").Count() != 0)
+                                                        {
+                                                            foreach (var rule in Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "creatinine"))
+                                                            {
+                                                                if (item.creatinine > rule.greater && rule.greater != 0)
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.creatinine)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important">@Html.DisplayFor(modelItem => item.creatinineeffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important" title="rule: @rule.ruleName | greater than: @rule.greater or less than: @rule.less">@Html.DisplayFor(modelItem => item.creatinine)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                                else if (item.creatinine < rule.less && rule.less != 0)
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.creatinine)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important">@Html.DisplayFor(modelItem => item.creatinineeffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important" title="rule: @rule.ruleName | greater than: @rule.greater or less than: @rule.less">@Html.DisplayFor(modelItem => item.creatinine)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                                else
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.creatinine)</td>
+                                                                        <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.creatinineeffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.creatinine)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            <tr>
+                                                                <td class="iSeriesTD">@Html.DisplayNameFor(model => item.creatinine)</td>
+                                                                <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.creatinineeffectiveDate)</td>
+                                                                <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.creatinine)</td>
+                                                            </tr>
+                                                        }
+                                                        <!-- egfr -->
+                                                        @if (Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "egfr").Count() != 0)
+                                                        {
+                                                            foreach (var rule in Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "egfr"))
+                                                            {
+                                                                if (item.eGfr > rule.greater && rule.greater != 0)
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.eGfr)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important">@Html.DisplayFor(modelItem => item.eGfreffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important" title="rule: @rule.ruleName | greater than: @rule.greater or less than: @rule.less">@Html.DisplayFor(modelItem => item.eGfr)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                                else if (item.eGfr < rule.less && rule.less != 0)
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.eGfr)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important">@Html.DisplayFor(modelItem => item.eGfreffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important" title="rule: @rule.ruleName | greater than: @rule.greater or less than: @rule.less">@Html.DisplayFor(modelItem => item.eGfr)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                                else
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.eGfr)</td>
+                                                                        <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.eGfreffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.eGfr)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            <tr>
+                                                                <td class="iSeriesTD">@Html.DisplayNameFor(model => item.eGfr)</td>
+                                                                <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.eGfreffectiveDate)</td>
+                                                                <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.eGfr)</td>
+                                                            </tr>
+                                                        }
+                                                        <!-- maucreatratio -->
+                                                        @if (Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "maucreatratio").Count() != 0)
+                                                        {
+                                                            foreach (var rule in Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "maucreatratio"))
+                                                            {
+                                                                if (item.mauCreatRatio > rule.greater && rule.greater != 0)
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.mauCreatRatio)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important">@Html.DisplayFor(modelItem => item.mauCreatRatioeffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important" title="rule: @rule.ruleName | greater than: @rule.greater or less than: @rule.less">@Html.DisplayFor(modelItem => item.mauCreatRatio)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                                else if (item.mauCreatRatio < rule.less && rule.less != 0)
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.mauCreatRatio)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important">@Html.DisplayFor(modelItem => item.mauCreatRatioeffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important" title="rule: @rule.ruleName | greater than: @rule.greater or less than: @rule.less">@Html.DisplayFor(modelItem => item.mauCreatRatio)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                                else
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.mauCreatRatio)</td>
+                                                                        <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.mauCreatRatioeffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.mauCreatRatio)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            <tr>
+                                                                <td class="iSeriesTD">@Html.DisplayNameFor(model => item.mauCreatRatio)</td>
+                                                                <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.mauCreatRatioeffectiveDate)</td>
+                                                                <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.mauCreatRatio)</td>
+                                                            </tr>
+                                                        }
+                                                    </tbody>
+                                                }
+                                            </table>
+                                            <br />
+                                            <div class="text-center">
+                                                <a href="@Url.Action("pathologyHistory_diabetes", "Member", new { DependentID = Model.DependentID, pro = Context.Request.Query["pro"] })" class="btn pathology-history">History</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!--------------- tab-pathology-hiv -------------->
+                                    <div role="tabpanel" class="tab-pane" id="pathology_hiv">
+                                        <br />
+                                        <div class="row">
+                                            <table class="table pathology-clinical-table" id="pathology_hiv_table">
+                                                <thead>
+                                                    <tr>
+                                                        <th class="iSeriesTH" style="width: 30%"></th>
+                                                        <th style="text-align: center!important; width: 30%">
+                                                            Path date
+                                                        </th>
+                                                        <th style="text-align: center!important; width: 30%">
+                                                            Pathology value
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+                                                @foreach (var item in Model.hivPathologies)
+                                                {
+
+
+
+                                                    <tbody>
+                                                        <tr>
+                                                            <td class="iSeriesTD">@Html.DisplayNameFor(model => item.hivEliza)</td>
+                                                            <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.hivElizaeffectiveDate)</td>
+                                                            <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.hivEliza)</td>
+                                                        </tr>
+                                                        @if (Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "cd4count").Count() != 0)
+                                                        {
+                                                            foreach (var rule in Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "cd4count"))
+                                                            {
+                                                                if (item.CD4Count > rule.greater && rule.greater != 0)
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.CD4Count)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important">@Html.DisplayFor(modelItem => item.CD4CounteffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important" title="rule: @rule.ruleName | greater than: @rule.greater or less than: @rule.less">@Html.DisplayFor(modelItem => item.CD4Count)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                                else if (item.CD4Count < rule.less && rule.less != 0)
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.CD4Count)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important">@Html.DisplayFor(modelItem => item.CD4CounteffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important" title="rule: @rule.ruleName | greater than: @rule.greater or less than: @rule.less">@Html.DisplayFor(modelItem => item.CD4Count)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                                else
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.CD4Count)</td>
+                                                                        <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.CD4CounteffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.CD4Count)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            <tr>
+                                                                <td class="iSeriesTD">@Html.DisplayNameFor(model => item.CD4Count)</td>
+                                                                <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.CD4CounteffectiveDate)</td>
+                                                                <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.CD4Count)</td>
+                                                            </tr>
+                                                        }
+                                                        @if (Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "cd4percentage").Count() != 0)
+                                                        {
+                                                            foreach (var rule in Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "cd4percentage"))
+                                                            {
+                                                                if (item.CD4Percentage > rule.greater && rule.greater != 0)
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.CD4Percentage)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important">@Html.DisplayFor(modelItem => item.CD4PercentageeffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important" title="rule: @rule.ruleName | greater than: @rule.greater or less than: @rule.less">@Html.DisplayFor(modelItem => item.CD4Percentage)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                                else if (item.CD4Percentage < rule.less && rule.less != 0)
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.CD4Percentage)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important">@Html.DisplayFor(modelItem => item.CD4PercentageeffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important" title="rule: @rule.ruleName | greater than: @rule.greater or less than: @rule.less">@Html.DisplayFor(modelItem => item.CD4Percentage)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                                else
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.CD4Percentage)</td>
+                                                                        <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.CD4PercentageeffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.CD4Percentage)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            <tr>
+                                                                <td class="iSeriesTD">@Html.DisplayNameFor(model => item.CD4Percentage)</td>
+                                                                <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.CD4PercentageeffectiveDate)</td>
+                                                                <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.CD4Percentage)</td>
+                                                            </tr>
+                                                        }
+
+                                                        @if (Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "viralload").Count() != 0)
+                                                        {
+                                                            foreach (var rule in Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "viralload"))
+                                                            {
+                                                                if (item.viralLoad > rule.greater && rule.greater != 0)
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.viralLoad)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important">@Html.DisplayFor(modelItem => item.viralLoadeffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important" title="rule: @rule.ruleName | greater than: @rule.greater or less than: @rule.less">@Html.DisplayFor(modelItem => item.viralLoad)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                                else if (item.viralLoad < rule.less && rule.less != 0)
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.viralLoad)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important">@Html.DisplayFor(modelItem => item.viralLoadeffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td" style="color: darkred!important; font-weight: bold!important" title="rule: @rule.ruleName | greater than: @rule.greater or less than: @rule.less">@Html.DisplayFor(modelItem => item.viralLoad)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                                else
+                                                                {
+                                                                    <tr>
+                                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => item.viralLoad)</td>
+                                                                        <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.viralLoadeffectiveDate)</td>
+                                                                        <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.viralLoad)</td>
+                                                                    </tr>
+                                                                    break;
+                                                                }
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            <tr>
+                                                                <td class="iSeriesTD">@Html.DisplayNameFor(model => item.viralLoad)</td>
+                                                                <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.viralLoadeffectiveDate)</td>
+                                                                <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.viralLoad)</td>
+                                                            </tr>
+                                                        }
+                                                    </tbody>
+                                                }
+                                            </table>
+                                            <br />
+                                            <div class="text-center">
+                                                <a href="@Url.Action("pathologyHistory_hiv", "Member", new { DependentID = Model.DependentID, pro = Context.Request.Query["pro"] })" class="btn pathology-history">History</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!--------------- tab-pathology-tbcur -------------->
+                                    <div role="tabpanel" class="tab-pane" id="pathology_tbcur">
+                                        <br />
+                                        <div class="row">
+                                            <table class="table pathology-clinical-table" id="pathology_tbcur_table">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="text-align: center!important; width: 25%">
+                                                            TB Screen
+                                                        </th>
+                                                        <th style="text-align: center!important; width: 25%">
+                                                            TB screen date
+                                                        </th>
+                                                        <th style="text-align: center!important; width: 25%">
+                                                            Treatment start date
+                                                        </th>
+                                                        <th style="text-align: center!important; width: 25%">
+                                                            Treatment end date
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+                                                @foreach (var item in Model.TBPathologies)
+                                                {
+                                                    <tbody>
+                                                        <tr>
+                                                            <td class="hcTable pathology-td">@Html.DisplayNameFor(model => item.TBScreen)</td>
+                                                            <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.TBScreenDate)</td>
+                                                            <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.tbTreatmentStartDate)</td>
+                                                            <td class="hcTable pathology-td">@Html.DisplayFor(modelItem => item.tbTreatmentEndDate)</td>
+                                                        </tr>
+                                                    </tbody>
+                                                }
+                                            </table>
+                                            <br />
+                                            <div class="text-center">
+                                                <a href="@Url.Action("pathologyHistory_tbcul", "Member", new { DependentID = Model.DependentID, pro = Context.Request.Query["pro"] })" class="btn pathology-history">History</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+<script src="js/jquery.tablesorter.min.js"></script>
+
+<script src="~/bundles/jqueryval"></script>
+
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+    <!-- collapsible -->
+    <script>
+        $(document).on('click', '.panel-heading span.clickable', function (e) {
+            var $this = $(this);
+            if (!$this.hasClass('panel-collapsed')) {
+                $this.parents('.panel').find('.panel-body').slideUp();
+                $this.addClass('panel-collapsed');
+                $this.find('i').removeClass('fa-caret-up').addClass('fa-caret-down');
+            } else {
+                $this.parents('.panel').find('.panel-body').slideDown();
+                $this.removeClass('panel-collapsed');
+                $this.find('i').removeClass('fa-caret-down').addClass('fa-caret-up');
+            }
+        });
+        $(document).on('click', '.panel div.clickable', function (e) {
+            var $this = $(this);
+            if (!$this.hasClass('panel-collapsed')) {
+                $this.parents('.panel').find('.panel-body').slideUp();
+                $this.addClass('panel-collapsed');
+                $this.find('i').removeClass('fa-caret-up').addClass('fa-caret-down');
+            } else {
+                $this.parents('.panel').find('.panel-body').slideDown();
+                $this.removeClass('panel-collapsed');
+                $this.find('i').removeClass('fa-caret-down').addClass('fa-caret-up');
+            }
+        });
+        $(document).ready(function () {
+            $('.panel-heading span.clickable').click();
+            $('.panel div.clickable').click();
+        });
+    </script>
+    <!-- pathology-tab-redirect-->
+    <script>
+        //pathology>createNew
+        $(document).ready(function () {
+            if (localStorage.key(0) == "create_pathologyCreate") {
+                //var key = localStorage.key(0);
+                //alert(key);
+                $("#pathology_tab").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("create_pathologyCreate");
+            }
+        });
+        //pathology>back
+        $(document).ready(function () {
+            if (localStorage.key(0) == "back_pathologyCreate") {
+                //var key = localStorage.key(0);
+                //alert(key);
+                $("#pathology_tab").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("back_pathologyCreate");
+            }
+        });
+        //pathology>general
+        $(document).ready(function () {
+            if (localStorage.key(0) == "back_general") {
+                //var key = localStorage.key(0);
+                //alert(key);
+                $("#pathology_tab").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("back_general");
+            }
+        });
+        //pathology>hyperlipidaemia
+        $(document).ready(function () {
+            if (localStorage.key(0) == "back_hyperlipdaemia") {
+                $("#pathology_tab").trigger("click");
+                $("#hyperlipidaemia_tab").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("back_hyperlipdaemia");
+            }
+        });
+        //pathology>diabetes
+        $(document).ready(function () {
+            if (localStorage.key(0) == "back_diabetes") {
+                $("#pathology_tab").trigger("click");
+                $("#diabetes_tab").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("back_diabetes");
+            }
+        });
+        //pathology>hiv
+        $(document).ready(function () {
+            if (localStorage.key(0) == "back_hiv") {
+                $("#pathology_tab").trigger("click");
+                $("#hiv_tab").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("back_hiv");
+            }
+        });
+    </script>
+
+}
+
+

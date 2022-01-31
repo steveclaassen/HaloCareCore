@@ -1,0 +1,483 @@
+﻿@model HaloCareCore.Models.EnrolmentViewModel
+@using HaloCareCore.Extensions
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "editPatient";
+    Layout = "~/Views/Shared/_LayoutMember.cshtml";
+}
+
+<comment>
+    <!--
+        05 February 2020 -- HCare-959(Edit Member changes)
+
+
+    -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .select2-container--default .select2-selection--single {
+        border: 1px solid #f4f4f4 !important;
+    }
+</style>
+
+<link href="~/Content/css/select2.min.css" rel="stylesheet" />
+<script src="~/Scripts/select2.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet" />
+
+<!--pageHeader-->
+<nav id="global-nav" class="nav">
+    <div class="pull-left title">
+        <h1 class="site-title_patientProfile">
+            <span><i class="fas fa-user-circle"></i>&emsp; Patient</span>
+        </h1>
+    </div>
+    <div class="pull-right title">
+        <h1 class="site-title_userID pull-right">
+            <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+        </h1>
+        <h1 class="site-title_userID pull-right">
+            @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+            {
+                <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+            }
+        </h1>
+        <h1 class="site-waffleIcon pull-right">
+            <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+        </h1>
+    </div>
+</nav>
+
+<div class="dashboardContainer zero-padding">
+    <div class="patientDashboard_View">
+
+        <!--breadCrumbs-->
+        <ul class="breadcrumbs_patientDashboard">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Administration", new {})">Home</a></li>
+            <li><a href="@Url.Action("patientDashboard", "Member", new { DependentID = Context.Request.Query["DependentID"]})">Patient</a></li>
+            <li><a href="#">Edit</a></li>
+        </ul>
+
+        <!--Left navSlider -->
+        @Html.Partial("_navSlider", new { DependentID = Context.Request.Query["DependentID"] })
+
+        <!--navCollection-->
+        <div class="navCollection_patientDashboard">
+            @Html.Partial("_navCollection")
+        </div>
+
+        <!--profileInformation-->
+        <div class="profileBar">
+            @Html.Action("_profileBar_edit", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })
+        </div>
+    </div>
+
+    <div class="profilebar-spacer"></div>
+
+    <div class="patientDashboard_container">
+        <h4 class="tableHeading">Edit patient data</h4>
+        <hr class="fancyruler">
+        <br />
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+
+            <div class="form-horizontal editForm" style="text-align: right">
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                @Html.HiddenFor(model => model.dependent.DependantID)
+                @Html.HiddenFor(model => model.member.memberID)
+                @Html.HiddenFor(model => model.dependent.birthDate)
+                @Html.HiddenFor(model => model.dependent.icd10Code)
+                @Html.HiddenFor(model => model.dependent.Active)
+
+                <div class="form-group">
+                    <div class="col-md-12">
+                        <div class="col-md-6">
+                            <div class="col-md-3">
+                                @Html.LabelFor(model => model.member.membershipNo, htmlAttributes: new { @class = "control-label" })
+                            </div>
+                            <div class="col-md-9">
+                                @if (User.HasRole("5. Super user"))
+                                {
+                                    @Html.EditorFor(model => model.member.membershipNo, new
+                                    {
+                                        htmlAttributes = new
+                                        {@*@class = "infoBox_editMember"*@@class = "disabledField",
+     @disabled = "disabled"
+ }
+})
+                                    @Html.ValidationMessageFor(model => model.member.membershipNo, "", new { @class = "text-danger" })
+                                }
+                                else
+                                {
+                                    @Html.EditorFor(model => model.member.membershipNo, new { htmlAttributes = new { @class = "disabledField", @disabled = "disabled" } })
+                                    @Html.ValidationMessageFor(model => model.member.membershipNo, "", new { @class = "text-danger" })
+                                }
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="col-md-3">
+                                @Html.Label(null, "Medical Aid", htmlAttributes: new { @class = "control-label" })
+                            </div>
+                            <div class="col-md-9">
+                                @Html.EditorFor(model => model.medicalAid.Name, new { htmlAttributes = new { @class = "disabledField", @disabled = "disabled" } })
+                                @Html.ValidationMessageFor(model => model.medicalAid.Name, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-md-12">
+                        <div class="col-md-6">
+                            <div class="col-md-3">
+                                @Html.LabelFor(model => model.dependent.initials, htmlAttributes: new { @class = "control-label" })
+                            </div>
+                            <div class="col-md-9">
+                                @Html.EditorFor(model => model.dependent.initials, new { htmlAttributes = new { @class = "disabledField", @disabled = "disabled" } })
+                                @Html.ValidationMessageFor(model => model.dependent.initials, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="col-md-3">
+                                @Html.LabelFor(model => model.dependent.dependentCode, htmlAttributes: new { @class = "control-label" })
+                            </div>
+                            <div class="col-md-9">
+                                @Html.EditorFor(model => model.dependent.dependentCode, new { htmlAttributes = new { @class = "disabledField", @disabled = "disabled", @onkeypress = "return isNumber(event)" } })
+                                @Html.ValidationMessageFor(model => model.dependent.dependentCode, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-md-12">
+                        <div class="col-md-6">
+                            <div class="col-md-3">
+                                @Html.LabelFor(model => model.dependent.firstName, htmlAttributes: new { @class = "control-label" })
+                            </div>
+                            <div class="col-md-9">
+                                @Html.EditorFor(model => model.dependent.firstName, new { htmlAttributes = new { @class = "disabledField", @disabled = "disabled" } })
+                                @Html.ValidationMessageFor(model => model.dependent.firstName, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="col-md-3">
+                                @Html.LabelFor(model => model.dependent.title, htmlAttributes: new { @class = "control-label" })
+                            </div>
+                            <div class="col-md-9">
+                                @Html.EditorFor(model => model.dependent.title, new { htmlAttributes = new { @class = "disabledField", @disabled = "disabled" } })
+                                @Html.ValidationMessageFor(model => model.dependent.title, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-md-12">
+                        <div class="col-md-6">
+                            <div class="col-md-3">
+                                @Html.LabelFor(model => model.dependent.lastName, htmlAttributes: new { @class = "control-label" })
+                            </div>
+                            <div class="col-md-9">
+                                @Html.EditorFor(model => model.dependent.lastName, new { htmlAttributes = new { @class = "disabledField", @disabled = "disabled" } })
+                                @Html.ValidationMessageFor(model => model.dependent.lastName, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="col-md-3">
+                                @Html.LabelFor(model => model.dependent.dependentType, htmlAttributes: new { @class = "control-label" })
+                            </div>
+                            <div class="col-md-9 depTypePill">
+                                @Html.DropDownList("dependantType", null, "**Select**", htmlAttributes: new { @class = "infoBox_editMember", @required = "required" })<br>
+                                @Html.ValidationMessage("dependantType", "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-md-12">
+                        <div class="col-md-6">
+                            <div class="col-md-3">
+                                @Html.LabelFor(model => model.dependent.idNumber, htmlAttributes: new { @class = "control-label" })
+                            </div>
+                            <div class="col-md-9">
+                                @Html.EditorFor(model => model.dependent.idNumber, new { htmlAttributes = new { @class = "disabledField", @disabled = "disabled" } })
+                                @Html.ValidationMessageFor(model => model.dependent.idNumber, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="col-md-3">
+                                @Html.LabelFor(model => model.dependent.isPrinciple, htmlAttributes: new { @class = "control-label lift" })
+                            </div>
+                            <div class="col-md-9">
+                                <div class="checkbox check-box">
+                                    @Html.EditorFor(model => model.dependent.isPrinciple)
+                                    @Html.ValidationMessageFor(model => model.dependent.isPrinciple, "", new { @class = "text-danger pullE" })
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-md-12">
+                        <div class="col-md-6">
+                            <div class="col-md-3" style="margin-top: -2px">
+                                @Html.LabelFor(model => model.dependent.birthDate, htmlAttributes: new { @class = "control-label" })
+                            </div>
+                            <div class="col-md-9 birthDate_fixer infoBox_editMember">
+                                @Html.DisplayFor(model => model.dependent.birthDate, new { htmlAttributes = new { @class = "infoBox_editMember datepicker" } })
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="col-md-3" style="text-align: right; margin-left: -1%!important; font-family: 'Century Gothic'; font-size: 14px; font-weight: bold; color: #003366">
+                                @System.Web.Configuration.WebConfigurationManager.AppSettings["Citizen"]
+                            </div>
+                            <div class="col-md-9">
+                                <div class="checkbox check-box_editMember">
+                                    @Html.EditorFor(model => model.dependent.isSACitizen)
+                                    @Html.ValidationMessageFor(model => model.dependent.isSACitizen, "", new { @class = "text-danger pullE" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 1.5%"></div>
+
+                <div class="form-group">
+                    <div class="col-md-12">
+                        <div class="col-md-6">
+                            <div class="col-md-3">
+                                @Html.LabelFor(model => model.dependent.demographic, htmlAttributes: new { @class = "control-label" })
+                            </div>
+                            <div class="col-md-9 demographicPill">
+                                @Html.DropDownList("DemographicCode", null, "**Select**", htmlAttributes: new { @class = "disabledField", @disabled = "disabled" })<br>
+                                @Html.ValidationMessage("DemographicCode", "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 1.5%"></div>
+
+                <div class="form-group">
+                    <div class="col-md-12">
+                        <div class="col-md-6">
+                            <div class="col-md-3">
+                                @Html.LabelFor(model => model.dependent.languageCode, htmlAttributes: new { @class = "control-label" })
+                            </div>
+                            <div class="col-md-9 languagePill">
+                                @Html.DropDownList("language", null, "**Select**", htmlAttributes: new { @class = "disabledField", @disabled = "disabled" })<br>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 1.6%"></div>
+
+                <div class="form-group">
+                    <div class="col-md-12">
+                        <div class="col-md-6">
+                            <div class="col-md-3">
+                                @Html.LabelFor(model => model.dependent.sex, htmlAttributes: new { @class = "control-label" })
+                            </div>
+                            <div class="col-md-9 genderPill">
+                                @Html.DropDownList("sex", null, "**Select**", htmlAttributes: new { @class = "disabledField", @disabled = "disabled" })<br>
+                                @Html.ValidationMessage("sex", "", new { @class = "text-danger", @style = "position: relative" })
+
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-md-12">
+                        <div class="col-md-6">
+
+                        </div>
+                        <div class="col-md-6">
+                            <div class="col-md-3">
+                                @Html.LabelFor(model => model.dependent.optOut, htmlAttributes: new { @class = "control-label" })
+                            </div>
+                            <div class="col-md-9">
+                                <div class="checkbox check-box">
+                                    @Html.EditorFor(model => model.dependent.optOut)
+                                    @Html.ValidationMessageFor(model => model.dependent.optOut, "", new { @class = "text-danger pullE" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <br />
+            <br />
+
+            <div class="form-group">
+                <div class="actionButton" style="margin-left: 38%; z-index: 100">
+                    <input value="Back" class="btn buttonRound_formBack go_back" style="width: 15%!important" />
+                    <input type="submit" value="Save" class="btn buttonRound_scriptAdd" style="width: 15%!important" />
+                </div>
+            </div>
+        }
+
+    </div>
+
+</div>
+
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+
+<!--Lab refence validation Alert-->
+@if (ViewBag.memberNumber != null)
+{
+    <script type="text/javascript">
+
+    window.onload = function () {
+        toastr.options.positionClass = 'toast-bottom-right';
+        toastr.options.timeOut = 5000;
+
+        toastr.error("@ViewBag.memberNumber");
+    }
+    </script>
+}
+
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+@section scripts{
+
+    <script src="~/bundles/jqueryval"></script>
+
+
+    <script type="text/javascript">
+        $(function () {
+            fillBirthdate();
+        });
+
+        function isNumber(evt) {
+            evt = (evt) ? evt : window.event;
+            var charCode = (evt.which) ? evt.which : evt.keyCode;
+            if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+                return false;
+            }
+            return true;
+        }
+
+        function fillBirthdate() {
+            var stateId = $('#dependent_idNumber').val();
+            if (stateId.length > 5) {
+                var decade = '19';
+                if (stateId.substring(0, 2) < 19) {
+                    decade = '20';
+                }
+
+                $('#dependent_birthDate').val(decade + $('#dependent_idNumber').val().substring(0, 2) + '-' + $('#dependent_idNumber').val().substring(2, 4) + '-' + $('#dependent_idNumber').val().substring(4, 6));
+
+            }
+        }
+
+        function isNumber(evt) {
+            evt = (evt) ? evt : window.event;
+            var charCode = (evt.which) ? evt.which : evt.keyCode;
+            if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+                return false;
+            }
+            return true;
+        }
+
+        function changeBirthdate() {
+            var stateId = $('#dependent_idNumber').val();
+            if (stateId.length > 5) {
+                var decade = '19';
+                if (stateId.substring(0, 2) < 19) {
+                    decade = '20';
+                }
+
+                $('#dependent_birthDate').val(decade + $('#dependent_idNumber').val().substring(0, 2) + '-' + $('#dependent_idNumber').val().substring(2, 4) + '-' + $('#dependent_idNumber').val().substring(4, 6));
+            }
+        }
+
+
+    </script>
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+
+    <script>
+        $(document).ready(function () { $("#provider").select2({ multiple: false, allowClear: true }); });
+        $(document).ready(function () { $("#sex").select2({ multiple: false, allowClear: true }); });
+        $(document).ready(function () { $("#dependantType").select2({ multiple: false, allowClear: true }); });
+        $(document).ready(function () { $("#medicalAid").select2({ multiple: false, allowClear: true }); });
+        $(document).ready(function () { $("#DemographicCode").select2({ multiple: false, allowClear: true }); });
+        $(document).ready(function () { $("#language").select2({ multiple: false, allowClear: true }); });
+        $(document).ready(function () { $("#originationID").select2({ multiple: false, allowClear: true }); });
+    </script>
+
+
+    <script>
+
+        /*WaffleNavigation_Script_open*/
+        $("#patientMenu-toggle").click(function (e) {
+            e.preventDefault();
+            $("#patientWrapper").toggleClass("active");
+        });
+        /*WaffleNavigation_Script_close*/
+        $("#exit-toggle").click(function (e) {
+            e.preventDefault();
+            $("#patientWrapper").toggleClass("active");
+        });
+
+        /*specialNote*/
+        $("#alert-toggle").click(function (e) {
+            e.preventDefault();
+            $("#alertWrapper").toggleClass("active");
+        });
+
+        /*Left navigationSlider*/
+        $("#menu-toggle").click(function (e) {
+            e.preventDefault();
+            $("#wrapper").toggleClass("active");
+        });
+
+        $(function () {
+            $('.go_back').click(function (e) {
+                e.preventDefault();
+                history.go(-1);
+            });
+        });
+
+        // Javascript to enable link to tab
+        var url = document.location.toString();
+        if (url.match('#')) {
+            $('.nav-tabs a[href="#' + url.split('#')[1] + '"]').tab('show');
+        }
+
+        // Change hash for page-reload
+        $('.nav-tabs a').on('shown.bs.tab', function (e) {
+            window.location.hash = e.target.hash;
+        })
+
+        $(".nav-tabs a").click(function () { });
+
+
+    </script>
+}

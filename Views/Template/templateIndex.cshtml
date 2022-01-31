@@ -1,0 +1,224 @@
+﻿@model HaloCareCore.Models.CommunicationViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Templates";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<comment>
+    <!--
+        19 June 2020 -- HCare-953(Settings - Assignment tabs - page tabs)
+        Create a new layout for the updated tabs in the Settings/AssignmentTypes view.
+    -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+</style>
+<javascript>
+    <script src="https://www.jqueryscript.net/demo/jQuery-Plugin-For-Sortable-Bootstrap-Tables-Bootstrap-Sortable/Scripts/bootstrap-sortable.js"></script>
+</javascript>
+
+<div class="fullScreen_container">
+    <!----------------------------------------------------------------------------- html-top-navigation-panel  ---------------------------------------------------------------------------->
+    <navigation>
+        <nav id="global-nav" class="nav">
+            <div class="pull-left title">
+                <h1 class="site-title_patientProfile">
+                    <span><i class="fas fa-comments"></i></span>&emsp; Templates
+                </h1>
+            </div>
+            <div class="pull-right title">
+                <div class="site-title_userID pull-right">
+                    <div class="halocareLogoX"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+                </div>
+                <h1 class="site-title_userID pull-right">
+                    @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                    {
+                        <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                    }
+                </h1>
+                <h1 class="site-waffleIcon pull-right">
+                    <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+                </h1>
+            </div>
+        </nav>
+        <ul class="breadcrumbs_fullScreens">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+            <li><a href="@Url.Action("Index", "Administration", new {})">Settings</a></li>
+            <li><a href="#">@ViewBag.Title</a></li>
+        </ul>
+        <div class="navCollection_fullScreens">
+            @Html.Partial("_navCollection")
+        </div>
+
+        <div style="margin-bottom: 3%"></div>
+    </navigation>
+
+    <!-------------------------------------------------------------------------------------- html-body ------------------------------------------------------------------------------------>
+    <div class="container-tab">
+        <div class="row">
+            <div class="span12">
+                <div class="container-tab">
+                    <!------------------------------------------------------------------------------------ tab-navigation ----------------------------------------------------------------------------------->
+                    <ul class="nav nav-pills nav-justified" role="tablist">
+                        <li role="presentation" class="tab-clinical active"><a href="#text-templates" aria-controls="text-templates" class="tab-label" data-toggle="tab" id="text_template">Text templates</a></li>
+                        <li role="presentation" class="tab-clinical"><a href="#email-templates" aria-controls="email-templates" class="tab-label" role="tab" data-toggle="tab" id="email_template">Email templates</a></li>
+                    </ul>
+                    <div class="tab-content">
+                        <!------------------------------------------------------------------------------- text-template-panel ------------------------------------------------------------------------------->
+                        <div role="tabpanel" class="tab-pane active" id="text-templates">
+                            <div class="row">
+                                <br />
+                                <!--------------------------------------------------------------------------- new/search -------------------------------------------------------------------------->
+                                <div class="col-md-12 row">
+                                    <div class="col-md-6">
+                                        <h4 class="subHeading">
+                                            Text templates
+                                            <a class="create-new" href="@Url.Action("Create", "Template", new { })" style="font-size: 14px">Create new <span><i class="fa fa-plus-circle" style="font-size: 12px"></i></span></a>
+                                        </h4>
+                                    </div>
+                                    <!--------------------------------------------------------------------------- jq-search -------------------------------------------------------------------------->
+                                    <div class="col-md-6">
+                                        <div class="input-wrapper-new-search">
+                                            <input type="text" class="form-control-new-search" id="text-template-search" onkeyup="myFunction()" placeholder="Search..." />
+                                        </div>
+                                    </div>
+                                </div>
+                                <!------------------------------------------------------------------------ text-template-table ---------------------------------------------------------------------->
+                                <table class="table taskSetupTable sortable" id="text-template-table">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 10%">@Html.DisplayNameFor(model => model.smsMessageTemplate.title) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="width: 20%">@Html.DisplayNameFor(model => model.smsMessageTemplate.template) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="width: 10%">@Html.DisplayNameFor(model => model.smsMessageTemplate.program) <i class="fa fa-fw fa-sort sortArrow"></i></th><!--HCare-1043-->
+                                            <th style="width: 10%">@Html.DisplayName("Created") <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="width: 10%">@Html.DisplayName("Modified") <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="width: 8%">@Html.DisplayNameFor(model => model.smsMessageTemplate.smsLanguage) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="text-align: center!important; width: 7%">@Html.DisplayNameFor(model => model.smsMessageTemplate.Active)</th>
+                                            <th style="text-align: center!important; width: 7%">Action</th>
+                                        </tr>
+                                    </thead>
+
+                                    @foreach (var item in Model.smsMessageTemplates)
+                                    {
+                                        <tbody id="text-template-filter">
+                                            <tr>
+                                                <td><span class="@(item.Active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.title)</span></td>
+                                                <td><span class="@(item.Active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.template)</span></td>
+                                                <td><span class="@(item.Active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.program)</span></td><!--HCare-1043-->
+                                                <td>@Html.DisplayFor(modelItem => item.createdBy) <span style="font-size: 10px">@(item.createdDate == null ? "" : item.createdDate.ToString("(dd-MM-yyyy)"))</span></td>
+                                                <td>@Html.DisplayFor(modelItem => item.modifiedBy) <span style="font-size: 10px">@(item.modifiedDate == null ? "" : item.modifiedDate.Value.ToString("(dd-MM-yyyy)"))</span></td>
+                                                <td><span class="@(item.Active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.smsLanguage)</span></td>
+                                                <td class="text-center"><span class="@(item.Active == true ? "check-yes fas fa-check-circle" : "check-no fas fa-times-circle")"></span></td>
+                                                <td class="statusCode linkNav" style="text-align: center!important">
+                                                    @Html.ActionLink("Edit", "Edit", new { id = item.templateID }) |
+                                                    @Html.ActionLink("Details", "Details", new { id = item.templateID })
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    }
+                                </table>
+                            </div>
+                        </div>
+                        <!------------------------------------------------------------------------------- email-template-panel ------------------------------------------------------------------------------->
+                        <div role="tabpanel" class="tab-pane" id="email-templates">
+                            <div class="row">
+                                <br />
+                                <!--------------------------------------------------------------------------- new/search -------------------------------------------------------------------------->
+                                <div class="col-md-12 row">
+                                    <div class="col-md-6">
+                                        <h4 class="subHeading">
+                                            Email templates
+                                            <a class="create-new" href="@Url.Action("Create_EmailTemplates", "Template", new { })" style="font-size: 14px">Create new <span><i class="fa fa-plus-circle" style="font-size: 12px"></i></span></a>
+                                        </h4>
+                                    </div>
+                                    <!--------------------------------------------------------------------------- jq-search -------------------------------------------------------------------------->
+                                    <div class="col-md-6">
+                                        <div class="input-wrapper-new-search">
+                                            <input type="text" class="form-control-new-search" id="email-template-search" onkeyup="myFunction()" placeholder="Search..." />
+                                        </div>
+                                    </div>
+                                </div>
+                                <!------------------------------------------------------------------------ email-template-table ---------------------------------------------------------------------->
+                                <table class="table taskSetupTable sortable" id="email-template-table">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 10%">@Html.DisplayNameFor(model => model.emailTemplate.title) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="width: 10%">@Html.DisplayNameFor(model => model.emailTemplate.program) <i class="fa fa-fw fa-sort sortArrow"></i></th> <!--HCare-1043-->
+                                            <th style="width: 15%">@Html.DisplayName("Created") <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="width: 15%">@Html.DisplayName("Modified") <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="text-align: center!important; width: 10%">@Html.DisplayNameFor(model => model.emailTemplate.Active) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="text-align: center!important; width: 10%">Action</th>
+                                        </tr>
+                                    </thead>
+
+                                    @foreach (var item in Model.emailTemplates)
+                                    {
+                                        <tbody id="email-template-filter">
+                                            <tr>
+                                                <td><span class="@(item.Active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.title)</span></td>
+                                                <td><span class="@(item.Active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.program)</span></td> <!--HCare-1043-->
+                                                <td>@Html.DisplayFor(modelItem => item.createdBy) <span style="font-size: 10px">@(item.createdDate == null ? "" : item.createdDate.ToString("(dd-MM-yyyy)"))</span></td>
+                                                <td>@Html.DisplayFor(modelItem => item.modifiedBy) <span style="font-size: 10px">@(item.modifiedDate == null ? "" : item.modifiedDate.Value.ToString("(dd-MM-yyyy)"))</span></td>
+                                                <td class="text-center"><span class="@(item.Active == true ? "check-yes fas fa-check-circle" : "check-no fas fa-times-circle")"></span></td>
+                                                <td class="statusCode linkNav" style="text-align: center!important">
+                                                    @Html.ActionLink("Edit", "Edit_EmailTemplates", new { id = item.templateID }) |
+                                                    @Html.ActionLink("Details", "Details_EmailTemplates", new { id = item.templateID })
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    }
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixedBack">
+        <input value="Back" class="btn buttonRound_formBack " onclick="MainbackBtn();" style="width: 15%" />
+    </div>
+</div>
+
+<script src="js/jquery.tablesorter.min.js"></script>
+
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <!-- redirect -->
+    <script>
+            function MainbackBtn() {
+            window.location.href = '@Url.Action("Index", "Administration")';
+        }
+    </script>
+    <!-- text-template-search -->
+    <script>
+        $(document).ready(function () {
+            $("#text-template-search").on("keyup", function () {
+                var value = $(this).val().toLowerCase();
+                $("#text-template-filter tr").filter(function () {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+            });
+        });
+    </script>
+    <!-- email-template-search -->
+    <script>
+        $(document).ready(function () {
+            $("#text-template-search").on("keyup", function () {
+                var value = $(this).val().toLowerCase();
+                $("#email-template-filter tr").filter(function () {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+            });
+        });
+    </script>
+
+}
+

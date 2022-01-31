@@ -1,0 +1,74 @@
+﻿
+@{
+    ViewBag.Title = "performanceDashboard";
+    Layout = "~/Views/Shared/_LayoutReport_Menu.cshtml";
+}
+
+
+<style>
+    .indexnav {
+        margin-top: 100px;
+    }
+
+    body {
+        background-image: url('../../Content/Images/Backgrounds/homePage/homePage_one.png');
+        background-size: 100%;
+    }
+</style>
+
+
+<div class="topBar_reports">
+    <h2>Performance Dashboard</h2>
+    <img src="~/Content/Images/memberProfile/topBar Icons/performanceWhite_Two.png" style="width: 3.5%; margin-top: 0%" />
+</div>
+
+<br />
+<br />
+<br />
+<br />
+
+
+<!--Navigation Icons-->
+
+<h2 style="color: #003366; font-size: 250%; text-align: center; margin-bottom: 10%"><i><span style="color: #0081b3">Performance Dashboard</span></i><br /> <span style="font-family: 'Antro Vectra'; font-size: 100%; padding-left: 10em">HaloCare</span></h2>
+
+<div class="container indexnav">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="col-md-2"></div>
+
+            <!--productionReport-->
+            <div class="col-md-4">
+                <a href="@Url.Action("caseManagerProduction", "ReportManagement", null)">
+                    <img src="~/Content/Images/Navigation/5. Reports/productionReports_One.png" style="width: 18%; margin-top: 5%; margin-bottom: 5%" />
+                    <div class="col-xs-12 homenavbtns">
+                        <h8>Case Manager<br /><span>Production Report</span></h8>
+                    </div>
+                </a>
+            </div>
+
+            <!--slaReport-->
+            <div class="col-md-4">
+                <a href="@Url.Action("serviceLevelAgreement", "ReportManagement", null)">
+                    <img src="~/Content/Images/Navigation/5. Reports/slaReports_One.png" style="width: 16%; margin-top: 3%; margin-bottom: 3.5%" />
+                    <div class="col-xs-12 homenavbtns">
+                        <h8>Service Level<br /><span>Agreement Report</span></h8>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-2"></div>
+
+        </div>
+    </div>
+</div>
+
+<footer class="backButton_Navigation" style="position: fixed; bottom: 1.5%; left: 50px">
+    @Html.ActionLink("Back", "reportDashboard", "ReportManagement")
+</footer>
+
+<footer>
+    <img src="~/Content/Images/Navigation/5. Reports/executiveDashboard.png" style="position:fixed; bottom:3.5%; right: 0; left: 0; margin-left: 95.8%; width: 2%">
+</footer>
+
+

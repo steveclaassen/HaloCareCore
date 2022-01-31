@@ -1,0 +1,539 @@
+﻿@model HaloCareCore.Models.Management.RiskRatingMonitor
+@using HaloCareCore.Extensions
+@{
+    ViewBag.Title = "Risk rating";
+    Layout = "~/Views/Shared/_layout-view-x.cshtml";
+}
+
+<javascript>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+    <script src="https://www.jqueryscript.net/demo/jQuery-Plugin-For-Sortable-Bootstrap-Tables-Bootstrap-Sortable/Scripts/bootstrap-sortable.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/js/standalone/selectize.js"></script>
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.default.css">
+</javascript>
+<style>
+    .selectize-control.single .selectize-input [data-value] {
+        border: 1px solid transparent !important;
+        border-radius: 0px !important;
+    }
+
+    .selectize-control.multi .selectize-input [data-value] {
+        border: 1px solid transparent !important;
+        border-radius: 0px !important;
+        box-shadow: none !important;
+    }
+
+    .error-alert {
+        display: none;
+        background-color: rgba(217, 48, 78, 0.2);
+        padding: 10px 12px 10px 12px;
+        border: 1px solid transparent;
+        border-radius: 0px;
+        font: 100 12px 'Open Sans', sans-serif;
+        color: rgb(217, 48, 78);
+        margin: 0 0 0 0;
+        margin-top: -10px;
+        margin-bottom: -10px;
+        margin-left: -15px;
+        width: 102%;
+        vertical-align: middle;
+    }
+
+        .error-alert span a {
+            color: rgb(217, 48, 78);
+            margin-top: -5px;
+        }
+
+    .new-account-row-insert {
+        display: block;
+        max-width: 1000px !important;
+        width: 42%;
+        max-height: 100px;
+        height: 30px;
+        margin-top: 5px;
+        margin-left: 10px;
+        padding: 6px 6px;
+        line-height: 1.428571429;
+        color: #003366;
+        border-radius: 0px;
+        border: none;
+        border-bottom: 1px solid #e8e6e6;
+        background-color: transparent !important;
+        font-family: 'Century Gothic' !important;
+        text-indent: 5px;
+    }
+
+    .required-color {
+        color: transparent !important;
+    }
+
+    label.attachment-btn {
+        color: #ffffff;
+        background-color: dodgerblue;
+        border: 1px solid dodgerblue;
+        margin-top: 0.5%;
+        margin-left: 1%;
+        padding: 4px 4px;
+        font-family: 'Century Gothic';
+        font-size: 1em;
+        line-height: 1.6;
+        border-radius: 3px;
+        width: 100px;
+        outline: none !important;
+        z-index: 40;
+        font-weight: 100;
+        transition: 0.3s;
+        text-align: center;
+    }
+
+    #file-chosen {
+        margin-left: 0.3rem;
+        font-family: 'Century Gothic';
+        color: #ccc;
+    }
+
+    .file-check-yes {
+        color: #33BB66;
+        font-size: 18px;
+    }
+
+    .file-check-no {
+        color: rgb(244 113 116 / 0.50);
+        font-size: 18px;
+        margin-bottom: -2px;
+        display: none;
+    }
+
+    .cke_toolbar_last {
+        display: none !important;
+    }
+</style>
+
+<div id="instruction-wrapper">
+    <div class="instruction-panel">
+        <h class="account-step">Instruction</h>
+        <p class="account-step-instruction">Enter new information.</p>
+        <ul style="padding: 0">
+            <li class="account-step-list asl-1 active-step"><span class="number-circle circle-1 active-circle">1</span>@Html.DisplayNameFor(model => model.Description)</li>
+            <li class="account-step-list asl-2"><span class="number-circle circle-2">2</span>@Html.DisplayNameFor(model => model.From)</li>
+            <li class="account-step-list asl-3"><span class="number-circle circle-3">3</span>@Html.DisplayNameFor(model => model.To)</li>
+            <li class="account-step-list asl-4"><span class="number-circle circle-4">4</span>@Html.DisplayNameFor(model => model.Percentage)</li>
+            <li class="account-step-list asl-5"><span class="number-circle circle-5">5</span>@Html.DisplayNameFor(model => model.Program)</li>
+        </ul>
+    </div>
+</div>
+
+<div class="collapse in">
+    <div class="card card-body">
+        <div class="collapse-body">
+            <div class="new-account-panel">
+                @using (Html.BeginForm("Risk_Rating_Monitor_Create", "Administration", FormMethod.Post, new { id = "rr-monitor-create", enctype = "multipart/form-data" }))
+                {
+                    <div class="col-md-12 row">
+                        <div class="account-heading">Risk rating monitor setup</div>
+                        <p class="account-sub-header-new">Enter the information below and click submit to continue.</p>
+                    </div>
+                    <hr class="fancyruler">
+                    <input id="validation" name="validation" value="@ViewBag.Validation" hidden />
+                    <div id="rrm-validation" class="error-alert"></div>
+
+                    <table class="table details-table" id="new-template">
+                        <tr>
+                            <td class="new-account-row-heading">@Html.DisplayNameFor(model => model.Description) <sup style="font-size: 5px; top: -8px"><i id="required-description" class="fas fa-asterisk pulser"></i></sup></td>
+                            <td class="row-information">
+                                @Html.EditorFor(model => model.Description, new { htmlAttributes = new { @class = "new-account-row-insert", @autocomplete = "off", @required = "required", @onkeyup = "Validation1()" } })
+                                <span id="description-validation" class="text-danger" style="margin-left: 1%"></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="new-account-row-heading">@Html.DisplayNameFor(model => model.From) <sup style="font-size: 5px; top: -8px"><i id="required-rr-from" class="fas fa-asterisk pulser"></i></sup></td>
+                            <td class="row-information">
+                                @Html.DropDownListFor(model => model.From, new SelectList(Model.RiskRatingTypes, "RiskType", "RiskName"), "Select", htmlAttributes: new { @class = "selectize-2", @required = "required", @onchange = "Validation2()" })
+                                <span id="rr-from-validation" class="text-danger" style="margin-left: 1%"></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="new-account-row-heading">@Html.DisplayNameFor(model => model.To) <sup style="font-size: 5px; top: -8px"><i id="required-rr-to" class="fas fa-asterisk pulser"></i></sup></td>
+                            <td class="row-information">
+                                @Html.DropDownListFor(model => model.To, new SelectList(Model.RiskRatingTypes, "RiskType", "RiskName"), "Select", htmlAttributes: new { @class = "selectize-3", @required = "required", @onchange = "Validation3()" })
+                                <span id="rr-to-validation" class="text-danger" style="margin-left: 1%"></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="new-account-row-heading">@Html.DisplayNameFor(model => model.Percentage) <sup style="font-size: 5px; top: -8px"><i id="required-percentage" class="fas fa-asterisk pulser"></i></sup></td>
+                            <td class="row-information">
+                                @Html.EditorFor(model => model.Percentage, new { htmlAttributes = new { @class = "new-account-row-insert", @autocomplete = "off", @required = "required", @onkeyup = "Validation4()" } })
+                                <span id="percentage-validation" class="text-danger" style="margin-left: 1%"></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="new-account-row-heading">@Html.DisplayNameFor(model => model.Program) </td>
+                            <td class="row-information">
+                                @Html.DropDownListFor(model => model.Program, new SelectList(Model.Programs.Where(x => x.Active == true), "programID", "ProgramName"), "Select", htmlAttributes: new { @class = "selectize-5", @onchange = "Validation5()" })
+                                <span id="program-validation" class="text-danger" style="margin-left: 1%"></span>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <div class="sf-footer">
+                        <input type="button" id="rrm-back" value="Back" class="btn modal-button-previous" onclick="location.href = '@Url.Action("Index", "Rules", null)'; backKey();" />
+                        <input type="submit" id="rrm-submit" value="Submit" class="btn modal-button-next" onclick="storageKey(); NameCheck(); FromCheck(); ToCheck(); PercentageCheck();" />
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+@section scripts{
+    <script src="~/bundles/jqueryval"></script>
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/js/standalone/selectize.js"></script>
+    <script>
+        initSelectize();
+        function initSelectize() {
+            $('#From').selectize({
+                persist: true,
+                preload: true,
+                maxItems: 1,
+                delimiter: ',',
+                valueField: 'id',
+                labelField: 'name',
+                searchField: ['name'],
+                hideSelected: true,
+                plugins: ['remove_button'],
+                render: {
+                    option: function (item, escape) {
+                        return '<span class="name">' + escape(item.name) + '</span>';
+                    }
+                },
+            }),
+                $('#To').selectize({
+                    persist: true,
+                    preload: true,
+                    maxItems: 1,
+                    delimiter: ',',
+                    valueField: 'id',
+                    labelField: 'name',
+                    searchField: ['name'],
+                    hideSelected: true,
+                    plugins: ['remove_button'],
+                    render: {
+                        option: function (item, escape) {
+                            return '<span class="name">' + escape(item.name) + '</span>';
+                        }
+                    },
+                }),
+                $('#Program').selectize({
+                    persist: true,
+                    preload: true,
+                    maxItems: 1,
+                    delimiter: ',',
+                    valueField: 'id',
+                    labelField: 'name',
+                    searchField: ['name'],
+                    hideSelected: true,
+                    plugins: ['remove_button'],
+                    render: {
+                        option: function (item, escape) {
+                            return '<span class="name">' + escape(item.name) + '</span>';
+                        }
+                    },
+                })
+        }
+    </script>
+    <script>
+        $(function () {
+            $('li.asl-1').click(function () {
+                $("#Description").focus();
+                $('li.asl-1').addClass("active-step");
+                $('li span.circle-1').addClass("active-circle");
+                $('li.asl-2').removeClass("active-step");
+                $('li span.circle-2').removeClass("active-circle");
+                $('li.asl-3').removeClass("active-step");
+                $('li span.circle-3').removeClass("active-circle");
+                $('li.asl-4').removeClass("active-step");
+                $('li span.circle-4').removeClass("active-circle");
+                $('li.asl-5').removeClass("active-step");
+                $('li span.circle-5').removeClass("active-circle");
+            });
+            $('#Description').click(function () {
+                $('li.asl-1').addClass("active-step");
+                $('li span.circle-1').addClass("active-circle");
+                $('li.asl-2').removeClass("active-step");
+                $('li span.circle-2').removeClass("active-circle");
+                $('li.asl-3').removeClass("active-step");
+                $('li span.circle-3').removeClass("active-circle");
+                $('li.asl-4').removeClass("active-step");
+                $('li span.circle-4').removeClass("active-circle");
+                $('li.asl-5').removeClass("active-step");
+                $('li span.circle-5').removeClass("active-circle");
+            });
+
+            $(document).on('click', '.selectize-2 div.selectize-input.focus', function (e) {
+                $('li.asl-1').removeClass("active-step");
+                $('li span.circle-1').removeClass("active-circle");
+                $('li.asl-2').addClass("active-step");
+                $('li span.circle-2').addClass("active-circle");
+                $('li.asl-3').removeClass("active-step");
+                $('li span.circle-3').removeClass("active-circle");
+                $('li.asl-4').removeClass("active-step");
+                $('li span.circle-4').removeClass("active-circle");
+                $('li.asl-5').removeClass("active-step");
+                $('li span.circle-5').removeClass("active-circle");
+            });
+            $(document).on('click', '.selectize-3 div.selectize-input.focus', function (e) {
+                $('li.asl-1').removeClass("active-step");
+                $('li span.circle-1').removeClass("active-circle");
+                $('li.asl-2').removeClass("active-step");
+                $('li span.circle-2').removeClass("active-circle");
+                $('li.asl-3').addClass("active-step");
+                $('li span.circle-3').addClass("active-circle");
+                $('li.asl-4').removeClass("active-step");
+                $('li span.circle-4').removeClass("active-circle");
+                $('li.asl-5').removeClass("active-step");
+                $('li span.circle-5').removeClass("active-circle");
+            });
+
+            $('li.asl-4').click(function () {
+                $("#Description").focus();
+                $('li.asl-1').removeClass("active-step");
+                $('li span.circle-1').removeClass("active-circle");
+                $('li.asl-2').removeClass("active-step");
+                $('li span.circle-2').removeClass("active-circle");
+                $('li.asl-3').removeClass("active-step");
+                $('li span.circle-3').removeClass("active-circle");
+                $('li.asl-4').addClass("active-step");
+                $('li span.circle-4').addClass("active-circle");
+                $('li.asl-5').removeClass("active-step");
+                $('li span.circle-5').removeClass("active-circle");
+            });
+            $('#Percentage').click(function () {
+                $('li.asl-1').removeClass("active-step");
+                $('li span.circle-1').removeClass("active-circle");
+                $('li.asl-2').removeClass("active-step");
+                $('li span.circle-2').removeClass("active-circle");
+                $('li.asl-3').removeClass("active-step");
+                $('li span.circle-3').removeClass("active-circle");
+                $('li.asl-4').addClass("active-step");
+                $('li span.circle-4').addClass("active-circle");
+                $('li.asl-5').removeClass("active-step");
+                $('li span.circle-5').removeClass("active-circle");
+            });
+
+            $(document).on('click', '.selectize-4 div.selectize-input.focus', function (e) {
+                $('li.asl-1').removeClass("active-step");
+                $('li span.circle-1').removeClass("active-circle");
+                $('li.asl-2').removeClass("active-step");
+                $('li span.circle-2').removeClass("active-circle");
+                $('li.asl-3').removeClass("active-step");
+                $('li span.circle-3').removeClass("active-circle");
+                $('li.asl-4').removeClass("active-step");
+                $('li span.circle-4').removeClass("active-circle");
+                $('li.asl-5').addClass("active-step");
+                $('li span.circle-5').addClass("active-circle");
+            });
+        });
+    </script>
+    <script>
+        function Validation1() {
+            var name = $("#Description").val();
+            $("#rrm-validation").hide().html('');
+            $('#description-validation').html('');
+            $("#rrm-submit").prop('disabled', false);
+
+            if (name.length > 0) {
+                $("#required-description").addClass("required-color");
+                $('li').find('span.circle-1').text("✓");
+                $('li').find('span.circle-1').addClass("complete-circle");
+            }
+            else {
+                $("#required-description").removeClass("required-color");
+                $('li').find('span.circle-1').text("1");
+                $('li').find('span.circle-1').removeClass("complete-circle");
+            }
+
+            $.ajax({
+                url: '/Administration/RiskMonitorValidation',
+                type: "POST",
+                dataType: "JSON",
+                data: { name: name },
+                success: function (result) {
+                    var description = result.Description;
+                    if (description.toLowerCase() == name.toLowerCase()) {
+                        $("#rrm-validation").fadeIn(200).html('&emsp;&nbsp;Warning: Description already exists.');
+                        $('#description-validation').html('<span style="font-size: 10px"><i class="fas fa-exclamation-circle"></i> </span>Description already exists!');
+                        $("#rrm-submit").prop('disabled', true);
+                        event.preventDefault();
+                    }
+                },
+                error: function (result) {
+                }
+            });
+
+        }
+        function Validation2() {
+            var from = $("#From").val();
+            $('#rr-from-validation').html('');
+
+            if (from.length > 0) {
+                $("#required-rr-from").addClass("required-color");
+                $('li').find('span.circle-2').text("✓");
+                $('li').find('span.circle-2').addClass("complete-circle");
+                $('#rr-from-validation').addClass("hidden");
+            }
+            else {
+                $("#required-rr-from").removeClass("required-color");
+                $('li').find('span.circle-2').text("2");
+                $('li').find('span.circle-2').removeClass("complete-circle");
+                $('#rr-from-validation').removeClass("hidden");
+            }
+
+            DuplicateCheck();
+        }
+        function Validation3() {
+            var to = $("#To").val();
+            $('#rr-to-validation').html('');
+
+            if (to.length > 0) {
+                $("#required-rr-to").addClass("required-color");
+                $('li').find('span.circle-3').text("✓");
+                $('li').find('span.circle-3').addClass("complete-circle");
+                $('#rr-to-validation').addClass("hidden");
+            }
+            else {
+                $("#required-rr-to").removeClass("required-color");
+                $('li').find('span.circle-3').text("3");
+                $('li').find('span.circle-3').removeClass("complete-circle");
+                $('#rr-to-validation').removeClass("hidden");
+            }
+
+            DuplicateCheck();
+        }
+        function Validation4() {
+            var percentage = $("#Percentage").val();
+            $('#percentage-validation').html('');
+
+            if (percentage.length > 0) {
+                $("#required-percentage").addClass("required-color");
+                $('li').find('span.circle-4').text("✓");
+                $('li').find('span.circle-4').addClass("complete-circle");
+                $('#percentage-validation').addClass("hidden");
+            }
+            else {
+                $("#required-percentage").removeClass("required-color");
+                $('li').find('span.circle-4').text("4");
+                $('li').find('span.circle-4').removeClass("complete-circle");
+                $('#percentage-validation').removeClass("hidden");
+            }
+
+            DuplicateCheck();
+        }
+        function Validation5() {
+            var program = $("#Program").val();
+            $('#program-validation').html('');
+
+            if (program.length > 0) {
+                $("#required-program").addClass("required-color");
+                $('li').find('span.circle-4').text("✓");
+                $('li').find('span.circle-4').addClass("complete-circle");
+                $('#program-validation').addClass("hidden");
+            }
+            else {
+                $("#required-program").removeClass("required-color");
+                $('li').find('span.circle-4').text("4");
+                $('li').find('span.circle-4').removeClass("complete-circle");
+                $('#program-validation').removeClass("hidden");
+            }
+
+            DuplicateCheck();
+        }
+    </script>
+    <script>
+        function NameCheck() {
+            var value = $("#Description").val();
+            if (value == null || value == '') {
+                $('#description-validation').html('<span style="font-size: 10px"><i class="fas fa-exclamation-circle"></i> </span>Description is required!');
+                event.preventDefault();
+            }
+        }
+        function FromCheck() {
+            var value = $("#From :selected").val();
+            if (value == "") {
+                $('#rrm-from-validation').html('<span style="font-size: 10px"><i class="fas fa-exclamation-circle"></i> </span>This field is required!');
+                event.preventDefault();
+            }
+        }
+        function ToCheck() {
+            var value = $("#To :selected").val();
+            if (value == "") {
+                $('#rrm-to-validation').html('<span style="font-size: 10px"><i class="fas fa-exclamation-circle"></i> </span>This field is required!');
+                event.preventDefault();
+            }
+        }
+        function DuplicateCheck() {
+            $("#rrm-validation").fadeOut(200).html('');
+            $("#rrm-submit").prop('disabled', false);
+
+            var from = $("#From :selected").val();
+            var to = $("#To :selected").val();
+            var percentage = $("#Percentage").val();
+            var program = $("#Program :selected").val();
+
+            if (from != "" && to != "") {
+                $.ajax({
+                    url: '/Administration/RiskMonitorDuplication',
+                    type: "POST",
+                    dataType: "JSON",
+                    data: { from: from, to: to, percentage: percentage, program: program },
+                    success: function (result) {
+                        if (result != 'clear') {
+                            var description = result.Description;
+
+                            $("#rrm-validation").fadeIn(200).html('&emsp;&nbsp;Warning: <b>' + description + '</b> already contains the same parameters selected.');
+                            $("#rrm-submit").prop('disabled', true);
+                            event.preventDefault();
+                        }
+                    },
+                    error: function (result) {
+                    }
+                });
+            }
+
+        }
+    </script>
+    <script>
+        $(function () {
+            var validation = $("#validation").val();
+            if (validation == "duplicate") {
+                $("#rrm-validation").show().html('&emsp; Description already exists!');
+            }
+        });
+    </script>
+    <script>
+        function backKey() {
+            localStorage.setItem("rrm-back", Date.now());
+        }
+        function storageKey() {
+            localStorage.setItem("rrm-create", Date.now());
+        }
+    </script>
+    <script>
+        $(function () {
+            $('#Percentage').on('change', function () {
+                var num = parseFloat($('#Percentage').val());
+                var percentage = num.toFixed(2);
+
+                $('#Percentage').val(percentage);
+            })
+        })
+    </script>
+}

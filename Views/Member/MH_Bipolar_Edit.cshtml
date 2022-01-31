@@ -1,0 +1,1093 @@
+﻿@model HaloCareCore.Models.Questionnaire.MH_BipolarResponse
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Bipolar questionnaire";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<comment>
+    <!--
+        04 August 2020 -- HCare-1125(Mental Health Disease: QUESTIONNAIRE - BIPOLAR)
+    -->
+</comment>
+<style>
+    .field-validation-error:before {
+        font-family: FontAwesome;
+        content: "\f06a\00a0";
+    }
+
+    .subtext {
+        color: #808080;
+        font-size: 14px;
+    }
+
+    .select2-container--default .select2-results__option--highlighted[aria-selected] .subtext {
+        color: #fff
+    }
+
+    .select2-container--default .select2-results__option--highlighted[aria-selected]:hover .subtext {
+        color: #fff
+    }
+
+    .select2-container--default .select2-selection--single {
+        display: block !important;
+        width: 420px !important;
+        max-height: 100px;
+        height: 30px;
+        margin-left: 10px;
+        padding: 6px 6px;
+        line-height: 1.428571429;
+        color: #003366;
+        border-radius: 0px !important;
+        border: none !important;
+        border-bottom: 1px solid #e8e6e6 !important;
+        background-color: transparent !important;
+        -webkit-box-shadow: none !important;
+        box-shadow: none !important;
+        outline: none !important
+    }
+
+        .select2-container--default .select2-selection--single .select2-selection__placeholder {
+            color: white !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow b {
+            margin-top: -5px !important;
+            margin-right: 50% !important;
+        }
+
+    .overlay {
+        height: 100%;
+        width: 0;
+        position: fixed;
+        z-index: 501;
+        top: 0;
+        left: 0;
+        background-color: rgb(0,0,0);
+        background-color: rgba(0,0,0, 0.5);
+        overflow-x: visible;
+    }
+
+    .warning {
+        display: none;
+        background: #fff;
+        color: #FFFFFF;
+        border: none;
+        border-radius: 10px;
+        position: fixed;
+        width: 500px;
+        left: 50%;
+        top: 12%;
+        margin-left: -258px;
+        padding: 0px;
+        box-sizing: border-box;
+        z-index: 502;
+    }
+
+    .assignment-header {
+        background: #E74D4F;
+        text-align: center;
+        padding: 10px 20px 10px 10px;
+        margin-top: 0px;
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;
+        border: 5px solid #E74D4F;
+    }
+
+    .assignment-logo {
+        color: white;
+        text-align: center;
+        font-size: 50px;
+    }
+
+    .assignment-heading {
+        padding: 10px;
+        font-family: Comfortaa;
+        color: rgb(0,0,0);
+        text-align: center;
+        font-size: 25px;
+        font-weight: bold;
+    }
+
+    .assignment-message {
+        color: rgb(0,0,0);
+        text-align: center;
+        padding: 10px 10px 10px 10px;
+    }
+
+    .warning-alert {
+        color: #FEAF20;
+        margin-top: 5px;
+    }
+</style>
+
+<!---------------------------------------------------------------------- header ---------------------------------------------------------------------->
+<nav id="global-nav" class="nav">
+    <div class="pull-left title">
+        <h1 class="site-title_patientProfile">
+            <span><img src="~/Content/Images/_2020/icons/banner-icon/mental-health-white.png" /></span>&emsp; Schizophrenia questionnaire
+        </h1>
+    </div>
+    <div class="pull-right title">
+        <h1 class="site-title_userID pull-right">
+            <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+        </h1>
+        <h1 class="site-title_userID pull-right">
+            @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+            {
+                <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+            }
+        </h1>
+        <h1 class="site-waffleIcon pull-right">
+            <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+        </h1>
+    </div>
+</nav>
+
+<div class="dashboardContainer zero-padding">
+    <div class="patientDashboard_View">
+        <ul class="breadcrumbs_patientDashboard">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new { })">Home</a></li>
+            <li><a href="@Url.Action("patientClinical", "Member", new { DependentID = Context.Request.Query["DependentID"] })">Patient</a></li>
+            <li><a href="#">@ViewBag.Title</a></li>
+        </ul>
+
+        @Html.Partial("_navSlider_blank", new { DependentID = Context.Request.Query["DependentID"] })
+
+        <div class="navCollection_patientDashboard">
+            @Html.Partial("_navCollection")
+        </div>
+
+        <div class="profileBar">
+            @Html.Action("_profileBar_edit", "Member", new { DependentID = Model.DependantID })
+        </div>
+    </div>
+    <br />
+    <div class="profilebar-spacer"></div>
+
+    <div id="general-pregnant-panel" class="patientDashboard_container">
+        <div class="col-md-12 row">
+            <div class="heading-spacer"></div>
+        </div>
+
+        @using (Ajax.BeginForm("MH_Bipolar_Edit", "Clinical", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "divPath", OnSuccess = "hideModal(); alert('Saved');" }, new { id = "bipolar-edit" }))
+        {
+            <div class="hidden-fields">
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                @Html.HiddenFor(model => model.DependantID)
+                @Html.Hidden("pro", (object)ViewBag.program)
+                @Html.HiddenFor(model => model.AssignmentID)
+                @Html.HiddenFor(model => model.TaskID)
+                @Html.HiddenFor(model => model.RiskID)
+                @Html.HiddenFor(model => model.CreatedBy)
+                @Html.HiddenFor(model => model.CreatedDate)
+            </div>
+            <div id="overlay-edit" class="overlay"></div>
+            <div class="form-horizontal">
+                <table id="bipolar-table" class="table mental-health-table">
+                    <tr>
+                        <td style="width: 6%; text-align:center!important">Q1</td>
+                        <td style="width: 80%">
+                            Depressed mood: Sadness, hopeless, helpless, worthless <span id="bipolar-depression-warning" class="pull-right warning-alert hidden"><i class="fas fa-exclamation-triangle"></i></span>
+                        </td>
+                        <td style="width: 40%">
+                            <select id="bipolar-depression" name="bipolar-depression" class="form-control select2" style="width: 100%;" required>
+                                <option value="@Model.DepressionSC" subtext="" selected="selected">@Model.Depression</option>
+                                <option value="0" subtext="No signs or symptoms.">Absent</option>
+                                <option value="1" subtext="Slight reduction in social engagement with no impairment in social or interpersonal function.">Mild</option>
+                                <option value="2" subtext="Clear reduction in social engagement with some functional sequelae, e.g., avoids some social engagements or conversations.">Moderate</option>
+                                <option value="3" subtext="Marked reduction in social interaction or avoidance of almost all forms of social contact, e.g., refuses to answer the phone or see friends or family.">Severe</option>
+                            </select>
+
+                            <input type="hidden" id="bipolar-depression-text" name="bipolar-depression-text" />
+                            <input type="hidden" id="bipolar-depression-score" name="bipolar-depression-score" />
+                        </td>
+                        <td style="width: 2%">@Html.ValidationMessage("bipolar-depression", " ", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 1%", @id = "bipolar-depression-error" })</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 5%; text-align:center!important">Q2</td>
+                        <td style="width: 80%">
+                            Insomnia (reduction in total sleep time) <span id="bipolar-insomnia-warning" class="pull-right warning-alert hidden"><i class="fas fa-exclamation-triangle"></i></span>
+                        </td>
+                        <td style="width: 50%">
+                            <select id="bipolar-insomnia" name="bipolar-insomnia" class="form-control select2" style="width: 100%;" required>
+                                <option value="@Model.InsomniaSC" subtext="" selected="selected">@Model.Insomnia</option>
+                                <option value="0" subtext="No signs or symptoms.">Absent</option>
+                                <option value="1" subtext="Up to 2 hours.">Mild</option>
+                                <option value="2" subtext="2 – 4 hours.">Moderate</option>
+                                <option value="3" subtext="More than 4 hours.">Severe</option>
+                            </select>
+                            <input type="hidden" id="bipolar-insomnia-text" name="bipolar-insomnia-text" />
+                            <input type="hidden" id="bipolar-insomnia-score" name="bipolar-insomnia-score" />
+                        </td>
+                        <td style="width: 2%">@Html.ValidationMessage("bipolar-insomnia", " ", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 1%", @id = "bipolar-insomnia-error" })</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 5%; text-align:center!important">Q3</td>
+                        <td style="width: 80%">
+                            Loss of appetite <span id="bipolar-appetite-warning" class="pull-right warning-alert hidden"><i class="fas fa-exclamation-triangle"></i></span>
+                        </td>
+                        <td style="width: 50%">
+                            <select id="bipolar-appetite" name="bipolar-appetite" class="form-control select2" style="width: 100%;" required>
+                                <option value="@Model.AppetiteSC" subtext="" selected="selected">@Model.Appetite</option>
+                                <option value="0" subtext="No signs or symptoms.">Absent</option>
+                                <option value="1" subtext="No change in food intake, but has to push self to eat or reports that food has lost taste.">Mild</option>
+                                <option value="2" subtext="Some decrease in food intake.">Moderate</option>
+                                <option value="3" subtext="Marked decrease in food intake, hardly eating.">Severe</option>
+                            </select>
+
+                            <input type="hidden" id="bipolar-appetite-text" name="bipolar-appetite-text" />
+                            <input type="hidden" id="bipolar-appetite-score" name="bipolar-appetite-score" />
+                        </td>
+                        <td style="width: 2%">@Html.ValidationMessage("bipolar-appetite", " ", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 1%", @id = "bipolar-appetite-error" })</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 5%; text-align:center!important">Q4</td>
+                        <td style="width: 80%">
+                            Reduced social engagement <span id="bipolar-social-engagement-warning" class="pull-right warning-alert hidden"><i class="fas fa-exclamation-triangle"></i></span>
+                        </td>
+                        <td style="width: 50%">
+                            <select id="bipolar-social-engagement" name="bipolar-social-engagement" class="form-control select2" style="width: 100%;" required>
+                                <option value="@Model.SocialEngagementSC" subtext="" selected="selected">@Model.SocialEngagement</option>
+                                <option value="0" subtext="No signs or symptoms.">Absent</option>
+                                <option value="1" subtext="Slight reduction in social engagement with no impairment in social or interpersonal function.">Mild</option>
+                                <option value="2" subtext="Clear reduction in social engagement with some functional sequelae, e.g., avoids some social engagements or conversations.">Moderate</option>
+                                <option value="3" subtext="Marked reduction in social interaction or avoidance of almost all forms of social contact, e.g., refuses to answer the phone or see friends or family.">Severe</option>
+                            </select>
+
+                            <input type="hidden" id="bipolar-social-engagement-text" name="bipolar-social-engagement-text" />
+                            <input type="hidden" id="bipolar-social-engagement-score" name="bipolar-social-engagement-score" />
+                        </td>
+                        <td style="width: 2%">@Html.ValidationMessage("bipolar-social-engagement", " ", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 1%", @id = "bipolar-social-engagement-error" })</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 5%; text-align:center!important">Q5</td>
+                        <td style="width: 80%">
+                            Reduced energy and activity <span id="bipolar-activity-warning" class="pull-right warning-alert hidden"><i class="fas fa-exclamation-triangle"></i></span>
+                        </td>
+                        <td style="width: 50%">
+                            <select id="bipolar-activity" name="bipolar-activity" class="form-control select2" style="width: 100%;" required>
+                                <option value="@Model.ActivitySC" subtext="" selected="selected">@Model.Activity</option>
+                                <option value="0" subtext="No signs or symptoms.">Absent</option>
+                                <option value="1" subtext="Able to engage in usual activities but with increased effort.">Mild</option>
+                                <option value="2" subtext="Significant reduction in energy leading to reduction of some role-specific activities.">Moderate</option>
+                                <option value="3" subtext="Leaden paralysis or cessation of almost all role specific.">Severe</option>
+                            </select>
+
+                            <input type="hidden" id="bipolar-activity-text" name="bipolar-activity-text" />
+                            <input type="hidden" id="bipolar-activity-score" name="bipolar-activity-score" />
+                        </td>
+                        <td style="width: 2%">@Html.ValidationMessage("bipolar-activity", " ", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 1%", @id = "bipolar-activity-error" })</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 5%; text-align:center!important">Q6</td>
+                        <td style="width: 80%">
+                            Reduced motivation <span id="bipolar-motivation-warning" class="pull-right warning-alert hidden"><i class="fas fa-exclamation-triangle"></i></span>
+                        </td>
+                        <td style="width: 50%">
+                            <select id="bipolar-motivation" name="bipolar-motivation" class="form-control select2" style="width: 100%;" required>
+                                <option value="@Model.MotivationSC" subtext="" selected="selected">@Model.Motivation</option>
+                                <option value="0" subtext="No signs or symptoms.">Absent</option>
+                                <option value="1" subtext="Slight reduction in motivation with no reduction in function.">Mild</option>
+                                <option value="2" subtext="Reduced motivation or drive with significantly reduced volitional activity or requires substantial effort to maintain usual level of function.">Moderate</option>
+                                <option value="3" subtext="Reduced motivation or drive such that goal directed behaviour or function is markedly reduced.">Severe</option>
+                            </select>
+
+                            <input type="hidden" id="bipolar-motivation-text" name="bipolar-motivation-text" />
+                            <input type="hidden" id="bipolar-motivation-score" name="bipolar-motivation-score" />
+                        </td>
+                        <td style="width: 2%">@Html.ValidationMessage("bipolar-motivation", " ", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 1%", @id = "bipolar-motivation-error" })</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 5%; text-align:center!important">Q7</td>
+                        <td style="width: 80%">
+                            Impaired concentration and memory <span id="bipolar-concentration-warning" class="pull-right warning-alert hidden"><i class="fas fa-exclamation-triangle"></i></span>
+                        </td>
+                        <td style="width: 50%">
+                            <select id="bipolar-concentration" name="bipolar-concentration" class="form-control select2" style="width: 100%;" required>
+                                <option value="@Model.ConcentrationSC" subtext="" selected="selected">@Model.Concentration</option>
+                                <option value="0" subtext="No signs or symptoms.">Absent</option>
+                                <option value="1" subtext="Occasionally wakes (up to twice weekly) 1 hour or more before normal time to wake or alarm time.">Mild</option>
+                                <option value="2" subtext="Often wakes early (up to 5 times weekly) 1 hour or more before normal time to wake or alarm.">Moderate</option>
+                                <option value="3" subtext="Daily wakes 1 hour or more before normal time.">Severe</option>
+                            </select>
+
+                            <input type="hidden" id="bipolar-concentration-text" name="bipolar-concentration-text" />
+                            <input type="hidden" id="bipolar-concentration-score" name="bipolar-concentration-score" />
+                        </td>
+                        <td style="width: 2%">@Html.ValidationMessage("bipolar-concentration", " ", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 1%", @id = "bipolar-concentration-error" })</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 5%; text-align:center!important">Q8</td>
+                        <td style="width: 80%">
+                            Anxiety <span id="bipolar-anxiety-warning" class="pull-right warning-alert hidden"><i class="fas fa-exclamation-triangle"></i></span>
+                        </td>
+                        <td style="width: 50%">
+                            <select id="bipolar-anxiety" name="bipolar-anxiety" class="form-control select2" style="width: 100%;" required>
+                                <option value="@Model.AnxietySC" subtext="" selected="selected">@Model.Anxiety</option>
+                                <option value="0" subtext="No signs or symptoms.">Absent</option>
+                                <option value="1" subtext="Transient worry or tension about minor matters.">Mild</option>
+                                <option value="2" subtext="Significant anxiety, tension, or worry, or some accompanying somatic features.">Moderate</option>
+                                <option value="3" subtext="Marked continuous anxiety, tension, or worry that interferes with normal activity; or panic attacks.">Severe</option>
+                            </select>
+
+                            <input type="hidden" id="bipolar-anxiety-text" name="bipolar-anxiety-text" />
+                            <input type="hidden" id="bipolar-anxiety-score" name="bipolar-anxiety-score" />
+                        </td>
+                        <td style="width: 2%">@Html.ValidationMessage("bipolar-anxiety", " ", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 1%", @id = "bipolar-anxiety-error" })</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 5%; text-align:center!important">Q9</td>
+                        <td style="width: 80%">
+                            Reduced ability to experience pleasure in usual activities <span id="bipolar-pleasure-warning" class="pull-right warning-alert hidden"><i class="fas fa-exclamation-triangle"></i></span>
+                        </td>
+                        <td style="width: 50%">
+                            <select id="bipolar-pleasure" name="bipolar-pleasure" class="form-control select2" style="width: 100%;" required>
+                                <option value="@Model.PleasureSC" subtext="" selected="selected">@Model.Pleasure</option>
+                                <option value="0" subtext="No signs or symptoms.">Absent</option>
+                                <option value="1" subtext="Slight reduction in pleasure from usually pleasurable activities.">Mild</option>
+                                <option value="2" subtext="Significant reduction in pleasure from usually pleasurable activities; some pleasure from isolated activities retained.">Moderate</option>
+                                <option value="3" subtext="Complete inability to experience pleasure.">Severe</option>
+                            </select>
+
+                            <input type="hidden" id="bipolar-pleasure-text" name="bipolar-pleasure-text" />
+                            <input type="hidden" id="bipolar-pleasure-score" name="bipolar-pleasure-score" />
+                        </td>
+                        <td style="width: 2%">@Html.ValidationMessage("bipolar-pleasure", " ", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 1%", @id = "bipolar-pleasure-error" })</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 5%; text-align:center!important">Q10</td>
+                        <td style="width: 80%">
+                            Reduced intensity or range of feelings or emotions <span id="bipolar-emotion-warning" class="pull-right warning-alert hidden"><i class="fas fa-exclamation-triangle"></i></span>
+                        </td>
+                        <td style="width: 50%">
+                            <select id="bipolar-emotion" name="bipolar-emotion" class="form-control select2" style="width: 100%;" required>
+                                <option value="@Model.EmotionSC" subtext="" selected="selected">@Model.Emotion</option>
+                                <option value="0" subtext="No signs or symptoms.">Absent</option>
+                                <option value="1" subtext="Slight constriction of range of affect, or transient reduction in range or intensity of feelings.">Mild</option>
+                                <option value="2" subtext="Significant constriction of range or intensity of feelings with preservation of some emotions, e.g., unable to cry.">Moderate</option>
+                                <option value="3" subtext="Marked and pervasive constriction of range of affect or inability to experience usual emotions.">Severe</option>
+                            </select>
+
+                            <input type="hidden" id="bipolar-emotion-text" name="bipolar-emotion-text" />
+                            <input type="hidden" id="bipolar-emotion-score" name="bipolar-emotion-score" />
+                        </td>
+                        <td style="width: 2%">@Html.ValidationMessage("bipolar-emotion", " ", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 1%", @id = "bipolar-emotion-error" })</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 5%; text-align:center!important">Q11</td>
+                        <td style="width: 80%">
+                            Subjective sense, or thoughts, of decreased self-value or self-worth <span id="bipolar-worthlessness-warning" class="pull-right warning-alert hidden"><i class="fas fa-exclamation-triangle"></i></span>
+                        </td>
+                        <td style="width: 50%">
+                            <select id="bipolar-worthlessness" name="bipolar-worthlessness" class="form-control select2" style="width: 100%;" required>
+                                <option value="@Model.WorthlessnessSC" subtext="" selected="selected">@Model.Worthlessness</option>
+                                <option value="0" subtext="No signs or symptoms.">Absent</option>
+                                <option value="1" subtext="Slight decrease in sense of self-worth.">Mild</option>
+                                <option value="2" subtext="Some thoughts of worthlessness and decreased self-worth.">Moderate</option>
+                                <option value="3" subtext="Marked, pervasive, or persistent feelings of worthlessness, e.g., feels others better off without them, unable to appreciate positive attributes.">Severe</option>
+                            </select>
+
+                            <input type="hidden" id="bipolar-worthlessness-text" name="bipolar-worthlessness-text" />
+                            <input type="hidden" id="bipolar-worthlessness-score" name="bipolar-worthlessness-score" />
+                        </td>
+                        <td style="width: 2%">@Html.ValidationMessage("bipolar-worthlessness", " ", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 1%", @id = "bipolar-worthlessness-error" })</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 5%; text-align:center!important">Q12</td>
+                        <td style="width: 80%">
+                            Sense of pessimism or gloom regarding the future, inability to cope, or sense of loss of control <span id="bipolar-helplessness-warning" class="pull-right warning-alert hidden"><i class="fas fa-exclamation-triangle"></i></span>
+                        </td>
+                        <td style="width: 50%">
+                            <select id="bipolar-helplessness" name="bipolar-helplessness" class="form-control select2" style="width: 100%;" required>
+                                <option value="@Model.HelplessnessSC" subtext="" selected="selected">@Model.Helplessness</option>
+                                <option value="0" subtext="No signs or symptoms.">Absent</option>
+                                <option value="1" subtext="Occasional and mild feelings of not being able to cope as usual; or pessimism.">Mild</option>
+                                <option value="2" subtext="Often feels unable to cope, or significant feelings of helplessness or hopelessness which lift at times.">Moderate</option>
+                                <option value="3" subtext="Marked and persistent feelings of pessimism, helplessness, or hopelessness.">Severe</option>
+                            </select>
+
+                            <input type="hidden" id="bipolar-helplessness-text" name="bipolar-helplessness-text" />
+                            <input type="hidden" id="bipolar-helplessness-score" name="bipolar-helplessness-score" />
+                        </td>
+                        <td style="width: 2%">@Html.ValidationMessage("bipolar-helplessness", " ", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 1%", @id = "bipolar-helplessness-error" })</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 5%; text-align:center!important">Q13</td>
+                        <td style="width: 80%">
+                            Thoughts or feelings that life is not worthwhile; thoughts of death or suicide <span id="bipolar-suicide-warning" class="pull-right warning-alert hidden"><i class="fas fa-exclamation-triangle"></i></span>
+                        </td>
+                        <td style="width: 50%">
+                            <select id="bipolar-suicide" name="bipolar-suicide" class="form-control select2" style="width: 100%;" required>
+                                <option value="@Model.SuicidalSC" subtext="" selected="selected">@Model.Suicidal</option>
+                                <option value="0" subtext="No signs or symptoms.">Absent</option>
+                                <option value="1" subtext="Thoughts that life is not worthwhile or is meaningless.">Mild</option>
+                                <option value="2" subtext="Thoughts of dying or death, but with no active suicide thoughts or plans.">Moderate</option>
+                                <option value="3" subtext="Thoughts or plans of suicide.">Severe</option>
+                            </select>
+
+                            <input type="hidden" id="bipolar-suicide-text" name="bipolar-suicide-text" />
+                            <input type="hidden" id="bipolar-suicide-score" name="bipolar-suicide-score" />
+                        </td>
+                        <td style="width: 2%">@Html.ValidationMessage("bipolar-suicide", " ", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 1%", @id = "bipolar-suicide-error" })</td>
+                    </tr>
+                    <tr id="suicide-cmt">
+                        <td style="width: 5%; text-align:center!important"></td>
+                        <td style="width: 80%">
+                            What did you think you might do? Did you actually try?
+                        </td>
+                        <td style="width: 50%">
+                            @Html.TextAreaFor(model => model.SuicidalCMT, new { htmlAttributes = new { @class = "form-control-mental-health-textarea", @placeholder = "Comment" } })<br>
+                            @Html.ValidationMessageFor(model => model.SuicidalCMT, "", new { @class = "text-danger" })
+                        </td>
+                        <td style="width: 2%">@Html.ValidationMessageFor(model => model.SuicidalCMT, " ", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 1%" })</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 5%; text-align:center!important">Q14</td>
+                        <td style="width: 80%">
+                            Subjective sense of self blame, failure, or remorse for real or imagined past errors <span id="bipolar-guilt-warning" class="pull-right warning-alert hidden"><i class="fas fa-exclamation-triangle"></i></span>
+                        </td>
+                        <td style="width: 50%">
+                            <select id="bipolar-guilt" name="bipolar-guilt" class="form-control select2" style="width: 100%;" required>
+                                <option value="@Model.GuiltSC" subtext="" selected="selected">@Model.Guilt</option>
+                                <option value="0" subtext="No signs or symptoms.">Absent</option>
+                                <option value="1" subtext="Slight decrease in self-esteem or increased self-criticism.">Mild</option>
+                                <option value="2" subtext="Significant thoughts of failure, self-criticism, inability to cope, or ruminations regarding past failures and the effect on others; able to recognise as excessive.">Moderate</option>
+                                <option value="3" subtext="Marked, pervasive, or persistent guilt, e.g., feelings of deserving punishment; or does not clearly recognise as excessive.">Severe</option>
+                            </select>
+
+                            <input type="hidden" id="bipolar-guilt-text" name="bipolar-guilt-text" />
+                            <input type="hidden" id="bipolar-guilt-score" name="bipolar-guilt-score" />
+                        </td>
+                        <td style="width: 2%">@Html.ValidationMessage("bipolar-guilt", " ", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 1%", @id = "bipolar-guilt-error" })</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 5%; text-align:center!important">Q15</td>
+                        <td style="width: 80%">
+                            Presence of overvalued ideas, delusions, or hallucinations <span id="bipolar-psychotic-warning" class="pull-right warning-alert hidden"><i class="fas fa-exclamation-triangle"></i></span>
+                        </td>
+                        <td style="width: 50%">
+                            <select id="bipolar-psychotic" name="bipolar-psychotic" class="form-control select2" style="width: 100%;" required>
+                                <option value="@Model.PsychoticSC" subtext="" selected="selected">@Model.Psychotic</option>
+                                <option value="0" subtext="No signs or symptoms.">Absent</option>
+                                <option value="1" subtext="Mild overvalued ideas, e.g., self-criticism or pessimism without clear effect on behaviour.">Mild</option>
+                                <option value="2" subtext="Significant overvalued ideas with clear effect on behaviour, e.g., strong guilt feelings, clear thoughts that others would be better off without them.">Moderate</option>
+                                <option value="3" subtext="Clear psychotic symptoms, e.g., delusions or hallucinations.">Severe</option>
+                            </select>
+
+                            <input type="hidden" id="bipolar-psychotic-text" name="bipolar-psychotic-text" />
+                            <input type="hidden" id="bipolar-psychotic-score" name="bipolar-psychotic-score" />
+                        </td>
+                        <td style="width: 2%">@Html.ValidationMessage("bipolar-psychotic", " ", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 1%", @id = "bipolar-psychotic-error" })</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 5%; text-align:center!important">Q16</td>
+                        <td style="width: 80%">
+                            Reports uncharacteristic subjective irritability, short fuse, easily angered, manifested by verbal or physical outbursts <span id="bipolar-irritability-warning" class="pull-right warning-alert hidden"><i class="fas fa-exclamation-triangle"></i></span>
+                        </td>
+                        <td style="width: 50%">
+                            <select id="bipolar-irritability" name="bipolar-irritability" class="form-control select2" style="width: 100%;" required>
+                                <option value="@Model.IrritabilitySC" subtext="" selected="selected">@Model.Irritability</option>
+                                <option value="0" subtext="No signs or symptoms.">Absent</option>
+                                <option value="1" subtext="Slight subjective irritability; may not be overtly present.">Mild</option>
+                                <option value="2" subtext="Verbal snappiness and irritability that is clearly observable in interview.">Moderate</option>
+                                <option value="3" subtext="Reports of physical outbursts, e.g., throwing/breaking objects, or markedly abusive verbal outbursts.">Severe</option>
+                            </select>
+
+                            <input type="hidden" id="bipolar-irritability-text" name="bipolar-irritability-text" />
+                            <input type="hidden" id="bipolar-irritability-score" name="bipolar-irritability-score" />
+                        </td>
+                        <td style="width: 2%">@Html.ValidationMessage("bipolar-irritability", " ", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 1%", @id = "bipolar-irritability-error" })</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 5%; text-align:center!important">Q17</td>
+                        <td style="width: 80%">
+                            Reports uncharacteristic subjective irritability, short fuse, easily angered, manifested by verbal or physical outbursts <span id="bipolar-lability-warning" class="pull-right warning-alert hidden"><i class="fas fa-exclamation-triangle"></i></span>
+                        </td>
+                        <td style="width: 50%">
+                            <select id="bipolar-lability" name="bipolar-lability" class="form-control select2" style="width: 100%;" required>
+                                <option value="@Model.LabilitySC" subtext="" selected="selected">@Model.Lability</option>
+                                <option value="0" subtext="No signs or symptoms.">Absent</option>
+                                <option value="1" subtext="Subjective reports of mild increase in mood lability.">Mild</option>
+                                <option value="2" subtext="Mood lability clearly observable, moderate in intensity.">Moderate</option>
+                                <option value="3" subtext="Marked and dominant mood lability, frequent or dramatic swings in mood.">Severe</option>
+                            </select>
+
+                            <input type="hidden" id="bipolar-lability-text" name="bipolar-lability-text" />
+                            <input type="hidden" id="bipolar-lability-score" name="bipolar-lability-score" />
+                        </td>
+                        <td style="width: 2%">@Html.ValidationMessage("bipolar-lability", " ", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 1%", @id = "bipolar-lability-error" })</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 5%; text-align:center!important">Q18</td>
+                        <td style="width: 80%">
+                            Subjective reports and objective evidence of increased motor drive and motor activity <span id="bipolar-inc-motor-drive-warning" class="pull-right warning-alert hidden"><i class="fas fa-exclamation-triangle"></i></span>
+                        </td>
+                        <td style="width: 50%">
+                            <select id="bipolar-inc-motor-drive" name="bipolar-inc-motor-drive" class="form-control select2" style="width: 100%;" required>
+                                <option value="@Model.IncMotorDriveSC" subtext="" selected="selected">@Model.IncMotorDrive</option>
+                                <option value="0" subtext="No signs or symptoms.">Absent</option>
+                                <option value="1" subtext="Slight increase in drive.">Mild</option>
+                                <option value="2" subtext="Clear increase in energy and drive.">Moderate</option>
+                                <option value="3" subtext="Marked or continuous increase in drive.">Severe</option>
+                            </select>
+
+                            <input type="hidden" id="bipolar-inc-motor-drive-text" name="bipolar-inc-motor-drive-text" />
+                            <input type="hidden" id="bipolar-inc-motor-drive-score" name="bipolar-inc-motor-drive-score" />
+                        </td>
+                        <td style="width: 2%">@Html.ValidationMessage("bipolar-inc-motor-drive", " ", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 1%", @id = "bipolar-inc-motor-drive-error" })</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 5%; text-align:center!important">Q19</td>
+                        <td style="width: 80%">
+                            Increase in either the rate or quantity of speech, or observed flight of ideas <span id="bipolar-inc-speech-warning" class="pull-right warning-alert hidden"><i class="fas fa-exclamation-triangle"></i></span>
+                        </td>
+                        <td style="width: 50%">
+                            <select id="bipolar-inc-speech" name="bipolar-inc-speech" class="form-control select2" style="width: 100%;" required>
+                                <option value="@Model.IncSpeechSC" subtext="" selected="selected">@Model.IncSpeech</option>
+                                <option value="0" subtext="No signs or symptoms.">Absent</option>
+                                <option value="1" subtext="Slight increase in the rate or quantity of speech.">Mild</option>
+                                <option value="2" subtext="Racing thoughts, significantly more talkative, clearly distractible, or some circumstantiality; does not impede interview.">Moderate</option>
+                                <option value="3" subtext="Flight of ideas; interferes with interview.">Severe</option>
+                            </select>
+
+                            <input type="hidden" id="bipolar-inc-speech-text" name="bipolar-inc-speech-text" />
+                            <input type="hidden" id="bipolar-inc-speech-score" name="bipolar-inc-speech-score" />
+                        </td>
+                        <td style="width: 2%">@Html.ValidationMessage("bipolar-inc-speech", " ", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 1%", @id = "bipolar-inc-speech-error" })</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 5%; text-align:center!important">Q20</td>
+                        <td style="width: 80%">
+                            Restlessness or agitation <span id="bipolar-agitation-warning" class="pull-right warning-alert hidden"><i class="fas fa-exclamation-triangle"></i></span>
+                        </td>
+                        <td style="width: 50%">
+                            <select id="bipolar-agitation" name="bipolar-agitation" class="form-control select2" style="width: 100%;" required>
+                                <option value="@Model.AgitationSC" subtext="" selected="selected">@Model.Agitation</option>
+                                <option value="0" subtext="No signs or symptoms.">Absent</option>
+                                <option value="1" subtext="Slight restlessness.">Mild</option>
+                                <option value="2" subtext="Clear increase in level of agitation.">Moderate</option>
+                                <option value="3" subtext="Marked agitation.">Severe</option>
+                            </select>
+
+                            <input type="hidden" id="bipolar-agitation-text" name="bipolar-agitation-text" />
+                            <input type="hidden" id="bipolar-agitation-score" name="bipolar-agitation-score" />
+                        </td>
+                        <td style="width: 2%">@Html.ValidationMessage("bipolar-agitation", " ", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 1%", @id = "bipolar-agitation-error" })</td>
+                    </tr>
+                </table>
+                <div class="col-md-12 row">
+                    <div class="col-md-6"></div>
+                    <div class="col-md-6">
+                        <div class="pull-right createForm">
+                            @Html.LabelFor(model => model.Active, htmlAttributes: new { @class = "control-label col-md-9" })
+                            <div class="col-md-3">
+                                <div class="checkbox">
+                                    @Html.EditorFor(model => model.Active)
+                                    @Html.ValidationMessageFor(model => model.Active, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            @Html.LabelFor(model => model.FollowUp, htmlAttributes: new { @class = "control-label col-md-9" })
+                            <div class="col-md-3">
+                                <div class="checkbox">
+                                    @Html.EditorFor(model => model.FollowUp)
+                                    @Html.ValidationMessageFor(model => model.FollowUp, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div style="text-align: center!important">
+                        <input id="submit" type="submit" value="Save" class="btn create-button" onclick="storageKey()" style="width: 15%" /><br />
+                        <input id="back" value="Back" class="btn reset-button go_back" onclick="backKey()" style="width: 15%!important" />
+                    </div>
+                </div>
+            </div>
+        }
+
+        <div class="warning" id="suicide-warning">
+            <button type="button" class="warning-close yes" id="bipolar-warning-close"><span aria-hidden="true">&times;</span></button>
+            <div class="assignment-header">
+                <div class="assignment-logo"><i class="fas fa-exclamation-triangle"></i></div>
+            </div>
+            <div class="assignment-heading">ALERT!</div>
+            <div class="assignment-message"><b>Suicide alert: </b>Doctor referral assignment will be required!</div>
+            <div class="assignment-footer" style="text-align:center!important"><input id="submit" value="OK" class="btn alert-button yes" /></div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/bundles/jqueryval"></script>
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $('[data-toggle="tooltip"]').tooltip({
+                placement: 'right'
+            });
+        });
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function () {
+
+            $("#bipolar-suicide-text").val($("#bipolar-suicide :selected").text());
+            $("#bipolar-suicide-score").val($("#bipolar-suicide :selected").val());
+            $('#bipolar-suicide').on("select2:select", function (e) {
+                $("#bipolar-suicide-text").val($("#bipolar-suicide :selected").text());
+                $("#bipolar-suicide-score").val($(this).val());
+                $("#bipolar-suicide-error").hide();
+
+                if ($(this).val() > 0) {
+                    //AlertMessageBipolar(),
+                    //openOverlay(),
+                    $("#bipolar-suicide-cmt").removeClass("hidden"),
+                        $("#bipolar-suicide-error").hide();
+                }
+                else {
+                    $("#suicide-cmt").addClass("hidden");
+                }
+
+                //follow-up-check
+                if ($("#bipolar-suicide :selected").text() == "Follow up") {
+                    $("#bipolar-suicide-warning").removeClass("hidden");
+
+                }
+                else {
+                    $("#bipolar-suicide-warning").addClass("hidden");
+                }
+            });
+
+            $("#bipolar-depression-text").val($("#bipolar-depression :selected").text());
+            $("#bipolar-depression-score").val($("#bipolar-depression :selected").val());
+            $('#bipolar-depression').on("select2:select", function (e) {
+                $("#bipolar-depression-text").val($("#bipolar-depression :selected").text());
+                $("#bipolar-depression-score").val($(this).val());
+                $("#bipolar-depression-error").hide();
+
+                //follow-up-check
+                if ($("#bipolar-depression :selected").text() == "Follow up") {
+                    $("#bipolar-depression-warning").removeClass("hidden");
+
+                }
+                else {
+                    $("#bipolar-depression-warning").addClass("hidden");
+                }
+            });
+
+            $("#bipolar-insomnia-text").val($("#bipolar-insomnia :selected").text());
+            $("#bipolar-insomnia-score").val($("#bipolar-insomnia :selected").val());
+            $('#bipolar-insomnia').on("select2:select", function (e) {
+                $("#bipolar-insomnia-text").val($("#bipolar-insomnia :selected").text());
+                $("#bipolar-insomnia-score").val($(this).val());
+                $("#bipolar-insomnia-error").hide();
+
+                //follow-up-check
+                if ($("#bipolar-insomnia :selected").text() == "Follow up") {
+                    $("#bipolar-insomnia-warning").removeClass("hidden");
+
+                }
+                else {
+                    $("#bipolar-insomnia-warning").addClass("hidden");
+                }
+            });
+
+            $("#bipolar-appetite-text").val($("#bipolar-appetite :selected").text());
+            $("#bipolar-appetite-score").val($("#bipolar-appetite :selected").val());
+            $('#bipolar-appetite').on("select2:select", function (e) {
+                $("#bipolar-appetite-text").val($("#bipolar-appetite :selected").text());
+                $("#bipolar-appetite-score").val($(this).val());
+                $("#bipolar-appetite-error").hide();
+
+                //follow-up-check
+                if ($("#bipolar-appetite :selected").text() == "Follow up") {
+                    $("#bipolar-appetite-warning").removeClass("hidden");
+
+                }
+                else {
+                    $("#bipolar-appetite-warning").addClass("hidden");
+                }
+            });
+
+            $("#bipolar-social-engagement-text").val($("#bipolar-social-engagement :selected").text());
+            $("#bipolar-social-engagement-score").val($("#bipolar-social-engagement :selected").val());
+            $('#bipolar-social-engagement').on("select2:select", function (e) {
+                $("#bipolar-social-engagement-text").val($("#bipolar-social-engagement :selected").text());
+                $("#bipolar-social-engagement-score").val($(this).val());
+                $("#bipolar-social-engagement-error").hide();
+
+                //follow-up-check
+                if ($("#bipolar-social-engagement :selected").text() == "Follow up") {
+                    $("#bipolar-social-engagement-warning").removeClass("hidden");
+
+                }
+                else {
+                    $("#bipolar-social-engagement-warning").addClass("hidden");
+                }
+            });
+
+            $("#bipolar-activity-text").val($("#bipolar-activity :selected").text());
+            $("#bipolar-activity-score").val($("#bipolar-activity :selected").val());
+            $('#bipolar-activity').on("select2:select", function (e) {
+                $("#bipolar-activity-text").val($("#bipolar-activity :selected").text());
+                $("#bipolar-activity-score").val($(this).val());
+                $("#bipolar-activity-error").hide();
+
+                //follow-up-check
+                if ($("#bipolar-activity :selected").text() == "Follow up") {
+                    $("#bipolar-activity-warning").removeClass("hidden");
+
+                }
+                else {
+                    $("#bipolar-activity-warning").addClass("hidden");
+                }
+            });
+
+            $("#bipolar-motivation-text").val($("#bipolar-motivation :selected").text());
+            $("#bipolar-motivation-score").val($("#bipolar-motivation :selected").val());
+            $('#bipolar-motivation').on("select2:select", function (e) {
+                $("#bipolar-motivation-text").val($("#bipolar-motivation :selected").text());
+                $("#bipolar-motivation-score").val($(this).val());
+                $("#bipolar-motivation-error").hide();
+
+                //follow-up-check
+                if ($("#bipolar-motivation :selected").text() == "Follow up") {
+                    $("#bipolar-motivation-warning").removeClass("hidden");
+
+                }
+                else {
+                    $("#bipolar-motivation-warning").addClass("hidden");
+                }
+            });
+
+            $("#bipolar-concentration-text").val($("#bipolar-concentration :selected").text());
+            $("#bipolar-concentration-score").val($("#bipolar-concentration :selected").val());
+            $('#bipolar-concentration').on("select2:select", function (e) {
+                $("#bipolar-concentration-text").val($("#bipolar-concentration :selected").text());
+                $("#bipolar-concentration-score").val($(this).val());
+                $("#bipolar-concentration-error").hide();
+
+                //follow-up-check
+                if ($("#bipolar-concentration :selected").text() == "Follow up") {
+                    $("#bipolar-concentration-warning").removeClass("hidden");
+
+                }
+                else {
+                    $("#bipolar-concentration-warning").addClass("hidden");
+                }
+            });
+
+            $("#bipolar-anxiety-text").val($("#bipolar-anxiety :selected").text());
+            $("#bipolar-anxiety-score").val($("#bipolar-anxiety :selected").val());
+            $('#bipolar-anxiety').on("select2:select", function (e) {
+                $("#bipolar-anxiety-text").val($("#bipolar-anxiety :selected").text());
+                $("#bipolar-anxiety-score").val($(this).val());
+                $("#bipolar-anxiety-error").hide();
+
+                //follow-up-check
+                if ($("#bipolar-anxiety :selected").text() == "Follow up") {
+                    $("#bipolar-anxiety-warning").removeClass("hidden");
+
+                }
+                else {
+                    $("#bipolar-anxiety-warning").addClass("hidden");
+                }
+            });
+
+            $("#bipolar-pleasure-text").val($("#bipolar-pleasure :selected").text());
+            $("#bipolar-pleasure-score").val($("#bipolar-pleasure :selected").val());
+            $('#bipolar-pleasure').on("select2:select", function (e) {
+                $("#bipolar-pleasure-text").val($("#bipolar-pleasure :selected").text());
+                $("#bipolar-pleasure-score").val($(this).val());
+                $("#bipolar-pleasure-error").hide();
+
+                //follow-up-check
+                if ($("#bipolar-pleasure :selected").text() == "Follow up") {
+                    $("#bipolar-pleasure-warning").removeClass("hidden");
+
+                }
+                else {
+                    $("#bipolar-pleasure-warning").addClass("hidden");
+                }
+            });
+
+            $("#bipolar-emotion-text").val($("#bipolar-emotion :selected").text());
+            $("#bipolar-emotion-score").val($("#bipolar-emotion :selected").val());
+            $('#bipolar-emotion').on("select2:select", function (e) {
+                $("#bipolar-emotion-text").val($("#bipolar-emotion :selected").text());
+                $("#bipolar-emotion-score").val($(this).val());
+                $("#bipolar-emotion-error").hide();
+
+                //follow-up-check
+                if ($("#bipolar-emotion :selected").text() == "Follow up") {
+                    $("#bipolar-emotion-warning").removeClass("hidden");
+
+                }
+                else {
+                    $("#bipolar-emotion-warning").addClass("hidden");
+                }
+            });
+
+            $("#bipolar-worthlessness-text").val($("#bipolar-worthlessness :selected").text());
+            $("#bipolar-worthlessness-score").val($("#bipolar-worthlessness :selected").val());
+            $('#bipolar-worthlessness').on("select2:select", function (e) {
+                $("#bipolar-worthlessness-text").val($("#bipolar-worthlessness :selected").text());
+                $("#bipolar-worthlessness-score").val($(this).val());
+                $("#bipolar-worthlessness-error").hide();
+
+                //follow-up-check
+                if ($("#bipolar-worthlessness :selected").text() == "Follow up") {
+                    $("#bipolar-worthlessness-warning").removeClass("hidden");
+
+                }
+                else {
+                    $("#bipolar-worthlessness-warning").addClass("hidden");
+                }
+            });
+
+            $("#bipolar-helplessness-text").val($("#bipolar-helplessness :selected").text());
+            $("#bipolar-helplessness-score").val($("#bipolar-helplessness :selected").val());
+            $('#bipolar-helplessness').on("select2:select", function (e) {
+                $("#bipolar-helplessness-text").val($("#bipolar-helplessness :selected").text());
+                $("#bipolar-helplessness-score").val($(this).val());
+                $("#bipolar-helplessness-error").hide();
+
+                //follow-up-check
+                if ($("#bipolar-helplessness :selected").text() == "Follow up") {
+                    $("#bipolar-helplessness-warning").removeClass("hidden");
+
+                }
+                else {
+                    $("#bipolar-helplessness-warning").addClass("hidden");
+                }
+
+            });
+
+            $("#bipolar-guilt-text").val($("#bipolar-guilt :selected").text());
+            $("#bipolar-guilt-score").val($("#bipolar-guilt :selected").val());
+            $('#bipolar-guilt').on("select2:select", function (e) {
+                $("#bipolar-guilt-text").val($("#bipolar-guilt :selected").text());
+                $("#bipolar-guilt-score").val($(this).val());
+                $("#bipolar-guilt-error").hide();
+
+                //follow-up-check
+                if ($("#bipolar-guilt :selected").text() == "Follow up") {
+                    $("#bipolar-guilt-warning").removeClass("hidden");
+
+                }
+                else {
+                    $("#bipolar-guilt-warning").addClass("hidden");
+                }
+            });
+
+            $("#bipolar-psychotic-text").val($("#bipolar-psychotic :selected").text());
+            $("#bipolar-psychotic-score").val($("#bipolar-psychotic :selected").val());
+            $('#bipolar-psychotic').on("select2:select", function (e) {
+                $("#bipolar-psychotic-text").val($("#bipolar-psychotic :selected").text());
+                $("#bipolar-psychotic-score").val($(this).val());
+                $("#bipolar-psychotic-error").hide();
+
+                //follow-up-check
+                if ($("#bipolar-psychotic :selected").text() == "Follow up") {
+                    $("#bipolar-psychotic-warning").removeClass("hidden");
+
+                }
+                else {
+                    $("#bipolar-psychotic-warning").addClass("hidden");
+                }
+
+            });
+
+            $("#bipolar-irritability-text").val($("#bipolar-irritability :selected").text());
+            $("#bipolar-irritability-score").val($("#bipolar-irritability :selected").val());
+            $('#bipolar-irritability').on("select2:select", function (e) {
+                $("#bipolar-irritability-text").val($("#bipolar-irritability :selected").text());
+                $("#bipolar-irritability-score").val($(this).val());
+                $("#bipolar-irritability-error").hide();
+
+                //follow-up-check
+                if ($("#bipolar-irritability :selected").text() == "Follow up") {
+                    $("#bipolar-irritability-warning").removeClass("hidden");
+
+                }
+                else {
+                    $("#bipolar-irritability-warning").addClass("hidden");
+                }
+            });
+
+            $("#bipolar-lability-text").val($("#bipolar-lability :selected").text());
+            $("#bipolar-lability-score").val($("#bipolar-lability :selected").val());
+            $('#bipolar-lability').on("select2:select", function (e) {
+                $("#bipolar-lability-text").val($("#bipolar-lability :selected").text());
+                $("#bipolar-lability-score").val($(this).val());
+                $("#bipolar-lability-error").hide();
+
+                //follow-up-check
+                if ($("#bipolar-lability :selected").text() == "Follow up") {
+                    $("#bipolar-lability-warning").removeClass("hidden");
+
+                }
+                else {
+                    $("#bipolar-lability-warning").addClass("hidden");
+                }
+
+            });
+
+            $("#bipolar-inc-motor-drive-text").val($("#bipolar-inc-motor-drive :selected").text());
+            $("#bipolar-inc-motor-drive-score").val($("#bipolar-inc-motor-drive :selected").val());
+            $('#bipolar-inc-motor-drive').on("select2:select", function (e) {
+                $("#bipolar-inc-motor-drive-text").val($("#bipolar-inc-motor-drive :selected").text());
+                $("#bipolar-inc-motor-drive-score").val($(this).val());
+                $("#bipolar-inc-motor-drive-error").hide();
+
+                //follow-up-check
+                if ($("#bipolar-inc-motor-drive :selected").text() == "Follow up") {
+                    $("#bipolar-inc-motor-drive-warning").removeClass("hidden");
+
+                }
+                else {
+                    $("#bipolar-inc-motor-drive-warning").addClass("hidden");
+                }
+
+            });
+
+            $("#bipolar-inc-speech-text").val($("#bipolar-inc-speech :selected").text());
+            $("#bipolar-inc-speech-score").val($("#bipolar-inc-speech :selected").val());
+            $('#bipolar-inc-speech').on("select2:select", function (e) {
+                $("#bipolar-inc-speech-text").val($("#bipolar-inc-speech :selected").text());
+                $("#bipolar-inc-speech-score").val($(this).val());
+                $("#bipolar-inc-speech-error").hide();
+
+                //follow-up-check
+                if ($("#bipolar-inc-speech :selected").text() == "Follow up") {
+                    $("#bipolar-inc-speech-warning").removeClass("hidden");
+
+                }
+                else {
+                    $("#bipolar-inc-speech-warning").addClass("hidden");
+                }
+
+            });
+
+            $("#bipolar-agitation-text").val($("#bipolar-agitation :selected").text());
+            $("#bipolar-agitation-score").val($("#bipolar-agitation :selected").val());
+            $('#bipolar-agitation').on("select2:select", function (e) {
+                $("#bipolar-agitation-text").val($("#bipolar-agitation :selected").text());
+                $("#bipolar-agitation-score").val($(this).val());
+                $("#bipolar-agitation-error").hide();
+                $("#bipolar-agitation-warning").addClass("hidden");
+
+                //follow-up-check
+                if ($("#bipolar-agitation :selected").text() == "Follow up") {
+                    $("#bipolar-agitation-warning").removeClass("hidden");
+
+                }
+                else {
+                    $("#bipolar-agitation-warning").addClass("hidden");
+                }
+
+
+            });
+        });
+    </script>
+    <script>
+        function openOverlay() {
+            document.getElementById("overlay-edit").style.width = "100%";
+        }
+
+        function closeOverlay() {
+            document.getElementById("overlay-edit").style.width = "0%";
+        }
+    </script>
+    <script>
+        function AlertMessageBipolar(msg, myYes) {
+            var b = $("#suicide-warning");
+            b.find(".message").text(msg);
+            b.find(".yes").unbind().click(function () {
+                b.hide(),
+                    closeOverlay();
+            });
+            b.find(".yes").click(myYes);
+            b.show();
+            $("#bipolar-warning-close").focus();
+        }
+    </script>
+    <script>
+        $(function () {
+            $(".select2").select2({ matcher: matchCustom, templateResult: formatCustom });
+        })
+
+        function stringMatch(term, candidate) {
+            return candidate && candidate.toLowerCase().indexOf(term.toLowerCase()) >= 0;
+        }
+
+        function matchCustom(params, data) {
+            // If there are no search terms, return all of the data
+            if ($.trim(params.term) === '') {
+                return data;
+            }
+            // Do not display the item if there is no 'text' property
+            if (typeof data.text === 'undefined') {
+                return null;
+            }
+            // Match text of option
+            if (stringMatch(params.term, data.text)) {
+                return data;
+            }
+            // Match attribute "data-foo" of option
+            if (stringMatch(params.term, $(data.element).attr('subtext'))) {
+                return data;
+            }
+            // Return `null` if the term should not be displayed
+            return null;
+        }
+
+        function formatCustom(state) {
+            return $(
+                '<div><div>' + state.text + '</div><div class="subtext">'
+                + $(state.element).attr('subtext')
+                + '</div></div>'
+            );
+        }
+    </script>
+    <script>
+        function backKey() {
+            localStorage.clear();
+            localStorage.removeItem("create_bipolar");
+            localStorage.setItem("create_bipolar", Date.now());
+        }
+        function storageKey() {
+            localStorage.setItem("create_bipolar", Date.now());
+        }
+    </script>
+    <script>
+        // follow-up-check on load
+        if ($("#bipolar-suicide :selected").text() == "Follow up") { $("#bipolar-suicide-warning").removeClass("hidden"); } else { $("#bipolar-suicide-warning").addClass("hidden"); }
+        if ($("#bipolar-depression :selected").text() == "Follow up") { $("#bipolar-depression-warning").removeClass("hidden"); } else { $("#bipolar-depression-warning").addClass("hidden"); }
+        if ($("#bipolar-insomnia :selected").text() == "Follow up") { $("#bipolar-insomnia-warning").removeClass("hidden"); } else { $("#bipolar-insomnia-warning").addClass("hidden"); }
+        if ($("#bipolar-appetite :selected").text() == "Follow up") { $("#bipolar-appetite-warning").removeClass("hidden"); } else { $("#bipolar-appetite-warning").addClass("hidden"); }
+        if ($("#bipolar-social-engagement :selected").text() == "Follow up") { $("#bipolar-social-engagement-warning").removeClass("hidden"); } else { $("#bipolar-social-engagement-warning").addClass("hidden"); }
+        if ($("#bipolar-activity :selected").text() == "Follow up") { $("#bipolar-activity-warning").removeClass("hidden"); } else { $("#bipolar-activity-warning").addClass("hidden"); }
+        if ($("#bipolar-motivation :selected").text() == "Follow up") { $("#bipolar-motivation-warning").removeClass("hidden"); } else { $("#bipolar-motivation-warning").addClass("hidden"); }
+        if ($("#bipolar-concentration :selected").text() == "Follow up") { $("#bipolar-concentration-warning").removeClass("hidden"); } else { $("#bipolar-concentration-warning").addClass("hidden"); }
+        if ($("#bipolar-anxiety :selected").text() == "Follow up") { $("#bipolar-anxiety-warning").removeClass("hidden"); } else { $("#bipolar-anxiety-warning").addClass("hidden"); }
+        if ($("#bipolar-pleasure :selected").text() == "Follow up") { $("#bipolar-pleasure-warning").removeClass("hidden"); } else { $("#bipolar-pleasure-warning").addClass("hidden"); }
+        if ($("#bipolar-emotion :selected").text() == "Follow up") { $("#bipolar-emotion-warning").removeClass("hidden"); } else { $("#bipolar-emotion-warning").addClass("hidden"); }
+        if ($("#bipolar-worthlessness :selected").text() == "Follow up") { $("#bipolar-worthlessness-warning").removeClass("hidden"); } else { $("#bipolar-worthlessness-warning").addClass("hidden"); }
+        if ($("#bipolar-helplessness :selected").text() == "Follow up") { $("#bipolar-helplessness-warning").removeClass("hidden"); } else { $("#bipolar-helplessness-warning").addClass("hidden"); }
+        if ($("#bipolar-guilt :selected").text() == "Follow up") { $("#bipolar-guilt-warning").removeClass("hidden"); } else { $("#bipolar-guilt-warning").addClass("hidden"); }
+        if ($("#bipolar-psychotic :selected").text() == "Follow up") { $("#bipolar-psychotic-warning").removeClass("hidden"); } else { $("#bipolar-psychotic-warning").addClass("hidden"); }
+        if ($("#bipolar-irritability :selected").text() == "Follow up") { $("#bipolar-irritability-warning").removeClass("hidden"); } else { $("#bipolar-irritability-warning").addClass("hidden"); }
+        if ($("#bipolar-lability :selected").text() == "Follow up") { $("#bipolar-lability-warning").removeClass("hidden"); } else { $("#bipolar-lability-warning").addClass("hidden"); }
+        if ($("#bipolar-inc-motor-drive :selected").text() == "Follow up") { $("#bipolar-inc-motor-drive-warning").removeClass("hidden"); } else { $("#bipolar-inc-motor-drive-warning").addClass("hidden"); }
+        if ($("#bipolar-inc-speech :selected").text() == "Follow up") { $("#bipolar-inc-speech-warning").removeClass("hidden"); } else { $("#bipolar-inc-speech-warning").addClass("hidden"); }
+        if ($("#bipolar-agitation :selected").text() == "Follow up") { $("#bipolar-agitation-warning").removeClass("hidden"); } else { $("#bipolar-agitation-warning").addClass("hidden"); }
+    </script>
+
+}

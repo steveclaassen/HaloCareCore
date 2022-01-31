@@ -1,0 +1,125 @@
+﻿@model HaloCareCore.Models.Communications.SmsMessageTemplates
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Details";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+</style>
+
+<div class="fullScreen_container zero-padding">
+
+    <!--pageHeader-->
+    <nav id="global-nav" class="nav">
+        <div class="pull-left title">
+            <h1 class="site-title_patientProfile">
+                <span><i class="fas fa-comment-alt"></i>&emsp; Text messages</span>
+            </h1>
+        </div>
+        <div class="pull-right title">
+            <h1 class="site-title_userID pull-right">
+                <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+            </h1>
+            <h1 class="site-title_userID pull-right">
+                @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                {
+                    <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                }
+            </h1>
+            <h1 class="site-waffleIcon pull-right">
+                <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+            </h1>
+        </div>
+    </nav>
+
+    <!--breadCrumbs-->
+    <ul class="breadcrumbs_fullScreens">
+        <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+        <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+        <li><a href="@Url.Action("Index", "Template", new {})">Text message</a></li>
+        <li><a href="#">Detail</a></li>
+    </ul>
+
+    <!--navCollection-->
+    <div class="navCollection_fullScreens">
+        @Html.Partial("_navCollection")
+    </div>
+
+    <div style="margin-bottom: 1%"></div>
+
+    <div class="row">
+        <h4 class="tableHeading">Text message detail</h4>
+        <hr class="fancyruler">
+        <br />
+        <br />
+        <div style="margin-left: 5%">
+
+            <dl class="dl-horizontal editForm">
+                <dt>
+                    @Html.DisplayNameFor(model => model.template)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.template)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.createdBy)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.createdBy)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.createdDate)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.createdDate)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.modifiedBy)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.modifiedBy)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.modifiedDate)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.modifiedDate)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.Active)
+                </dt>
+
+                <dd class="detailsCheck">
+                    @Html.DisplayFor(model => model.Active)
+                </dd>
+            </dl>
+        </div>
+
+        <div class="fixedBack">
+            <input value="Back" class="btn buttonRound_formBack go_back" style="width: 15%!important" />
+            <a href="@Url.Action("Edit", "Template", new { id = Model.templateID})" value="Edit" class="btn buttonRound_formEdit" style="width: 15%!important">Edit</a>
+        </div>
+
+    </div>
+</div>
+
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+}
+

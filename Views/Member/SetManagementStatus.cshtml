@@ -1,0 +1,304 @@
+﻿@model HaloCareCore.Models.Management.PatientManagementStatusHistory
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Management status";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<comment>
+    <!--
+        10 April 2019 -- HCare-669 (Management status: systematic end date (Deceased/Deactivated/Resigned))
+        Used IF statement to set the POST in both the profile Management setting and the Assignment Task. If status is set to Deceased, Deactivated or Resigned. The end date will systematically be set to the same as the
+        effective date.
+
+        17 April 2019 -- HCare-708 (Submit button - duplicate post entries)
+        Duplicate entries do get entered if you click too quickly on the submit button. I have added JS to disable the submit button after the first click.
+
+        23 April 2019 -- HCare-713 (Management Status changes)
+        Duplicate check has been created with regard to the management status. Included in this is the end date cannot precede the effective date for the same entry in the edit management status view.
+
+        06 May 2019 -- HCare-728 (Questionnaire - Submit button freeze -- Related to HCare-708)
+        A secondary affect of the duplicate click check for HCare-708 resulted in the Submit button for the Questionnaire to freeze should a user neglect to complete a required field. This would push the user back to the
+        section that has not been answered but freeze the button in the process. I have relooked at the code linked to HCare-708 as well as the submit button in the questionnaire which has resolved the issue.
+
+        01 July 2019 -- HCare-751(Assignment - Change/Add management status)
+        Add a check in controller to account for NO status to be added in order to avoid the error mentioned by Mercia - the controller was looking for the previous status and if the patient doesnt have one, it would break
+
+        04 July 2019 -- HCare-755 (Validation check for Management Status create)
+        Added validation to avoid duplication in the Management status create in the profile as well as in the assignment task.
+
+        02 August 2019 -- HCare-748(Assignments on closed statuses) This SR was reverted and is no longer in use.
+        Added IF statement to method in MemberController that will find the active assignments linked to the patient and should you change the management status to a closed status, the assignments will be made inactive and
+        given a 'closed' status as well as a comment of 'Management status closed'.
+
+        09 September 2019 -- HCare-786(Management status enhancements)
+        Modification to setting the management status manually as well as in the assignment task. To limit Users to specific management statuses depending on their status types i.e. Open, Closed, Pending
+
+        11 September 2019 -- HCare-792(Create assignment when management status is changed to DM Enrolment)
+        When a managment status is updated to DM Enrolment, an assignment will be generated as per the requirement
+
+        25 November 2019 -- HCare-852(Management Status dates)
+        Updated the logic for the dates so that the user cannot use the same date within the collection (start and end date) of any other date in the Members's status history.
+
+        23 January 2020 -- HCare-948 (Automate assignment if man. status is manually changed to ERH)
+        If the user sets the management status to Enrolment HIV - the assignment 'New registration - HIV' is automatically opened for the member. This logic has been added to both the SetManagmentStatus method and assignment (_ChangeStatus) method.
+        Redid the SetManagementStatus method to accomodate teh new automation with the validation inbetween.
+
+        18 June 2020 -- HCare-918(Management status effective date)
+        I have used a date input tag which allows you to add a min and max date which I have added min = “1900-01-01” and max = today + 1.
+        I also noted that the edit view did not return the management status in the dropdown and corrected that.
+
+        03 July 2020 -- HCare-991(Management statusses - edit - DM enrolment)
+        Added validation to the controller on the SetManagmentStatus method to not be able to add more than one Enrolment status.
+
+        06 July 2020 -- HCare-1067(Dependant created date vs First Management status date)
+        Management status create / edit and assignment has been amended to use ajax which will pull the dependant’s created date into a variable and compare it to the date inserted into the Effective date input tag. This will render an error message should the effective date be less than the members created date and will also disable the submit button until the date is corrected.
+
+    -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .select2-container--default .select2-selection--single {
+        display: block;
+        max-width: 500px !important;
+        width: 400px !important;
+        max-height: 50px;
+        height: 32px !important;
+        margin-left: 10px;
+        padding: 6px 6px;
+        line-height: 1.428571429;
+        border: 1px solid #f4f4f4 !important;
+        border-radius: 4px;
+        -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+        box-shadow: 1px 1px 1px 0px rgba(0,0,0,0.20);
+        -webkit-transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+        transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+        background-color: transparent !important;
+    }
+
+    span.select2-selection.select2-selection--single {
+        outline: none;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__placeholder {
+        color: white !important;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__arrow b {
+        margin-top: -5px !important;
+        margin-left: 0px !important;
+    }
+
+    .input-group-addon {
+        visibility: hidden;
+    }
+
+    .field-validation-error:before {
+        font-family: FontAwesome;
+        content: "\f06a\00a0";
+        animation: pulse 2s ease infinite;
+    }
+</style>
+<javascript>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet" />
+</javascript>
+
+<!---------------------------------------------------------------------- header ---------------------------------------------------------------------->
+<nav id="global-nav" class="nav">
+    <div class="pull-left title">
+        <h1 class="site-title_patientProfile">
+            <span><img src="~/Content/Images/memberProfile/topBar Icons/medicalStatus.png" /></span>&emsp; Managed care
+        </h1>
+    </div>
+    <div class="pull-right title">
+        <h1 class="site-title_userID pull-right">
+            <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+        </h1>
+        <h1 class="site-title_userID pull-right">
+            @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+            {
+                <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+            }
+        </h1>
+        <h1 class="site-waffleIcon pull-right">
+            <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+        </h1>
+    </div>
+</nav>
+
+<div class="dashboardContainer zero-padding">
+    <div class="patientDashboard_View">
+        <!------------------------------------------------------------------------ bread-crumbs ------------------------------------------------------------------------>
+        <ul class="breadcrumbs_patientDashboard">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new { })">Home</a></li>
+            <li><a href="@Url.Action("patientDashboard", "Member", new { DependentID = Context.Request.Query["DependentID"] })">Patient</a></li>
+            <li><a href="#">@ViewBag.Title</a></li>
+        </ul>
+
+        <!--------------------------------------------------------------------- left-navigation-bar --------------------------------------------------------------------->
+        @Html.Partial("_navSlider", new { DependentID = Context.Request.Query["DependentID"] })
+
+        <!----------------------------------------------------------------------- nav-collection ----------------------------------------------------------------------->
+        <div class="navCollection_patientDashboard">
+            @Html.Partial("_navCollection")
+        </div>
+
+        <!----------------------------------------------------------------------- patient-profile ----------------------------------------------------------------------->
+        <div class="profileBar">
+            @*@Html.Action("_profileBar_edit", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })*@
+            @Html.Action("_profileBar_edit", "Member", new { DependentID = TempData["dependantid"], pro = TempData["programid"] })
+        </div>
+    </div>
+    <br />
+    <!----------------------------------------------------------------------- form ----------------------------------------------------------------------->
+    <div class="profilebar-spacer"></div>
+    <div id="management-status-panel" class="patientDashboard_container">
+        <div class="col-md-12 row">
+            <div class="heading-spacer"></div>
+            <div class="col-md-6"><div class="page-heading">Management status</div></div>
+            <hr class="heading-ruler">
+        </div>
+
+        @using (Html.BeginForm("SetManagementStatus", "Member", FormMethod.Post))
+        {
+            <input type="hidden" name="dependantid" id="dependantid" value="@TempData["dependantid"].ToString()" />
+            <input type="hidden" name="programid" id="programid" value="@TempData["programid"].ToString()" />
+            <input type="hidden" name="medicalaid" id="medicalaid" value="@TempData["medicalaid"].ToString()" />
+
+            <div class="form-horizontal createForm">
+                <div class="form-group">
+                    @Html.Label(null,"Managed care status", htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.DropDownList("managementStatus", null, "**Select**", htmlAttributes: new { @class = "infoBox_editMember", @required = "required" })<br />
+                        @Html.ValidationMessage("managementStatus", "", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 1%", @id = "managementStatusError" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.Label(null,"Effective date", htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        <input class="text-box single-line input-validation-error infoBox_editMember" data-val="true" data-val-date="The field must be a date." id="effectiveDate" name="effectiveDate" type="date" aria-required="true" aria-describedby="DOB-error" aria-invalid="true" value="@DateTime.Now.AddDays(1).ToString("yyyy-MM-dd")" min="@DateTime.Now.ToString("1900-01-01")" max="@DateTime.Now.AddDays(1).ToString("yyyy-MM-dd")" oninvalid="InvalidMsg(this);" onblur="CreatedDateCheck();">
+                        @Html.ValidationMessage("effectiveDate", "", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 1%" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="fixed-btn">
+                        <input value="Back" class="btn bck-button go_back" onclick="backKey()" style="width: 15%!important" />
+                        <input type="submit" id="submit" value="Save" class="btn create-button patientClinical" onclick="storageKey()" style="width: 15%" />
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+@section scripts{
+    <script src="~/bundles/jqueryval"></script>
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+    @if (ViewBag.Message != null)
+    {
+        <script type="text/javascript">
+
+        window.onload = function () {
+            toastr.options.positionClass = 'toast-bottom-right';
+            toastr.options.timeOut = 10000;
+
+            toastr.error("@ViewBag.Message");
+        }
+        </script>
+    }
+    @if (ViewBag.DME != null)
+    {
+        <script type="text/javascript">
+
+        window.onload = function () {
+            toastr.options.positionClass = 'toast-bottom-right';
+            toastr.options.timeOut = 10000;
+
+            toastr.error("@ViewBag.DME");
+        }
+        </script>
+    }
+
+    <!-- disable submit on click - hcare-728 -->
+    <script type="text/javascript">
+        $('form').submit(function () {
+            var button = $('#managementStatusSubmit');
+            var oldValue = button.value;
+            var isDisabled = true;
+
+            $(this).find('#managementStatusSubmit').prop('disabled', true);
+
+            setTimeout(function () {
+                button.value = "Processing...";
+                button.attr('disabled', !isDisabled);
+            }, 4000)
+
+        });
+
+        $('.statusValidation').change(function () {
+            if ($(this).val() != 'Select') {
+                $("#managementStatus-error").hide();
+                $("#managementStatusError").hide();
+            }
+        });
+    </script>
+    <!-- select-dropdown-menus-->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function () { $("#managementStatus").select2({ multiple: false }); });
+    </script>
+
+    <!-- effective-date-validation - HCare-1067 -->
+    <script>
+        function convertToJavaScriptDate(value) {
+            var pattern = /Date\(([^)]+)\)/;
+            var results = pattern.exec(value);
+            var dt = new Date(parseFloat(results[1]));
+            return dt.getFullYear() + "-" + ("0" + (dt.getMonth() + 1)).slice(-2) + "-" + ("0" + (dt.getDate())).slice(-2);
+        }
+
+
+        function CreatedDateCheck() {
+            var DependantID = $('#dependantid').val();
+            var EffectiveDate = $('#effectiveDate').val();
+
+            $.ajax({
+                url: '/Member/DependantCreatedDateCheck',
+                type: "POST",
+                dataType: "JSON",
+                data: { dependantID: DependantID },
+                success: function (result) {
+                    var CreatedDate = convertToJavaScriptDate(result.createdDate);
+                    var medicalaid = $('#medicalaid').val();
+                    if (medicalaid != "OPMED") {
+                        if (EffectiveDate < CreatedDate) {
+                            $('span[data-valmsg-for="effectiveDate"]').html('<span style="font-size: 12px"><i class="fas fa-exclamation-circle"></i> </span>Dependant was not yet created - Created date ' + CreatedDate);
+                            $('#submit').prop('disabled', true);
+                        }
+                        else {
+                            $('span[data-valmsg-for="managementStatusCode"]').text('');
+                            $('#submit').prop('disabled', false);
+                        }
+                    }
+                }
+            });
+        }
+
+    </script>
+
+
+
+}

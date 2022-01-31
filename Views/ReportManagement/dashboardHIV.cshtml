@@ -1,0 +1,244 @@
+﻿
+@{
+    ViewBag.Title = "dashboardHIV";
+    Layout = "~/Views/Shared/_LayoutMember.cshtml";
+}
+
+
+<div class="topBar_reportDash">
+    <h2>HIV/AIDs Report Dashboard</h2>
+    <img src="~/Content/Images/memberProfile/topBar Icons/Reports.png" />
+</div>
+<style>
+    .indexnav {
+        margin-top: 100px;
+    }
+
+    body {
+        background-image: url('../../Content/Images/Backgrounds/reportDashboard/reportDashboard_two.jpg');
+        background-size: 100%;
+    }
+</style>
+
+
+<!--sideNavigation Bar-->
+<div id="tabs">
+    <div class="nav-side-menu_Reports memberNav pull-left" style="display: block">
+        <div class="blank">&nbsp;</div>
+        <div class="blank">&nbsp;</div>
+        <div class="blank">&nbsp;</div>
+        <div class="blank">&nbsp;</div>
+
+        <div class="menu-list">
+
+            <ul id="menu-content" class="menu-content collapse out active">
+
+                <!--dashBoard-->
+                <li>
+                    <a href="@Url.Action("reportDashboard", "ReportManagement", null)"><i><img src="~/Content/Images/Icons/Reports/dashboardNav.png" style="width: 8%; margin-left: 2%; margin-right: 3%" /></i>&nbsp; Dashboard &nbsp;</a>
+                </li>
+
+                <!--reportOverview-->
+
+                <li data-toggle="collapse" data-target="#overview" class="collapsed">
+                    <a href="#"><i><img src="~/Content/Images/Icons/Reports/oncologyNav.png" style="width: 8%; margin-left: 3%; margin-right: 2%" /></i>&nbsp; Overview &nbsp;&nbsp;<span class="caret" style="margin-left:10%"></span></a>
+                </li>
+                <ul class="sub-menu collapse" id="overview">
+
+                    <li><a href="#">Dashboard</a></li>
+                    <li data-toggle="collapse" data-target="#overviewGeneral" class="collapsed">
+                        <a href="#">General<span class="caret"></span></a>
+                    </li>
+                    <ul class="sub-sub-menu collapse" id="overviewGeneral">
+                        <li><a href="#">&nbsp;PEP</a></li>
+                        <li><a href="#">&nbsp;Production</a></li>
+                        <li><a href="#">&nbsp;Authorisation Letters</a></li>
+                        <li><a href="#">&nbsp;Enquiries</a></li>
+                        <li><a href="#">&nbsp;Documents</a></li>
+                    </ul>
+                    <li data-toggle="collapse" data-target="#overviewPatient" class="collapsed">
+                        <a href="#">Patient<span class="caret"></span></a>
+                    </li>
+                    <ul class="sub-sub-menu collapse" id="overviewPatient">
+                        <li><a href="#">&nbsp;All</a></li>
+                        <li><a href="#">&nbsp;Prescriptions</a></li>
+                        <li><a href="#">&nbsp;Pathology</a></li>
+                        <li><a href="#">&nbsp;Assignments</a></li>
+                        <li><a href="#">&nbsp;Enquiries</a></li>
+                        <li><a href="#">&nbsp;Documents</a></li>
+                    </ul>
+                    <li data-toggle="collapse" data-target="#overviewProduction" class="collapsed">
+                        <a href="#">Production<span class="caret"></span></a>
+                    </li>
+                    <ul class="sub-sub-menu collapse" id="overviewProduction">
+                        <li><a href="#">&nbsp;All</a></li>
+                        <li><a href="#">&nbsp;Assignments</a></li>
+                        <li><a href="#">&nbsp;Enquiries</a></li>
+                        <li><a href="#">&nbsp;SMS</a></li>
+                        <li><a href="#">&nbsp;Documents</a></li>
+                        <li><a href="#">&nbsp;Patient Profiles</a></li>
+                        <li><a href="#">&nbsp;Authorisations</a></li>
+                    </ul>
+                    <li data-toggle="collapse" data-target="#overviewScheme" class="collapsed">
+                        <a href="#">Scheme<span class="caret"></span></a>
+                    </li>
+                    <ul class="sub-sub-menu collapse" id="overviewScheme">
+                        <li><a href="#">&nbsp;All</a></li>
+                        <li><a href="#">&nbsp;Active Patients</a></li>
+                        <li><a href="#">&nbsp;Active by Gender</a></li>
+                        <li><a href="#">&nbsp;New Registrations</a></li>
+                        <li><a href="#">&nbsp;Status</a></li>
+                        <li><a href="#">&nbsp;Pathology</a></li>
+                    </ul>
+                </ul>
+
+                <!--hiv/aidsDrop-->
+
+                <li data-toggle="collapse" data-target="#hivaids" class="collapsed">
+                    <a href="#"><i><img src="~/Content/Images/Icons/Reports/hivNav.png" style="width: 8%; margin-left: 3%; margin-right: 2%" /></i>&nbsp; HIV/AIDS &nbsp;&nbsp;<span class="caret" style="margin-left:10%"></span></a>
+                </li>
+                <ul class="sub-menu collapse" id="hivaids">
+
+                    <li>@Html.ActionLink("Dashboard", "reportHIV", "ReportManagement")</li>
+                    <li data-toggle="collapse" data-target="#hivPatient" class="collapsed">
+                        <a href="#">Patient<span class="caret"></span></a>
+                    </li>
+                    <ul class="sub-sub-menu collapse" id="hivPatient">
+                        <li><a href="#">&nbsp;All</a></li>
+                        <li><a href="#">&nbsp;Prescriptions</a></li>
+                        <li><a href="#">&nbsp;Pathology</a></li>
+                        <li><a href="#">&nbsp;Assignments</a></li>
+                        <li><a href="#">&nbsp;Enquiries</a></li>
+                        <li><a href="#">&nbsp;Documents</a></li>
+                    </ul>
+                    <li data-toggle="collapse" data-target="#hivProduction" class="collapsed">
+                        <a href="#">Production<span class="caret"></span></a>
+                    </li>
+                    <ul class="sub-sub-menu collapse" id="hivProduction">
+                        <li><a href="#">&nbsp;All</a></li>
+                        <li><a href="#">&nbsp;Assignments</a></li>
+                        <li><a href="#">&nbsp;Enquiries</a></li>
+                        <li><a href="#">&nbsp;SMS</a></li>
+                        <li><a href="#">&nbsp;Documents</a></li>
+                        <li><a href="#">&nbsp;Patient Profiles</a></li>
+                        <li><a href="#">&nbsp;Authorisations</a></li>
+                    </ul>
+                    <li data-toggle="collapse" data-target="#hivScheme" class="collapsed">
+                        <a href="#">Scheme<span class="caret"></span></a>
+                    </li>
+                    <ul class="sub-sub-menu collapse" id="hivScheme">
+                        <li><a href="#">&nbsp;All</a></li>
+                        <li><a href="#">&nbsp;Active Patients</a></li>
+                        <li><a href="#">&nbsp;Active by Gender</a></li>
+                        <li><a href="#">&nbsp;New Registrations</a></li>
+                        <li><a href="#">&nbsp;Status</a></li>
+                        <li><a href="#">&nbsp;Pathology</a></li>
+                    </ul>
+                </ul>
+
+
+                <!--diabetesDrop-->
+
+                <li data-toggle="collapse" data-target="#diabetes" class="collapsed">
+                    <a href="#"><i><img src="~/Content/Images/Icons/Reports/diabetesNav.png" style="width: 15%" /></i>&nbsp; Diabetes &nbsp;&nbsp;<span class="caret" style="margin-left:10%"></span></a>
+                </li>
+                <ul class="sub-menu collapse" id="diabetes">
+
+                    <li><a href="#">Dashboard</a></li>
+                    <li data-toggle="collapse" data-target="#diabetesPatient" class="collapsed">
+                        <a href="#">Patient<span class="caret"></span></a>
+                    </li>
+                    <ul class="sub-sub-menu collapse" id="diabetesPatient">
+                        <li><a href="#">&nbsp;All</a></li>
+                        <li><a href="#">&nbsp;Prescriptions</a></li>
+                        <li><a href="#">&nbsp;Pathology</a></li>
+                        <li><a href="#">&nbsp;Assignments</a></li>
+                        <li><a href="#">&nbsp;Enquiries</a></li>
+                        <li><a href="#">&nbsp;Documents</a></li>
+                    </ul>
+                    <li data-toggle="collapse" data-target="#diabetesProduction" class="collapsed">
+                        <a href="#">Production<span class="caret"></span></a>
+                    </li>
+                    <ul class="sub-sub-menu collapse" id="diabetesProduction">
+                        <li><a href="#">&nbsp;All</a></li>
+                        <li><a href="#">&nbsp;Assignments</a></li>
+                        <li><a href="#">&nbsp;Enquiries</a></li>
+                        <li><a href="#">&nbsp;SMS</a></li>
+                        <li><a href="#">&nbsp;Documents</a></li>
+                        <li><a href="#">&nbsp;Patient Profiles</a></li>
+                        <li><a href="#">&nbsp;Authorisations</a></li>
+                    </ul>
+                    <li data-toggle="collapse" data-target="#diabetesScheme" class="collapsed">
+                        <a href="#">Scheme<span class="caret"></span></a>
+                    </li>
+                    <ul class="sub-sub-menu collapse" id="diabetesScheme">
+                        <li><a href="#">&nbsp;All</a></li>
+                        <li><a href="#">&nbsp;Active Patients</a></li>
+                        <li><a href="#">&nbsp;Active by Gender</a></li>
+                        <li><a href="#">&nbsp;New Registrations</a></li>
+                        <li><a href="#">&nbsp;Status</a></li>
+                        <li><a href="#">&nbsp;Pathology</a></li>
+                    </ul>
+                </ul>
+
+                <!--oncologyDrop-->
+                <!--
+                                <li data-toggle="collapse" data-target="#oncology" class="collapsed">
+                                    <a href="#"><i><img src="~/Content/Images/Icons/Reports/oncologyNav.png" style="width: 15%" /></i>&nbsp; Oncology &nbsp;&nbsp;<span class="caret" style="margin-left:10%"></span></a>
+                                </li>
+                                <ul class="sub-menu collapse" id="oncology">
+
+                                    <li><a href="#">Dashboard</a></li>
+                                    <li data-toggle="collapse" data-target="#oncologyPatient" class="collapsed">
+                                        <a href="#">Patient<span class="caret"></span></a>
+                                    </li>
+                                    <ul class="sub-sub-menu collapse" id="oncologyPatient">
+                                        <li><a href="#">&nbsp;All</a></li>
+                                        <li><a href="#">&nbsp;Prescriptions</a></li>
+                                        <li><a href="#">&nbsp;Pathology</a></li>
+                                        <li><a href="#">&nbsp;Assignments</a></li>
+                                        <li><a href="#">&nbsp;Enquiries</a></li>
+                                        <li><a href="#">&nbsp;Documents</a></li>
+                                    </ul>
+                                    <li data-toggle="collapse" data-target="#oncologyProduction" class="collapsed">
+                                        <a href="#">Production<span class="caret"></span></a>
+                                    </li>
+                                    <ul class="sub-sub-menu collapse" id="oncologyProduction">
+                                        <li><a href="#">&nbsp;All</a></li>
+                                        <li><a href="#">&nbsp;Assignments</a></li>
+                                        <li><a href="#">&nbsp;Enquiries</a></li>
+                                        <li><a href="#">&nbsp;SMS</a></li>
+                                        <li><a href="#">&nbsp;Documents</a></li>
+                                        <li><a href="#">&nbsp;Patient Profiles</a></li>
+                                        <li><a href="#">&nbsp;Authorisations</a></li>
+                                    </ul>
+                                    <li data-toggle="collapse" data-target="#oncologyScheme" class="collapsed">
+                                        <a href="#">Scheme<span class="caret"></span></a>
+                                    </li>
+                                    <ul class="sub-sub-menu collapse" id="oncologyScheme">
+                                        <li><a href="#">&nbsp;All</a></li>
+                                        <li><a href="#">&nbsp;Active Patients</a></li>
+                                        <li><a href="#">&nbsp;Active by Gender</a></li>
+                                        <li><a href="#">&nbsp;New Registrations</a></li>
+                                        <li><a href="#">&nbsp;Status</a></li>
+                                        <li><a href="#">&nbsp;Pathology</a></li>
+                                    </ul>
+                                </ul>
+                -->
+                <!--Search-->
+
+                <li>
+                    <a href="@Url.Action("Index", "Projects", null)"><i><img src="~/Content/Images/Icons/Reports/searchNav.png" style="width: 15%" /></i>&nbsp; Search &nbsp;</a>
+                </li>
+
+
+
+            </ul>
+        </div>
+
+    </div>
+</div>
+
+<footer>
+    <img src="~/Content/Images/memberProfile/Page Icons/Reportsx.png" style="position:fixed; bottom:3%; right: 0; left: 0; margin-left: 95.8%; width: 2%">
+</footer>

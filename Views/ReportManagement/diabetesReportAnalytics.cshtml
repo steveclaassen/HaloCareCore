@@ -1,0 +1,1179 @@
+﻿
+@{
+    ViewBag.Title = "diabetesReportAnalytics";
+    Layout = "~/Views/Shared/_LayoutReport.cshtml";
+}
+
+<style>
+    .indexnav {
+        margin-top: 100px;
+    }
+
+    .analytical_Data {
+        column-width: 50px;
+    }
+
+    .subject_Data {
+        column-width: 100px;
+    }
+
+    .reportInfo tbody > tr > td {
+        text-align: left;
+        border-top: none !important;
+    }
+</style>
+
+<div class="topBar_reports">
+    <h2>Report Analytics</h2>
+    <img src="~/Content/Images/memberProfile/topBar Icons/Analytics.png" style="width: 3%; margin-top: 0.5%" />
+</div>
+
+
+<!--sideNavigation Bar-->
+<div id=" container tabs">
+    <div class="nav-side-menu_Reports memberNav pull-left">
+        <div class="blank">&nbsp;</div>
+        <div class="blank">&nbsp;</div>
+        <div class="blank">&nbsp;</div>
+
+        <div class="menu-list">
+
+            <ul id="menu-content" class="menu-content collapse out active">
+
+                <!--dashBoard-->
+                <li>
+                    <a href="@Url.Action("reportDashboard", "ReportManagement", null)"><i><img src="~/Content/Images/memberProfile/topBar Icons/Reports.png" style="width: 12%; margin-left: 6%; margin-right: 0%" /></i>&nbsp; Reports &nbsp;</a>
+                </li>
+
+                <!--operationsReports-->
+
+                <li data-toggle="collapse" data-target="#overview" class="collapsed">
+                    <a href="#"><i><img src="~/Content/Images/Icons/Reports/oncologyNav.png" style="width: 15%; margin-left: 4%; margin-right: 2%" /></i>Operations &nbsp;&nbsp;<span class="caret" style="margin-left:10%; margin-top: 10%"></span></a>
+                </li>
+                <ul class="sub-menu collapse" id="overview">
+                    <li data-toggle="collapse" data-target="#diabetesOps" class="collapsed">
+                        <a href="#">Diabetes<span class="caret"></span></a>
+                    </li>
+                    <ul class="sub-sub-menu collapse" id="diabetesOps">
+                        <li><a href="@Url.Action("diabetesRiskReport", "ReportManagement", null)">Dashboard</a></li>
+                        <li data-toggle="collapse" data-target="#diabetesRiskReports" class="collapsed">
+                            <a href="#">Risk Reports<span class="caret"></span></a>
+                        </li>
+                        <ul class="sub-sub-menu collapse" id="diabetesRiskReports">
+                            <li><a href="@Url.Action("diabetesRiskReport", "ReportManagement", null)">Home</a></li>
+                            <li><a href="@Url.Action("diabetesEnrolments", "ReportManagement", null)">Enrolments</a></li>
+                            <li><a href="@Url.Action("diabetesActiveOnProgram", "ReportManagement", null)">Active on Program</a></li>
+                            <li><a href="@Url.Action("diabetesActiveOnMedication", "ReportManagement", null)">Active on Medication</a></li>
+                            <li><a href="@Url.Action("diabetesNotTxReady", "ReportManagement", null)">Not Tx Ready</a></li>
+                            <li><a href="@Url.Action("diabetesGenderAndAge", "ReportManagement", null)">Gender & Age</a></li>
+                            <li><a href="@Url.Action("diabetesRegime", "ReportManagement", null)">Script</a></li>
+                            <li><a href="@Url.Action("diabetesAveHbA1c", "ReportManagement", null)">Average HbA1c</a></li>
+                            <li><a href="@Url.Action("diabetesRiskEvaluation", "ReportManagement", null)">Risk Evaluation</a></li>
+                            <li><a href="@Url.Action("diabetesDeactivatedPatients", "ReportManagement", null)">Deactivated</a></li>
+                        </ul>
+                        <li data-toggle="collapse" data-target="#diabetesPatientList" class="collapsed">
+                            <a href="#">Patient List<span class="caret"></span></a>
+                        </li>
+                        <ul class="sub-sub-menu collapse" id="diabetesPatientList">
+                            <li><a href="@Url.Action("diabetesPatientList", "ReportManagement", null)">Overview</a></li>
+
+                        </ul>
+                    </ul>
+                    <li data-toggle="collapse" data-target="#hivOps" class="collapsed">
+                        <a href="#">HIV<span class="caret"></span></a>
+                    </li>
+                    <ul class="sub-sub-menu collapse" id="hivOps">
+                        <li><a href="@Url.Action("hivRiskReport", "ReportManagement", null)">Dashboard</a></li>
+                        <li data-toggle="collapse" data-target="#hivRiskReports" class="collapsed">
+                            <a href="#">Risk Reports<span class="caret"></span></a>
+                        </li>
+                        <ul class="sub-sub-menu collapse" id="hivRiskReports">
+                            <li><a href="@Url.Action("hivRiskReport", "ReportManagement", null)">Home</a></li>
+                            <li><a href="@Url.Action("hivEnrolments", "ReportManagement", null)">Enrolments</a></li>
+                            <li><a href="@Url.Action("hivActiveOnProgram", "ReportManagement", null)">Active on Program</a></li>
+                            <li><a href="@Url.Action("hivActiveOnMedication", "ReportManagement", null)">Active on Medication</a></li>
+                            <li><a href="@Url.Action("hivNotTxReady", "ReportManagement", null)">Not Tx Ready</a></li>
+                            <li><a href="@Url.Action("hivGenderAndAge", "ReportManagement", null)">Gender & Age</a></li>
+                            <li><a href="@Url.Action("hivPepAndPrep", "ReportManagement", null)">PEP/PrEP</a></li>
+                            <li><a href="@Url.Action("hivCd4", "ReportManagement", null)">CD4/CD4%</a></li>
+                            <li><a href="@Url.Action("hivViralLoad", "ReportManagement", null)">Viral Load</a></li>
+                            <li><a href="@Url.Action("hivViralLoadMigration", "ReportManagement", null)">VL Migration</a></li>
+                            <li><a href="@Url.Action("hivDeactivatedPatients", "ReportManagement", null)">Deactivated</a></li>
+                            <li><a href="@Url.Action("hivRegime", "ReportManagement", null)">Script</a></li>
+                        </ul>
+                        <li data-toggle="collapse" data-target="#hivPatientList" class="collapsed">
+                            <a href="#">Patient List<span class="caret"></span></a>
+                        </li>
+                        <ul class="sub-sub-menu collapse" id="hivPatientList">
+                            <li><a href="@Url.Action("hivPatientList", "ReportManagement", null)">Overview</a></li>
+
+                        </ul>
+                    </ul>
+
+                </ul>
+
+                <!--executiveReports-->
+
+                <li data-toggle="collapse" data-target="#hivaids" class="collapsed">
+                    <a href="#"><i><img src="~/Content/Images/memberProfile/topBar Icons/executiveDashboard.png" style="width: 12%; margin-left: 6%; margin-right: 2.5%" /></i>Executive &nbsp;&nbsp;<span class="caret" style="margin-left:10%; margin-top: 10%"></span></a>
+                </li>
+                <ul class="sub-menu collapse" id="hivaids">
+                    <li><a href="@Url.Action("boardReport", "ReportManagement", null)">New</a></li>
+                </ul>
+
+
+                <!--performanceReports-->
+
+                <li data-toggle="collapse" data-target="#diabetes" class="collapsed">
+                    <a href="#"><i><img src="~/Content/Images/memberProfile/topBar Icons/performanceWhite_Two.png" style="width: 14%; margin-left: 5%; margin-right: -1%" /></i>&nbsp; Performance &nbsp;<span class="caret" style="margin-left:5%; margin-top: 10%"></span></a>
+                </li>
+                <ul class="sub-menu collapse" id="diabetes">
+                    <li><a href="@Url.Action("caseManagerProduction", "ReportManagement", null)">Production</a></li>
+                    <li><a href="@Url.Action("serviceLevelAgreement", "ReportManagement", null)">SLA</a></li>
+
+                </ul>
+
+
+                <!--analyticalReports-->
+
+                <li data-toggle="collapse" data-target="#Analytics" class="collapsed">
+                    <a href="#"><i><img src="~/Content/Images/memberProfile/topBar Icons/Analytics.png" style="width: 15%; margin-left: 4%; margin-right: 0%" /></i>&nbsp; Analytics &nbsp;<span class="caret" style="margin-left:12%; margin-top: 10%"></span></a>
+                </li>
+                <ul class="sub-menu collapse" id="Analytics">
+                    <li><a href="@Url.Action("diabetesReportAnalytics", "ReportManagement", null)">Diabetes</a></li>
+                    <li><a href="@Url.Action("hivReportAnalytics", "ReportManagement", null)">HIV</a></li>
+
+                </ul>
+
+            </ul>
+        </div>
+
+    </div>
+</div>
+<br />
+<br />
+<br />
+<br />
+<h2 style="color: #003366; font-size: 250%; text-align: center; margin-bottom: 5%"><i><span style="color: #0081b3">Report Analytics</span></i><br /> <span style="font-family: 'Antro Vectra'; font-size: 90%; padding-left: 10em">Diabetes</span></h2>
+
+<!--searchFilter-->
+
+<br />
+<br />
+<div class="form-horizontal">
+    <div class="form-group">
+        <div class="col-md-12">
+            <div class="col-md-6">
+                @Html.Label(null,"Disease", htmlAttributes: new { @class = "control-label col-md-3 pushR" })
+                <div class="col-md-5">
+                    @Html.Editor("Type", new { htmlAttributes = new { @class = "infoBox_Reports" } })
+                </div>
+            </div>
+            <div class="col-md-6">
+                @Html.Label(null,"Month", htmlAttributes: new { @class = "control-label col-md-3 pullR" })
+                <div class="col-md-5">
+                    @Html.Editor("Type", new { htmlAttributes = new { @class = "infoBox_Reports" } })
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-md-12">
+            <div class="col-md-6">
+                @Html.Label(null,"Medical Scheme", htmlAttributes: new { @class = "control-label col-md-3 pushR" })
+                <div class="col-md-5">
+                    @Html.Editor("Type", new { htmlAttributes = new { @class = "infoBox_Reports" } })
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                @Html.Label(null,"Year", htmlAttributes: new { @class = "control-label col-md-3 pullR" })
+                <div class="col-md-5">
+                    @Html.Editor("Type", new { htmlAttributes = new { @class = "infoBox_Reports" } })
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-md-12">
+            <div class="col-md-6">
+                @Html.Label(null,"Type", htmlAttributes: new { @class = "control-label col-md-3 pushR" })
+                <div class="col-md-5">
+                    @Html.Editor("Type", new { htmlAttributes = new { @class = "infoBox_Reports" } })
+                </div>
+            </div>
+
+            <div class="col-md-6"></div>
+            <br />
+            <br />
+            <br />
+
+            <div class="form-group">
+                <div class="actionButton" style="margin-left: 48%; margin-bottom: -1.5%">
+                    <input type="submit" value="Search" class="btn buttonRound_approve" style="width: 10%!important" />
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<br />
+<br />
+
+<hr class="reportRuler">
+<br />
+
+<h2 style="color: #003366; font-size: 200%; text-align: center; margin-bottom: 2%"><i>Analytical<span style="color: #0081b3"> Report Breakdown</span></i></h2>
+<br />
+<!--reportLogo-->
+
+<div class="reportLogo">
+    <img src="~/Content/Images/haloCareLoginx.jpg" />
+</div>
+<div class="schemeLogo">
+    <img src="~/Content/Images/Schemes/angloMedicalScheme.jpg" />
+</div>
+<!--reportInformation-->
+<br />
+<h2 style="color: #003366; font-size: 140%; margin-left: 1%"><i>HaloCare <span style="color: #0081b3"> Report</span></i></h2>
+<hr class="reportRuler">
+
+<table class="table reportInfo" id="table">
+    <tr>
+        <td>
+            <b>Medical Scheme:</b>
+        </td>
+        <td>
+            Anglo Medical Scheme
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <b>Report Type:</b>
+        </td>
+        <td>
+            Analytical Breakdown
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <b>Period:</b>
+        </td>
+        <td>
+            01 January 2017 - 31 November 2017
+        </td>
+    </tr>
+
+
+</table>
+
+<br />
+<br />
+
+<!--dataTable-->
+
+<h2 style="color: #003366; font-size: 150%; margin-left: 2%; text-align: center"><i>Enrolment<span style="color: #0081b3"> Reports</span></i></h2>
+<hr class="reportRuler">
+<div class="row col-md-12">
+    <div class="col-md-6">
+        <h2 style="color: #003366; font-size: 120%; margin-left: 2%"><i>Enrolments<span style="color: #0081b3"> - 2017 Annual Totals</span></i></h2>
+
+        <table class="table" id="table">
+            <tr>
+                <th>
+
+                </th>
+                <th>
+                    2017 Totals
+                </th>
+
+
+            </tr>
+
+
+            <tr>
+                <td style="text-align: left">
+                    New Registrations
+                </td>
+                <td>
+                    xx
+                </td>
+
+
+            </tr>
+            <tr>
+                <td style="text-align: left">
+                    DM Enrolments
+                </td>
+                <td>
+                    xx
+                </td>
+
+
+            </tr>
+            <br />
+            <tr>
+                <td style="text-align: left">
+                    <b>Total</b>
+                </td>
+                <td>
+                    <b>xx</b>
+                </td>
+
+            </tr>
+
+        </table>
+    </div>
+    <br />
+
+    <!--enrollmentTotals-->
+    <br />
+    <br />
+
+    <div class="col-md-6">
+        <div class="chart-container" style="width: 42%; margin: auto; display: block">
+            <div class="pie-chart-container">
+                <canvas id="pie-chartcanvas-1"></canvas>
+            </div>
+
+        </div>
+    </div>
+</div>
+<br />
+
+
+
+<h2 style="color: #003366; font-size: 120%; margin-left: 2%"><i>Enrolments<span style="color: #0081b3"> - 2017 Monthly Totals</span></i></h2>
+
+
+<table class="table" id="table">
+    <tr>
+        <th class="subject_Data"></th>
+        <th class="analytical_Data">
+            January
+        </th>
+        <th class="analytical_Data">
+            February
+        </th>
+        <th class="analytical_Data">
+            March
+        </th>
+        <th class="analytical_Data">
+            April
+        </th>
+        <th class="analytical_Data">
+            May
+        </th>
+        <th class="analytical_Data">
+            June
+        </th>
+        <th class="analytical_Data">
+            July
+        </th>
+        <th class="analytical_Data">
+            August
+        </th>
+        <th class="analytical_Data">
+            September
+        </th>
+        <th class="analytical_Data">
+            October
+        </th>
+        <th class="analytical_Data">
+            November
+        </th>
+        <th class="analytical_Data">
+            December
+        </th>
+    </tr>
+
+
+    <tr>
+        <td style="text-align: left">
+            New Registrations
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+    </tr>
+    <tr>
+        <td style="text-align: left">
+            DM Enrolments
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+    </tr>
+    <tr style="font-weight: bold">
+        <td style="text-align: left">
+            Grand Total
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+    </tr>
+
+</table>
+<hr class="reportRuler">
+
+<br />
+<h2 style="color: #003366; font-size: 150%; margin-left: 2%; text-align: center"><i>Active<span style="color: #0081b3"> on Program</span></i></h2>
+<hr class="reportRuler">
+<div class="row col-md-12">
+    <div class="col-md-6">
+
+        <h2 style="color: #003366; font-size: 120%; margin-left: 2%"><i>Active on Program<span style="color: #0081b3"> - 2017 Annual Totals</span></i></h2>
+
+        <table class="table" id="table">
+            <tr>
+                <th class="subject_Data"></th>
+                <th>
+                    2017 Totals
+                </th>
+
+            </tr>
+
+
+            <tr>
+                <td style="text-align: left">
+                    Active HAART
+                </td>
+                <td>
+                    xx
+                </td>
+
+            </tr>
+            <tr>
+                <td style="text-align: left">
+                    MTC
+                </td>
+                <td>
+                    xx
+                </td>
+
+            </tr>
+            <tr>
+                <td style="text-align: left">
+                    Not Tx Ready
+                </td>
+                <td>
+                    xx
+                </td>
+
+            </tr>
+            <tr>
+                <td style="text-align: left">
+                    PEP
+                </td>
+                <td>
+                    xx
+                </td>
+
+            </tr>
+            <tr>
+                <td style="text-align: left">
+                    PrEP
+                </td>
+                <td>
+                    xx
+                </td>
+
+            </tr>
+            <tr>
+                <td style="text-align: left">
+                    Intervention
+                </td>
+                <td>
+                    xx
+                </td>
+
+            </tr>
+            <tr>
+                <td style="text-align: left">
+                    F/Intervention
+                </td>
+                <td>
+                    xx
+                </td>
+
+            </tr>
+            <br />
+            <tr>
+                <td style="text-align: left">
+                    <b>Total</b>
+                </td>
+                <td>
+                    <b>xx</b>
+                </td>
+
+            </tr>
+        </table>
+    </div>
+    <br />
+    <br />
+    <br />
+    <!--activeOnProgram-->
+    <div class="col-md-6">
+        <div class="chart-container" style="width: 48%; margin: auto; display: block">
+            <div class="pie-chart-container">
+                <canvas id="pie-chartcanvas-2"></canvas>
+            </div>
+
+        </div>
+    </div>
+</div>
+<br />
+
+<hr class="reportRuler">
+
+<h2 style="color: #003366; font-size: 120%; margin-left: 2%"><i>Active on Program<span style="color: #0081b3"> - 2017 Monthly Totals</span></i></h2>
+
+
+<table class="table" id="table">
+    <tr>
+        <th class="subject_Data"></th>
+        <th class="analytical_Data">
+            January
+        </th>
+        <th class="analytical_Data">
+            February
+        </th>
+        <th class="analytical_Data">
+            March
+        </th>
+        <th class="analytical_Data">
+            April
+        </th>
+        <th class="analytical_Data">
+            May
+        </th>
+        <th class="analytical_Data">
+            June
+        </th>
+        <th class="analytical_Data">
+            July
+        </th>
+        <th class="analytical_Data">
+            August
+        </th>
+        <th class="analytical_Data">
+            September
+        </th>
+        <th class="analytical_Data">
+            October
+        </th>
+        <th class="analytical_Data">
+            November
+        </th>
+        <th class="analytical_Data">
+            December
+        </th>
+    </tr>
+
+
+    <tr>
+        <td style="text-align: left">
+            Active HAART
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+    </tr>
+    <tr>
+        <td style="text-align: left">
+            MTC
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+    </tr>
+    <tr>
+        <td style="text-align: left">
+            Not Tx Ready
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+    </tr>
+    <tr>
+        <td style="text-align: left">
+            PEP
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+    </tr>
+    <tr>
+        <td style="text-align: left">
+            PrEP
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+    </tr>
+    <tr>
+        <td style="text-align: left">
+            Intervention
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+    </tr>
+    <tr>
+        <td style="text-align: left">
+            F/Intervention
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+    </tr>
+    <tr style="font-weight: bold">
+        <td style="text-align: left">
+            Grand Total
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+        <td>
+            xx
+        </td>
+    </tr>
+
+</table>
+<hr class="reportRuler">
+
+<!-- Trigger the modal with a button -->
+
+<div class="exportIcon">
+    <a href="your#exportIcon" role="button" data-toggle="modal"> <i class="fa fa-cog fa-spin fa-1x fa-fw" style="color: #003366; font-size: 20px"></i></a>
+</div>
+
+
+
+
+<!-- Modal -->
+<div id="exportIcon" class="modal fade" role="dialog">
+    <div class="modal-dialog_reports">
+
+        <!-- Modal content-->
+        <div class="modal_Reports">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title" style="text-align: center">Report Options</h4>
+            </div>
+            <div class="modal-body">
+                <br />
+                <div class="form-horizontal">
+                    <div class="col-md-6">
+                        <div class="save">
+                            <a>
+                                <img src="~/Content/Images/Navigation/5. Reports/save.png" style="width: 40%; margin: auto; display: block; margin-bottom: -8%" /><br />
+                                <p style="text-align: center">Save</p>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="export">
+                            <a>
+                                <img src="~/Content/Images/Navigation/5. Reports/excel.png" style="width: 40%; margin: auto; display: block; margin-bottom: -8%" /> <br />
+                                <p style="text-align: center">Export</p>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <br />
+                <br />
+                <br />
+                <br />
+                <br />
+                <br />
+
+            </div>
+            <a>
+                <div class="modalFooter_reports">
+                    <p data-dismiss="modal">Cancel</p>
+                </div>
+            </a>
+        </div>
+
+    </div>
+</div>
+
+<footer class="backButton_Navigation" style="position: fixed; bottom: 1.5%;">
+    @Html.ActionLink("Back", "analyticsDiseaseManagement", "ReportManagement")
+</footer>
+
+<footer>
+    <img src="~/Content/Images/Navigation/5. Reports/diabetesReport.png" style="position:fixed; bottom:3.5%; right: 0; left: 0; margin-left: 95.5%; width: 1.5%">
+</footer>
+
+
+
+<script src="~/Scripts/Chart.min.js"></script>
+<script src="~/Scripts/jquery-3.1.1.min.js"></script>
+<script src="js/pie.js"></script>
+
+
+<script>
+    $(function () {
+
+        //get the pie chart canvas
+        var ctx1 = $("#pie-chartcanvas-1");
+        var ctx2 = $("#pie-chartcanvas-2");
+
+
+        //pie chart data
+        var data1 = {
+            labels: ["New Registrations", "DM Enrolments"],
+            datasets: [
+                {
+                    label: "Enrolment Totals ",
+                    data: [20, 10],
+                    backgroundColor: [
+                        "#ff0000",
+                        "#669999",
+
+
+                    ],
+                    borderColor: [
+                        "#ff0000",
+                        "#669999",
+                    ],
+                    borderWidth: [1, 1]
+                }
+            ]
+        };
+
+        //pie chart data
+        var data2 = {
+            labels: ["Active HAART", "MTC", "Not Tx Ready", "PEP", "PrEP", "Intervention", "F/Intervention"],
+            datasets: [
+                {
+                    label: "Program Summary",
+                    data: [31, 1, 2, 3, 4, 5, 6],
+                    backgroundColor: [
+                        "#002e4d",
+                        "#006bb3",
+                        "#008ae6",
+                        "#1aa3ff",
+                        "#80ccff",
+                        "#99d6ff",
+                        "#e6f5ff"
+
+                    ],
+                    borderColor: [
+                        "#002e4d",
+                        "#006bb3",
+                        "#008ae6",
+                        "#1aa3ff",
+                        "#80ccff",
+                        "#99d6ff",
+                        "#e6f5ff"
+                    ],
+                    borderWidth: [1, 1, 1, 1, 1]
+                }
+            ]
+        };
+
+
+        //options
+        var options = {
+            responsive: true,
+
+            legend: {
+                display: true,
+                position: "bottom",
+                labels: {
+                    fontColor: "#333",
+                    fontSize: 10
+                }
+            }
+        };
+
+        //create Chart class object
+        var chart1 = new Chart(ctx1, {
+            type: "pie",
+            data: data1,
+            options: options
+        });
+        //create Chart class object
+        var chart2 = new Chart(ctx2, {
+            type: "pie",
+            data: data2,
+            options: options
+        });
+    });
+
+</script>
+
+
+
+
+
+
+
+

@@ -1,0 +1,508 @@
+﻿@model HaloCareCore.Models.EnrolmentViewModel
+@{
+    ViewBag.Title = "Patient dashboard";
+    Layout = "~/Views/Shared/_LayoutMember.cshtml";
+}
+<comment>
+    <!--
+    26 July 2019 -- HCare-768 (Management status displayed incorrectly on patient dashboard)
+    Added an active check to the patient dashboard where the managment status is displayed in the Disease Management block. This is also corrected in the advanced search in order to pull the correct data related to the management status should a status be deactivated.
+
+    18 October 2019 -- HCare-865 (No program display - Remove the End Date from all screens of the "Program".)
+    Removed access to the Add, Edit Program from the patient dashboard as well as the Program history view. You cannot add or edit a program
+    The end date has also been removed from the view
+
+    22 June 2020 -- HCare-1026(Change Medical Aid to Medical Scheme)
+    I ran a search on the system for “medical aid” and “benefit option” and replaced with “Medical scheme” and “Scheme option” as per the request.
+    There were 123 instances of “Medical Aid” which were listed throughout the system including notes made. And 7 instances of “Benefit option”. All have been replaced.
+
+    -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .share-dot {
+        font-size: 8px;
+        color: dodgerblue;
+        text-align: center;
+    }
+</style>
+<javascript>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js"></script>
+    <script src="https://www.jqueryscript.net/demo/jQuery-Plugin-For-Sortable-Bootstrap-Tables-Bootstrap-Sortable/Scripts/bootstrap-sortable.js"></script>
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+</javascript>
+
+<div id="popup-overlay" class="popup-overlay"></div>
+
+<!----------------------------------------------------------------------------- html-top-navigation-panel  ---------------------------------------------------------------------------->
+<nav id="global-nav" class="nav">
+    <div class="pull-left title">
+        <h1 class="site-title_patientProfile">
+            <span><i class="fas fa-user-circle"></i>&emsp; Patient dashboard</span>
+        </h1>
+    </div>
+    <div class="pull-right title">
+        <h1 class="site-title_userID pull-right">
+            <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+        </h1>
+        <h1 class="site-title_userID pull-right">
+            @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+            {
+                <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+            }
+        </h1>
+        <h1 class="site-waffleIcon pull-right">
+            <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+        </h1>
+    </div>
+</nav>
+
+<!-------------------------------------------------------------------------------------- html-body ------------------------------------------------------------------------------------>
+<div class="dashboardContainer zero-padding">
+    <div class="patientDashboard_View">
+        <!-- breadcrumbs -->
+        <ul class="breadcrumbs_patientDashboard">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+            <li><a href="@Url.Action("patientDashboard", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"]})">Patient</a></li>
+            <li><a href="#">@ViewBag.Title</a></li>
+        </ul>
+        <!-- navigation-collection -->
+        <div class="navCollection_patientDashboard">
+            @Html.Partial("_navCollection")
+        </div>
+        <!-- left-navigation-panel -->
+        @Html.Partial("_navSlider", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })
+        <!--profile-information-->
+        <div class="profileBar">
+            @Html.Action("_profileBar_edit", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })
+        </div>
+    </div>
+
+    <div class="profilebar-spacer"></div>
+
+    <div class="patientDashboard_container">
+        <!---------------------------------------------------------------------------- iseries-sync ---------------------------------------------------------------------------->
+        <div class="col-md-12 row">
+            <div class="col-md-6">
+                <h4 class="summaryHeading">Patient summary</h4>
+            </div>
+            <div class="col-md-6">
+                <div class="sync-button">
+                    @if (Model.medicalAid.sync)
+                    {
+                        <a href="@Url.Action("SyncSeries", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="iSeries sync"><span class="sub_icon fas fa-sync-alt"></span></a>
+                    }
+                </div>
+            </div>
+        </div>
+        <hr class="member-dashboard-ruler" />
+
+        <!---->
+        <!---->
+        <div class="container-tab">
+            <div class="row">
+                <div class="span12">
+                    <div class="container-tab">
+                        <div class="tab-content">
+                            <!------------------------------------------------------------------------ patient-dashboard ------------------------------------------------------------------------>
+                            <div role="tabpanel" class="tab-pane active" id="profile">
+                                <div class="row">
+                                    <div class="row communicationTab">
+                                        <div class="form-horizontal">
+                                            <!---------------------------------------------------------------------- disease-management ---------------------------------------------------------------------->
+                                            <div class="col-md-12" style="z-index: 10">
+                                                <div class="panel panel-gray">
+                                                    <div class="panel-heading clickable" id="patientInfo">
+                                                        <h3 class="panel-title">
+                                                            Disease management
+                                                        </h3>
+                                                        <span class="pull-right clickable" style="margin-top: -1.25%; margin-right: 0.5%"><i class="fas fa-caret-up"></i></span>
+                                                    </div>
+                                                    <div class="panel-body">
+                                                        <div class="col-md-12">
+                                                            <!------------ program ------------>
+                                                            <div class="col-md-6">
+                                                                <table class="table patient_Table">
+                                                                    <tr>
+                                                                        <th>
+                                                                            @Html.DisplayName("Program type")
+                                                                        </th>
+                                                                        <th>
+                                                                            @Html.DisplayName("Start date")
+                                                                        </th>
+                                                                        <th style="text-align: center!important">
+                                                                            @Html.DisplayName("Action")
+                                                                        </th>
+                                                                    </tr>
+                                                                    @if (Model.programs.Count != 0)
+                                                                    {
+                                                                        foreach (var progs in Model.programs)
+                                                                        {
+                                                                            if (progs.effectiveDate <= DateTime.Now)
+                                                                            {
+                                                                                <tr>
+                                                                                    <td>
+                                                                                        @Html.DisplayFor(model => progs.programCode)
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        @Html.DisplayFor(model => progs.effectiveDate)
+                                                                                    </td>
+                                                                                    <td class="linkNav" style="text-align: center!important">
+                                                                                        @Html.ActionLink("View", "ProgramHistory", new { DependentID = Model.dependent.DependantID, pro = Context.Request.Query["pro"] }, null)
+                                                                                    </td>
+                                                                                </tr>
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <tr>
+                                                                            <td>-</td>
+                                                                            <td>-</td>
+                                                                            <td class="linkNav" style="text-align: center!important">
+                                                                                @Html.ActionLink("View", "ProgramHistory", new { DependentID = Model.dependent.DependantID, pro = Context.Request.Query["pro"] }, null)
+                                                                            </td>
+                                                                        </tr>
+                                                                    }
+                                                                </table>
+                                                            </div>
+                                                            <!------- management-status ------->
+                                                            <div class="col-md-6">
+                                                                <table class="table patient_Table">
+                                                                    <tr>
+                                                                        <th>
+                                                                            @Html.DisplayName("Management status")
+                                                                        </th>
+                                                                        <th>
+                                                                            @Html.DisplayName("Start date")
+                                                                        </th>
+                                                                        <th>
+                                                                            @Html.DisplayName("End date")
+                                                                        </th>
+                                                                        <th style="text-align: center!important">
+                                                                            @Html.DisplayName("Action")
+                                                                        </th>
+                                                                    </tr>
+                                                                    @if (Model.statuss.Count != 0)
+                                                                    {
+                                                                        var count = 0;
+                                                                        foreach (var stat in Model.statuss)
+                                                                        {
+                                                                            if (count < 2)
+                                                                            {
+                                                                                <tr>
+                                                                                    <td>
+                                                                                        @Html.DisplayFor(model => stat.managementStatusCode)
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        @Html.DisplayFor(model => stat.effectiveDate)
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        @Html.DisplayFor(model => stat.endDate)
+                                                                                    </td>
+                                                                                    <td class="linkNav" style="text-align: center!important">
+                                                                                        @Html.ActionLink("Add/View", "ManageStatus", "Member", new { DependentID = Model.dependent.DependantID, pro = Context.Request.Query["pro"] }, null)
+                                                                                    </td>
+                                                                                </tr>
+                                                                                count++;
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <tr>
+                                                                            <td>-</td>
+                                                                            <td>-</td>
+                                                                            <td>-</td>
+                                                                            <td class="linkNav" style="text-align: center!important">
+                                                                                @Html.ActionLink("Add/View", "ManageStatus", "Member", new { DependentID = Model.dependent.DependantID, pro = Context.Request.Query["pro"] }, null)
+                                                                            </td>
+                                                                        </tr>
+                                                                    }
+                                                                </table>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!---------------------------------------------------------------------- management-details ---------------------------------------------------------------------->
+                                            <div class="col-md-12" style="z-index: 10">
+                                                <div class="panel panel-gray">
+                                                    <div class="panel-heading clickable" id="patientInfo">
+                                                        <h3 class="panel-title">
+                                                            Management details
+                                                        </h3>
+                                                        <span class="pull-right clickable" style="margin-top: -1.25%; margin-right: 0.5%"><i class="fas fa-caret-up"></i></span>
+                                                    </div>
+                                                    <div class="panel-body">
+                                                        <div class="col-md-12">
+                                                            <!--------- case-manager ---------->
+                                                            <div class="col-md-6">
+                                                                <table class="table patient_Table">
+                                                                    <tr>
+                                                                        <th>@Html.DisplayName("Case manager")</th>
+                                                                        <th>@Html.DisplayName("Effective")</th>
+                                                                        <th style="text-align: center!important">@Html.DisplayName("Action")</th>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        @if (Model.UserMemberHistories.Count != 0)
+                                                                        {
+                                                                            <td>@Html.DisplayFor(model => model.UserMemberHistories[0].UserFullName)</td>
+                                                                            <td>@Html.DisplayFor(model => model.UserMemberHistories[0].EffectiveDate)</td>
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            <td>-</td>
+                                                                            <td>-</td>
+                                                                        }
+                                                                        <td class="text-center">
+                                                                            <input type="submit" class="link-button" value="Add" onclick="location.href='@Url.Action("AddCaseManagerToProfile", "CaseManager", new { DependentID = Model.dependent.DependantID, pro= Context.Request.Query["pro"] })'" /> /
+                                                                            <input type="submit" class="link-button" value="View" onclick="location.href='@Url.Action("History", "CaseManager", new { DependentID = Model.dependent.DependantID, pro = Context.Request.Query["pro"] })'" />
+
+                                                                        </td>
+                                                                    </tr>
+                                                                </table>
+                                                            </div>
+                                                            <!------------ doctors ------------>
+                                                            <div class="col-md-6">
+                                                                <table class="table patient_Table">
+                                                                    <tr>
+                                                                        <th>
+                                                                            @Html.DisplayName("Doctor ")
+                                                                        </th>
+                                                                        <th>
+                                                                            @Html.DisplayName("Practice #")
+                                                                        </th>
+                                                                        <th>
+                                                                            @Html.DisplayName("Contact #")
+                                                                        </th>
+                                                                        <th style="text-align: center!important">
+                                                                            @Html.DisplayName("Action")
+                                                                        </th>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        @if (Model.doctor.practiceNo != null)
+                                                                        {
+                                                                            <td>
+                                                                                @Html.DisplayFor(model => model.doctor.drFirstName) @Html.DisplayFor(model => model.doctor.lastName_UL)
+                                                                            </td>
+                                                                            <td>
+                                                                                @Html.DisplayFor(model => model.doctor.practiceNo)
+                                                                            </td>
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            <td>
+                                                                                -
+                                                                            </td>
+                                                                            <td>
+                                                                                -
+                                                                            </td>
+                                                                        }
+                                                                        @if (Model.doctorContact != null)
+                                                                        {
+                                                                            <td>
+                                                                                @Html.DisplayFor(model => model.doctorContact.cell)
+                                                                            </td>
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            <td>
+                                                                                -
+                                                                            </td>
+                                                                        }
+                                                                        <td class="linkNav" style="text-align: center!important">
+                                                                            @Html.ActionLink("Add", "DoctorSearch", "PatientManagement", new { DependentID = Model.dependent.DependantID, pro = Context.Request.Query["pro"] }, null)/@Html.ActionLink("View", "ViewDoctorHistory", "Member", new { DependentID = Model.dependent.DependantID, pro = Context.Request.Query["pro"] }, null)
+                                                                        </td>
+                                                                    </tr>
+                                                                </table>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!---------------------------------------------------------------------- medical-aid-details --------------------------------------------------------------------->
+                                            <!---------------------------------------------------------------------- member-information ---------------------------------------------------------------------->
+                                            <!----------------------------------------------------------------- chroniline-member-information ---------------------------------------------------------------->
+                                            <div class="col-md-12" style="z-index: 10">
+                                                <div class="panel panel-gray">
+                                                    <div class="panel-heading clickable" id="patientInfo">
+                                                        <h3 class="panel-title">
+                                                            ChroniLine member information
+                                                        </h3>
+                                                        <span class="pull-right clickable" style="margin-top: -1.25%; margin-right: 0.5%"><i class="fas fa-caret-up"></i></span>
+                                                    </div>
+                                                    <div class="panel-body">
+                                                        <div class="col-md-12">
+                                                            <table class="table patient-clinical-history-table">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th>
+                                                                            @Html.DisplayName("Medical scheme")
+                                                                        </th>
+                                                                        <th>
+                                                                            @Html.DisplayName("Option")
+                                                                        </th>
+                                                                        <th>
+                                                                            @Html.DisplayName("Member #")
+                                                                        </th>
+                                                                        <th>
+                                                                            @Html.DisplayName("Dep code")
+                                                                        </th>
+                                                                        <th>
+                                                                            @Html.DisplayName("Full name")
+                                                                        </th>
+                                                                        <th>
+                                                                            @Html.DisplayName("ID/Auth#")
+                                                                        </th>
+                                                                        <th>
+                                                                            @Html.DisplayName("Employer group")
+                                                                        </th>
+
+                                                                        <th>
+                                                                            @Html.DisplayName("Option status")
+                                                                        </th>
+                                                                        <th>
+                                                                            @Html.DisplayName("Member status")
+                                                                        </th>
+                                                                    </tr>
+                                                                </thead>
+                                                                @if (Model.memberImports.Count() == 0)
+                                                                {
+                                                                    <tr><td colspan="8" style="text-align: center!important; color: rgba(128, 128, 128, 0.50)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="color: rgba(128, 128, 128, 0.50)"></i></span> no records found</td></tr>
+                                                                }
+                                                                else
+                                                                {
+                                                                    foreach (var item in Model.memberImports)
+                                                                    {
+                                                                        <tbody>
+                                                                            <tr>
+                                                                                <td>@item.medicalAidCode</td>
+                                                                                <td>@item.option</td>
+                                                                                <td>@item.membershipNo</td>
+                                                                                <td>@item.dependantCode</td>
+                                                                                <td>@item.fullName</td>
+                                                                                <td>@item.iDNumber</td>
+                                                                                <td>@item.employerCode</td>
+                                                                                <td>@item.optionStatus</td>
+                                                                                <td>@item.memberStatus</td>
+                                                                            </tr>
+                                                                        </tbody>
+                                                                    }
+                                                                }
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!---->
+        <!---->
+    </div>
+
+</div>
+
+<div id="popup-warning" class="popup-box">
+    <div class="col-md-12">
+        <button type="button" class="popup-close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <div class="popup-scheme">Scheme: @Model.PopUp.medicalAid</div>
+        <div class="popup-title">@Model.PopUp.program_pop_title</div>
+        <hr class="settings-ruler" />
+        <div class="popup-template">@Html.Raw(Html.Encode(Model.PopUp.program_pop_template).Replace("(b)", "<b>").Replace("(/b)", "</b>"))</div>
+    </div>
+    <div class="col-md-12 popup-info-panel">@Model.PopUp.program • @Model.PopUp.medicalAid • @Model.PopUp.option</div>
+    <div class="col-md-12 popup-footer">
+        <button class="popup-button" id="popup-submit">Close</button>
+    </div>
+</div>
+
+<script src="~/bundles/jqueryval"></script>
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+    <!-- collapsible -->
+    <script>
+        $(document).on('click', '.panel-heading span.clickable', function (e) {
+            var $this = $(this);
+            if (!$this.hasClass('panel-collapsed')) {
+                $this.parents('.panel').find('.panel-body').slideUp();
+                $this.addClass('panel-collapsed');
+                $this.find('i').removeClass('fa-caret-up').addClass('fa-caret-down');
+            } else {
+                $this.parents('.panel').find('.panel-body').slideDown();
+                $this.removeClass('panel-collapsed');
+                $this.find('i').removeClass('fa-caret-down').addClass('fa-caret-up');
+            }
+        });
+        $(document).on('click', '.panel div.clickable', function (e) {
+            var $this = $(this);
+            if (!$this.hasClass('panel-collapsed')) {
+                $this.parents('.panel').find('.panel-body').slideUp();
+                $this.addClass('panel-collapsed');
+                $this.find('i').removeClass('fa-caret-up').addClass('fa-caret-down');
+            } else {
+                $this.parents('.panel').find('.panel-body').slideDown();
+                $this.removeClass('panel-collapsed');
+                $this.find('i').removeClass('fa-caret-down').addClass('fa-caret-up');
+            }
+        });
+        //$(document).ready(function () {
+        //    $('.panel-heading span.clickable').click();
+        //    $('.panel div.clickable').click();
+        //});
+    </script>
+    <!-- general -->
+    <script>
+        // left-navigation-slider
+        $("#menu-toggle").click(function (e) {
+            e.preventDefault();
+            $("#wrapper").toggleClass("active");
+        });
+        // waffle-navigation-script-open
+        $("#patientMenu-toggle").click(function (e) {
+            e.preventDefault();
+            $("#patientWrapper").toggleClass("active");
+        });
+        // waffle-navigation-script-close
+        $("#exit-toggle").click(function (e) {
+            e.preventDefault();
+            $("#patientWrapper").toggleClass("active");
+        });
+        // special-note
+        $("#alert-toggle").click(function (e) {
+            e.preventDefault();
+            $("#alertWrapper").toggleClass("active");
+        });
+        // program-popup
+        $("#program-toggle").click(function (e) {
+            e.preventDefault();
+            $("#programWrapper").toggleClass("active");
+        });
+        // go-back
+        $(function () {
+            $('.go_back').click(function (e) {
+                e.preventDefault();
+                history.go(-1);
+            });
+        });
+    </script>
+
+}

@@ -1,0 +1,226 @@
+﻿@*@model IEnumerable<HaloCareCore.Models.Admin.Accounts>*@
+@model HaloCareCore.Models.ViewModels.AccountVM
+@using HaloCareCore.Extensions
+
+@{
+    ViewBag.Title = "Accounts";
+    Layout = "~/Views/Shared/_layout-view-x.cshtml";
+}
+<comment>
+    <!-- hcare-1338: new account setup -->
+</comment>
+<style>
+   
+</style>
+<javascript>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+    <script src="https://www.jqueryscript.net/demo/jQuery-Plugin-For-Sortable-Bootstrap-Tables-Bootstrap-Sortable/Scripts/bootstrap-sortable.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/js/standalone/selectize.js"></script>
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.default.css">
+</javascript>
+
+
+
+<div class="collapse in">
+    <div class="card card-body">
+        <div class="collapse-body">
+            <div class="search-information-data-panel">
+                <!-------------------------------------------------------------------------- bread-crumbs ------------------------------------------------------------------------->
+                <ul class="bread-crumbs-full-screen" style="color: #808080 !important;">
+                    <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+                    <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+                    <li><a href="@Url.Action("Index", "Administration", new {})">Settings</a></li>
+                    <li><a href="#">@ViewBag.Title</a></li>
+                </ul>
+                <!------------------------------------------------------------------------- nav-collection ------------------------------------------------------------------------>
+                @if (User.Identity.IsAuthenticated)
+                {
+                    if (User.HasRole("6. Global user") || (User.HasRole("5. Super user")))
+                    {
+                        <div class="navCollection_fullScreens">
+                            <div class="buttonCollection">
+                                <div class="col-md-12">
+                                    <div class="col-md-4"></div>
+                                    <div class="col-md-4">
+                                        <div class="col-md-2"></div>
+                                        <div class="col-md-10">
+                                            <div class="col-md-2">
+                                                <a href="@Url.Action("Index", "Home" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Home"><span style="font-size: 12px" class="sub_icon fas fa-home"></span></a>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <a href="@Url.Action("OpenAssignments", "Clinical" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Assignments"><span style="font-size: 12px" class="sub_icon fas fa-bell"></span></a>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <a href="@Url.Action("Search", "Member" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Patient"><span style="font-size: 12px" class="sub_icon fas fa-user-circle"></span></a>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <a href="@Url.Action("searchManagement", "patientManagement" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Search"><span style="font-size: 12px" class="sub_icon fas fa-search"></span></a>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <a href="@Url.Action("Index", "Administration" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Settings"><span style="font-size: 12px" class="sub_icon fas fa-cog"></span></a>
+                                            </div>
+                                            <div class="col-md-2"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4"></div>
+
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else if (User.HasRole("4. Advisor"))
+                    {
+                        <div class="navCollection_fullScreens">
+                            <div class="buttonCollection">
+                                <div class="col-md-12">
+                                    <div class="col-md-4"></div>
+                                    <div class="col-md-4">
+                                        <div class="col-md-2"></div>
+                                        <div class="col-md-10">
+                                            <div class="col-md-1"></div>
+                                            <div class="col-md-2">
+                                                <a href="@Url.Action("Index", "Home" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Home"><span style="font-size: 12px" class="sub_icon fas fa-home"></span></a>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <a href="@Url.Action("OpenAssignments", "Clinical" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Assignments"><span style="font-size: 12px" class="sub_icon fas fa-bell"></span></a>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <a href="@Url.Action("Search", "Member" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Patient"><span style="font-size: 12px" class="sub_icon fas fa-user-circle"></span></a>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <a href="@Url.Action("searchManagement", "patientManagement" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Search"><span style="font-size: 12px" class="sub_icon fas fa-search"></span></a>
+                                            </div>
+                                            <div class="col-md-2"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4"></div>
+
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else if (User.HasRole("1. Consultant") || (User.HasRole("2. Case manager") || (User.HasRole("3. Specialist"))))
+                    {
+                        <div class="navCollection_fullScreens">
+                            <div class="buttonCollection">
+                                <div class="col-md-12">
+                                    <div class="col-md-4"></div>
+                                    <div class="col-md-4">
+                                        <div class="col-md-1"></div>
+                                        <div class="col-md-10">
+                                            <div class="col-md-2"></div>
+                                            <div class="col-md-2">
+                                                <a href="@Url.Action("Index", "Home" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Home"><span style="font-size: 12px" class="sub_icon fas fa-home"></span></a>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <a href="@Url.Action("OpenAssignments", "Clinical" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Assignments"><span style="font-size: 12px" class="sub_icon fas fa-bell"></span></a>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <a href="@Url.Action("Search", "Member" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Patient"><span style="font-size: 12px" class="sub_icon fas fa-user-circle"></span></a>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <a href="@Url.Action("searchManagement", "patientManagement" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Search"><span style="font-size: 12px" class="sub_icon fas fa-search"></span></a>
+                                            </div>
+                                            <div class="col-md-2"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4"></div>
+
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                <div style="margin-bottom: 2%"></div>
+
+                @if (Model.Accounts.Count() == 0)
+                {
+                    <div style="margin-bottom: 6%"></div>
+
+                    <div class="no-records">
+                        <img src="~/Content/Images/_2020/tables/noRecords.png" />
+                    </div>
+
+                    <h4 class="noResultsFound">No results found</h4>
+
+                    <br>
+                    <br>
+                    <br>
+
+                    <div class="form-group">
+                        <div class="actionHover" style="text-align: center!important">
+                            <button class="btn account-create-button" type="submit" onclick="location.href='@Url.Action("AccountSetup", "Account", new { })'">Create new</button><br />
+                            <button class="btn back-button go_back" type="submit" style="width: 8%">Back</button>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <!--------------------------------------------------------------------------- new/search -------------------------------------------------------------------------->
+                    <div class="col-md-12 row">
+                        <div class="col-md-6">
+                            <h4 class="subHeading">
+                                Account overview
+                                <a class="create-new" href="@Url.Action("Step1", "Account", new { })" style="font-size: 14px">Create new <span><i class="fa fa-plus-circle" style="font-size: 12px"></i></span></a>
+                            </h4>
+                        </div>
+                        <!--------------------------------------------------------------------------- jq-search -------------------------------------------------------------------------->
+                        <div class="col-md-6">
+                            <div class="input-wrapper-new-search">
+                                <input type="text" class="form-control-new-search" id="search" onkeyup="myFunction()" placeholder="Search..." />
+                            </div>
+                        </div>
+                    </div>
+                    <table class="table mh-table table-hover" style="margin-left: 1.6%">
+                        <thead>
+                            <tr>
+                                <th style="width: 20%">@Html.DisplayNameFor(model => model.Accounts[0].name) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                <th>@Html.DisplayNameFor(model => model.Accounts[0].description) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                <th style="width: 10%;text-align: center!important">@Html.DisplayNameFor(model => model.Accounts[0].Active)</th>
+                                <th style="width: 10%;text-align: center !important">@Html.DisplayName("Action")</th>
+                            </tr>
+                        </thead>
+                        @foreach (var item in Model.Accounts)
+                        {
+                            <tbody id="account-search">
+                                <tr>
+                                    <td>@Html.DisplayFor(modelItem => item.name)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.description)</td>
+                                    <td class="row-information" style="text-align: center!important"><span class="@(item.Active == true ? "chk-yes fas fa-circle" : "chk-no fas fa-circle")"></span></td>
+                                    <td style="text-align: center!important">
+                                        <input type="button" class="link-button" value="Details" onclick="location.href='@Url.Action("Details", "Account", new { id = item.Id})'" />
+                                    </td>
+                                </tr>
+                            </tbody>
+                        }
+                    </table>
+                    <div>
+                        <span class="@(Model.Accounts.Count <= 12 ? "sf-footer" : "account-footer pull-right")">
+                            <input type="button" id="account-skip-step-2" value="Back" class="btn modal-button-previous" onclick="location.href='@Url.Action("Index", "Administration", null)'" />
+                        </span>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+    <script>
+        // table-search
+        $(document).ready(function () {
+            $("#search").on("keyup", function () {
+                var value = $(this).val().toLowerCase();
+                $("#account-search tr").filter(function () {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+            });
+        });
+    </script>
+
+
+}

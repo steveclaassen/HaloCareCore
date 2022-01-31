@@ -1,0 +1,1778 @@
+﻿@model HaloCareCore.Models.ClinicalViewModel
+@using HaloCareCore.Extensions
+@using System.Globalization
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Patient clinical";
+    Layout = "~/Views/Shared/_LayoutMember.cshtml";
+}
+
+<comment>
+    <!--
+        14 February 2019 -- HCare-607 (Halocare Bestmed Diabetes enrollment questionnaire)
+        Added Diagnosis collapseable in order to Create, Edit and View diagnosis entries - BM
+
+        15 February 2109 -- HCare-607
+        * Added View function to ALL collapseables in the Patient Clinical/Patient History tab to allow the user to view the full details of the entry - BM
+        * Tested NEW Diabetes Questionnaire functions (Yes / No /Follow up / validations)
+
+        18 February 2109 -- HCare-607
+        * Tested Diabetes Questionnaire functions (Yes / No /Follow up / validations) on BOTH new and old Diabetes Questionnaire
+        * Updating frontend for comments fields to show X when 'None' is inserted as well as matching text alignment and changing NULL dates to "-" etc.
+
+        06 March 2019 -- HCare-607
+        Additions to the SR have been made, removing Disclaimer, spelling in the questionnaire and Patient History update. I have corrected and tested the patient history containers that poplulate
+        an attachment and follow up icon based on the questionnaire submit.
+
+        29 April 2019 -- HCare-711 (Patient Clinical (Patient pathology front end))
+        Arranged  and matched the columns for the patient pathology as per the SR HCare-711
+
+        02 May 2019 -- HCare-25 (Patient Clinical - Hospitalisation collapsable)
+        Frontend update made in order to not show follow up if Date is Null.
+
+        12 July 2019 -- HCare-753(Add amputation checkbox to front view)
+        Added Amputation check to the table on patient clinical/patient history/Amputation tab
+
+        26 September 2019 -- HCare-820(UI ~ Pathology table)
+        Corrected the display for eGFR as well as remove the zeros from the table in the patient clinical view.
+
+        25 November 2019 -- HCare-892(Inactivate medication entry from Patient history)
+        Added edit button to Medication entry which allows the user to update the Note, Comment and active status.
+
+        20 January 2020 -- HCare-851(LINKED TO HCARE-134: Module 3 - Pathology Display (Related to HCare-837 & HCare-834))
+        Pathology tab split based on program selection. This SR needed to include a different code for the tab layout as the previous code was preventing tabs within tabs as well as the redirect to the last tab. This has now been sorted.
+
+        03 February 2020 -- HCare-851(LINKED TO HCARE-134: Module 3 - Pathology Display (Related to HCare-837 & HCare-834))
+        Request to change the tables for the initial view of the pathology BACK to the vertical view in order to view the pathology field and effective date.
+
+        01 April 2020 -- HCare-896(General tab - Patient Clinical / patient history)
+        As per the SR - I have removed the program type from all the panels in the patient history section. This includes the general and program specific panels except Medication where it is required. 
+
+        01 April 2020 -- HCare-1009(Clinical rules - Patient Clinical > Summary)
+        Amended the Patient clinical Summary view to pull the clinical rules based on the table join. Needed to include the gtMessage and ltMessage as reference in the join as well as the programcode.
+        The user will test by trying to break the clinical rules which were created in the settings > clinical rules view and thereafter being able to view broken rules in the Patient Clinical > Summary view under the Clinical rules panel
+
+        01 April 2020 -- HCare-816(Pathology abnormal values display)
+        I am using the clinical rules table as well as the logic that has been setup for security and the clinical rules to compare the pathology data in each section, ie. General, Diabetes, HIV etc. to the rules table. If the value in the pathology result is greater or less than the
+        rule, the value will be highlighted in bold red in the pathology results tables.
+
+        02 April 2020 -- HCare-1007(Display dates in HaloCare (Hospitalisation)
+        Updated Model to add the column headings and the format the date in the hospitalisation view as per the SR logged.
+
+        25 April 2020 -- HCare-1025(Pathology history view error)
+        The error was being caused by the hivEliza field which is a string. The Pathology abnormal values display code was looking for a decimal value and because the word POSITIVE was placed into the hivEliza field, the view broke. I have removed the code for that field as well as abnGtt and normGtt which are also string fields.
+
+        08 May 2020 -- HCare-1022(Pathology history view error)
+        Updated the queries in repository to display the latest active value which is not NULL or empty or 0.00 and then to show all the active entries in the history.
+
+        14 May 2020 -- HCare-966(General Questionnaire: TB Screening question)
+        TB screening question has been added to the General Questionnaire. As per the discussion, this question needed to replace the older question of TB diagnosed leading into the date of screening and outcome with diagnosis date range.
+        The data is then pulled through to the Patient Clinical General tab as well as a column 'TB Screened' being exported to excel from advanced search.
+
+        27 May 2020 -- HCare-828(Patient Clinical Summary)
+        Remove spaces between headings on the summary page as per request.
+
+        01 June 2020 -- HCare-930 (Frail Care General Questionnaire)
+        Addition of Frail care questions added to the General questionnaire under the General/Other section. This information has also been added to the Patient Clinical / Patient History section under the "Other" panel.
+        The user will also have access to Add, Edit, View the additional information linked to the Frail care question via the Patient Clinical / Patient History section under the "Other" panel.
+
+        03 June 2020 -- HCare-1023(Clinical > Patient History > Clinical / Diabetes - HIV > Medicine)
+        As per the specification and SR - I have refactored the viewing requirements for the Medication panels in the Patient Clinical / Patient History section. In addition, the NEW History view has been added which follows the
+        requirement in the spec as well.
+
+        02 July 2020 -- HCare-1079(Pathology name changes)
+        Updated the headings in the pathology section as per requirement
+
+        16 July 2020 -- HCare-961(Check screen displays of these fields i.e. HDL/LDL etc.)
+        Changed patientClinical pathology section to read from the Model in order to control the display name from there.
+        Ran a search for each of the properties in the list to check the casing.
+
+        20 July 2020 -- HCare-897(Medication table / Script / Script History)
+        Removed item status from the tables as per the SR
+
+        14 August 2020 -- HCare-1136(PRJ-36 - Mental Health Disease: DOCTOR REFERRAL TAB)
+
+    -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    #plusSubmit {
+        position: relative;
+        z-index: 1;
+        left: -25px;
+        top: 1px;
+        color: #7B7B7B;
+        cursor: pointer;
+        width: 0;
+    }
+
+    .filterable {
+        margin-top: 15px;
+    }
+
+        .filterable .panel-heading .pull-right {
+            margin-top: -20px;
+        }
+
+        .filterable .filters input[disabled] {
+            background-color: transparent;
+            border: none;
+            cursor: auto;
+            box-shadow: none;
+            padding: 0;
+            height: auto;
+        }
+
+        .filterable .filters::-webkit-input-placeholder {
+            color: #ccc !important;
+        }
+
+        .filterable .filters::-moz-placeholder {
+            color: #ccc !important;
+        }
+
+        .filterable .filters:-ms-input-placeholder {
+            color: #ccc !important;
+        }
+
+    .reset:hover {
+        cursor: pointer;
+        background: -webkit-linear-gradient(#e80a89, #f15b2a);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        line-height: 25px;
+    }
+
+    .isDisabled {
+        color: currentColor;
+        cursor: no-drop !important;
+        opacity: 0.5;
+        text-decoration: none;
+    }
+</style>
+<javascript>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js"></script>
+    <script src="https://www.jqueryscript.net/demo/jQuery-Plugin-For-Sortable-Bootstrap-Tables-Bootstrap-Sortable/Scripts/bootstrap-sortable.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+</javascript>
+<div id="loadingscreen" class="">
+    <div class="container-loader">
+        <div></div><div></div><div></div><div></div>
+        <span class="loading-text">LOADING...</span>
+    </div>
+    <div id="loading" class="loading"></div>
+</div>
+
+<!----------------------------------------------------------------------------- html-top-navigation-panel  ---------------------------------------------------------------------------->
+<nav id="global-nav" class="nav" style="z-index: 10000">
+    <div class="pull-left title">
+        <h1 class="site-title_patientProfile">
+            <span><i class="fas fa-file-medical-alt"></i>&emsp; Patient clinical</span>
+        </h1>
+    </div>
+    <div class="pull-right title">
+        <h1 class="site-title_userID pull-right">
+            <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+        </h1>
+        <h1 class="site-title_userID pull-right">
+            @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+            {
+                <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+            }
+        </h1>
+        <h1 class="site-waffleIcon pull-right">
+            <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+        </h1>
+    </div>
+</nav>
+
+<!-------------------------------------------------------------------------------------- html-body ------------------------------------------------------------------------------------>
+<div class="dashboardContainer zero-padding">
+    <div class="patientDashboard_View">
+        <!-- breadcrumbs -->
+        <ul class="breadcrumbs_patientDashboard">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+            <li><a href="@Url.Action("patientDashboard", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"]})">Patient</a></li>
+            <li><a href="#">@ViewBag.Title</a></li>
+        </ul>
+        <!-- navigation-collection -->
+        <div class="navCollection_patientDashboard">
+            @Html.Partial("_navCollection")
+        </div>
+        <!-- left-navigation-panel -->
+        @Html.Partial("_navSlider", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })
+        <!--profile-information-->
+        <div class="profileBar">
+            @Html.Action("_profileBar_edit", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })
+        </div>
+    </div>
+
+    <div class="profilebar-spacer"></div>
+
+    <div class="patientDashboard_container">
+        <h4 class="summaryHeading">Patient clinical</h4>
+        <hr class="patientProfile_Ruler" />
+        <div class="container-tab">
+            <div class="row">
+                <div class="hidden-fields">
+                    <input type="hidden" name="dependantID" id="dependantID" value="@TempData["dependantID"].ToString()" />
+                    <input type="hidden" name="program" id="program" value="@TempData["program"].ToString()" />
+                </div>
+                <div class="span12">
+                    <div class="container-tab">
+                        <!------------------------------------------------------------------------------------ tab-navigation ----------------------------------------------------------------------------------->
+                        <ul class="nav nav-pills nav-justified" role="tablist">
+                            <li role="presentation" class="tab-clinical"><a class="subtab-label" href="@Url.Action("PatientClinical_Summary", "Member", new { DependentID = Model.DependentID, pro = Context.Request.Query["pro"] })">Summary</a></li>
+                            <li role="presentation" class="tab-clinical"><a class="subtab-label" href="@Url.Action("PatientClinical_Pathology", "Member", new { DependentID = Model.DependentID, pro = Context.Request.Query["pro"] })">Pathology</a></li>
+                            <li role="presentation" class="tab-clinical active"><a class="subtab-label" href="@Url.Action("PatientClinical_Script", "Member", new { DependentID = Model.DependentID, pro = Context.Request.Query["pro"] })">Script</a></li>
+                            <li role="presentation" class="tab-clinical"><a class="subtab-label" href="@Url.Action("PatientClinical_PatientHistory", "Member", new { DependentID = Model.DependentID, pro = Context.Request.Query["pro"] })">Patient history</a></li>
+                            <li role="presentation" class="tab-clinical"><a class="subtab-label" href="@Url.Action("PatientClinical_ScriptHistory", "Member", new { DependentID = Model.DependentID, pro = Context.Request.Query["pro"] })">Script history</a></li>
+                        </ul>
+                        <!-------------------------------------------------------------------------------------- tab-panels ------------------------------------------------------------------------------------->
+                        <div class="tab-content">
+                            <!----------------------------------------------------------------------------------- tab-script ------------------------------------------------------------------------------------>
+                            <div role="tabpanel" class="tab-pane active" id="script">
+                                @if (User.Identity.IsAuthenticated)
+                                {
+                                    if (User.HasRole("6. Global user") || (User.HasRole("5. Super user")) || (User.HasRole("4. Advisor")))
+                                    {
+                                        <div class="row">
+                                            <br />
+                                            <div class="row">
+                                                <h4 class="subHeading">Authorisation history</h4>
+                                                <hr class="patientProfile_Ruler" />
+                                            </div>
+                                            <div class="tab-content">
+                                                <!------- tab-authorisation-script ------>
+                                                <div role="tabpanel" class="tab-pane active" id="authorisation_script_one">
+                                                    <div class="row">
+                                                        <!---------- table-filter-jquery ---------->
+                                                        <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
+                                                        <!---------- table-filter-jquery ---------->
+                                                        @if (Model.ScriptItems != null)
+                                                        {
+                                                            if (Model.ScriptItems.Count > 0)
+                                                            {
+                                                                <div class="filterable">
+                                                                    <table class="table patient-clinical-authorisation-table" id="authorisation_script_table">
+                                                                        <thead>
+                                                                            <tr class="filters">
+                                                                                <th style="width: 80px;" class="script-filter"><input type="text" class="form-control" placeholder="Script ID" data-original-value="" id="scriptID_filter"></th>
+                                                                                <th style="width: 80px;" class="script-filter"><input type="text" class="form-control" placeholder="CL item #" data-original-value="" id="clitem_filter"></th>
+                                                                                <th style="width: 80px;" class="script-filter"><input type="text" class="form-control" placeholder="NAPPI" data-original-value="" id="clitem_filter"></th>
+                                                                                <th style="width: 80px%;" class="script-filter"><input type="text" class="form-control" placeholder="Product" data-original-value="" id="product_filter"></th>
+
+                                                                                @*<th style="width: 80px" class="script-filter"><input type="text" class="form-control" placeholder="" data-original-value="" id="product_filter"></th>*@
+                                                                                <th style="width: 80px; " class="script-filter"><input type="text" class="form-control" placeholder="Qty" data-original-value="" id="qty_filter"></th>
+                                                                                <th style="width: 80px;" class="script-filter"><input type="text" class="form-control" placeholder="Instructions" data-original-value="" id="instruction_filter"></th>
+                                                                                @*<th style="width: 9%;" class="script-filter"><input type="text" class="form-control" placeholder="Status" data-original-value="" id="status_filter"></th>*@
+                                                                                <th style="width: 230px;" class="script-filter"><input type="text" class="form-control" placeholder="From" data-original-value="" id="from_filter"></th>
+                                                                                <th style="width: 230px;" class="script-filter"><input type="text" class="form-control" placeholder="To" data-original-value="" id="to_filter"></th>
+                                                                                <th style="width: 80px;" class="script-filter"><input type="text" class="form-control" placeholder="Doctor" data-original-value="" id="doctor_filter"></th>
+                                                                                <th style="width: 80px;" class="script-filter"><input type="text" class="form-control" placeholder="Note" data-original-value="" id="note_filter"></th>
+                                                                                <th style="width: 80px;" class="script-filter"><i class="fas fa-sync-alt reset" id="reset_filter"></i></th>
+                                                                            </tr>
+                                                                            <tr class="filters">
+                                                                                <th onclick="userTable(0)" style="width: 100px">
+                                                                                    @Html.DisplayName("Script ID") <i class="fa fa-fw fa-sort"></i>
+                                                                                </th>
+                                                                                <th onclick="userTable(0)" style="width: 100px">
+                                                                                    @Html.DisplayName("CL item #") <i class="fa fa-fw fa-sort"></i>
+                                                                                </th>
+                                                                                <th onclick="userTable(0)" style="width: 100px">
+                                                                                    @Html.DisplayName("NAPPI") <i class="fa fa-fw fa-sort"></i>
+                                                                                </th>
+                                                                                <th onclick="userTable(0)" style="width: 100px">
+                                                                                    @Html.DisplayName("Product") <i class="fa fa-fw "></i>
+                                                                                </th>
+                                                                                <th onclick="userTable(0)" style="width: 70px">
+                                                                                    @Html.DisplayName("Qty") <i class="fa fa-fw fa-sort"></i>
+                                                                                </th>
+                                                                                <th onclick="userTable(0)" style="width: 12%">
+                                                                                    @Html.DisplayName("Medication instructions") <i class="fa fa-fw fa-sort"></i>
+                                                                                </th>
+                                                                                <th onclick="userTable(0)" style="width: 230px">
+                                                                                    @Html.DisplayName("From date") <i class="fa fa-fw fa-sort"></i>
+                                                                                </th>
+                                                                                <th onclick="userTable(0)" style="width: 230px">
+                                                                                    @Html.DisplayName("To date") <i class="fa fa-fw fa-sort"></i>
+                                                                                </th>
+                                                                                <th onclick="userTable(0)" style="width: 80px">
+                                                                                    @Html.DisplayName("Doctor") <i class="fa fa-fw fa-sort"></i>
+                                                                                </th>
+                                                                                <th onclick="userTable(0)" style="width: 12%">
+                                                                                    @Html.DisplayName("Line note") <i class="fa fa-fw fa-sort"></i>
+                                                                                </th>
+                                                                                <th style="text-align: center!important; width: 50px">
+                                                                                    @Html.DisplayName("Action")
+                                                                                </th>
+
+                                                                            </tr>
+                                                                        </thead>
+                                                                        @foreach (var item in Model.ScriptItems)
+                                                                        {
+                                                                            <tbody>
+                                                                                <tr>
+                                                                                    <td>
+                                                                                        @Html.DisplayFor(modelItem => item.scriptID)
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        @Html.DisplayFor(modelItem => item.CLItemLineNo)
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        @Html.DisplayFor(modelItem => item.nappiCode)
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        @Html.DisplayFor(modelItem => item.productName)
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        @Html.DisplayFor(modelItem => item.quantity)
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        @Html.DisplayFor(modelItem => item.directions)
+                                                                                    </td>
+                                                                                    <td data-dateformat="DD-MM-YYYY">
+                                                                                        @Html.DisplayFor(modelItem => item.fromDate)
+                                                                                    </td>
+                                                                                    <td data-dateformat="DD-MM-YYYY">
+                                                                                        @Html.DisplayFor(modelItem => item.toDate)
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        @Html.DisplayFor(modelItem => item.prescribingDr)
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        @Html.DisplayFor(modelItem => item.comment)
+                                                                                    </td>
+                                                                                    <td class="statusCode linkNav" style="text-align: center!important">
+                                                                                        @*@Html.ActionLink("Edit", "EditScriptItem", "Member", new { itemId = item.itemNo }, null)*@
+                                                                                        <div class="contactIcon fas fa-pencil-alt" onclick="location.href='@Url.Action("EditScriptItem", "Member", new { itemId = item.itemNo, pro = Context.Request.Query["pro"] })'" title="edit"></div>
+                                                                                    </td>
+                                                                            </tbody>
+                                                                        }
+
+                                                                    </table>
+                                                                </div>
+                                                            }
+                                                            else
+                                                            {
+                                                                <div class="no-records-authorisation">
+                                                                    <img src="~/Content/Images/_2020/tables/noRecords.png" />
+                                                                </div>
+                                                                <h4 class="noResultsFound">No results found</h4>
+                                                            }
+                                                        }
+                                                    </div>
+                                                </div>
+                                                <br />
+
+                                                @if (Model.Scripts.Count != 0)
+                                                {
+                                                    <div class="modal fade" id="myScriptModal" tabindex="-1" style="z-index:10" role="dialog" aria-labelledby="myModalLabel">
+                                                        <div class="modal-body">
+                                                            @{Html.RenderAction("_AddScriptItem", "Member", new { script = Model.Scripts[0].scriptID, member = 1 }); }
+                                                        </div>
+                                                    </div>
+                                                }
+
+                                                @if (Model.ScriptItems != null)
+                                                {
+                                                    if (Model.ScriptItems.Count > 0)
+                                                    {
+                                                        if (Model.ScriptItems[0].createdBy != "CL Importer")
+                                                        {
+                                                            <div style="margin-left: 22%" class="addScriptBtn">
+                                                                <a data-toggle="modal" href="#myScriptModal" input type="button" class="btn script-authorisation-button" style="margin-left: 0.5%!important; width: 16%">Add item</a>
+                                                                <input type="button" class="btn newBackButton" style="margin-left: 0.5%!important;width: 16%" value="Authorise" onclick="location.href='@Url.Action("AuthoriseScript", "Scripts", new { id = Model.Scripts[0].scriptID }, null)'" />
+                                                                <input type="button" class="btn newBackButton" style="margin-left: 0.5%!important;width: 16%" value="Add reference" onclick="location.href='@Url.Action("AddReferenceScript", "Member", new { id = Model.Scripts[0].scriptID }, null)'" />
+                                                                <a data-toggle="modal" href="#myModal" class="btn newBackButton" style="width: 16%">Add script</a>
+                                                            </div>
+                                                            <br />
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        <div style="margin-left: 42.5%">
+                                                            <a data-toggle="modal" href="#myModal" class="btn script-authorisation-button">Add Script</a>
+                                                        </div>
+                                                    }
+                                                }
+
+                                                <!-- Modal -->
+                                                <div class="modal fade" id="myModal" tabindex="-1" role="dialog" style="z-index:10" aria-labelledby="myModalLabel" aria-hidden="true">
+                                                    <div class="">
+                                                        <div class="">
+                                                            <div class="modal-body">
+                                                                @Html.Action("_AddScript", "Member", new { DependentID = Model.DependentID, id = 0, taskId = 0 })
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                            <script>
+                                                //Reset Button
+                                                $('.reset').click(function (e) {
+                                                    $('[data-original-value]').each(function () {
+                                                        $(this).val($(this).data(''));
+                                                    });
+
+                                                    e.preventDefault();
+                                                });
+
+                                                $(".reset").click(function () {
+                                                    $('#scriptID_filter').focus().keyup()(keyCode == 13);
+                                                });
+
+                                                //Table Filter - Individual Columns
+                                                $(document).ready(function () {
+                                                    $('.filterable .btn-filter').click(function () {
+                                                        var $panel = $(this).parents('.filterable'),
+                                                            $filters = $panel.find('.filters input'),
+                                                            $tbody = $panel.find('.table tbody');
+                                                        if ($filters.prop('disabled') == true) {
+                                                            $filters.prop('disabled', false);
+                                                            $filters.first().focus();
+                                                        } else {
+                                                            $filters.val('').prop('disabled', true);
+                                                            $tbody.find('.no-result').remove();
+                                                            $tbody.find('tr').show();
+                                                        }
+                                                    });
+
+                                                    $('.filterable .filters input').keyup(function (e) {
+                                                        /* Ignore tab key */
+                                                        var code = e.keyCode || e.which;
+                                                        if (code == '9') return;
+                                                        /* Useful DOM data and selectors */
+                                                        var $input = $(this),
+                                                            inputContent = $input.val().toLowerCase(),
+                                                            $panel = $input.parents('.filterable'),
+                                                            column = $panel.find('.filters th').index($input.parents('th')),
+                                                            $table = $panel.find('.table'),
+                                                            $rows = $table.find('tbody tr');
+                                                        /* Dirtiest filter function ever ;) */
+                                                        var $filteredRows = $rows.filter(function () {
+                                                            var value = $(this).find('td').eq(column).text().toLowerCase();
+                                                            return value.indexOf(inputContent) === -1;
+                                                        });
+                                                        /* Clean previous no-result if exist */
+                                                        $table.find('tbody .no-result').remove();
+                                                        /* Show all rows, hide filtered ones (never do that outside of a demo ! xD) */
+                                                        $rows.show();
+                                                        $filteredRows.hide();
+                                                        /* Prepend no-result row if all rows are filtered */
+                                                        if ($filteredRows.length === $rows.length) {
+                                                            $table.find('tbody').prepend($('<tr class="no-result"><td colspan="12">No result found</td></tr>'));
+                                                        }
+                                                    });
+                                                });
+                                            </script>
+                                        </div>
+                                    }
+                                    else if (User.HasRole("1. Consultant") || (User.HasRole("2. Case manager")) || (User.HasRole("3. Specialist")))
+                                    {
+                                        <div class="row">
+                                            <br />
+                                            <div class="row">
+                                                <h4 class="subHeading">Authorisation history</h4>
+                                                <hr class="patientProfile_Ruler" />
+                                            </div>
+                                            <div class="tab-content">
+                                                <!------- tab-authorisation-script ------>
+                                                <div role="tabpanel" class="tab-pane active" id="authorisation_script_one">
+                                                    <div class="row">
+                                                        <!---------- table-filter-jquery ---------->
+                                                        <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
+                                                        <!---------- table-filter-jquery ---------->
+                                                        @if (Model.ScriptItems != null)
+                                                        {
+                                                            if (Model.ScriptItems.Count > 0)
+                                                            {
+                                                                <div class="filterable">
+                                                                    <table class="table patient-clinical-authorisation-table" id="authorisation_script_table">
+                                                                        <thead>
+                                                                            <tr class="filters table">
+                                                                                <th style="width: 80px;" class="script-filter"><input type="text" class="form-control" placeholder="Script ID" data-original-value="" id="scriptID_filter"></th>
+                                                                                <th style="width: 80px;" class="script-filter"><input type="text" class="form-control" placeholder="CL item #" data-original-value="" id="clitem_filter"></th>
+                                                                                <th style="width: 80px;" class="script-filter"><input type="text" class="form-control" placeholder="NAPPI" data-original-value="" id="clitem_filter"></th>
+                                                                                <th style="width: 80px%;" class="script-filter"><input type="text" class="form-control" placeholder="Product" data-original-value="" id="product_filter"></th>
+                                                                                <th style="width: 80px; " class="script-filter"><input type="text" class="form-control" placeholder="Qty" data-original-value="" id="qty_filter"></th>
+                                                                                <th style="width: 80px;" class="script-filter"><input type="text" class="form-control" placeholder="Instructions" data-original-value="" id="instruction_filter"></th>
+                                                                                @*<th style="width: 9%;" class="script-filter"><input type="text" class="form-control" placeholder="Status" data-original-value="" id="status_filter"></th>*@
+                                                                                <th style="width: 230px;" class="script-filter"><input type="text" class="form-control" placeholder="From" data-original-value="" id="from_filter"></th>
+                                                                                <th style="width: 230px;" class="script-filter"><input type="text" class="form-control" placeholder="To" data-original-value="" id="to_filter"></th>
+                                                                                <th style="width: 80px;" class="script-filter"><input type="text" class="form-control" placeholder="Doctor" data-original-value="" id="doctor_filter"></th>
+                                                                                <th style="width: 80px;" class="script-filter"><input type="text" class="form-control" placeholder="Note" data-original-value="" id="note_filter"></th>
+                                                                                <th style="width: 80px;" class="script-filter"><i class="fas fa-sync-alt reset" id="reset_filter"></i></th>
+                                                                            </tr>
+                                                                            <tr class="filters">
+                                                                                <th onclick="userTable(0)" style="width: 105px">
+                                                                                    @Html.DisplayName("Script ID") <i class="fa fa-fw fa-sort"></i>
+                                                                                </th>
+                                                                                <th onclick="userTable(0)" style="width: 100px">
+                                                                                    @Html.DisplayName("CL item #") <i class="fa fa-fw fa-sort"></i>
+                                                                                </th>
+                                                                                <th onclick="userTable(0)" style="width: 100px">
+                                                                                    @Html.DisplayName("NAPPI") <i class="fa fa-fw fa-sort"></i>
+                                                                                </th>
+                                                                                <th onclick="userTable(0)" style="width: 100px">
+                                                                                    @Html.DisplayName("Product") <i class="fa fa-fw "></i>
+                                                                                </th>
+
+                                                                                <th onclick="userTable(0)" style="width: 70px">
+                                                                                    @Html.DisplayName("Qty") <i class="fa fa-fw fa-sort"></i>
+                                                                                </th>
+                                                                                <th onclick="userTable(0)" style="width: 12%">
+                                                                                    @Html.DisplayName("Medication instructions") <i class="fa fa-fw fa-sort"></i>
+                                                                                </th>
+                                                                                <th onclick="userTable(0)" style="width: 230px">
+                                                                                    @Html.DisplayName("From date") <i class="fa fa-fw fa-sort"></i>
+                                                                                </th>
+                                                                                <th onclick="userTable(0)" style="width: 230px">
+                                                                                    @Html.DisplayName("To date") <i class="fa fa-fw fa-sort"></i>
+                                                                                </th>
+                                                                                <th onclick="userTable(0)" style="width: 100px">
+                                                                                    @Html.DisplayName("Doctor") <i class="fa fa-fw fa-sort"></i>
+                                                                                </th>
+                                                                                <th onclick="userTable(0)" style="width: 230px">
+                                                                                    @Html.DisplayName("Line note") <i class="fa fa-fw fa-sort"></i>
+                                                                                </th>
+                                                                                <th style="text-align: center!important; width: 50px">
+                                                                                    @Html.DisplayName("Action")
+                                                                                </th>
+
+                                                                            </tr>
+                                                                        </thead>
+                                                                        @foreach (var item in Model.ScriptItems)
+                                                                        {
+                                                                            <tbody>
+                                                                                <tr>
+                                                                                    <td>
+                                                                                        @Html.DisplayFor(modelItem => item.scriptID)
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        @Html.DisplayFor(modelItem => item.CLItemLineNo)
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        @Html.DisplayFor(modelItem => item.nappiCode)
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        @Html.DisplayFor(modelItem => item.productName)
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        @Html.DisplayFor(modelItem => item.quantity)
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        @Html.DisplayFor(modelItem => item.directions)
+                                                                                    </td>
+                                                                                    <td data-dateformat="DD-MM-YYYY">
+                                                                                        @Html.DisplayFor(modelItem => item.fromDate)
+                                                                                    </td>
+                                                                                    <td data-dateformat="DD-MM-YYYY">
+                                                                                        @Html.DisplayFor(modelItem => item.toDate)
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        @Html.DisplayFor(modelItem => item.prescribingDr)
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        @Html.DisplayFor(modelItem => item.comment)
+                                                                                    </td>
+                                                                                    <td class="statusCode linkNav" style="text-align: center!important">
+                                                                                        @Html.ActionLink("Edit", "EditScriptItem", "Member", new { itemId = item.itemNo }, null)
+                                                                                    </td>
+                                                                            </tbody>
+                                                                        }
+
+                                                                    </table>
+                                                                </div>
+                                                            }
+                                                            else
+                                                            {
+                                                                <div class="no-records-authorisation">
+                                                                    <img src="~/Content/Images/_2020/tables/noRecords.png" />
+                                                                </div>
+                                                                <h4 class="noResultsFound">No results found</h4>
+                                                            }
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <script>
+                                                //Reset Button
+                                                $('.reset').click(function (e) {
+                                                    $('[data-original-value]').each(function () {
+                                                        $(this).val($(this).data(''));
+                                                    });
+
+                                                    e.preventDefault();
+                                                });
+
+                                                $(".reset").click(function () {
+                                                    $('#scriptID_filter').focus().keyup()(keyCode == 13);
+                                                });
+
+                                                //Table Filter - Individual Columns
+                                                $(document).ready(function () {
+                                                    $('.filterable .btn-filter').click(function () {
+                                                        var $panel = $(this).parents('.filterable'),
+                                                            $filters = $panel.find('.filters input'),
+                                                            $tbody = $panel.find('.table tbody');
+                                                        if ($filters.prop('disabled') == true) {
+                                                            $filters.prop('disabled', false);
+                                                            $filters.first().focus();
+                                                        } else {
+                                                            $filters.val('').prop('disabled', true);
+                                                            $tbody.find('.no-result').remove();
+                                                            $tbody.find('tr').show();
+                                                        }
+                                                    });
+
+                                                    $('.filterable .filters input').keyup(function (e) {
+                                                        /* Ignore tab key */
+                                                        var code = e.keyCode || e.which;
+                                                        if (code == '9') return;
+                                                        /* Useful DOM data and selectors */
+                                                        var $input = $(this),
+                                                            inputContent = $input.val().toLowerCase(),
+                                                            $panel = $input.parents('.filterable'),
+                                                            column = $panel.find('.filters th').index($input.parents('th')),
+                                                            $table = $panel.find('.table'),
+                                                            $rows = $table.find('tbody tr');
+                                                        /* Dirtiest filter function ever ;) */
+                                                        var $filteredRows = $rows.filter(function () {
+                                                            var value = $(this).find('td').eq(column).text().toLowerCase();
+                                                            return value.indexOf(inputContent) === -1;
+                                                        });
+                                                        /* Clean previous no-result if exist */
+                                                        $table.find('tbody .no-result').remove();
+                                                        /* Show all rows, hide filtered ones (never do that outside of a demo ! xD) */
+                                                        $rows.show();
+                                                        $filteredRows.hide();
+                                                        /* Prepend no-result row if all rows are filtered */
+                                                        if ($filteredRows.length === $rows.length) {
+                                                            $table.find('tbody').prepend($('<tr class="no-result"><td colspan="12">No result found</td></tr>'));
+                                                        }
+                                                    });
+                                                });
+                                            </script>
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+<script src="js/jquery.tablesorter.min.js"></script>
+
+<script src="~/bundles/jqueryval"></script>
+
+@section scripts{
+
+    <script>
+        $(window).on('load', function () {
+            $("#loadingscreen").addClass("hidden");
+
+        });
+    </script>
+
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+    <!-- collapsible -->
+    <script>
+        $(document).on('click', '.panel-heading span.clickable', function (e) {
+            var $this = $(this);
+            if (!$this.hasClass('panel-collapsed')) {
+                $this.parents('.panel').find('.panel-body').slideUp();
+                $this.addClass('panel-collapsed');
+                $this.find('i').removeClass('fa-caret-up').addClass('fa-caret-down');
+            } else {
+                $this.parents('.panel').find('.panel-body').slideDown();
+                $this.removeClass('panel-collapsed');
+                $this.find('i').removeClass('fa-caret-down').addClass('fa-caret-up');
+            }
+        });
+        $(document).on('click', '.panel div.clickable', function (e) {
+            var $this = $(this);
+            if (!$this.hasClass('panel-collapsed')) {
+                $this.parents('.panel').find('.panel-body').slideUp();
+                $this.addClass('panel-collapsed');
+                $this.find('i').removeClass('fa-caret-up').addClass('fa-caret-down');
+            } else {
+                $this.parents('.panel').find('.panel-body').slideDown();
+                $this.removeClass('panel-collapsed');
+                $this.find('i').removeClass('fa-caret-down').addClass('fa-caret-up');
+            }
+        });
+        $(document).ready(function () {
+            $('.panel-heading span.clickable').click();
+            $('.panel div.clickable').click();
+        });
+    </script>
+    <!-- table js -->
+    <script>
+        //tableSearch
+        var $rows = $('#scriptHistoryTable tr');
+        $('#search').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $rows.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+
+        //scriptTable sortTable
+        function scriptTable(n) {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("scriptTable");
+            switching = true;
+            dir = "asc";
+
+            while (switching) {
+                switching = false;
+                rows = table.getElementsByTagName("TR");
+
+                for (i = 1; i < (rows.length - 1); i++) {
+
+                    shouldSwitch = false;
+
+                    x = rows[i].getElementsByTagName("TD")[n];
+                    y = rows[i + 1].getElementsByTagName("TD")[n];
+
+                    if (dir == "asc") {
+                        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                            //if so, mark as a switch and break the loop:
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (dir == "desc") {
+                        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                            //if so, mark as a switch and break the loop:
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+                if (shouldSwitch) {
+                    /*If a switch has been marked, make the switch
+                    and mark that a switch has been done:*/
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                    //Each time a switch is done, increase this count by 1:
+                    switchcount++;
+                } else {
+                    /*If no switching has been done AND the direction is "asc",
+                    set the direction to "desc" and run the while loop again.*/
+                    if (switchcount == 0 && dir == "asc") {
+                        dir = "desc";
+                        switching = true;
+                    }
+                }
+            }
+        }
+
+        //scriptHistoryTable sortTable
+        function scriptHistoryTable(n) {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("scriptHistoryTable");
+            switching = true;
+            dir = "asc";
+
+            while (switching) {
+                switching = false;
+                rows = table.getElementsByTagName("TR");
+
+                for (i = 1; i < (rows.length - 1); i++) {
+
+                    shouldSwitch = false;
+
+                    x = rows[i].getElementsByTagName("TD")[n];
+                    y = rows[i + 1].getElementsByTagName("TD")[n];
+
+                    if (dir == "asc") {
+                        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                            //if so, mark as a switch and break the loop:
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (dir == "desc") {
+                        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                            //if so, mark as a switch and break the loop:
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+                if (shouldSwitch) {
+                    /*If a switch has been marked, make the switch
+                    and mark that a switch has been done:*/
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                    //Each time a switch is done, increase this count by 1:
+                    switchcount++;
+                } else {
+                    /*If no switching has been done AND the direction is "asc",
+                    set the direction to "desc" and run the while loop again.*/
+                    if (switchcount == 0 && dir == "asc") {
+                        dir = "desc";
+                        switching = true;
+                    }
+                }
+            }
+        }
+
+        //clinicalRules
+        function clinicalRuletable(n) {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("clinicalRuletable");
+            switching = true;
+            dir = "asc";
+
+            while (switching) {
+                switching = false;
+                rows = table.getElementsByTagName("TR");
+
+                for (i = 1; i < (rows.length - 1); i++) {
+
+                    shouldSwitch = false;
+
+                    x = rows[i].getElementsByTagName("TD")[n];
+                    y = rows[i + 1].getElementsByTagName("TD")[n];
+
+                    if (dir == "asc") {
+                        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                            //if so, mark as a switch and break the loop:
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (dir == "desc") {
+                        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                            //if so, mark as a switch and break the loop:
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+                if (shouldSwitch) {
+                    /*If a switch has been marked, make the switch
+                    and mark that a switch has been done:*/
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                    //Each time a switch is done, increase this count by 1:
+                    switchcount++;
+                } else {
+                    /*If no switching has been done AND the direction is "asc",
+                    set the direction to "desc" and run the while loop again.*/
+                    if (switchcount == 0 && dir == "asc") {
+                        dir = "desc";
+                        switching = true;
+                    }
+                }
+            }
+        }
+
+        $(document).ready(function () {
+            $('#table').DataTable({
+                columnDefs: [{
+                    targets: [0],
+                    orderData: [0, 1]
+                }, {
+                    targets: [1],
+                    orderData: [1, 0]
+                }, {
+                    targets: [4],
+                    orderData: [4, 0]
+                }]
+            });
+        });
+
+        // Javascript to enable link to tab
+        var url = document.location.toString();
+        if (url.match('#')) {
+            $('.nav-tabs a[href="#' + url.split('#')[1] + '"]').tab('show');
+        }
+
+        // Change hash for page-reload
+        $('.nav-tabs a').on('shown.bs.tab', function (e) {
+            window.location.hash = e.target.hash;
+        })
+
+        $(".nav-tabs a").click(function () { });
+
+        $(function () {
+            var activeTab = $('[href=' + location.hash + ']');
+            activeTab && activeTab.tab('show');
+        });
+    </script>
+    <!--Redirect to Tab-->
+    @*<script>
+            $(document).ready(function () {
+                if (localStorage.key(0) == "addPathology") {
+                    $("#tab5-2").attr("checked", "checked");
+                    localStorage.clear();
+                    localStorage.removeItem("addPathology");
+                }
+            });
+
+            $(document).ready(function () {
+                document.getElementsByTagName("html")[0].style.visibility = "visible";
+                if (localStorage.key(0) == "patientClinical") {
+                    //var key = localStorage.key(0);
+                    //alert(key);
+                    $("#tab5-4").attr("checked", "checked");
+                    localStorage.clear();
+                    localStorage.removeItem("patientClinical");
+                }
+            });
+
+
+        </script>*@
+    <!-- pathology-tab-redirect-->
+    <script>
+        //pathology>createNew
+        $(document).ready(function () {
+            if (localStorage.key(0) == "create_pathologyCreate") {
+                //var key = localStorage.key(0);
+                //alert(key);
+                $("#pathology_tab").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("create_pathologyCreate");
+            }
+        });
+        //pathology>back
+        $(document).ready(function () {
+            if (localStorage.key(0) == "back_pathologyCreate") {
+                //var key = localStorage.key(0);
+                //alert(key);
+                $("#pathology_tab").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("back_pathologyCreate");
+            }
+        });
+        //pathology>general
+        $(document).ready(function () {
+            if (localStorage.key(0) == "back_general") {
+                //var key = localStorage.key(0);
+                //alert(key);
+                $("#pathology_tab").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("back_general");
+            }
+        });
+        //pathology>hyperlipidaemia
+        $(document).ready(function () {
+            if (localStorage.key(0) == "back_hyperlipdaemia") {
+                $("#pathology_tab").trigger("click");
+                $("#hyperlipidaemia_tab").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("back_hyperlipdaemia");
+            }
+        });
+        //pathology>diabetes
+        $(document).ready(function () {
+            if (localStorage.key(0) == "back_diabetes") {
+                $("#pathology_tab").trigger("click");
+                $("#diabetes_tab").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("back_diabetes");
+            }
+        });
+        //pathology>hiv
+        $(document).ready(function () {
+            if (localStorage.key(0) == "back_hiv") {
+                $("#pathology_tab").trigger("click");
+                $("#hiv_tab").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("back_hiv");
+            }
+        });
+    </script>
+    <!-- patient-history--clinical-tab-redirect-->
+    <script>
+        //clinical-create
+        $(document).ready(function () {
+            if (localStorage.key(0) == "create_clinicalExam") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#patientInfo").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("create_clinicalExam");
+            }
+        });
+        //clinical-edit
+        $(document).ready(function () {
+            if (localStorage.key(0) == "edit_clinicalExam") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#patientInfo").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("edit_clinicalExam");
+            }
+        });
+        //clinical-back
+        $(document).ready(function () {
+            if (localStorage.key(0) == "back_clinicalExam") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#patientInfo").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("back_clinicalExam");
+            }
+        });
+        //comorbid-create
+        $(document).ready(function () {
+            if (localStorage.key(0) == "create_comorbid") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#comorbid").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("create_comorbid");
+            }
+        });
+        //comorbid-edit
+        $(document).ready(function () {
+            if (localStorage.key(0) == "edit_comorbid") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#comorbid").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("edit_comorbid");
+            }
+        });
+        //comorbid-back
+        $(document).ready(function () {
+            if (localStorage.key(0) == "back_comorbid") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#comorbid").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("back_comorbid");
+            }
+        });
+
+        //add-medication-button
+        $("#add-general-medication").click(function (e) {
+            localStorage.clear();
+            localStorage.setItem("add_medication", Date.now());
+        });
+        //history-medication-button
+        $("#history-general-medication").click(function (e) {
+            localStorage.clear();
+            localStorage.setItem("history_medication", Date.now());
+        });
+        //edit-medication-button
+        $("#edit-general-medication").click(function (e) {
+            localStorage.clear();
+            localStorage.setItem("edit_medication", Date.now());
+        });
+        //medication-create
+        $(document).ready(function () {
+            if (localStorage.key(0) == "create_medication") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#general_medication").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("create_medication");
+            }
+        });
+        //medication-edit
+        $(document).ready(function () {
+            if (localStorage.key(0) == "edit_medication") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#general_medication").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("edit_medication");
+
+            }
+        });
+        //medication-back
+        $(document).ready(function () {
+            if (localStorage.key(0) == "back_medication") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#general_medication").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("back_medication");
+
+            }
+        });
+
+        //allergy-create
+        $(document).ready(function () {
+            if (localStorage.key(0) == "create_allergy") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#general_allergy").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("create_allergy");
+            }
+        });
+        //allergy-edit
+        $(document).ready(function () {
+            if (localStorage.key(0) == "edit_allergy") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#general_allergy").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("edit_allergy");
+            }
+        });
+        //allergy-back
+        $(document).ready(function () {
+            if (localStorage.key(0) == "back_allergy") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#general_allergy").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("back_allergy");
+            }
+        });
+
+        //socialHistory-create
+        $(document).ready(function () {
+            if (localStorage.key(0) == "create_socialRecord") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#general_socialHistory").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("create_socialRecord");
+            }
+        });
+        //socialHistory-edit
+        $(document).ready(function () {
+            if (localStorage.key(0) == "edit_socialRecord") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#general_socialHistory").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("edit_socialRecord");
+            }
+        });
+        //socialHistory-back
+        $(document).ready(function () {
+            if (localStorage.key(0) == "back_socialRecord") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#general_socialHistory").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("back_socialRecord");
+            }
+        });
+
+        //hospitalisations-create
+        $(document).ready(function () {
+            if (localStorage.key(0) == "create_hospitalisation") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#general_hospital").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("create_hospitalisation");
+            }
+        });
+        //hospitalisations-edit
+        $(document).ready(function () {
+            if (localStorage.key(0) == "edit_hospitalisation") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#general_hospital").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("edit_hospitalisation");
+            }
+        });
+        //hospitalisations-back
+        $(document).ready(function () {
+            if (localStorage.key(0) == "back_hospitalisation") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#general_hospital").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("back_hospitalisation");
+            }
+        });
+
+        //pregnant-create
+        $(document).ready(function () {
+            if (localStorage.key(0) == "create_pregnant") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#general_pregnant").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("create_pregnant");
+            }
+        });
+        //pregnant-edit
+        $(document).ready(function () {
+            if (localStorage.key(0) == "edit_pregnant") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#general_pregnant").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("edit_pregnant");
+            }
+        });
+        //pregnant-back
+        $(document).ready(function () {
+            if (localStorage.key(0) == "back_pregnant") {
+                var key = localStorage.key(0);
+                $("#patient_history_tab").trigger("click"),
+                    $("#general_pregnant").trigger("click"),
+                    localStorage.removeItem("back_pregnant"),
+                    localStorage.clear();
+
+            }
+        });
+
+        //general-create
+        $(document).ready(function () {
+            if (localStorage.key(0) == "create_clinicalGeneral") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#clinicalGeneral").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("create_clinicalGeneral");
+            }
+        });
+
+        //general-edit
+        $(document).ready(function () {
+            if (localStorage.key(0) == "edit_clinicalGeneral") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#clinicalGeneral").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("edit_clinicalGeneral");
+            }
+        });
+        //general-back
+        $(document).ready(function () {
+            if (localStorage.key(0) == "back_clinicalGeneral") {
+                var key = localStorage.key(0);
+                $("#patient_history_tab").trigger("click"),
+                    $("#clinicalGeneral").trigger("click"),
+                    localStorage.removeItem("back_clinicalGeneral"),
+                    localStorage.clear();
+
+            }
+        });
+        //newborn-create
+        $(document).ready(function () {
+            if (localStorage.key(0) == "create_newborn") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#general_newborn").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("create_newborn");
+            }
+        });
+        //newborn-edit
+        $(document).ready(function () {
+            if (localStorage.key(0) == "edit_newborn") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#general_newborn").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("edit_newborn");
+            }
+        });
+        //newborn-back
+        $(document).ready(function () {
+            if (localStorage.key(0) == "back_newborn") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#general_newborn").trigger("click"),
+                    localStorage.removeItem("back_newborn"),
+                    localStorage.clear();
+            }
+        });
+
+
+    </script>
+    <!-- patient-history--diabetes-tab-redirect-->
+    <script>
+        //diagnosis-create
+        $(document).ready(function () {
+            if (localStorage.key(0) == "create_diagnosis_diabetes") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#ph_diabetes_tab").trigger("click"),
+                    $("#diagnosis_diabetes").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("create_diagnosis_diabetes");
+            }
+        });
+        //diagnosis-edit
+        $(document).ready(function () {
+            if (localStorage.key(0) == "edit_diagnosis_diabetes") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#ph_diabetes_tab").trigger("click"),
+                    $("#diagnosis_diabetes").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("edit_diagnosis_diabetes");
+            }
+        });
+        //diagnosis-back
+        $(document).ready(function () {
+            if (localStorage.key(0) == "back_diagnosis_diabetes") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#ph_diabetes_tab").trigger("click"),
+                    $("#diagnosis_diabetes").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("back_diagnosis_diabetes");
+            }
+        });
+
+        //add-medication-button
+        $("#add-diabetes-medication").click(function (e) {
+            localStorage.clear();
+            localStorage.setItem("add_diabetes_medication", Date.now());
+        });
+        //history-medication-button
+        $("#history-diabetes-medication").click(function (e) {
+            localStorage.clear();
+            localStorage.setItem("history_diabetes_medication", Date.now());
+        });
+        //edit-medication-button
+        $("#edit-diabetes-medication").click(function (e) {
+            localStorage.clear();
+            localStorage.setItem("edit_diabetes_medication", Date.now());
+        });
+        //medication-create
+        $(document).ready(function () {
+            if (localStorage.key(0) == "create_diabetes_medication") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#ph_diabetes_tab").trigger("click");
+                $("#medication_diabetes").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("create_diabetes_medication");
+            }
+        });
+        //medication-edit
+        $(document).ready(function () {
+            if (localStorage.key(0) == "edit_diabetes_medication") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#ph_diabetes_tab").trigger("click");
+                $("#medication_diabetes").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("edit_diabetes_medication");
+
+            }
+        });
+        //medication-back
+        $(document).ready(function () {
+            if (localStorage.key(0) == "back_diabetes_medication") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#ph_diabetes_tab").trigger("click");
+                $("#medication_diabetes").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("back_diabetes_medication");
+
+            }
+        });
+
+        //vision-create
+        $(document).ready(function () {
+            if (localStorage.key(0) == "create_vision_diabetes") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#ph_diabetes_tab").trigger("click"),
+                    $("#vision_diabetes").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("create_vision_diabetes");
+            }
+        });
+        //vision-edit
+        $(document).ready(function () {
+            if (localStorage.key(0) == "edit_vision_diabetes") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#ph_diabetes_tab").trigger("click"),
+                    $("#vision_diabetes").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("edit_vision_diabetes");
+            }
+        });
+        //vision-back
+        $(document).ready(function () {
+            if (localStorage.key(0) == "back_vision_diabetes") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#ph_diabetes_tab").trigger("click"),
+                    $("#vision_diabetes").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("back_vision_diabetes");
+            }
+        });
+        //podiatry-create
+        $(document).ready(function () {
+            if (localStorage.key(0) == "create_podiatry_diabetes") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#ph_diabetes_tab").trigger("click"),
+                    $("#podiatry_diabetes").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("create_podiatry_diabetes");
+            }
+        });
+        //podiatry-edit
+        $(document).ready(function () {
+            if (localStorage.key(0) == "edit_podiatry_diabetes") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#ph_diabetes_tab").trigger("click"),
+                    $("#podiatry_diabetes").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("edit_podiatry_diabetes");
+            }
+        });
+        //podiatry-back
+        $(document).ready(function () {
+            if (localStorage.key(0) == "back_podiatry_diabetes") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#ph_diabetes_tab").trigger("click"),
+                    $("#podiatry_diabetes").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("back_podiatry_diabetes");
+            }
+        });
+        //autonero-create
+        $(document).ready(function () {
+            if (localStorage.key(0) == "create_autonero_diabetes") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#ph_diabetes_tab").trigger("click"),
+                    $("#autonero_diabetes").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("create_autonero_diabetes");
+            }
+        });
+        //autonero-edit
+        $(document).ready(function () {
+            if (localStorage.key(0) == "edit_autonero_diabetes") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#ph_diabetes_tab").trigger("click"),
+                    $("#autonero_diabetes").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("edit_autonero_diabetes");
+            }
+        });
+        //autonero-back
+        $(document).ready(function () {
+            if (localStorage.key(0) == "back_autonero_diabetes") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#ph_diabetes_tab").trigger("click"),
+                    $("#autonero_diabetes").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("back_autonero_diabetes");
+            }
+        });
+        //hypglycaemia-create
+        $(document).ready(function () {
+            if (localStorage.key(0) == "create_hypo_diabetes") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#ph_diabetes_tab").trigger("click"),
+                    $("#hypo_diabetes").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("create_hypo_diabetes");
+            }
+        });
+        //hypglycaemia-edit
+        $(document).ready(function () {
+            if (localStorage.key(0) == "edit_hypo_diabetes") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#ph_diabetes_tab").trigger("click"),
+                    $("#hypo_diabetes").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("edit_hypo_diabetes");
+            }
+        });
+        //hypglycaemia-back
+        $(document).ready(function () {
+            if (localStorage.key(0) == "back_hypo_diabetes") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#ph_diabetes_tab").trigger("click"),
+                    $("#hypo_diabetes").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("back_hypo_diabetes");
+            }
+        });
+
+    </script>
+    <!-- patient-history--hiv-tab-redirect-->
+    <script>
+        //diagnosis-create
+        $(document).ready(function () {
+            if (localStorage.key(0) == "create_diagnosis_hiv") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#ph_hiv_tab").trigger("click"),
+                    $("#diagnosis_hiv").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("create_diagnosis_hiv");
+            }
+        });
+        //diagnosis-edit
+        $(document).ready(function () {
+            if (localStorage.key(0) == "edit_diagnosis_hiv") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#ph_hiv_tab").trigger("click"),
+                    $("#diagnosis_hiv").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("edit_diagnosis_hiv");
+            }
+        });
+        //diagnosis-back
+        $(document).ready(function () {
+            if (localStorage.key(0) == "back_diagnosis_hiv") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#ph_hiv_tab").trigger("click"),
+                    $("#diagnosis_hiv").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("back_diagnosis_hiv");
+            }
+        });
+        //add-medication-button
+        $("#add-hiv-medication").click(function (e) {
+            localStorage.clear();
+            localStorage.setItem("add_hiv_medication", Date.now());
+        });
+        //history-medication-button
+        $("#history-hiv-medication").click(function (e) {
+            localStorage.clear();
+            localStorage.setItem("history_hiv_medication", Date.now());
+        });
+        //edit-medication-button
+        $("#edit-hiv-medication").click(function (e) {
+            localStorage.clear();
+            localStorage.setItem("edit_hiv_medication", Date.now());
+        });
+        //medication-create
+        $(document).ready(function () {
+            if (localStorage.key(0) == "create_hiv_medication") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#ph_hiv_tab").trigger("click");
+                $("#medication_hiv").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("create_hiv_medication");
+            }
+        });
+        //medication-edit
+        $(document).ready(function () {
+            if (localStorage.key(0) == "edit_hiv_medication") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#ph_hiv_tab").trigger("click");
+                $("#medication_hiv").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("edit_hiv_medication");
+
+            }
+        });
+        //medication-back
+        $(document).ready(function () {
+            if (localStorage.key(0) == "back_hiv_medication") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#ph_hiv_tab").trigger("click");
+                $("#medication_hiv").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("back_hiv_medication");
+
+            }
+        });
+        //otherMedication-create
+        $(document).ready(function () {
+            if (localStorage.key(0) == "create_otherMedication_hiv") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#ph_hiv_tab").trigger("click"),
+                    $("#otherMedication_hiv").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("create_otherMedication_hiv");
+            }
+        });
+        //otherMedication-edit
+        $(document).ready(function () {
+            if (localStorage.key(0) == "edit_otherMedication_hiv") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#ph_hiv_tab").trigger("click"),
+                    $("#otherMedication_hiv").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("edit_otherMedication_hiv");
+            }
+        });
+        //otherMedication-back
+        $(document).ready(function () {
+            if (localStorage.key(0) == "back_otherMedication_hiv") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#ph_hiv_tab").trigger("click"),
+                    $("#otherMedication_hiv").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("back_otherMedication_hiv");
+            }
+        });
+        //bloodResults_hiv-create
+        $(document).ready(function () {
+            if (localStorage.key(0) == "create_bloodResults_hiv") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#ph_hiv_tab").trigger("click"),
+                    $("#otherMedication_hiv").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("create_bloodResults_hiv");
+            }
+        });
+        //bloodResults_hiv-edit
+        $(document).ready(function () {
+            if (localStorage.key(0) == "edit_bloodResults_hiv") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#ph_hiv_tab").trigger("click"),
+                    $("#bloodResults_hivbloodResults_hiv").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("edit_bloodResults_hiv");
+            }
+        });
+        //bloodResults_hiv-back
+        $(document).ready(function () {
+            if (localStorage.key(0) == "back_bloodResults_hiv") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#ph_hiv_tab").trigger("click"),
+                    $("#bloodResults_hiv").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("back_bloodResults_hiv");
+            }
+        });
+        //other-hiv-create
+        $(document).ready(function () {
+            if (localStorage.key(0) == "create_hivOther") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#ph_hiv_tab").trigger("click"),
+                    $("#general_hiv").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("create_hivOther");
+            }
+        });
+        //other-hiv-edit
+        $(document).ready(function () {
+            if (localStorage.key(0) == "edit_hivOther") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#ph_hiv_tab").trigger("click"),
+                    $("#general_hiv").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("edit_hivOther");
+            }
+        });
+        //other-hiv-back
+        $(document).ready(function () {
+            if (localStorage.key(0) == "back_hivOther") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#ph_hiv_tab").trigger("click"),
+                    $("#general_hiv").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("back_hivOther");
+            }
+        });
+    </script>
+    <!-- patient-history--mental-health-tab-redirect-->
+    <script>
+        //dsm5-create
+        $(document).ready(function () {
+            if (localStorage.key(0) == "create_dsm5") {
+                var key = localStorage.key(0);
+                alert(key);
+                $("#patient_history_tab").trigger("click"),
+                    $("#ph_mentalhealth_tab").trigger("click"),
+                    $("#mh_dsm5").trigger("click"),
+                    localStorage.clear(),
+                    localStorage.removeItem("create_dsm5");
+            }
+        });
+        //dsm5-edit
+        $(document).ready(function () {
+            if (localStorage.key(0) == "edit_dsm5") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#ph_mentalhealth_tab").trigger("click"),
+                    $("#mh-dsm5").trigger("click"),
+                    localStorage.clear(),
+                    localStorage.removeItem("edit_dsm5");
+            }
+        });
+        //dsm5-back
+        $(document).ready(function () {
+            if (localStorage.key(0) == "back_dsm5") {
+                $("#patient_history_tab").trigger("click");
+                $("#ph_mentalhealth_tab").trigger("click");
+                $("#mh-dsm5").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("back_dsm5");
+            }
+        });
+        //schizophrenia-create
+        $(document).ready(function () {
+            if (localStorage.key(0) == "create_schizophrenia") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#ph_mentalhealth_tab").trigger("click"),
+                    $("#mh-schizophrenia").trigger("click"),
+                    localStorage.clear(),
+                    localStorage.removeItem("create_schizophrenia");
+            }
+        });
+        //schizophrenia-edit
+        $(document).ready(function () {
+            if (localStorage.key(0) == "edit_schizophrenia") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#ph_mentalhealth_tab").trigger("click"),
+                    $("#mh-schizophrenia").trigger("click"),
+                    localStorage.clear(),
+                    localStorage.removeItem("edit_schizophrenia");
+            }
+        });
+        //schizophrenia-back
+        $(document).ready(function () {
+            if (localStorage.key(0) == "back_schizophrenia") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#ph_mentalhealth_tab").trigger("click"),
+                    $("#mh-schizophrenia").trigger("click"),
+                    localStorage.removeItem("back_schizophrenia"),
+                    localStorage.clear();
+            }
+        });
+
+        //dsm5-create
+        $(document).ready(function () {
+            if (localStorage.key(0) == "create_bipolar") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#ph_mentalhealth_tab").trigger("click"),
+                    $("#mh-bipolar").trigger("click"),
+                    localStorage.clear(),
+                    localStorage.removeItem("create_bipolar");
+            }
+        });
+        //dsm5-edit
+        $(document).ready(function () {
+            if (localStorage.key(0) == "edit_bipolar") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#ph_mentalhealth_tab").trigger("click"),
+                    $("#mh-bipolar").trigger("click"),
+                    localStorage.clear(),
+                    localStorage.removeItem("edit_bipolar");
+            }
+        });
+        //dsm5-back
+        $(document).ready(function () {
+            if (localStorage.key(0) === "back_bipolar") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#ph_mentalhealth_tab").trigger("click"),
+                    $("#mh-bipolar").trigger("click"),
+                    localStorage.removeItem("back_bipolar"),
+                    localStorage.clear();
+            }
+        });
+        //depression-create
+        $(document).ready(function () {
+            if (localStorage.key(0) == "create_depression") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#ph_mentalhealth_tab").trigger("click"),
+                    $("#mh-depression").trigger("click"),
+                    localStorage.clear(),
+                    localStorage.removeItem("create_depression");
+            }
+        });
+        //depression-edit
+        $(document).ready(function () {
+            if (localStorage.key(0) == "edit_depression") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#ph_mentalhealth_tab").trigger("click"),
+                    $("#mh-depression").trigger("click"),
+                    localStorage.clear(),
+                    localStorage.removeItem("edit_depression");
+            }
+        });
+        //depression-back
+        $(document).ready(function () {
+            if (localStorage.key(0) == "back_depression") {
+                $("#patient_history_tab").trigger("click"),
+                    $("#ph_mentalhealth_tab").trigger("click"),
+                    $("#mh-depression").trigger("click"),
+                    localStorage.removeItem("back_depression"),
+                    localStorage.clear();
+            }
+        });
+    </script>
+}
+
+

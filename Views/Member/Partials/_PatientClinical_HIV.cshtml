@@ -1,0 +1,1141 @@
+﻿@model HaloCareCore.Models.ClinicalViewModel
+@using HaloCareCore.Extensions
+
+@{
+    ViewBag.Title = "HIV";
+    Layout = "~/Views/Shared/_LayoutMember.cshtml";
+}
+<comment>
+    <!--
+        07 August 2020 -- HCare-1142(Patient Clinical bug)
+    -->
+</comment>
+
+<div class="row" style="margin-top: -60px">
+    <!--------- diagnosis --------->
+    <div class="col-md-12" style="z-index: 10">
+        <div class="panel panel-default">
+            <div class="panel-heading clickable panel-collapsed" id="diagnosis_hiv">
+                <h3 class="panel-title">
+                    Diagnosis
+                    @if (Model.summary.hivProgramDiagnoses != null)
+                    {
+                        if (Model.summary.hivProgramDiagnoses.Count() > 0)
+                        {
+
+                            foreach (var item in Model.summary.hivProgramDiagnoses)
+                            {
+                                if (!string.IsNullOrEmpty(item.Comment) && item.Comment != "Follow up" && item.Comment != "None")
+                                {
+                                    <span style="font-size: 12px">&nbsp;<i class="fas fa-sticky-note notificationIcon" title="comment"></i></span>
+                                    break;
+                                }
+
+                            }
+                        }
+                    }
+                    @if (Model.summary.hivProgramDiagnoses != null)
+                    {
+                        if (Model.summary.hivProgramDiagnoses.Count() > 0)
+                        {
+
+                            foreach (var item in Model.summary.hivProgramDiagnoses)
+                            {
+                                if (item.FollowUp == true || item.EffectiveDate == null)
+                                {
+                                    <span style="font-size: 12px">&nbsp;<i class="fas fa-star notificationIcon" title="follow up"></i></span>
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                </h3>
+                <span class="pull-right clickable panel-collapsed" style="margin-top: -1.25%; margin-right: 0.5%"><i class="fas fa-caret-up"></i></span>
+            </div>
+            <div class="panel-body">
+                <div class="col-md-12">
+                    <div class="row">
+                        <table class="table patient-clinical-history-table sortable" id="socialTable">
+                            <thead>
+                                <tr>
+                                    <th onclick="socialTable(0)" style="width: 10%; text-align: center!important">
+                                        @Html.DisplayName("Date created") <i class="fa fa-fw fa-sort"></i>
+                                    </th>
+                                    <th onclick="socialTable(1)" style="width: 24%">
+                                        @Html.DisplayName("Program code") <i class="fa fa-fw fa-sort"></i>
+                                    </th>
+                                    <th onclick="socialTable(2)">
+                                        @Html.DisplayName("Program description") <i class="fa fa-fw fa-sort"></i>
+                                    </th>
+                                    <th onclick="socialTable(4)" style="width: 11%; text-align: center!important">
+                                        @Html.DisplayName("Diagnosis date") <i class="fa fa-fw fa-sort"></i>
+                                    </th>
+                                    <th onclick="socialTable(0)" style="width: 12%">
+                                        @Html.DisplayName("Created by") <i class="fa fa-fw fa-sort"></i>
+                                    </th>
+                                    <th onclick="socialTable(0)" style="width: 8%; text-align: center!important">
+                                        @Html.DisplayName("Comment")
+                                    </th>
+                                    <th onclick="socialTable(4)" style="width: 8%; text-align: center!important">
+                                        Action
+                                    </th>
+
+                                </tr>
+                            </thead>
+
+                            @if (Model.summary.hivProgramDiagnoses.Count() == 0)
+                            {
+                                <tr><td colspan="7" style="text-align: center!important; color: rgba(128, 128, 128, 0.50)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="color: rgba(128, 128, 128, 0.50)"></i></span> no records found</td></tr>
+                            }
+                            else
+                            {
+                                foreach (var item in Model.summary.hivProgramDiagnoses)
+                                {
+                                    <tbody>
+                                        <tr>
+                                            @if (item.FollowUp == true)
+                                            {
+                                                <td colspan="6" style="text-align: center!important; color: rgba(204, 0, 0, 0.70)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="font-size: 18px; color: rgba(204, 0, 0, 0.70)!important"></i></span> Follow up required!</td>
+                                            }
+                                            else
+                                            {
+                                                <td data-dateformat="DD-MM-YYYY" style="text-align:center!important">
+                                                    @Html.DisplayFor(modelItem => item.CreatedDate)
+                                                </td>
+                                            }
+                                            <!---->
+                                            <!---->
+                                            @if (item.FollowUp == true)
+                                            {
+
+                                            }
+                                            else
+                                            {
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.ProgramCode)
+                                                </td>
+                                            }
+                                            <!---->
+                                            <!---->
+                                            @if (item.FollowUp == true)
+                                            {
+
+                                            }
+                                            else
+                                            {
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.ProgramDescription)
+                                                </td>
+                                            }
+                                            <!---->
+                                            <!---->
+                                            @if (item.FollowUp == true)
+                                            {
+
+                                            }
+                                            else if (item.EffectiveDate == null)
+                                            {
+                                                <td style="text-align: center!important"> - </td>
+
+                                            }
+                                            else
+                                            {
+                                                <td style="text-align: center!important">
+                                                    @Html.DisplayFor(modelItem => item.EffectiveDate)
+                                                </td>
+                                            }
+                                            <!---->
+                                            <!---->
+                                            @if (item.FollowUp == true)
+                                            {
+
+                                            }
+                                            else
+                                            {
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.CreatedBy)
+                                                </td>
+                                            }
+
+                                            <!---->
+                                            <!---->
+                                            @if (item.FollowUp == true)
+                                            {
+
+                                            }
+                                            else if (item.Comment == "None" || item.Comment == "none" || item.Comment == "NONE")
+                                            {
+                                                <td style="text-align: center!important"><span style="font-size: 14px; color: rgba(204, 0, 0, 0.70); text-align: center!important"><i class="fas fa-times" title="No comment"></i></span></td>
+                                            }
+                                            else if (item.Comment == "Follow up")
+                                            {
+                                                <td style="text-align: center!important; color: rgba(204, 0, 0, 0.70)!important; font-size: 12px!important" title="follow up required!"><span><i class="fas fa-info-circle" style="color: rgba(204, 0, 0, 0.70)"></i></span> Follow up!</td>
+                                            }
+                                            else if (item.Comment == null || item.Comment == " " || item.Comment == "")
+                                            {
+                                                <td style="text-align: center!important"><span style="font-size: 14px; color: rgba(204, 0, 0, 0.70); text-align: center!important"><i class="fas fa-times" title="No comment"></i></span></td>
+                                            }
+                                            else
+                                            {
+                                                <td style="text-align: center!important"><span style="font-size: 14px; color: forestgreen; text-align: center!important"><i class="fas fa-check" title="@item.Comment"></i></span></td>
+                                            }
+                                            <!---->
+                                            <!---->
+
+                                            <td class="linkNav statusCode" style="text-align: center!important">
+                                                @Html.ActionLink("View", "diagnosis_Details", new { Id = item.Id, pro = Context.Request.Query["pro"] }) /
+                                                @Html.ActionLink("Edit", "diagnosis_Edit", new { Id = item.Id, pro = Context.Request.Query["pro"] })
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                }
+                            }
+
+                        </table>
+                    </div>
+                </div>
+                @if (User.Identity.IsAuthenticated)
+                {
+                    if (User.HasRole("6. Global user") || (User.HasRole("5. Super user")) || (User.HasRole("4. Advisor")))
+                    {
+                        <div style="text-align: center">
+                            <input type="button" class="btn patient-clinical-button" value="Add" onclick="location.href='@Url.Action("diagnosis_Create", "Member", new { DependentID = Model.DependentID, pro=Context.Request.Query["pro"] }, null)'" />
+                        </div>
+                        <br />
+                    }
+
+                    else if (User.HasRole("1. Consultant") || (User.HasRole("2. Case manager")) || (User.HasRole("3. Specialist")))
+                    {
+                        <div style="text-align: center">
+                            <input type="button" class="btn patient-clinical-button isDisabled" style="width: 10%; margin-left: 42%!important; margin-bottom: 0%" value="Add" />
+                        </div>
+                        <br />
+                    }
+                }
+            </div>
+        </div>
+    </div>
+    <!--------- medication -------->
+    <div class="col-md-12" style="z-index: 10">
+        <div class="panel panel-default">
+            <div class="panel-heading clickable panel-collapsed" id="medication_hiv">
+                <h3 class="panel-title">
+                    Medication
+                    @if (Model.hivScriptItems != null)
+                    {
+                        if (Model.hivScriptItems.Count() > 0)
+                        {
+
+                            foreach (var item in Model.hivScriptItems)
+                            {
+                                if (!string.IsNullOrEmpty(item.comment) && item.comment != "Follow up" && item.comment != "None")
+                                {
+                                    <span style="font-size: 12px">&nbsp;<i class="fas fa-sticky-note notificationIcon" title="comment"></i></span>
+                                    break;
+                                }
+
+                            }
+                        }
+                    }
+                </h3>
+                <span class="pull-right clickable panel-collapsed" style="margin-top: -1.25%; margin-right: 0.5%"><i class="fas fa-caret-up"></i></span>
+            </div>
+            <div class="panel-body">
+                <div class="col-md-12">
+                    <table class="table patient-clinical-history-table sortable" id="scriptHistoryTable" >
+                        <thead>
+                            <tr>
+                                <th onclick="scriptHistoryTable(0)" style="width: 100px">
+                                    @Html.DisplayNameFor(model => model.generalScriptItems[0].icd10code) <i class="fa fa-fw fa-sort"></i>
+                                </th>
+                                <th onclick="scriptHistoryTable(1)" style="width: 150px">
+                                    @Html.DisplayNameFor(model => model.generalScriptItems[0].nappiCode) <i class="fa fa-fw fa-sort"></i>
+                                </th>
+                                <th onclick="scriptHistoryTable(2)" style="width: 250px">
+                                    @Html.DisplayNameFor(model => model.generalScriptItems[0].productName) <i class="fa fa-fw fa-sort"></i>
+                                </th>
+                               
+                                <th onclick="scriptHistoryTable(3)" style="width: 150px">
+                                    @Html.DisplayNameFor(model => model.generalScriptItems[0].fromDate) <i class="fa fa-fw fa-sort"></i>
+                                </th>
+                                <th onclick="scriptHistoryTable(4)" style="width: 150px">
+                                    @Html.DisplayNameFor(model => model.generalScriptItems[0].toDate) <i class="fa fa-fw fa-sort"></i>
+                                </th>
+                                <th onclick="scriptHistoryTable(5)" style="width: 220px">
+                                    @Html.DisplayNameFor(model => model.generalScriptItems[0].comment) <i class="fa fa-fw fa-sort"></i>
+                                </th>
+                                <th style="width: 100px; text-align: center!important">
+                                    Action
+                                </th>
+                            </tr>
+                        </thead>
+
+                        @if (Model.hivScriptItems != null)
+                        {
+                            if (Model.hivScriptItems.Count() == 0)
+                            {
+                                <tr><td colspan="10" style="text-align: center!important; color: rgba(128, 128, 128, 0.50)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="color: rgba(128, 128, 128, 0.50)"></i></span> no records found</td></tr>
+                            }
+                            else
+                            {
+                                foreach (var item in Model.hivScriptItems)
+                                {
+                                    <tbody>
+                                        <tr>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.icd10code)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.nappiCode)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.productName)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.fromDate)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.toDate)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.comment)
+                                            </td>
+                                            <td class="statusCode linkNav" style="text-align: center!important">
+                                                <input type="submit" id="edit-hiv-medication" class="link-button" value="Edit" onclick="location.href='@Url.Action("EditMedicationItem", "Member", new { itemId = item.itemNo, pro = Context.Request.Query["pro"] }, null)'" />
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                }
+                            }
+                        }
+                        else
+                        {
+                            <tr><td colspan="8" style="text-align: center!important; color: rgba(128, 128, 128, 0.50)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="color: rgba(128, 128, 128, 0.50)"></i></span> no records found</td></tr>
+                        }
+                    </table>
+                </div>
+                <div style="text-align: center; margin-bottom: 1%">
+                    <input type="button" id="add-hiv-medication" class="btn patient-clinical-button" value="Add" onclick="location.href='@Url.Action("AddMedication", "Member", new { DependentID = Model.DependentID, pro=Context.Request.Query["pro"] }, null)'" />
+                    <input type="button" id="history-hiv-medication" class="btn history-button" value="History" onclick="location.href='@Url.Action("Medication_History", "Member", new { DependentID = Model.DependentID, pro=Context.Request.Query["pro"] }, null)'" />
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--- other medical history --->
+    <div class="col-md-12" style="z-index: 10">
+        <div class="panel panel-default">
+            <div class="panel-heading clickable panel-collapsed" id="otherMedication_hiv">
+                <h3 class="panel-title">
+                    Other Medical History
+                    @if (Model.summary.otherMedicalHistories != null)
+                    {
+                        if (Model.summary.otherMedicalHistories.Count() > 0)
+                        {
+
+                            foreach (var item in Model.summary.otherMedicalHistories)
+                            {
+                                if (!string.IsNullOrEmpty(item.generalComments) && item.generalComments != "Follow up" && item.generalComments != "None")
+                                {
+                                    <span style="font-size: 12px">&nbsp;<i class="fas fa-sticky-note notificationIcon" title="comment"></i></span>
+                                    break;
+                                }
+
+                            }
+                        }
+                    }
+                    @if (Model.summary.otherMedicalHistories != null)
+                    {
+                        if (Model.summary.otherMedicalHistories.Count() > 0)
+                        {
+
+                            foreach (var item in Model.summary.otherMedicalHistories)
+                            {
+
+                                if (item.followUp == true || item.generalComments == "Follow up")
+                                {
+                                    <span style="font-size: 12px">&nbsp;<i class="fas fa-star notificationIcon" title="follow up"></i></span>
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                </h3>
+                <span class="pull-right clickable panel-collapsed" style="margin-top: -1.25%; margin-right: 0.5%"><i class="fas fa-caret-up"></i></span>
+            </div>
+            <div class="panel-body">
+                <div class="col-md-12">
+                    <div class="row">
+                        <table class="table patient-clinical-history-table sortable" id="medicalTable">
+                            <thead>
+                                <tr>
+                                    <th style="width: 10%; text-align: center!important ">
+                                        @Html.DisplayName("Created date")
+                                    </th>
+                                    <th style="width: 8%; text-align: center!important ">
+                                        @Html.DisplayName("Respiratory")
+                                    </th>
+                                    <th style="width: 8%; text-align: center!important ">
+                                        @Html.DisplayName("Pneumonia")
+                                    </th>
+                                    <th style="width: 8%; text-align: center!important ">
+                                        @Html.DisplayName("Meningitis")
+                                    </th>
+                                    <th style="width: 9%; text-align: center!important ">
+                                        @Html.DisplayName("Lymphadenopathy")
+                                    </th>
+                                    <th style="width: 8%; text-align: center!important ">
+                                        @Html.DisplayName("Diarrhoea")
+                                    </th>
+                                    <th style="width: 8%; text-align: center!important ">
+                                        @Html.DisplayName("Bladder inf")
+                                    </th>
+                                    <th style="width: 8%; text-align: center!important ">
+                                        @Html.DisplayName("Weight loss")
+                                    </th>
+                                    <th style="width: 8% ;text-align: center!important">
+                                        @Html.DisplayName("Cancer")
+                                    </th>
+                                    @if (Model.gender.ToLower() == "f")
+                                    {
+                                        <th style="width: 8% ;text-align: center!important">
+                                            @Html.DisplayName("Cervical cancer")
+                                        </th>
+                                    }
+                                    <th style="width: 8% ;text-align: center!important">
+                                        @Html.DisplayName("Immunization")
+                                    </th>
+                                    <th style="width: 8% ;text-align: center!important">
+                                        Action
+                                    </th>
+                                </tr>
+                            </thead>
+                            @if (Model.summary.otherMedicalHistories.Count() == 0 && Model.gender.ToLower() == "f")
+                            {
+                                <tr><td colspan="12" style="text-align: center!important; color: rgba(128, 128, 128, 0.50)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="color: rgba(128, 128, 128, 0.50)"></i></span> no records found</td></tr>
+                            }
+                            else if (Model.summary.otherMedicalHistories.Count() == 0)
+                            {
+                                <tr><td colspan="11" style="text-align: center!important; color: rgba(128, 128, 128, 0.50)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="color: rgba(128, 128, 128, 0.50)"></i></span> no records found</td></tr>
+                            }
+                            else
+                            {
+                                foreach (var item in Model.summary.otherMedicalHistories)
+                                {
+                                    <tbody>
+                                        <tr>
+                                            @if (item.followUp == true)
+                                            {
+                                                <td colspan="10" style="text-align: center!important; color: rgba(204, 0, 0, 0.70)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="font-size: 18px; color: rgba(204, 0, 0, 0.70)!important"></i></span> Follow up required!</td>
+                                            }
+                                            else
+                                            {
+                                                <td data-dateformat="DD-MM-YYYY" style="text-align: center!important">
+                                                    @Html.DisplayFor(modelItem => item.createdDate)
+                                                </td>
+                                            }
+                                            <!---->
+                                            <!---->
+                                            @if (item.followUp == true)
+                                            {
+
+                                            }
+                                            else if (item.respiratoryTract == false)
+                                            {
+                                                <td style="text-align: center!important"><span style="font-size: 14px; color: rgba(204, 0, 0, 0.70); text-align: center!important"><i class="fas fa-times" title="No comment"></i></span></td>
+                                            }
+                                            else
+                                            {
+                                                <td style="text-align: center!important">
+                                                    <span style="font-size: 14px; color: forestgreen; text-align: center!important">
+                                                        <i class="fas fa-check-circle"
+                                                           title="effective date: @Html.DisplayFor(modelItem => item.respiratoryTractEffectiveDate) | comment: @item.respiratoryTractComment"></i>
+                                                    </span>
+                                                </td>
+                                            }
+                                            <!---->
+                                            <!---->
+                                            @if (item.followUp == true)
+                                            {
+
+                                            }
+                                            else if (item.pneumonia == false)
+                                            {
+                                                <td style="text-align: center!important"><span style="font-size: 14px; color: rgba(204, 0, 0, 0.70); text-align: center!important"><i class="fas fa-times" title="No comment"></i></span></td>
+                                            }
+                                            else
+                                            {
+                                                <td style="text-align: center!important">
+                                                    <span style="font-size: 14px; color: forestgreen; text-align: center!important">
+                                                        <i class="fas fa-check-circle"
+                                                           title="effective date: @Html.DisplayFor(modelItem => item.pneumoniaEffectiveDate) | comment: @item.pneumoniaComment"></i>
+                                                    </span>
+                                                </td>
+                                            }
+                                            <!---->
+                                            <!---->
+                                            @if (item.followUp == true)
+                                            {
+
+                                            }
+                                            else if (item.meningitis == false)
+                                            {
+                                                <td style="text-align: center!important"><span style="font-size: 14px; color: rgba(204, 0, 0, 0.70); text-align: center!important"><i class="fas fa-times" title="No comment"></i></span></td>
+                                            }
+                                            else
+                                            {
+                                                <td style="text-align: center!important">
+                                                    <span style="font-size: 14px; color: forestgreen; text-align: center!important">
+                                                        <i class="fas fa-check-circle"
+                                                           title="effective date: @Html.DisplayFor(modelItem => item.meningitisEffectiveDate) | comment: @item.meningitisComment"></i>
+                                                    </span>
+                                                </td>
+                                            }
+                                            <!---->
+                                            <!---->
+                                            @if (item.followUp == true)
+                                            {
+
+                                            }
+                                            else if (item.lymphadenopathy == false)
+                                            {
+                                                <td style="text-align: center!important"><span style="font-size: 14px; color: rgba(204, 0, 0, 0.70); text-align: center!important"><i class="fas fa-times" title="No comment"></i></span></td>
+                                            }
+                                            else
+                                            {
+                                                <td style="text-align: center!important">
+                                                    <span style="font-size: 14px; color: forestgreen; text-align: center!important">
+                                                        <i class="fas fa-check-circle"
+                                                           title="effective date: @Html.DisplayFor(modelItem => item.lymphadenopathyEffectiveDate) | comment: @item.lymphadenopathyComment"></i>
+                                                    </span>
+                                                </td>
+                                            }
+                                            <!---->
+                                            <!---->
+                                            @if (item.followUp == true)
+                                            {
+
+                                            }
+                                            else if (item.diarrhoea == false)
+                                            {
+                                                <td style="text-align: center!important"><span style="font-size: 14px; color: rgba(204, 0, 0, 0.70); text-align: center!important"><i class="fas fa-times" title="No comment"></i></span></td>
+                                            }
+                                            else
+                                            {
+                                                <td style="text-align: center!important">
+                                                    <span style="font-size: 14px; color: forestgreen; text-align: center!important">
+                                                        <i class="fas fa-check-circle"
+                                                           title="effective date: @Html.DisplayFor(modelItem => item.diarrhoeaEffectiveDate) | comment: @item.diarrhoeaComment"></i>
+                                                    </span>
+                                                </td>
+                                            }
+                                            <!---->
+                                            <!---->
+                                            @if (item.followUp == true)
+                                            {
+
+                                            }
+                                            else if (item.bladderInfection == false)
+                                            {
+                                                <td style="text-align: center!important"><span style="font-size: 14px; color: rgba(204, 0, 0, 0.70); text-align: center!important"><i class="fas fa-times" title="No comment"></i></span></td>
+                                            }
+                                            else
+                                            {
+                                                <td style="text-align: center!important">
+                                                    <span style="font-size: 14px; color: forestgreen; text-align: center!important">
+                                                        <i class="fas fa-check-circle"
+                                                           title="effective date: @Html.DisplayFor(modelItem => item.bladderInfectionEffectiveDate) | comment: @item.bladderInfectionComment"></i>
+                                                    </span>
+                                                </td>
+                                            }
+                                            <!---->
+                                            <!---->
+                                            @if (item.followUp == true)
+                                            {
+
+                                            }
+                                            else if (item.weightLoss == false)
+                                            {
+                                                <td style="text-align: center!important"><span style="font-size: 14px; color: rgba(204, 0, 0, 0.70); text-align: center!important"><i class="fas fa-times" title="No comment"></i></span></td>
+                                            }
+                                            else
+                                            {
+                                                <td style="text-align: center!important">
+                                                    <span style="font-size: 14px; color: forestgreen; text-align: center!important">
+                                                        <i class="fas fa-check-circle"
+                                                           title="effective date: @Html.DisplayFor(modelItem => item.weightLossEffectiveDate) | comment: @item.weightLossComment"></i>
+                                                    </span>
+                                                </td>
+                                            }
+                                            <!---->
+                                            <!---->
+                                            @if (item.followUp == true)
+                                            {
+
+                                            }
+                                            else if (item.cancer == false)
+                                            {
+                                                <td style="text-align: center!important"><span style="font-size: 14px; color: rgba(204, 0, 0, 0.70); text-align: center!important"><i class="fas fa-times" title="No comment"></i></span></td>
+                                            }
+                                            else
+                                            {
+                                                <td style="text-align: center!important">
+                                                    <span style="font-size: 14px; color: forestgreen; text-align: center!important">
+                                                        <i class="fas fa-check-circle"
+                                                           title="effective date: @Html.DisplayFor(modelItem => item.cancerEffectiveDate) | comment: @item.cancerComment"></i>
+                                                    </span>
+                                                </td>
+                                            }
+                                            <!---->
+                                            <!---->
+                                            @if (Model.gender.ToLower() == "f")
+                                            {
+                                                if (item.followUp == true)
+                                                {
+
+                                                }
+                                                else if (item.cervicalCancer == false)
+                                                {
+                                                    <td style="text-align: center!important"><span style="font-size: 14px; color: rgba(204, 0, 0, 0.70); text-align: center!important"><i class="fas fa-times" title="No comment"></i></span></td>
+                                                }
+                                                else
+                                                {
+                                                    <td style="text-align: center!important">
+                                                        <span style="font-size: 14px; color: forestgreen; text-align: center!important">
+                                                            <i class="fas fa-check-circle"
+                                                               title="effective date: @Html.DisplayFor(modelItem => item.cervicalCancerEffectiveDate) | comment: @item.cervicalCancerComment"></i>
+                                                        </span>
+                                                    </td>
+                                                }
+                                            }
+                                            <!---->
+                                            <!---->
+                                            @if (item.followUp == true)
+                                            {
+
+                                            }
+                                            else if (item.immunization == false)
+                                            {
+                                                <td style="text-align: center!important"><span style="font-size: 14px; color: rgba(204, 0, 0, 0.70); text-align: center!important"><i class="fas fa-times" title="No comment"></i></span></td>
+                                            }
+                                            else
+                                            {
+                                                <td style="text-align: center!important">
+                                                    <span style="font-size: 14px; color: forestgreen; text-align: center!important">
+                                                        <i class="fas fa-check-circle"
+                                                           title="effective date: @Html.DisplayFor(modelItem => item.immunizationEffectiveDate) | comment: @item.immunizationComment"></i>
+                                                    </span>
+                                                </td>
+                                            }
+                                            <!---->
+                                            <!---->
+
+                                            <td class="linkNav statusCode" style="text-align: center!important">
+                                                @Html.ActionLink("View", "otherMedicalHistory_Details", new { id = item.Id, pro = Context.Request.Query["pro"] }) /
+                                                @Html.ActionLink("Edit", "otherMedicalHistory_Edit", new { id = item.Id, pro = Context.Request.Query["pro"] })
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                }
+                            }
+
+                        </table>
+                        <script>
+                            //tableSorting
+                            function medicalTable(n) {
+                                var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+                                table = document.getElementById("medicalTable");
+                                switching = true;
+                                dir = "asc";
+
+                                while (switching) {
+                                    switching = false;
+                                    rows = table.getElementsByTagName("TR");
+
+                                    for (i = 1; i < (rows.length - 1); i++) {
+
+                                        shouldSwitch = false;
+
+                                        x = rows[i].getElementsByTagName("TD")[n];
+                                        y = rows[i + 1].getElementsByTagName("TD")[n];
+
+                                        if (dir == "asc") {
+                                            if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+
+                                                shouldSwitch = true;
+                                                break;
+                                            }
+                                        } else if (dir == "desc") {
+                                            if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+
+                                                shouldSwitch = true;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    if (shouldSwitch) {
+
+                                        rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                                        switching = true;
+
+                                        switchcount++;
+                                    } else {
+
+                                        if (switchcount == 0 && dir == "asc") {
+                                            dir = "desc";
+                                            switching = true;
+                                        }
+                                    }
+                                }
+                            }
+                        </script>
+                    </div>
+                </div>
+                <div style="text-align: center">
+                    <input type="button" class="btn patient-clinical-button" value="Add" onclick="location.href='@Url.Action("otherMedicalHistory_Create", "Member", new { DependentID = Model.DependentID, pro=Context.Request.Query["pro"] }, null)'" />
+                </div>
+                <br />
+            </div>
+        </div>
+    </div>
+    <!--- monitoring blood test --->
+    <div class="col-md-12" style="z-index: 10">
+        <div class="panel panel-default">
+            <div class="panel-heading clickable panel-collapsed" id="bloodResults_hiv">
+                <h3 class="panel-title">
+                    Monitoring Blood Results
+                    @if (Model.hivPathologies != null)
+                    {
+                        if (Model.hivPathologies.Count() > 0)
+                        {
+
+                            foreach (var item in Model.hivPathologies)
+                            {
+                                if (!string.IsNullOrEmpty(item.comment) && item.comment != "Follow up" && item.comment != "None")
+                                {
+                                    <span style="font-size: 12px">&nbsp;<i class="fas fa-sticky-note notificationIcon" title="comment"></i></span>
+                                    break;
+                                }
+
+                            }
+                        }
+                    }
+                    @if (Model.hivPathologies != null)
+                    {
+                        if (Model.hivPathologies.Count() > 0)
+                        {
+
+                            foreach (var item in Model.hivPathologies)
+                            {
+
+                                if (item.CD4Count == 0 && item.viralLoad == 0 && item.CD4Percentage == 0)
+                                {
+                                    <span style="font-size: 12px">&nbsp;<i class="fas fa-star notificationIcon" title="follow up"></i></span>
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                </h3>
+                <span class="pull-right clickable panel-collapsed" style="margin-top: -1.25%; margin-right: 0.5%"><i class="fas fa-caret-up"></i></span>
+            </div>
+            <div class="panel-body">
+                <div class="col-md-12">
+                    <div class="row">
+                        <table class="table patient-clinical-history-table sortable" id="medicalTable">
+                            <thead>
+                                <tr>
+                                    <th style="width: 11%; text-align: center!important ">
+                                        @Html.DisplayName("Created date")
+                                    </th>
+                                    <th style="width: 11%; text-align: center!important ">
+                                        @Html.DisplayName("CD4 count")
+                                    </th>
+                                    <th style="width: 11%; text-align: center!important ">
+                                        @Html.DisplayName("CD4 effective")
+                                    </th>
+                                    <th style="width: 11%; text-align: center!important ">
+                                        @Html.DisplayName("Viral load")
+                                    </th>
+                                    <th style="width: 11%; text-align: center!important ">
+                                        @Html.DisplayName("VL effective")
+                                    </th>
+                                    <th style="width: 11%; text-align: center!important ">
+                                        @Html.DisplayName("CD4 %")
+                                    </th>
+                                    <th style="width: 11%; text-align: center!important ">
+                                        @Html.DisplayName("CD4% effective")
+                                    </th>
+                                    <th style="width: 11% ;text-align: center!important">
+                                        Action
+                                    </th>
+                                </tr>
+                            </thead>
+                            @if (Model.hivBloodResults.Count() == 0)
+                            {
+                                <tr><td colspan="8" style="text-align: center!important; color: rgba(128, 128, 128, 0.50)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="color: rgba(128, 128, 128, 0.50)"></i></span> no records found</td></tr>
+                            }
+                            else
+                            {
+                                foreach (var item in Model.hivBloodResults)
+                                {
+                                    <tbody>
+                                        <tr>
+                                            @if (item.CD4Count == 0 && item.viralLoad == 0 && item.CD4Percentage == 0)
+                                            {
+                                                <td colspan="7" style="text-align: center!important; color: rgba(204, 0, 0, 0.70)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="font-size: 18px; color: rgba(204, 0, 0, 0.70)!important"></i></span> Follow up required!</td>
+                                            }
+                                            else
+                                            {
+                                                <td data-dateformat="DD-MM-YYYY" style="text-align: center!important">
+                                                    @Html.DisplayFor(modelItem => item.createdDate)
+                                                </td>
+                                            }
+                                            @if (item.CD4Count == 0 && item.viralLoad == 0 && item.CD4Percentage == 0)
+                                            {
+                                            }
+                                            else
+                                            {
+                                                if (item.CD4Count == 0 || item.CD4Count.ToString() == "0.00")
+                                                {
+                                                    <td></td>
+                                                }
+                                                else
+                                                {
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.CD4Count)
+                                                    </td>
+                                                }
+                                            }
+
+                                            @if (item.CD4Count == 0 && item.viralLoad == 0 && item.CD4Percentage == 0)
+                                            {
+                                            }
+                                            else
+                                            {
+                                                if (item.CD4Count == 0 || item.CD4Count.ToString() == "0.00")
+                                                {
+                                                    <td></td>
+                                                }
+                                                else
+                                                {
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.CD4CounteffectiveDate)
+                                                    </td>
+                                                }
+                                            }
+                                            @if (item.CD4Count == 0 && item.viralLoad == 0 && item.CD4Percentage == 0)
+                                            {
+                                            }
+                                            else
+                                            {
+                                                if (item.viralLoad == 0 || item.viralLoad.ToString() == "0.00")
+                                                {
+                                                    <td></td>
+                                                }
+                                                else
+                                                {
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.viralLoad)
+                                                    </td>
+                                                }
+                                            }
+                                            @if (item.CD4Count == 0 && item.viralLoad == 0 && item.CD4Percentage == 0)
+                                            {
+                                            }
+                                            else
+                                            {
+                                                if (item.viralLoad == 0 || item.viralLoad.ToString() == "0.00")
+                                                {
+                                                    <td></td>
+                                                }
+                                                else
+                                                {
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.viralLoadeffectiveDate)
+                                                    </td>
+                                                }
+                                            }
+                                            @if (item.CD4Count == 0 && item.viralLoad == 0 && item.CD4Percentage == 0)
+                                            {
+                                            }
+                                            else
+                                            {
+                                                if (item.CD4Percentage == 0 || item.CD4Percentage.ToString() == "0.00")
+                                                {
+                                                    <td></td>
+                                                }
+                                                else
+                                                {
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.CD4Percentage)
+                                                    </td>
+                                                }
+                                            }
+                                            @if (item.CD4Count == 0 && item.viralLoad == 0 && item.CD4Percentage == 0)
+                                            {
+                                            }
+                                            else
+                                            {
+                                                if (item.CD4Percentage == 0 || item.CD4Percentage.ToString() == "0.00")
+                                                {
+                                                    <td></td>
+                                                }
+                                                else
+                                                {
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.CD4PercentageeffectiveDate)
+                                                    </td>
+                                                }
+                                            }
+                                            <td class="linkNav" style="text-align: center!important">
+                                                <div class="contactIcon fas fa-edit" onclick="location.href='@Url.Action("EditPathology", "Member", new { id = item.pathologyID, pro=Context.Request.Query["pro"] })'" title="Edit"> </div> &nbsp;
+                                                <div class="contactIcon fas fa-info-circle" onclick="location.href='@Url.Action("PathologyDetails", "Member", new { id = item.pathologyID, pro=Context.Request.Query["pro"] })'" title="Details"> </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                }
+                            }
+
+                        </table>
+                        <script>
+
+                            //tableSorting
+                            function medicalTable(n) {
+                                var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+                                table = document.getElementById("medicalTable");
+                                switching = true;
+                                dir = "asc";
+
+                                while (switching) {
+                                    switching = false;
+                                    rows = table.getElementsByTagName("TR");
+
+                                    for (i = 1; i < (rows.length - 1); i++) {
+
+                                        shouldSwitch = false;
+
+                                        x = rows[i].getElementsByTagName("TD")[n];
+                                        y = rows[i + 1].getElementsByTagName("TD")[n];
+
+                                        if (dir == "asc") {
+                                            if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+
+                                                shouldSwitch = true;
+                                                break;
+                                            }
+                                        } else if (dir == "desc") {
+                                            if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+
+                                                shouldSwitch = true;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    if (shouldSwitch) {
+
+                                        rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                                        switching = true;
+
+                                        switchcount++;
+                                    } else {
+
+                                        if (switchcount == 0 && dir == "asc") {
+                                            dir = "desc";
+                                            switching = true;
+                                        }
+                                    }
+                                }
+                            }
+                        </script>
+                    </div>
+                </div>
+                <div style="text-align: center">
+                    <input type="button" class="btn patient-clinical-button" value="Add" onclick="location.href='@Url.Action("CreatePathology", "Clinical", new { DependentID = Model.DependentID, pro = Context.Request.Query["pro"] }, null)'" />
+                </div>
+                <br />
+
+            </div>
+        </div>
+    </div>
+    <!---------- general ---------->
+    <div class="col-md-12" style="z-index: 10">
+        <div class="panel panel-default">
+            <div class="panel-heading clickable panel-collapsed" id="general_hiv">
+                <h3 class="panel-title">
+                    General
+                    @if (Model.summary.hivQuestionnaireOthers != null)
+                    {
+                        if (Model.summary.hivQuestionnaireOthers.Count() > 0)
+                        {
+
+                            foreach (var item in Model.summary.hivQuestionnaireOthers)
+                            {
+                                if (!string.IsNullOrEmpty(item.generalComments) && item.generalComments != "Follow up" && item.generalComments != "None")
+                                {
+                                    <span style="font-size: 12px">&nbsp;<i class="fas fa-sticky-note notificationIcon" title="comment"></i></span>
+                                    break;
+                                }
+
+                            }
+                        }
+                    }
+                    @if (Model.summary.hivQuestionnaireOthers != null)
+                    {
+                        if (Model.summary.hivQuestionnaireOthers.Count() > 0)
+                        {
+
+                            foreach (var item in Model.summary.hivQuestionnaireOthers)
+                            {
+
+                                if (item.followUp == true)
+                                {
+                                    <span style="font-size: 12px">&nbsp;<i class="fas fa-star notificationIcon" title="follow up"></i></span>
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                </h3>
+                <span class="pull-right clickable panel-collapsed" style="margin-top: -1.25%; margin-right: 0.5%"><i class="fas fa-caret-up"></i></span>
+            </div>
+            <div class="panel-body">
+                <div class="col-md-12">
+                    <div class="row">
+                        <table class="table patient-clinical-history-table sortable" id="otherTable">
+                            <thead>
+                                <tr>
+                                    <th onclick="socialTable(3)" style="width: 10%; text-align: center!important">
+                                        @Html.DisplayName("Depression") <i class="fa fa-fw fa-sort"></i>
+                                    </th>
+                                    <th onclick="socialTable(4)">
+                                        @Html.DisplayName("Comment") <i class="fa fa-fw fa-sort"></i>
+                                    </th>
+                                    <th style="width: 10%; text-align: center!important">
+                                        Action
+                                    </th>
+                                </tr>
+                            </thead>
+
+
+                            @if (Model.summary.hivQuestionnaireOthers.Count() == 0)
+                            {
+                                <tr><td colspan="3" style="text-align: center!important; color: rgba(128, 128, 128, 0.50)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="color: rgba(128, 128, 128, 0.50)"></i></span> no records found</td></tr>
+                            }
+
+                            else
+                            {
+                                foreach (var item in Model.summary.hivQuestionnaireOthers)
+                                {
+
+                                    <tbody>
+                                        <tr>
+                                            @if (item.followUp == true)
+                                            {
+                                                <td colspan="2" style="text-align: center!important; color: rgba(204, 0, 0, 0.70)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="font-size: 18px; color: rgba(204, 0, 0, 0.70)!important"></i></span> Follow up required!</td>
+                                            }
+                                            else
+                                            {
+                                                if (item.depression == false)
+                                                {
+                                                    <td style="text-align: center!important"><span style="font-size: 16px; color: red; text-align: center!important"><i class="far fa-times-circle"></i></span></td>
+                                                }
+                                                else
+                                                {
+                                                    <td style="text-align: center!important"><span style="font-size: 16px; color: green; text-align: center!important"><i class="far fa-check-circle"></i></span></td>
+                                                }
+                                            }
+                                            <!---->
+                                            <!---->
+                                            @if (item.followUp == true)
+                                            {
+                                            }
+                                            else if (item.depressionComment == null || item.depressionComment == "")
+                                            {
+                                                <td>
+                                                    -
+                                                </td>
+                                            }
+                                            else
+                                            {
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.depressionComment)
+                                                </td>
+                                            }
+                                            <!---->
+                                            <!---->
+
+                                            <td class="linkNav" style="text-align: center!important">
+                                                @Html.ActionLink("View", "hivOther_Details", new { id = item.QuestionnaireOtherID, pro = Context.Request.Query["pro"] }) /
+                                                @Html.ActionLink("Edit", "hivOther_Edit", new { id = item.QuestionnaireOtherID, pro = Context.Request.Query["pro"] })
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                }
+                            }
+
+                        </table>
+                        <script>
+
+                            //tableSorting
+                            function otherTable(n) {
+                                var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+                                table = document.getElementById("socialTable");
+                                switching = true;
+                                dir = "asc";
+
+                                while (switching) {
+                                    switching = false;
+                                    rows = table.getElementsByTagName("TR");
+
+                                    for (i = 1; i < (rows.length - 1); i++) {
+
+                                        shouldSwitch = false;
+
+                                        x = rows[i].getElementsByTagName("TD")[n];
+                                        y = rows[i + 1].getElementsByTagName("TD")[n];
+
+                                        if (dir == "asc") {
+                                            if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+
+                                                shouldSwitch = true;
+                                                break;
+                                            }
+                                        } else if (dir == "desc") {
+                                            if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+
+                                                shouldSwitch = true;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    if (shouldSwitch) {
+
+                                        rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                                        switching = true;
+
+                                        switchcount++;
+                                    } else {
+
+                                        if (switchcount == 0 && dir == "asc") {
+                                            dir = "desc";
+                                            switching = true;
+                                        }
+                                    }
+                                }
+                            }
+                        </script>
+                    </div>
+                </div>
+                <div style="text-align:center">
+                    <input type="button" class="btn patient-clinical-button" value="Add" onclick="location.href='@Url.Action("hivOther_Create", "Member", new { DependentID = Model.DependentID, pro=Context.Request.Query["pro"] }, null)', addHIVMedication()" />
+                </div>
+                <br />
+            </div>
+        </div>
+    </div>
+    <hr class="patientProfile_Ruler" />
+</div>
+
+@section Scripts {
+    <script src="~/Scripts/redirect-hiv.js"></script>
+}

@@ -1,0 +1,277 @@
+﻿@model HaloCareCore.Models.Communications.EmailTemplates
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Edit";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .field-validation-error:before {
+        font-family: FontAwesome;
+        content: "\f06a\00a0";
+        animation: pulse 2s ease infinite;
+    }
+
+    .error-alert {
+        width: 100%;
+        margin: 0 auto;
+        background-color: rgba(217, 83, 79, 0.1);
+        padding: 10px;
+        border-left-color: #d9534f !important;
+        border: 1px solid transparent;
+        border-left-width: 5px;
+        border-radius: 3px;
+        margin: 0 auto;
+        font-family: 'Open Sans', sans-serif;
+        font-size: 12px;
+        margin: 0 0 5px 0;
+        margin-top: -10px;
+        margin-bottom: 20px;
+    }
+
+        .error-alert span {
+            color: #d9534f;
+            text-align: center;
+        }
+</style>
+<javascript>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet" />
+    <link href='http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.min.css' rel='stylesheet' type='text/css'>
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/js/standalone/selectize.js"></script>
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.default.css">
+</javascript>
+
+<div class="fullScreen_container zero-padding" id="yourForm">
+
+    <!--pageHeader-->
+    <nav id="global-nav" class="nav">
+        <div class="pull-left title">
+            <h1 class="site-title_patientProfile">
+                <span><i class="fas fa-comment-alt"></i>&emsp; Email templates</span>
+            </h1>
+        </div>
+        <div class="pull-right title">
+            <h1 class="site-title_userID pull-right">
+                <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+            </h1>
+            <h1 class="site-title_userID pull-right">
+                @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                {
+                    <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                }
+            </h1>
+            <h1 class="site-waffleIcon pull-right">
+                <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+            </h1>
+        </div>
+    </nav>
+    <!--breadCrumbs-->
+    <ul class="breadcrumbs_fullScreens">
+        <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+        <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+        <li><a href="@Url.Action("Index", "Template", new {})">Email templates</a></li>
+        <li><a href="#">@ViewBag.Title</a></li>
+    </ul>
+    <!--navCollection-->
+    <div class="navCollection_fullScreens">
+        @Html.Partial("_navCollection")
+    </div>
+
+    <div style="margin-bottom: 1%"></div>
+
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        <div class="hidden-fields">
+            @Html.HiddenFor(model => model.templateID)
+            <input type="hidden" name="title-validation" id="title-validation" />
+            <input type="hidden" name="message-validation" id="message-validation" />
+            <input type="hidden" name="error-title" id="error-title" value="@ViewBag.emailTitle" />
+            <input type="hidden" name="error-template" id="error-template" value="@ViewBag.emailTemplate" />
+            <div class="col-md-12"><div id="duplicate-title-notice" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; Title already exists!</span></div></div></div>
+            <div class="col-md-12"><div id="duplicate-message-notice" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; Template message already exists!</span></div></div></div>
+            <div class="col-md-12"><div id="error-duplicate" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; This combination, <b>Title:</b> @ViewBag.emailTitle, <b>Program:</b> @ViewBag.Program & <b>Template</b> already exists!</span></div></div></div>
+            <div class="col-md-12"><div id="error-duplicate-title" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; The <b>Title:</b> @ViewBag.emailTitle already exists!</span></div></div></div>
+            <div class="col-md-12"><div id="error-duplicate-template" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; The <b>Template:</b> @ViewBag.emailTemplate already exists!</span></div></div></div>
+        </div>
+        <div class="row">
+            <h4 class="tableHeading">Email template</h4>
+            <hr class="fancyruler">
+
+            <div class="form-horizontal editForm" id="yourContentToBeSaved">
+
+                <br />
+                <br />
+                <div class="form-group">
+                    <div class="col-md-12">
+                        @Html.EditorFor(model => model.title, new { htmlAttributes = new { @class = "emailTemplate_Heading_Edit", @placeholder = "Title", @required = "required" } })
+                        @Html.ValidationMessageFor(model => model.title, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-12">
+                        @Html.TextAreaFor(model => model.templateBody, new { htmlAttributes = new { @class = "emailTemplate_Bodys", @placeholder = "Body", @required = "required" } })
+                        @Html.ValidationMessageFor(model => model.templateBody, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.program, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @*@Html.DropDownListFor(model => model.PathologyAssignments.ProgramCode, new SelectList(Model.programs, "ProgramName", "ProgramName"), "Select", new { htmlAttributes = new { @class = "infoBox_editMember", @id = "program" } })*@
+
+                        @Html.DropDownListFor(model => model.program, new SelectList(Model.Programs, "Code", "ProgramName"), "Select", htmlAttributes: new { @class = "" })<br>
+                        @Html.ValidationMessageFor(model => model.program, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Active, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        <div class="checkbox">
+                            @Html.EditorFor(model => model.Active)
+                            @Html.ValidationMessageFor(model => model.Active, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="fixedBack">
+                    <input value="Back" class="btn buttonRound_formBack go_back" onclick="backKey()" style="width: 15%!important" />
+                    <input type="submit" value="Save" class="btn buttonRound_formCreate" onclick="storageKey()" style="width: 15%!important" />
+                </div>
+                <br />
+                <div class="">
+                    <input id="hidden" type="hidden" />
+                </div>
+
+            </div>
+        </div>
+    }
+
+</div>
+
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/js/standalone/selectize.js"></script>
+    <script>
+        initSelectize();
+        function initSelectize() {
+            $('#program').selectize({
+                persist: true,
+                preload: true,
+                maxItems: 1,
+                delimiter: ',',
+                valueField: 'id',
+                labelField: 'name',
+                searchField: ['name'],
+                hideSelected: true,
+                plugins: ['remove_button'],
+                render: {
+                    option: function (item, escape) {
+                        return '<span class="name">' + escape(item.name) + '</span>';
+
+                    }
+                }
+            })
+        }
+    </script>
+    <script>
+
+        //CKEDITOR.replace('templateBody');
+
+
+        //CKEDITOR.on('instanceReady',
+        //    function (evt) {
+        //        var editor = evt.editor;
+        //        editor.execCommand('maximize');
+        //    });
+
+
+        //$('#yourForm').submit(function () {
+        //    // Destroy all the editors.
+        //    for (var instance in CKEDITOR.instances)
+        //        CKEDITOR.instances[instance].destroy();
+
+        //    // Store #yourContentToBeSaved HTML in a hidden field. You can
+        //    // retrieve these data with PHP on the server-side once the form is submitted.
+        //    $('#hidden').val($('#yourContentToBeSaved').html());
+        //});
+
+
+
+
+    </script>
+    <script type="text/javascript">
+        CKEDITOR.replace('templateBody', {
+            filebrowserImageBrowseUrl: '/Template/uploadPartial',
+            filebrowserImageUploadUrl: '/Template/uploadnow',
+            //hcare-1381: toolbar amendment
+            toolbar: [{ name: 'document', items: ['Source', 'NewPage', 'Save', 'Preview'] }, //removed: 'Save'
+            { name: 'basicstyles', items: ['Bold', 'Italic', 'Underline', 'Subscript', 'Superscript', 'TextColor', 'BGColor', '-', 'CopyFormatting', 'RemoveFormat'] }, //removed: 'Strike'
+            { name: 'clipboard', items: ['Cut', 'Copy', 'Paste', 'PasteText', 'PasteFromWord', '-', 'Undo', 'Redo'] },
+            { name: 'editing', items: ['Find', 'Replace', '-', 'SelectAll'] }, //removed: , '-', 'Scayt'
+                '/',
+            { name: 'styles', items: ['Styles', 'Format', 'Font', 'FontSize'] },
+            { name: 'paragraph', items: ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Blockquote', 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock'] },
+            { name: 'insert', items: ['Table', 'HorizontalRule', 'SpecialChar', 'Image'] }, //removed: 'Image','Flash','Smiley', 'PageBreak', 'Iframe'
+
+                //{name: 'links', items: ['Link', 'Unlink', 'Anchor'] },
+                //{name: 'tools', items: ['Maximize', '-', 'About'] }
+
+                //website for additional plugin configs: https://ckeditor.com/latest/samples/old/toolbar/toolbar.html
+            ],
+            //uiColor: '#FFF',
+        });
+
+        CKEDITOR.config.removePlugins = 'elementspath,contextmenu,liststyle,tabletools,tableselection'; //hcare-1381
+        CKEDITOR.config.disableNativeSpellChecker = false; //hcare-1381
+
+        function updateValue(id, value) {
+            // this gets called from the popup window and updates the field with a new value
+            document.getElementById(id).value = value;
+        }
+    </script>
+    <script>
+        function backKey() {
+            localStorage.setItem("back_email", Date.now());
+        }
+        function storageKey() {
+            localStorage.setItem("edit_email", Date.now());
+        }
+    </script>
+    <script>
+        $(document).ready(function () {
+            var r = $('#error-rule').val();
+            var ti = $('#error-title').val();
+            var te = $('#error-template').val();
+            if (ti.length > 0 && te.length > 0) {
+                $("#error-duplicate").removeClass("hidden");
+            }
+            else if (ti.length > 0) {
+                $("#error-duplicate-title").removeClass("hidden");
+            }
+            else if (te.length > 0) {
+                $("#error-duplicate-template").removeClass("hidden");
+            }
+            if (te.length > 0) {
+                $("#template").val(te);
+            }
+        });
+    </script>
+}
+
+

@@ -1,0 +1,353 @@
+﻿@model HaloCareCore.Models.EnquiryFull
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "EnquiryFullView";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<comment>
+    <!--
+            19 February 2019 -- HCare-648 (Enquiry View - Closing an enquiry)
+            Comment field => Removed Required attribute from Model.EnquiryComments
+            Comment field => Added default message to view as per request using JQuery script at the bottom of this view.
+
+            13 May 2019 -- HCare-735(Closing an enquiry - owner name changes)
+            I have corrected the issue regarding the updating of the initial "Created by" field and will only create a new entry stamped with the new user.
+
+            13 May 2019 -- HCare-736(Assignments ~ Postpone Effective date not being updated)
+            I have corrected the postponed date which will populate in the second line of the effective date column on the Enquiry full view. The Enquiries table will keep the initial effective date as well as the
+            first line in the Enquiry Full view screen.
+
+        -->
+</comment>
+
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .field-validation-error:before {
+        font-family: FontAwesome;
+        content: "\f06a\00a0";
+        animation: pulse 2s ease infinite;
+    }
+</style>
+
+<!--pageHeader-->
+<nav id="global-nav" class="nav">
+    <div class="pull-left title">
+        <h1 class="site-title_patientProfile">
+            <span><i class="fas fa-question-circle"></i></span>&emsp; Enquiries
+        </h1>
+    </div>
+    <div class="pull-right title">
+        <h1 class="site-title_userID pull-right">
+            <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+        </h1>
+        <h1 class="site-title_userID pull-right">
+            @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+            {
+                <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+            }
+        </h1>
+        <h1 class="site-waffleIcon pull-right">
+            <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+        </h1>
+    </div>
+</nav>
+
+<div class="dashboardContainer zero-padding">
+    <div class="patientDashboard_View">
+        <!--breadCrumbs-->
+        <ul class="breadcrumbs_patientDashboard">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+            <li><a class="go_back">Overview</a></li>
+            <li><a href="#">Detail</a></li>
+        </ul>
+        <!--Left navSlider -->
+        @Html.Partial("_navSlider_blank", new { })
+        <!--navCollection-->
+        <div class="navCollection_patientDashboard">
+            @Html.Partial("_navCollection")
+        </div>
+        <!--profileInformation-->
+        <div class="profileBar">
+            @Html.Action("_profileBar_edit", "Member", new { DependentID = Model.DependantID, pro = Context.Request.Query["pro"] })
+        </div>
+    </div>
+
+    <div class="profilebar-spacer-assignment"></div>
+
+    <div class="patientDashboard_container">
+        <h4 class="summaryHeading">Enquiry full view</h4>
+        <hr class="patientProfile_Ruler" />
+
+        <table class="table administration_Table">
+            <tr>
+                @if (Model.enquiryList.Count > 0)
+                {
+                    <th>
+                        @Html.DisplayNameFor(model => model.enquiryList[0].effectiveDate)
+                    </th>
+
+                    <th>
+                        @Html.DisplayNameFor(model => model.enquiryList[0].enquiryRefNumber)
+                    </th>
+
+                    <th>
+                        @Html.DisplayNameFor(model => model.enquiryList[0].TextInformation)
+                    </th>
+
+                    <th>
+                        @Html.DisplayNameFor(model => model.enquiryList[0].enquiryBy)
+                    </th>
+
+                    <th>
+                        @Html.DisplayNameFor(model => model.enquiryList[0].enquiryTypeName)
+                    </th>
+
+                    <th>
+                        @Html.DisplayNameFor(model => model.enquiryList[0].createdBy)
+                    </th>
+
+                    <th>
+                        @Html.DisplayNameFor(model => model.enquiryList[0].owner)
+                    </th>
+
+                    <th>
+                        @Html.DisplayNameFor(model => model.enquiryList[0].status)
+                    </th>
+                }
+            </tr>
+
+            @if (Model.enquiryList.Count == 0)
+            {
+                <tr><td colspan="10" style="text-align: center!important; color: rgba(128, 128, 128, 0.50)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="color: rgba(128, 128, 128, 0.50)"></i></span> no records found</td></tr>
+            }
+            else
+            {
+                foreach (var item in Model.enquiryList)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.effectiveDate)
+                        </td>
+
+                        <td>
+                            @Html.DisplayFor(modelItem => item.enquiryRefNumber)
+                        </td>
+
+                        <td>
+                            @Html.DisplayFor(modelItem => item.TextInformation)
+                        </td>
+
+                        <td>
+                            @Html.DisplayFor(modelItem => item.enquiryBy)
+                        </td>
+
+                        <td>
+                            @Html.DisplayFor(modelItem => item.enquiryTypeName)
+                        </td>
+
+                        <td>
+                            @Html.DisplayFor(modelItem => item.createdBy)
+                        </td>
+
+                        <td>
+                            @Html.DisplayFor(modelItem => item.owner)
+                        </td>
+
+                        <td>
+                            @Html.DisplayFor(modelItem => item.status)
+                        </td>
+                    </tr>
+                }
+            }
+
+        </table>
+
+        <div style="margin: auto">
+            @if (Model.enquiryList.Count > 0)
+            {
+                using (Html.BeginForm())
+                {
+                    if (Model.enquiryList[0].status.ToUpper() != "CLOSED")
+                    {
+                        @Html.HiddenFor(model => model.enquiryComment.queryId)
+                        @Html.HiddenFor(model => model.DependantID)
+                        @Html.Hidden("pro", Context.Request.Query["pro"])
+                        @*<div class="text-danger">@Html.ValidationSummary()</div>*@
+
+
+                        <div class="editForm" style="margin-bottom: 1%">
+
+                            <div style="margin-left: 35%; font-size: 18px; margin-bottom: 0%; color: #003366">
+                                <b>@Html.DisplayNameFor(model => model.enquiryList[0].owner)</b>
+                            </div>
+                            <div style="margin-left: 0%">
+                                @Html.DropDownList("owner", null, "**Select**", htmlAttributes: new { @class = "datafield-enquiryClose", @required = "required" })
+                                @Html.ValidationMessage("owner", "", new { @class = "text-danger", @style = "font-size: 110%;margin-left: 35%" })
+                            </div>
+
+                            <div style="margin-left: 35%; font-size: 18px; margin-bottom: 0%; color: #003366">
+                                <b>@Html.DisplayNameFor(model => model.enquiryComment.comment)</b>
+                            </div>
+                            <div style="color: #003366; margin-left: 0%">
+                                @Html.TextAreaFor(model => model.enquiryComment.comment, new { htmlAttributes = new { @class = "" } })<br />
+                            </div>
+                            <br />
+                            <div class="form-group">
+                                <div style="margin-left: 35%">
+                                    @Html.LabelFor(model => model.enquiryComment.effectiveDate, htmlAttributes: new { @class = "control-label" })
+                                </div>
+                                <div style="margin-left: 0%">
+                                    @Html.EditorFor(model => model.enquiryComment.effectiveDate, new { htmlAttributes = new { @class = "datafield-enquiryClose", @id = "autoEffectiveDate" } })
+                                    @Html.ValidationMessageFor(model => model.enquiryComment.effectiveDate, "", new { @class = "text-danger" })
+                                </div>
+
+                            </div>
+                            <!---->
+                            <!---->
+
+
+                        </div>
+
+                        <br />
+                        <br />
+
+                        <div class="form-group" style="text-align: center!important">
+                            <input type="Submit" value="PostPone" name="submitButton" class="btn enquiryPostpone-button" />
+                            <input type="submit" value="Close" name="submitButton" class="btn enquiryClose-button" style="margin-left: 0%!important" />
+                        </div>
+                        <div class="form-group" style="text-align: center!important">
+                            <input type="Submit" value="Back" class="btn buttonRound_formBack go_back" style="width: 8%!important" />
+                        </div>
+                    }
+                    if (Model.enquiryList[0].status.ToUpper() == "CLOSED")
+                    {
+                        <div class="form-group" style="text-align: center!important">
+                            <input type="Submit" value="Back" class="btn buttonRound_formBack go_back" style="width: 8%!important" />
+                        </div>
+                    }
+                }
+            }
+        </div>
+
+    </div>
+
+</div>
+
+
+
+
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script src="~/bundles/jqueryval"></script>
+
+<!-- Search -->
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <script>
+        var $rows = $('#table tr');
+        $('#search').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $rows.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+
+        /*tableSorting*/
+        function sortTable(n) {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("table");
+            switching = true;
+            dir = "asc";
+
+            while (switching) {
+                switching = false;
+                rows = table.getElementsByTagName("TR");
+
+                for (i = 1; i < (rows.length - 1); i++) {
+
+                    shouldSwitch = false;
+
+                    x = rows[i].getElementsByTagName("TD")[n];
+                    y = rows[i + 1].getElementsByTagName("TD")[n];
+
+                    if (dir == "asc") {
+                        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                            //if so, mark as a switch and break the loop:
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (dir == "desc") {
+                        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                            //if so, mark as a switch and break the loop:
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+                if (shouldSwitch) {
+                    /*If a switch has been marked, make the switch
+                    and mark that a switch has been done:*/
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                    //Each time a switch is done, increase this count by 1:
+                    switchcount++;
+                } else {
+                    /*If no switching has been done AND the direction is "asc",
+                    set the direction to "desc" and run the while loop again.*/
+                    if (switchcount == 0 && dir == "asc") {
+                        dir = "desc";
+                        switching = true;
+                    }
+                }
+            }
+        }
+
+
+        //AutoDate_EffectiveDate
+        $(document).ready(function () {
+            var date = new Date();
+
+            var day = date.getDate();
+            var month = date.getMonth() + 1;
+            var year = date.getFullYear();
+
+            if (month < 10) month = "0" + month;
+            if (day < 10) day = "0" + day;
+
+            var today = year + "-" + month + "-" + day;
+            $("#autoEffectiveDate").attr("value", today);
+        });
+
+    </script>
+
+    <script>
+
+        $(function () {
+            //var username = @HttpContextAccessor.HttpContext.Session.GetString("fullName").ToString();
+
+            $('[name=owner] option').filter(function () {
+                return ($(this).text() == '@HttpContextAccessor.HttpContext.Session.GetString("fullName").ToString()' );
+            }).prop('selected', true);
+        })
+
+    </script>
+
+    <script type="text/javascript">
+        $(function () {
+            $("#enquiryComment_comment").html("Questionnaire completed / Follow up necessary");
+        });
+    </script>
+
+
+
+}
+

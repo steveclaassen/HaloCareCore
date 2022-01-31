@@ -1,0 +1,583 @@
+﻿@model HaloCareCore.Models.ViewModels.PathologySearchVM
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Pathology";
+    Layout = "~/Views/Shared/_layout-view-patient.cshtml";
+}
+
+<comment>
+    <!--
+        30 June 2020 -- HCare-974 (Pathology history display)
+        •	Created a new search filter for the Dependant’s pathology which can be accessed by clicking the Search button in the patient clinical / pathology tab
+        •	I needed to create a new query which includes the Dependant ID in order to only pull the dependant’s pathology – Member Repository - GetSortedPathologySearchResults()
+        •	The new query also assists with creating a new list for the pathology results which sorts the chosen results based on the effective date which is listed to the left in the view.
+        •	Due to the dynamic pathology field requirement, I needed to create a new pathology/clinical rules check which highlights the value based on the rules broken – this I used jQuery and reference it in the Script file under pathology-clinical-rules.js
+        •	Amended the Excel to also pull the data as per the onscreen view – i.e. with the Pathology date sorted requirement - ExportPathologyResultsToExcel()
+    -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .contactIcon:hover {
+        line-height: 1.4;
+    }
+
+    .detail-information:hover {
+        background-color: rgba(255, 255, 255, 0.87);
+        z-index: 1000
+    }
+
+    .textbox-control-date {
+        display: block !important;
+        max-width: 600px !important;
+        width: 450px;
+        max-height: 100px;
+        height: 30px;
+        margin-left: 10px;
+        ;
+        padding: 6px 6px;
+        line-height: 1.428571429;
+        color: #003366;
+        border-radius: 0px !important;
+        border: none !important;
+        border-bottom: 1px solid #e8e6e6 !important;
+        background-color: transparent !important;
+        -webkit-box-shadow: none !important;
+        box-shadow: none !important;
+    }
+
+    .tooltip-inner {
+        width: 120px;
+        background: rgba(0,0,0,0.80);
+        color: #fff;
+        font-size: 10px;
+        font-weight: 100;
+        text-align: center;
+        border-radius: 6px;
+        padding: 5px 0;
+        z-index: 0;
+        -webkit-transition: opacity 0.5s;
+        transition: opacity 1.2s;
+    }
+
+    .tooltip-arrow {
+        border-bottom-color: rgba(0,0,0,0.80) !important;
+    }
+
+    .field-validation-error:before {
+        font-family: FontAwesome;
+        content: "\f06a\00a0";
+        animation: pulse 2s ease infinite;
+    }
+
+    .max {
+        color: #b30000 !important;
+        font-weight: bold !important;
+    }
+
+    .min {
+        color: #e60000 !important;
+        font-weight: bold !important;
+    }
+</style>
+
+<!------------------------------------------------------------------------------------ jQ-dateSort  ----------------------------------------------------------------------------------->
+<javascript>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="https://www.jqueryscript.net/demo/jQuery-Plugin-For-Sortable-Bootstrap-Tables-Bootstrap-Sortable/Scripts/bootstrap-sortable.js"></script>
+    <script src="js/jquery.tablesorter.min.js"></script>
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/js/standalone/selectize.js"></script>
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.default.css">
+
+    <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet" />
+
+</javascript>
+
+<!----------------------------------------------------------------------------- html-top-navigation-panel  ---------------------------------------------------------------------------->
+<nav id="global-nav" class="nav" style="z-index: 10000">
+    <div class="pull-left title">
+        <h1 class="site-title_patientProfile">
+            <span><img src="~/Content/Images/memberProfile/topBar Icons/bloods.png" style="width: 2.8%" /></span>&emsp; Pathology
+        </h1>
+    </div>
+    <div class="pull-right title">
+        <h1 class="site-title_userID pull-right">
+            <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+        </h1>
+        <h1 class="site-title_userID pull-right">
+            @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+            {
+                <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+            }
+        </h1>
+        <h1 class="site-waffleIcon pull-right">
+            <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+        </h1>
+    </div>
+</nav>
+
+<!-------------------------------------------------------------------------------------- html-body ------------------------------------------------------------------------------------>
+<div class="dashboardContainer zero-padding">
+
+    <div class="patientDashboard_View">
+        <!-- breadcrumbs -->
+        <ul class="breadcrumbs_patientDashboard">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+            <li><a href="@Url.Action("patientClinical", "Member", new {DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })">Patient</a></li>
+            <li><a href="#">@ViewBag.Title</a></li>
+        </ul>
+        <!-- navigation-collection -->
+        <div class="navCollection_patientDashboard">
+            @Html.Partial("_navCollection")
+        </div>
+        <!-- left-navigation-panel -->
+        @Html.Partial("_navSlider", new { DependentID = Context.Request.Query["DependentID"] })
+        <!--profile-information-->
+        <div class="profileBar">
+            @Html.Action("_profileBar_edit", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })
+        </div>
+    </div>
+
+    <div class="profilebar-spacer"></div>
+
+    <div class="patientDashboard_container">
+        <!---------------------------------------------------------------------------- filter ---------------------------------------------------------------------------->
+        @*<span class="pull-right icon-info" type="button" title="clinical-rules" href="#clinicalRuleModal" data-toggle="modal"><span class="fas fa-info-circle"></span></span>*@
+        @*<span class="pull-right icon-info" type="button" title="filter" onclick="SearchFilter()"><span class="fas fa-filter"></span></span>*@
+        <div id="filter" class="collapse in">
+            <h4 class="table-heading">
+                Pathology search &nbsp;
+                @if (Model.PathologySearchResults.Count > 0)
+                {
+                    <span class="filter-icon" type="button" title="filter" onclick="SearchFilter()"><span class="fas fa-filter"></span></span>
+                }
+            </h4>
+            <hr class="fancyruler">
+            @using (Html.BeginForm("Pathology_Search_Dependant", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] }, FormMethod.Post, new { id = "formFilter" }))
+            {
+                @Html.AntiForgeryToken()
+                <div class="form-horizontal form-layout">
+                    <br />
+                    <div class="form-group">
+                        <div class="col-md-12">
+                            <div class="col-md-4 new-form-control">
+                                @Html.Label(null,"Pathology field:", htmlAttributes: new { @class = "new-form-control" })
+                            </div>
+                            <div class="col-md-8">
+                                @Html.DropDownListFor(m => m.SelectedPathologyFields, new SelectList(Model.PathologyFieldsList, "DisplayName", "DisplayName"), "Select")
+                                @Html.ValidationMessageFor(model => model.SelectedPathologyFields, "", new { @class = "text-danger", @style = "font-size: 75%;margin-left: 2%" })
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-12">
+                            <div class="col-md-4 new-form-control">
+                                @Html.Label(null,"From date:", htmlAttributes: new { @class = "new-form-control" })
+                            </div>
+                            <div class="col-md-8">
+                                <input class="text-box single-line input-validation-error textbox-control-date" data-val="true" data-val-date="The field must be a date." id="FromDate" name="FromDate" type="date" min="@DateTime.Now.ToString("1900-01-01")" max="@DateTime.Now.ToString("yyyy-MM-dd")" aria-required="true" aria-describedby="DOB-error" aria-invalid="true">
+                                @Html.ValidationMessage("FromDate", "", new { @class = "text-danger", @style = "font-size: 98%; margin-left: 1.5%" })
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-12">
+                            <div class="col-md-4 new-form-control">
+                                @Html.Label(null,"To date:", htmlAttributes: new { @class = "new-form-control" })
+                            </div>
+                            <div class="col-md-8">
+                                <input class="text-box single-line input-validation-error textbox-control-date" data-val="true" data-val-date="The field must be a date." id="ToDate" name="ToDate" type="date" min="" max="@DateTime.Now.ToString("yyyy-MM-dd")" aria-required="true" aria-describedby="DOB-error" aria-invalid="true">
+                                @Html.ValidationMessage("ToDate", "", new { @class = "text-danger", @style = "font-size: 98%; margin-left: 1.5%" })
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <br />
+                <div class="form-group">
+                    <div class="actionButton" style="text-align: center">
+                        <input id="submit" type="submit" value="Search" class="btn submit-button-pathology" onclick="FCheck();" /><br />
+                        <input type="text" value="Reset filter" class="reset-button-pathology" onclick="Reset();" />
+                    </div>
+                </div>
+                <br />
+            }
+        </div>
+
+        <!----------------------------------------------------------------------------- table ----------------------------------------------------------------------------->
+        @if (ViewBag.displayFields == null)
+        { }
+        else if (Model.PathologySearchResults.Count > 0)
+        {
+            <br />
+            <div class="col-md-12 row">
+                <div class="col-md-6">
+                    <div class="page-heading">Pathology results &nbsp;<span class="filter-icon" type="button" title="filter" onclick="SearchFilter()"><span class="fas fa-filter"></span></span></div>
+                </div>
+                <!--------------------------------------------------------------------------- jq-search -------------------------------------------------------------------------->
+                <div class="col-md-6 row">
+                    <div class="col-md-6">
+                        <!-------------------------------------------------------------------------- excel export -------------------------------------------------------------------------->
+                        @using (Html.BeginForm("ExportPathologyResultsToExcel", "Member", FormMethod.Post))
+                        {
+                            @Html.HiddenFor(Model => Model.SelectedPathologyFields)
+                            <input type="text" name="pathologyfields" id="pathologyfields" value="@TempData["pathologyfields"].ToString()" hidden />
+                            <input type="text" name="fromdate" id="fromdate" value="@TempData["fromdate"].ToString()" hidden />
+                            <input type="text" name="todate" id="todate" value="@TempData["todate"].ToString()" hidden />
+                            <input type="text" name="dependantid" id="dependantid" value="@TempData["dependantid"].ToString()" hidden />
+
+                            <div class="form-group">
+                                <input class="export-excel-icon" type="image" src="~/Content/Images/_2020/icons/microsoft-excel.png" title="export to excel" alt="Submit">
+                            </div>
+                        }
+                    </div>
+                    <div class="col-md-6">
+                        <div class="input-wrapper-new-search">
+                            <input type="text" class="form-control-new-search" id="pTable" onkeyup="myFunction()" placeholder="Search..." />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br />
+            <table class="table pathology-search-table sortable" id="pathology_results">
+                <thead>
+                    <tr>
+                        <th>@Html.DisplayNameFor(Model => Model.PathologySearchResult.InitialDate) <i class="fa fa-fw fa-sort"></i></th>
+                        @foreach (var item in Model.SelectedPathologyFields)
+                        {
+                            <th style="width: 15%" data-defaultsort="disabled">@Html.DisplayFor(modelItem => item)</th>
+                        }
+                    </tr>
+                </thead>
+                @foreach (var item in Model.PathologySearchResults)
+                {
+                    <tbody id="pathology-filter" class="tooltip-div">
+                        <tr>
+                            <td>@Html.DisplayFor(modelItem => item.InitialDate)</td>
+                            @foreach (var field in Model.SelectedPathologyFields)
+                            {
+                                if ((item.GetType().GetProperty(field.Replace(" ", "")).GetValue(item)) != null)
+                                {
+                                    <td>
+                                        @(item.GetType().GetProperty(field.Replace(" ", "")).GetValue(item))
+                                    </td>
+                                }
+                                else
+                                {
+                                    <td></td>
+                                }
+                            }
+                        </tr>
+                    </tbody>
+                }
+            </table>
+        }
+        <div class="form-group">
+            <div class="fixed-btn">
+                <input type="text" value="Back" class="btn bck-button-pathology go_back" onclick="backKey()" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<!---------------------------------------------------------------------------------- clinical-rules-modal ---------------------------------------------------------------------------------->
+<div class="modal fade" id="clinicalRuleModal" role="dialog" aria-labelledby="clinicalRuleModal" aria-hidden="true">
+    <div class="modal-content-assignment">
+        <div class="modal-dialog-assignment">
+            <div class="modal-header-assignment">
+                <div class="col-md-4"><h5 class="modal-title" id="modal-email"><img src="~/Content/Images/_2020/icons/create-new-assignment.png" class="logo-modal" /></h5></div>
+                <div class="col-md-4 div-center"><p class="div-header">Clinical rules table</p></div>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body" style="margin-left: 0px; margin-top: 10px;">
+                <div class="form-horizontal">
+                    <table class="table patient-clinical-table" id="clinical_rules" style="margin-bottom: 1.5%!important">
+                        <thead>
+                            <tr>
+                                <th style="width: 33%">
+                                    @Html.DisplayName("Pathology field")
+                                </th>
+                                <th style="width: 33%; text-align: center!important">
+                                    @Html.DisplayName("Greater")
+                                </th>
+                                <th style="width: 33%; text-align: center!important">
+                                    @Html.DisplayName("Less")
+                                </th>
+                            </tr>
+                        </thead>
+                        @foreach (var item in Model.ClinicalRules)
+                        {
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        @Html.DisplayFor(model => item.pathologyField)
+                                    </td>
+                                    <td class="greater">
+                                        @Html.DisplayFor(model => item.greater)
+                                    </td>
+                                    <td class="less">
+                                        @Html.DisplayFor(model => item.less)
+                                    </td>
+                                </tr>
+                            </tbody>
+                        }
+                    </table>
+
+                </div>
+            </div>
+            <div class="modal-footer-assignment">
+                <input id="cancel-assignment" type="button" value="Cancel" class="btn modal-button" style="width: 15%" data-dismiss="modal" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="js/jquery.tablesorter.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+
+@if (ViewBag.Message != null)
+{
+    <script type="text/javascript">
+
+    window.onload = function () {
+        toastr.options.positionClass = 'toast-bottom-right';
+        toastr.options.timeOut = 5000;
+
+        toastr.info("@ViewBag.Message");
+    }
+    </script>
+}
+
+
+
+@section Scripts {
+    <script src="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/js/standalone/selectize.js"></script>
+    <!-- selectize dropdown menus -->
+    <script>
+        var $select = $("#SelectedPathologyFields").selectize({
+            persist: true,
+            preload: true,
+            maxItems: 5,
+            delimiter: ',',
+            valueField: 'id',
+            labelField: 'name',
+            searchField: ['name'],
+            //create: true,
+            hideSelected: true,
+            plugins: ['remove_button'],
+            render: {
+                option: function (item, escape) {
+                    return '<span class="name">' + escape(item.name) + '</span>';
+                }
+            }
+        });
+
+        var selectizeControl = $select[0].selectize
+
+        //$('#submit').mouseover(function () {
+        //    if ($('#SelectedPathologyFields').val() == '') {
+        //        alert('Input can not be left blank');
+        //    }
+        //});
+
+
+        $('#formFilter').submit(function () {
+            if ($('#SelectedPathologyFields').val() == '') {
+                alert('Pathology field is required');
+                return false;
+            }
+        });
+
+    </script>
+    <!-- filter reset -->
+    <script>
+        function Reset() {
+            $("#SelectedPathologyFields")[0].selectize.clear();
+            $("#FromDate").val("");
+            $("#ToDate").val("");
+        }
+    </script>
+    <!-- return of selected fields into dropdown after post -->
+    <script>
+        $("#SelectedPathologyFields")[0].selectize.clear();
+        var pf_array = $('#pathologyfields').val().split(",");
+        for (var i = 0; i < pf_array.length; i++) {
+            $("#SelectedPathologyFields")[0].selectize.addItem(pf_array[i]);
+        }
+
+        var fromDate = new Date($('#fromdate').val());
+        fromDate.setDate(fromDate.getDate() + 1);
+        document.querySelector("#FromDate").valueAsDate = fromDate;
+
+        var toDate = new Date($('#todate').val());
+        toDate.setDate(toDate.getDate() + 1);
+        document.querySelector("#ToDate").valueAsDate = toDate;
+    </script>
+    <!-- date-validation -->
+    <script type="text/javascript" language="javascript">
+        function CompareDate() {
+            var today = new Date();
+            day = today.getDate();
+            month = today.getMonth() + 1;
+            year = today.getFullYear();
+            //alert([day, month, year].join('-'));
+            var todate = new Date($('#ToDate').val());
+            day = todate.getDate();
+            month = todate.getMonth() + 1;
+            year = todate.getFullYear();
+            //alert([day, month, year].join('-'));
+            if (todate > today) {
+                var toDate = new Date($('#todate').val());
+                toDate.setDate(toDate.getDate());
+                document.querySelector("#ToDate").valueAsDate = toDate;
+            }
+
+        }
+        CompareDate();
+    </script>
+    <!-- date-validation -->
+    <script>
+        document.getElementById("FromDate").onchange = function () {
+            var input = document.getElementById("ToDate");
+            input.setAttribute("min", this.value);
+        }
+    </script>
+    <!-- page-redirect -->
+    <script>
+        function backKey() {
+            localStorage.setItem("back_general", Date.now());
+        }
+    </script>
+    <!-- general -->
+    <script>
+        //left-navigation-slider
+        $("#menu-toggle").click(function (e) {
+            e.preventDefault();
+            $("#wrapper").toggleClass("active");
+        });
+        //waffle-navigation-script-open
+        $("#patientMenu-toggle").click(function (e) {
+            e.preventDefault();
+            $("#patientWrapper").toggleClass("active");
+        });
+        //waffle-navigation-script-close
+        $("#exit-toggle").click(function (e) {
+            e.preventDefault();
+            $("#patientWrapper").toggleClass("active");
+        });
+        //special-note
+        $("#alert-toggle").click(function (e) {
+            e.preventDefault();
+            $("#alertWrapper").toggleClass("active");
+        });
+        //program-popup
+        $("#program-toggle").click(function (e) {
+            e.preventDefault();
+            $("#programWrapper").toggleClass("active");
+        });
+        //go-back
+        $(function () {
+            $('.go_back').click(function (e) {
+                e.preventDefault();
+                history.go(-1);
+            });
+        });
+    </script>
+    <!-- jquery-table-search -->
+    <script>
+        $(document).ready(function () {
+            $("#pTable").on("keyup", function () {
+                var value = $(this).val().toLowerCase();
+                $("#pathology-filter tr").filter(function () {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+            });
+        });
+    </script>
+    <!-- jquery-table-search -->
+    <script>
+        function pTable(n) {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("pathology_results");
+            switching = true;
+            dir = "asc";
+
+            while (switching) {
+                switching = false;
+                rows = table.getElementsByTagName("TR");
+
+                for (i = 1; i < (rows.length - 1); i++) {
+
+                    shouldSwitch = false;
+
+                    x = rows[i].getElementsByTagName("TD")[n];
+                    y = rows[i + 1].getElementsByTagName("TD")[n];
+
+                    if (dir == "asc") {
+                        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                            //if so, mark as a switch and break the loop:
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (dir == "desc") {
+                        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                            //if so, mark as a switch and break the loop:
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+                if (shouldSwitch) {
+                    /*If a switch has been marked, make the switch
+                    and mark that a switch has been done:*/
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                    //Each time a switch is done, increase this count by 1:
+                    switchcount++;
+                } else {
+                    /*If no switching has been done AND the direction is "asc",
+                    set the direction to "desc" and run the while loop again.*/
+                    if (switchcount == 0 && dir == "asc") {
+                        dir = "desc";
+                        switching = true;
+                    }
+                }
+            }
+        }
+    </script>
+
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+    <!-- tooltip -->
+    <script>
+        $('.tooltip-div').tooltip({
+            selector: "[data-toggle=tooltip]",
+            container: "body"
+        });
+    </script>
+    <!-- collapse -->
+    <script>
+        var len = @Model.PathologySearchResults.Count;
+        if (len > 0) {
+            $('#filter').removeClass("in")
+        }
+        function SearchFilter() {
+            $('#filter').toggleClass("in")
+        }
+    </script>
+    <!-- clinical rules - HCare-974 -->
+    <script src="~/Scripts/pathology-clinical-rules.js"></script>
+
+}
+
+

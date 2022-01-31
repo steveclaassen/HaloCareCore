@@ -1,0 +1,1168 @@
+﻿@model HaloCareCore.Models.pathologyAttachment
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "CreatePathology";
+    Layout = "~/Views/Shared/_LayoutMember.cshtml";
+}
+
+<comment>
+    <!--
+        02 April 2019 -- HCare-674 (Pathology effective dates addition (Related to HCare-603))
+        Effective dates have been added to pathology fields for reporting purposes as per a request from Madelein. I have added the effective dates for each pathology category and updated the frontend view for the
+        CreatePathology.cshtml, PathologyDetails.cshtml and EditPathology.cshtml views. I have also set the new fields to allow the "Main" effective date to set all the fields to the same date but a user is able to individually
+        update the dates for each effective date in the view as well.
+        Back end code for Create Pathology and Edit Pathology has been adjusted to also ignore the effective date field should the primary field not have a value. ie. If the CD4 Count is blank, when a user submits the form,
+        the CD4CountEffectiveDate will be set to NULL as there is no value in the primary field.
+        Additionally, the above has been added to the Capture Pathology Task as well
+
+        17 April 2019 -- HCare-708 (Submit button - duplicate post entries)
+        Duplicate entries do get entered if you click too quickly on the submit button. I have added JS to disable the submit button after the first click.
+
+        18 April 2019 -- HCare-707 (Capturing pathology - change process)
+        Addition of the No Attachment check box which overrides the attachment requirement has been added. Further to this, we have moved the entire add attachment/No attachment to the top of the page for the user to view easier.
+
+        06 May 2019 -- HCare-728 (Questionnaire - Submit button freeze -- Related to HCare-708)
+        A secondary affect of the duplicate click check for HCare-708 resulted in the Submit button for the Questionnaire to freeze should a user neglect to complete a required field. This would push the user back to the section that has not been answered but freeze the button in the process.
+        I have relooked at the code linked to HCare-708 as well as the submit button in the questionnaire which has resolved the issue.
+
+        14 May 2019 -- HCare-705 (Patient Clinical (Pathology create - Create a default list of Labs)
+        Created dropdown datalist for labs in the Create pathology view. You can select from the list of labs or Type in a lab name that does not reflect in the list. This was added to the member create, edit and the task.
+
+        06 June 2019 -- HCare-741 (Advance search - pathology readings)
+        As part of the Advanced Search for pathology readings(hbA1C & Viral load with effective dates), I've added the time to the effective dates so that we can pull the latest Pathology entry in the advanced search.
+        All effective dates in the pathology table now have a date and time in stamp in the database.
+
+        03 June 2019 -- HCare-742 (Pathology dates - limitations to be added)
+        Added a limitation on the datepicker as well as a validation message showing that the user should not use future dated effective dates. This has been set to all the date fields in the views
+
+        17 July 2019 -- HCare-747 (Laboratory Table - Master)
+        The laboratory table in the database is linked to the pathology laboratory dropdown list and will allow you to type free text as well when creating pathology entries for the lab.
+        Also needed to reconfigure the alerts due to the new dropdown. I have set up the table that you can create and edit the labs and this will allow users to view, create and edit in the pathology section as well
+
+        28 August 2019 -- HCare-772 (Pathology data - Mandatory dates)
+        If the pathology field is populated with a value, the date field associated with that field is changed to required. If for example the Haemoglobin field is populated with a value and the Effective date underneath it is removed by the user. The form will NOT submit and show the user
+        the required fields. This has been applied to the Create Pathology view when adding pathology from profile as well as in the InsertPathology Task
+
+        21 January 2020 -- HCare-927 (Loader (when waiting) changes in system)
+        Updated loader which has been set to the views as per the Service Request. Users to advise should the need this added to a view.
+
+        02 July 2020 -- HCare-1079(Pathology name changes)
+        Updated the headings to read from the pathology model
+
+        01 September 2020 -- HCare-1159(Urgent - Pathology capturing - dates)
+    -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .input-group-addon {
+        visibility: hidden;
+    }
+
+    .text-divider {
+        margin: 1em 0;
+        line-height: 0;
+        text-align: center;
+    }
+
+        .text-divider span {
+            background-color: rgba(254, 254, 254, 1);
+            padding: 1em;
+        }
+
+        .text-divider:before {
+            content: " ";
+            display: block;
+            border-top: 1px solid rgba(204, 204, 204, 0.50);
+            border-bottom: 1px solid transparent;
+            width: 96%;
+            margin-left: 0%;
+        }
+
+    .field-validation-error:before {
+        font-family: FontAwesome;
+        content: "\f06a\00a0";
+        animation: pulse 2s ease infinite;
+    }
+
+    .select2-container--default .select2-selection--single {
+        width: 190px !important;
+        height: 34px !important;
+        border: 1px solid transparent !important;
+    }
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            margin-top: 0px !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow b {
+            margin-top: -3px !important;
+            margin-left: 0px !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__placeholder {
+            color: white !important;
+        }
+
+    .margin-bottom-x {
+        margin-bottom: 15px;
+    }
+</style>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet" />
+
+<!--pageHeader-->
+<nav id="global-nav" class="nav">
+    <div class="pull-left title">
+        <h1 class="site-title_patientProfile">
+            <span><img src="~/Content/Images/memberProfile/topBar Icons/bloods.png" style="width: 2.8%" /></span>&emsp; Pathology
+        </h1>
+    </div>
+    <div class="pull-right title">
+        <h1 class="site-title_userID pull-right">
+            <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+        </h1>
+        <h1 class="site-title_userID pull-right">
+            @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+            {
+                <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+            }
+        </h1>
+        <h1 class="site-waffleIcon pull-right">
+            <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+        </h1>
+    </div>
+</nav>
+
+<div class="dashboardContainer zero-padding">
+    <div class="patientDashboard_View">
+        <!--breadCrumbs-->
+        <ul class="breadcrumbs_patientDashboard">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+            <li><a href="@Url.Action("patientClinical", "Member", new {DependentID = Context.Request.Query["DependentID"] })">Patient</a></li>
+            <li><a href="#">Pathology</a></li>
+        </ul>
+        <!--Left navSlider -->
+        @Html.Partial("_navSlider", new { DependentID = Context.Request.Query["DependentID"] })
+        <!--navCollection-->
+        <div class="navCollection_patientDashboard">
+            @Html.Partial("_navCollection")
+        </div>
+        <!--profileInformation-->
+        <div class="profileBar">
+            @Html.Action("_profileBar_edit", "Member", new { DependentID = Model.pathology.dependentID, pro = Context.Request.Query["pro"] })
+        </div>
+    </div>
+
+    <div class="profilebar-spacer"></div>
+
+    <div class="patientDashboard_container">
+
+        <h4 class="tableHeading">Add pathology</h4>
+        <hr class="fancyruler">
+
+        @using (Html.BeginForm("CreatePathology", "Clinical", FormMethod.Post, new { enctype = "multipart/form-data", id = "pathologyCreate" }))
+        {
+            @Html.AntiForgeryToken()
+
+            <div class="form-group">
+                <div class="col-md-10">
+                    @Html.HiddenFor(model => model.pathology.dependentID)
+                    @Html.HiddenFor(model => model.attachment.dependentID)
+                    @Html.Hidden("pro", Context.Request.Query["pro"])
+                </div>
+            </div>
+
+            <div class="form-horizontal editForm">
+                <div class="row">
+                    <div class="form-horizontal">
+                        <br />
+                        <h4 class="tableDivider-heading text-divider"><span>administration</span></h4>
+                        <br />
+                        <div class="form-group" style="margin-left: 3%; width: 90%">
+                            <div class="col-md-12">
+                                <!--effectiveDate-->
+                                <div class="col-md-3 text-right">
+                                    @Html.LabelFor(model => model.pathology.effectiveDate, htmlAttributes: new { @class = "control-label col-md-5" })
+                                    <div class="col-md-6">
+                                        <input class="text-box single-line input-validation-error infoBox_Pathology" data-val="true" data-val-date="The field must be a date." id="effectiveDate" name="effectiveDate" required type="date" aria-required="true" aria-describedby="DOB-error" aria-invalid="true" value="@DateTime.Now.ToString("yyyy-MM-dd")" min="@DateTime.Now.ToString("1900-01-01")" max="@DateTime.Now.ToString("yyyy-MM-dd")" oninvalid="InvalidMsg(this);">
+                                    </div>
+                                    @Html.ValidationMessage("effectiveDate", "", new { @class = "text-danger", @style = "font-size: 80%" })
+                                </div>
+                                <!--labReferenceNo-->
+                                <div class="col-md-3 text-right">
+                                    @Html.LabelFor(model => model.pathology.labReferenceNo, htmlAttributes: new { @class = "control-label col-md-5" })
+                                    <div class="col-md-6">
+                                        @Html.EditorFor(model => model.pathology.labReferenceNo, new { htmlAttributes = new { @class = "infoBox_Pathology", data_val = "true" } })
+                                    </div>
+                                    @Html.ValidationMessageFor(model => model.pathology.labReferenceNo, "", new { @class = "text-danger", @style = "font-size: 80%" })
+                                </div>
+                                <!--labName-->
+                                <div class="col-md-3 text-right">
+                                    @Html.LabelFor(model => model.pathology.labName, htmlAttributes: new { @class = "control-label col-md-5" })
+                                    <div class="col-md-6" style="margin-bottom: 0%!important">
+                                        @Html.DropDownList("laboratories", null, "", new { @class = "infoBox_Pathology", @required = "required", @autocomplete = "off", @id = "laboratories" })
+                                    </div>
+                                    @Html.ValidationMessage("laboratories", "", new { @class = "text-danger", @style = "font-size: 80%" })
+                                </div>
+                                <!--pathologyType-->
+                                <div class="col-md-3 text-right">
+                                    @Html.LabelFor(model => model.pathology.pathologyType, htmlAttributes: new { @class = "control-label col-md-5" })
+                                    <div class="col-md-6">
+                                        @Html.DropDownList("pathologyType", null, "Select", new { @class = "infoBox_Pathology", @required = "required", @id = "pathologyType" })
+                                    </div>
+                                    @Html.ValidationMessage("pathologyType", "", new { @class = "text-danger", @style = "font-size: 80%" })
+                                </div>
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 5%!important"></div>
+                        <div class="col-md-12">
+                            <!--Attachment-->
+                            <div class="col-md-6">
+                                <div style="margin-left: 25%!important">
+                                    <input type="file" name="Pathfile" class="upload" style="z-index: 100!important" />
+                                    @Html.ValidationMessage("Pathfile", "", new { @class = "text-danger", @style = "font-size: 110%;margin-left: 1%" })
+                                </div>
+                            </div>
+                            <!--noAttachment-->
+                            <div class="col-md-6">
+                                <div style="margin-left: 48%; margin-top: -2%">
+                                    <div class="col-md-10">
+                                        @Html.Label(null, "No attachment", htmlAttributes: new { @class = "control-label col-md-6" })
+                                        <div class="col-md-4" style="margin-top: 4.5%; z-index: 50">
+                                            @Html.CheckBox("chkNoAttachment", new { htmlAttributes = new { @class = "infoBox_Pathology" } })
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <br />
+                    <h4 class="tableDivider-heading text-divider"><span>categories</span></h4>
+                    <br />
+                    <br />
+                    <!--Line 1-->
+                    <div class="form-group">
+                        <div class="col-md-12" style="margin-left: 7.5%!important">
+                            <div class="col-md-3">
+                                @Html.LabelFor(model => model.pathology.CD4Count, htmlAttributes: new { @class = "control-label col-md-5 " })
+                                <div class="col-md-6">
+                                    @Html.EditorFor(model => model.pathology.CD4Count, new { htmlAttributes = new { @class = "infoBox_Pathology", placeholder = "0.00" } })
+                                    @Html.ValidationMessageFor(model => model.pathology.CD4Count, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                @Html.LabelFor(model => model.pathology.CD4Percentage, htmlAttributes: new { @class = "control-label col-md-5 " })
+                                <div class="col-md-6">
+                                    @Html.EditorFor(model => model.pathology.CD4Percentage, new { htmlAttributes = new { @class = "infoBox_Pathology", placeholder = "0.00" } })
+                                    @Html.ValidationMessageFor(model => model.pathology.CD4Percentage, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                @Html.LabelFor(model => model.pathology.viralLoad, htmlAttributes: new { @class = "control-label col-md-5 " })
+                                <div class="col-md-6">
+                                    @Html.EditorFor(model => model.pathology.viralLoad, new { htmlAttributes = new { @class = "infoBox_Pathology", placeholder = "0.00" } })
+                                    @Html.ValidationMessageFor(model => model.pathology.viralLoad, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-12" style="margin-left: 7.5%!important;margin-top: -1.5%">
+                            <div class="col-md-3 text-right margin-bottom-x">
+                                @Html.LabelFor(model => model.pathology.CD4CounteffectiveDate, htmlAttributes: new { @class = "control-label col-md-5" })
+                                <div class="col-md-6">
+                                    <input class="text-box single-line input-validation-error infoBox_Pathology" data-val="true" data-val-date="The field must be a date." id="CD4CounteffectiveDate" name="CD4CounteffectiveDate" type="date" aria-required="true" aria-describedby="DOB-error" aria-invalid="true" value="@DateTime.Now.ToString("yyyy-MM-dd")" min="@DateTime.Now.ToString("1900-01-01")" max="@DateTime.Now.ToString("yyyy-MM-dd")" oninvalid="InvalidMsg(this);">
+                                </div>
+                                @Html.ValidationMessage("CD4CounteffectiveDate", "", new { @class = "text-danger", @style = "font-size: 80%" })
+                            </div>
+                            <div class="col-md-3 text-right margin-bottom-x">
+                                @Html.LabelFor(model => model.pathology.CD4PercentageeffectiveDate, htmlAttributes: new { @class = "control-label col-md-5" })
+                                <div class="col-md-6">
+                                    <input class="text-box single-line input-validation-error infoBox_Pathology" data-val="true" data-val-date="The field must be a date." id="CD4PercentageeffectiveDate" name="CD4PercentageeffectiveDate" type="date" aria-required="true" aria-describedby="DOB-error" aria-invalid="true" value="@DateTime.Now.ToString("yyyy-MM-dd")" min="@DateTime.Now.ToString("1900-01-01")" max="@DateTime.Now.ToString("yyyy-MM-dd")" oninvalid="InvalidMsg(this);">
+                                </div>
+                                @Html.ValidationMessage("CD4PercentageeffectiveDate", "", new { @class = "text-danger", @style = "font-size: 80%" })
+                            </div>
+                            <div class="col-md-3 text-right margin-bottom-x">
+                                @Html.LabelFor(model => model.pathology.viralLoadeffectiveDate, htmlAttributes: new { @class = "control-label col-md-5" })
+                                <div class="col-md-6">
+                                    <input class="text-box single-line input-validation-error infoBox_Pathology" data-val="true" data-val-date="The field must be a date." id="viralLoadeffectiveDate" name="viralLoadeffectiveDate" type="date" aria-required="true" aria-describedby="DOB-error" aria-invalid="true" value="@DateTime.Now.ToString("yyyy-MM-dd")" min="@DateTime.Now.ToString("1900-01-01")" max="@DateTime.Now.ToString("yyyy-MM-dd")" oninvalid="InvalidMsg(this);">
+                                </div>
+                                @Html.ValidationMessage("viralLoadeffectiveDate", "", new { @class = "text-danger", @style = "font-size: 80%" })
+                            </div>
+                        </div>
+                    </div>
+                    <!--Line 2-->
+                    <div class="form-group">
+                        <div class="col-md-12" style="margin-left: 7.5%!important">
+                            <div class="col-md-3">
+                                @Html.LabelFor(model => model.pathology.haemoglobin, htmlAttributes: new { @class = "control-label col-md-5 " })
+                                <div class="col-md-6">
+                                    @Html.EditorFor(model => model.pathology.haemoglobin, new { htmlAttributes = new { @class = "infoBox_Pathology", placeholder = "0.00" } })
+                                    @Html.ValidationMessageFor(model => model.pathology.haemoglobin, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                @Html.LabelFor(model => model.pathology.bilirubin, htmlAttributes: new { @class = "control-label col-md-5 " })
+                                <div class="col-md-6">
+                                    @Html.EditorFor(model => model.pathology.bilirubin, new { htmlAttributes = new { @class = "infoBox_Pathology", placeholder = "0.00" } })
+                                    @Html.ValidationMessageFor(model => model.pathology.bilirubin, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                @Html.LabelFor(model => model.pathology.totalCholestrol, htmlAttributes: new { @class = "control-label col-md-5 " })
+                                <div class="col-md-6">
+                                    @Html.EditorFor(model => model.pathology.totalCholestrol, new { htmlAttributes = new { @class = "infoBox_Pathology", placeholder = "0.00" } })
+                                    @Html.ValidationMessageFor(model => model.pathology.totalCholestrol, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-12" style="margin-left: 7.5%!important;margin-top: -1.5%">
+                            <div class="col-md-3 text-right margin-bottom-x">
+                                @Html.LabelFor(model => model.pathology.haemoglobineffectiveDate, htmlAttributes: new { @class = "control-label col-md-5" })
+                                <div class="col-md-6">
+                                    <input class="text-box single-line input-validation-error infoBox_Pathology" data-val="true" data-val-date="The field must be a date." id="haemoglobineffectiveDate" name="haemoglobineffectiveDate" type="date" aria-required="true" aria-describedby="DOB-error" aria-invalid="true" value="@DateTime.Now.ToString("yyyy-MM-dd")" min="@DateTime.Now.ToString("1900-01-01")" max="@DateTime.Now.ToString("yyyy-MM-dd")" oninvalid="InvalidMsg(this);">
+                                </div>
+                                @Html.ValidationMessage("haemoglobineffectiveDate", "", new { @class = "text-danger" })
+                            </div>
+                            <div class="col-md-3 text-right margin-bottom-x">
+                                @Html.LabelFor(model => model.pathology.bilirubineffectiveDate, htmlAttributes: new { @class = "control-label col-md-5" })
+                                <div class="col-md-6">
+                                    <input class="text-box single-line input-validation-error infoBox_Pathology" data-val="true" data-val-date="The field must be a date." id="bilirubineffectiveDate" name="bilirubineffectiveDate" type="date" aria-required="true" aria-describedby="DOB-error" aria-invalid="true" value="@DateTime.Now.ToString("yyyy-MM-dd")" min="@DateTime.Now.ToString("1900-01-01")" max="@DateTime.Now.ToString("yyyy-MM-dd")" oninvalid="InvalidMsg(this);">
+                                </div>
+                                @Html.ValidationMessage("bilirubineffectiveDate", "", new { @class = "text-danger" })
+                            </div>
+                            <div class="col-md-3 text-right margin-bottom-x">
+                                @Html.LabelFor(model => model.pathology.totalCholestroleffectiveDate, htmlAttributes: new { @class = "control-label col-md-5" })
+                                <div class="col-md-6">
+                                    <input class="text-box single-line input-validation-error infoBox_Pathology" data-val="true" data-val-date="The field must be a date." id="totalCholestroleffectiveDate" name="totalCholestroleffectiveDate" type="date" aria-required="true" aria-describedby="DOB-error" aria-invalid="true" value="@DateTime.Now.ToString("yyyy-MM-dd")" min="@DateTime.Now.ToString("1900-01-01")" max="@DateTime.Now.ToString("yyyy-MM-dd")" oninvalid="InvalidMsg(this);">
+                                </div>
+                                @Html.ValidationMessage("totalCholestroleffectiveDate", "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                    <!--Line 3-->
+                    <div class="form-group">
+                        <div class="col-md-12" style="margin-left: 7.5%!important">
+                            <div class="col-md-3">
+                                @Html.LabelFor(model => model.pathology.hdl, htmlAttributes: new { @class = "control-label col-md-5 " })
+                                <div class="col-md-6">
+                                    @Html.EditorFor(model => model.pathology.hdl, new { htmlAttributes = new { @class = "infoBox_Pathology", placeholder = "0.00" } })
+                                    @Html.ValidationMessageFor(model => model.pathology.hdl, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                @Html.LabelFor(model => model.pathology.ldl, htmlAttributes: new { @class = "control-label col-md-5 " })
+                                <div class="col-md-6">
+                                    @Html.EditorFor(model => model.pathology.ldl, new { htmlAttributes = new { @class = "infoBox_Pathology", placeholder = "0.00" } })
+                                    @Html.ValidationMessageFor(model => model.pathology.ldl, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                @Html.LabelFor(model => model.pathology.triglycerides, htmlAttributes: new { @class = "control-label col-md-5 " })
+                                <div class="col-md-6">
+                                    @Html.EditorFor(model => model.pathology.triglycerides, new { htmlAttributes = new { @class = "infoBox_Pathology", placeholder = "0.00" } })
+                                    @Html.ValidationMessageFor(model => model.pathology.triglycerides, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-12" style="margin-left: 7.5%!important;margin-top: -1.5%">
+                            <div class="col-md-3 text-right margin-bottom-x">
+                                @Html.LabelFor(model => model.pathology.hdleffectiveDate, htmlAttributes: new { @class = "control-label col-md-5" })
+                                <div class="col-md-6">
+                                    <input class="text-box single-line input-validation-error infoBox_Pathology" data-val="true" data-val-date="The field must be a date." id="hdleffectiveDate" name="hdleffectiveDate" type="date" aria-required="true" aria-describedby="DOB-error" aria-invalid="true" value="@DateTime.Now.ToString("yyyy-MM-dd")" min="@DateTime.Now.ToString("1900-01-01")" max="@DateTime.Now.ToString("yyyy-MM-dd")" oninvalid="InvalidMsg(this);">
+                                </div>
+                                @Html.ValidationMessage("hdleffectiveDate", "", new { @class = "text-danger" })
+                            </div>
+                            <div class="col-md-3 text-right margin-bottom-x">
+                                @Html.LabelFor(model => model.pathology.ldleffectiveDate, htmlAttributes: new { @class = "control-label col-md-5" })
+                                <div class="col-md-6">
+                                    <input class="text-box single-line input-validation-error infoBox_Pathology" data-val="true" data-val-date="The field must be a date." id="ldleffectiveDate" name="ldleffectiveDate" type="date" aria-required="true" aria-describedby="DOB-error" aria-invalid="true" value="@DateTime.Now.ToString("yyyy-MM-dd")" min="@DateTime.Now.ToString("1900-01-01")" max="@DateTime.Now.ToString("yyyy-MM-dd")" oninvalid="InvalidMsg(this);">
+                                </div>
+                                @Html.ValidationMessage("ldleffectiveDate", "", new { @class = "text-danger" })
+                            </div>
+                            <div class="col-md-3 text-right margin-bottom-x">
+                                @Html.LabelFor(model => model.pathology.triglycerideseffectiveDate, htmlAttributes: new { @class = "control-label col-md-5" })
+                                <div class="col-md-6">
+                                    <input class="text-box single-line input-validation-error infoBox_Pathology" data-val="true" data-val-date="The field must be a date." id="triglycerideseffectiveDate" name="triglycerideseffectiveDate" type="date" aria-required="true" aria-describedby="DOB-error" aria-invalid="true" value="@DateTime.Now.ToString("yyyy-MM-dd")" min="@DateTime.Now.ToString("1900-01-01")" max="@DateTime.Now.ToString("yyyy-MM-dd")" oninvalid="InvalidMsg(this);">
+                                </div>
+                                @Html.ValidationMessage("triglycerideseffectiveDate", "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                    <!--Line 4-->
+                    <div class="form-group">
+                        <div class="col-md-12" style="margin-left: 7.5%!important">
+                            <div class="col-md-3">
+                                @Html.LabelFor(model => model.pathology.glucose, htmlAttributes: new { @class = "control-label col-md-5 " })
+                                <div class="col-md-6">
+                                    @Html.EditorFor(model => model.pathology.glucose, new { htmlAttributes = new { @class = "infoBox_Pathology", placeholder = "0.00" } })
+                                    @Html.ValidationMessageFor(model => model.pathology.glucose, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                @Html.LabelFor(model => model.pathology.hba1c, htmlAttributes: new { @class = "control-label col-md-5 " })
+                                <div class="col-md-6">
+                                    @Html.EditorFor(model => model.pathology.hba1c, new { htmlAttributes = new { @class = "infoBox_Pathology", placeholder = "0.00" } })
+                                    @Html.ValidationMessageFor(model => model.pathology.hba1c, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                @Html.LabelFor(model => model.pathology.alt, htmlAttributes: new { @class = "control-label col-md-5 " })
+                                <div class="col-md-6">
+                                    @Html.EditorFor(model => model.pathology.alt, new { htmlAttributes = new { @class = "infoBox_Pathology", placeholder = "0.00" } })
+                                    @Html.ValidationMessageFor(model => model.pathology.alt, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-12" style="margin-left: 7.5%!important;margin-top: -1.5%">
+                            <div class="col-md-3 text-right margin-bottom-x">
+                                @Html.LabelFor(model => model.pathology.glucoseeffectiveDate, htmlAttributes: new { @class = "control-label col-md-5" })
+                                <div class="col-md-6">
+                                    <input class="text-box single-line input-validation-error infoBox_Pathology" data-val="true" data-val-date="The field must be a date." id="glucoseeffectiveDate" name="glucoseeffectiveDate" type="date" aria-required="true" aria-describedby="DOB-error" aria-invalid="true" value="@DateTime.Now.ToString("yyyy-MM-dd")" min="@DateTime.Now.ToString("1900-01-01")" max="@DateTime.Now.ToString("yyyy-MM-dd")" oninvalid="InvalidMsg(this);">
+                                </div>
+                                @Html.ValidationMessage("glucoseeffectiveDate", "", new { @class = "text-danger" })
+                            </div>
+                            <div class="col-md-3 text-right margin-bottom-x">
+                                @Html.LabelFor(model => model.pathology.hba1ceffectiveDate, htmlAttributes: new { @class = "control-label col-md-5" })
+                                <div class="col-md-6">
+                                    <input class="text-box single-line input-validation-error infoBox_Pathology" data-val="true" data-val-date="The field must be a date." id="hba1ceffectiveDate" name="hba1ceffectiveDate" type="date" aria-required="true" aria-describedby="DOB-error" aria-invalid="true" value="@DateTime.Now.ToString("yyyy-MM-dd")" min="@DateTime.Now.ToString("1900-01-01")" max="@DateTime.Now.ToString("yyyy-MM-dd")" oninvalid="InvalidMsg(this);">
+                                </div>
+                                @Html.ValidationMessage("hba1ceffectiveDate", "", new { @class = "text-danger" })
+                            </div>
+                            <div class="col-md-3 text-right margin-bottom-x">
+                                @Html.LabelFor(model => model.pathology.alteffectiveDate, htmlAttributes: new { @class = "control-label col-md-5" })
+                                <div class="col-md-6">
+                                    <input class="text-box single-line input-validation-error infoBox_Pathology" data-val="true" data-val-date="The field must be a date." id="alteffectiveDate" name="alteffectiveDate" type="date" aria-required="true" aria-describedby="DOB-error" aria-invalid="true" value="@DateTime.Now.ToString("yyyy-MM-dd")" min="@DateTime.Now.ToString("1900-01-01")" max="@DateTime.Now.ToString("yyyy-MM-dd")" oninvalid="InvalidMsg(this);">
+                                </div>
+                                @Html.ValidationMessage("alteffectiveDate", "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                    <!--Line 5-->
+                    <div class="form-group">
+                        <div class="col-md-12" style="margin-left: 7.5%!important">
+                            <div class="col-md-3">
+                                @Html.LabelFor(model => model.pathology.ast, htmlAttributes: new { @class = "control-label col-md-5 " })
+                                <div class="col-md-6">
+                                    @Html.EditorFor(model => model.pathology.ast, new { htmlAttributes = new { @class = "infoBox_Pathology", placeholder = "0.00" } })
+                                    @Html.ValidationMessageFor(model => model.pathology.ast, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                @Html.LabelFor(model => model.pathology.urea, htmlAttributes: new { @class = "control-label col-md-5 " })
+                                <div class="col-md-6">
+                                    @Html.EditorFor(model => model.pathology.urea, new { htmlAttributes = new { @class = "infoBox_Pathology", placeholder = "0.00" } })
+                                    @Html.ValidationMessageFor(model => model.pathology.urea, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                @Html.LabelFor(model => model.pathology.creatinine, htmlAttributes: new { @class = "control-label col-md-5 " })
+                                <div class="col-md-6">
+                                    @Html.EditorFor(model => model.pathology.creatinine, new { htmlAttributes = new { @class = "infoBox_Pathology", placeholder = "0.00" } })
+                                    @Html.ValidationMessageFor(model => model.pathology.creatinine, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-12" style="margin-left: 7.5%!important;margin-top: -1.5%">
+                            <div class="col-md-3 text-right margin-bottom-x">
+                                @Html.LabelFor(model => model.pathology.asteffectiveDate, htmlAttributes: new { @class = "control-label col-md-5" })
+                                <div class="col-md-6">
+                                    <input class="text-box single-line input-validation-error infoBox_Pathology" data-val="true" data-val-date="The field must be a date." id="asteffectiveDate" name="asteffectiveDate" type="date" aria-required="true" aria-describedby="DOB-error" aria-invalid="true" value="@DateTime.Now.ToString("yyyy-MM-dd")" min="@DateTime.Now.ToString("1900-01-01")" max="@DateTime.Now.ToString("yyyy-MM-dd")" oninvalid="InvalidMsg(this);">
+                                </div>
+                                @Html.ValidationMessage("asteffectiveDate", "", new { @class = "text-danger" })
+                            </div>
+                            <div class="col-md-3 text-right margin-bottom-x">
+                                @Html.LabelFor(model => model.pathology.ureaeffectiveDate, htmlAttributes: new { @class = "control-label col-md-5" })
+                                <div class="col-md-6">
+                                    <input class="text-box single-line input-validation-error infoBox_Pathology" data-val="true" data-val-date="The field must be a date." id="ureaeffectiveDate" name="ureaeffectiveDate" type="date" aria-required="true" aria-describedby="DOB-error" aria-invalid="true" value="@DateTime.Now.ToString("yyyy-MM-dd")" min="@DateTime.Now.ToString("1900-01-01")" max="@DateTime.Now.ToString("yyyy-MM-dd")" oninvalid="InvalidMsg(this);">
+                                </div>
+                                @Html.ValidationMessage("ureaeffectiveDate", "", new { @class = "text-danger" })
+                            </div>
+                            <div class="col-md-3 text-right margin-bottom-x">
+                                @Html.LabelFor(model => model.pathology.creatinineeffectiveDate, htmlAttributes: new { @class = "control-label col-md-5" })
+                                <div class="col-md-6">
+                                    <input class="text-box single-line input-validation-error infoBox_Pathology" data-val="true" data-val-date="The field must be a date." id="creatinineeffectiveDate" name="creatinineeffectiveDate" type="date" aria-required="true" aria-describedby="DOB-error" aria-invalid="true" value="@DateTime.Now.ToString("yyyy-MM-dd")" min="@DateTime.Now.ToString("1900-01-01")" max="@DateTime.Now.ToString("yyyy-MM-dd")" oninvalid="InvalidMsg(this);">
+                                </div>
+                                @Html.ValidationMessage("creatinineeffectiveDate", "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                    <!--Line 6-->
+                    <div class="form-group">
+                        <div class="col-md-12" style="margin-left: 7.5%!important">
+                            <div class="col-md-3">
+                                @Html.LabelFor(model => model.pathology.eGfr, htmlAttributes: new { @class = "control-label col-md-5 " })
+                                <div class="col-md-6">
+                                    @Html.EditorFor(model => model.pathology.eGfr, new { htmlAttributes = new { @class = "infoBox_Pathology", placeholder = "0.00" } })
+                                    @Html.ValidationMessageFor(model => model.pathology.eGfr, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                @Html.LabelFor(model => model.pathology.mauCreatRatio, htmlAttributes: new { @class = "control-label col-md-5 " })
+                                <div class="col-md-6">
+                                    @Html.EditorFor(model => model.pathology.mauCreatRatio, new { htmlAttributes = new { @class = "infoBox_Pathology", placeholder = "0.00" } })
+                                    @Html.ValidationMessageFor(model => model.pathology.mauCreatRatio, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                @Html.LabelFor(model => model.pathology.FEV1, htmlAttributes: new { @class = "control-label col-md-5 " })
+                                <div class="col-md-6">
+                                    @Html.EditorFor(model => model.pathology.FEV1, new { htmlAttributes = new { @class = "infoBox_Pathology", placeholder = "0.00" } })
+                                    @Html.ValidationMessageFor(model => model.pathology.FEV1, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-12" style="margin-left: 7.5%!important;margin-top: -1.5%">
+                            <div class="col-md-3 text-right margin-bottom-x">
+                                @Html.LabelFor(model => model.pathology.eGfreffectiveDate, htmlAttributes: new { @class = "control-label col-md-5" })
+                                <div class="col-md-6">
+                                    <input class="text-box single-line input-validation-error infoBox_Pathology" data-val="true" data-val-date="The field must be a date." id="eGfreffectiveDate" name="eGfreffectiveDate" type="date" aria-required="true" aria-describedby="DOB-error" aria-invalid="true" value="@DateTime.Now.ToString("yyyy-MM-dd")" min="@DateTime.Now.ToString("1900-01-01")" max="@DateTime.Now.ToString("yyyy-MM-dd")" oninvalid="InvalidMsg(this);">
+                                </div>
+                                @Html.ValidationMessage("eGfreffectiveDate", "", new { @class = "text-danger" })
+                            </div>
+                            <div class="col-md-3 text-right margin-bottom-x">
+                                @Html.LabelFor(model => model.pathology.mauCreatRatioeffectiveDate, htmlAttributes: new { @class = "control-label col-md-5" })
+                                <div class="col-md-6">
+                                    <input class="text-box single-line input-validation-error infoBox_Pathology" data-val="true" data-val-date="The field must be a date." id="mauCreatRatioeffectiveDate" name="mauCreatRatioeffectiveDate" type="date" aria-required="true" aria-describedby="DOB-error" aria-invalid="true" value="@DateTime.Now.ToString("yyyy-MM-dd")" min="@DateTime.Now.ToString("1900-01-01")" max="@DateTime.Now.ToString("yyyy-MM-dd")" oninvalid="InvalidMsg(this);">
+                                </div>
+                                @Html.ValidationMessage("mauCreatRatioeffectiveDate", "", new { @class = "text-danger" })
+                            </div>
+                            <div class="col-md-3 text-right margin-bottom-x">
+                                @Html.LabelFor(model => model.pathology.FEV1effectiveDate, htmlAttributes: new { @class = "control-label col-md-5" })
+                                <div class="col-md-6">
+                                    <input class="text-box single-line input-validation-error infoBox_Pathology" data-val="true" data-val-date="The field must be a date." id="FEV1effectiveDate" name="FEV1effectiveDate" type="date" aria-required="true" aria-describedby="DOB-error" aria-invalid="true" value="@DateTime.Now.ToString("yyyy-MM-dd")" min="@DateTime.Now.ToString("1900-01-01")" max="@DateTime.Now.ToString("yyyy-MM-dd")" oninvalid="InvalidMsg(this);">
+                                </div>
+                                @Html.ValidationMessage("FEV1effectiveDate", "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                    <!--Line 7-->
+                    <div class="form-group">
+                        <div class="col-md-12" style="margin-left: 7.5%!important">
+                            <div class="col-md-3">
+                                @Html.LabelFor(model => model.pathology.Eosinophylia, htmlAttributes: new { @class = "control-label col-md-5 " })
+                                <div class="col-md-6">
+                                    @Html.EditorFor(model => model.pathology.Eosinophylia, new { htmlAttributes = new { @class = "infoBox_Pathology", placeholder = "0.00" } })
+                                    @Html.ValidationMessageFor(model => model.pathology.Eosinophylia, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                @Html.LabelFor(model => model.pathology.hivEliza, htmlAttributes: new { @class = "control-label col-md-5 " })
+                                <div class="col-md-6">
+                                    @Html.EditorFor(model => model.pathology.hivEliza, new { htmlAttributes = new { @class = "infoBox_Pathology", placeholder = "0.00" } })
+                                    @Html.ValidationMessageFor(model => model.pathology.hivEliza, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                @Html.LabelFor(model => model.pathology.ucreatinine, htmlAttributes: new { @class = "control-label col-md-5 " })
+                                <div class="col-md-6">
+                                    @Html.EditorFor(model => model.pathology.ucreatinine, new { htmlAttributes = new { @class = "infoBox_Pathology", placeholder = "0.00" } })
+                                    @Html.ValidationMessageFor(model => model.pathology.ucreatinine, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-12" style="margin-left: 7.5%!important;margin-top: -1.5%">
+                            <div class="col-md-3 text-right margin-bottom-x">
+                                @Html.LabelFor(model => model.pathology.EosinophyliaeffectiveDate, htmlAttributes: new { @class = "control-label col-md-5" })
+                                <div class="col-md-6">
+                                    <input class="text-box single-line input-validation-error infoBox_Pathology" data-val="true" data-val-date="The field must be a date." id="EosinophyliaeffectiveDate" name="EosinophyliaeffectiveDate" type="date" aria-required="true" aria-describedby="DOB-error" aria-invalid="true" value="@DateTime.Now.ToString("yyyy-MM-dd")" min="@DateTime.Now.ToString("1900-01-01")" max="@DateTime.Now.ToString("yyyy-MM-dd")" oninvalid="InvalidMsg(this);">
+                                </div>
+                                @Html.ValidationMessage("EosinophyliaeffectiveDate", "", new { @class = "text-danger" })
+                            </div>
+                            <div class="col-md-3 text-right margin-bottom-x">
+                                @Html.LabelFor(model => model.pathology.hivElizaeffectiveDate, htmlAttributes: new { @class = "control-label col-md-5" })
+                                <div class="col-md-6">
+                                    <input class="text-box single-line input-validation-error infoBox_Pathology" data-val="true" data-val-date="The field must be a date." id="hivElizaeffectiveDate" name="hivElizaeffectiveDate" type="date" aria-required="true" aria-describedby="DOB-error" aria-invalid="true" value="@DateTime.Now.ToString("yyyy-MM-dd")" min="@DateTime.Now.ToString("1900-01-01")" max="@DateTime.Now.ToString("yyyy-MM-dd")" oninvalid="InvalidMsg(this);">
+                                </div>
+                                @Html.ValidationMessage("hivElizaeffectiveDate", "", new { @class = "text-danger" })
+                            </div>
+                            <div class="col-md-3 text-right margin-bottom-x">
+                                @Html.LabelFor(model => model.pathology.ucreatinineeffectiveDate, htmlAttributes: new { @class = "control-label col-md-5" })
+                                <div class="col-md-6">
+                                    <input class="text-box single-line input-validation-error infoBox_Pathology" data-val="true" data-val-date="The field must be a date." id="ucreatinineeffectiveDate" name="ucreatinineeffectiveDate" type="date" aria-required="true" aria-describedby="DOB-error" aria-invalid="true" value="@DateTime.Now.ToString("yyyy-MM-dd")" min="@DateTime.Now.ToString("1900-01-01")" max="@DateTime.Now.ToString("yyyy-MM-dd")" oninvalid="InvalidMsg(this);">
+                                </div>
+                                @Html.ValidationMessage("ucreatinineeffectiveDate", "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                    <!--Line 8-->
+                    <div class="form-group">
+                        <div class="col-md-12" style="margin-left: 7.5%!important">
+                            <div class="col-md-3">
+                                @Html.LabelFor(model => model.pathology.normGtt, htmlAttributes: new { @class = "control-label col-md-5 " })
+                                <div class="col-md-6">
+                                    @Html.EditorFor(model => model.pathology.normGtt, new { htmlAttributes = new { @class = "infoBox_Pathology", placeholder = "0.00" } })
+                                    @Html.ValidationMessageFor(model => model.pathology.normGtt, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                @Html.LabelFor(model => model.pathology.abnGtt, htmlAttributes: new { @class = "control-label col-md-5 " })
+                                <div class="col-md-6">
+                                    @Html.EditorFor(model => model.pathology.abnGtt, new { htmlAttributes = new { @class = "infoBox_Pathology", placeholder = "0.00" } })
+                                    @Html.ValidationMessageFor(model => model.pathology.abnGtt, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                @Html.LabelFor(model => model.pathology.salbumin, htmlAttributes: new { @class = "control-label col-md-5 " })
+                                <div class="col-md-6">
+                                    @Html.EditorFor(model => model.pathology.salbumin, new { htmlAttributes = new { @class = "infoBox_Pathology", placeholder = "0.00" } })
+                                    @Html.ValidationMessageFor(model => model.pathology.salbumin, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-12" style="margin-left: 7.5%!important;margin-top: -1.5%">
+                            <div class="col-md-3 text-right margin-bottom-x">
+                                @Html.LabelFor(model => model.pathology.normGtteffectiveDate, htmlAttributes: new { @class = "control-label col-md-5" })
+                                <div class="col-md-6">
+                                    <input class="text-box single-line input-validation-error infoBox_Pathology" data-val="true" data-val-date="The field must be a date." id="normGtteffectiveDate" name="normGtteffectiveDate" type="date" aria-required="true" aria-describedby="DOB-error" aria-invalid="true" value="@DateTime.Now.ToString("yyyy-MM-dd")" min="@DateTime.Now.ToString("1900-01-01")" max="@DateTime.Now.ToString("yyyy-MM-dd")" oninvalid="InvalidMsg(this);">
+                                </div>
+                                @Html.ValidationMessage("normGtteffectiveDate", "", new { @class = "text-danger" })
+                            </div>
+                            <div class="col-md-3 text-right margin-bottom-x">
+                                @Html.LabelFor(model => model.pathology.abnGtteffectiveDate, htmlAttributes: new { @class = "control-label col-md-5" })
+                                <div class="col-md-6">
+                                    <input class="text-box single-line input-validation-error infoBox_Pathology" data-val="true" data-val-date="The field must be a date." id="abnGtteffectiveDate" name="abnGtteffectiveDate" type="date" aria-required="true" aria-describedby="DOB-error" aria-invalid="true" value="@DateTime.Now.ToString("yyyy-MM-dd")" min="@DateTime.Now.ToString("1900-01-01")" max="@DateTime.Now.ToString("yyyy-MM-dd")" oninvalid="InvalidMsg(this);">
+                                </div>
+                                @Html.ValidationMessage("abnGtteffectiveDate", "", new { @class = "text-danger" })
+                            </div>
+                            <div class="col-md-3 text-right margin-bottom-x">
+                                @Html.LabelFor(model => model.pathology.salbumineffectiveDate, htmlAttributes: new { @class = "control-label col-md-5" })
+                                <div class="col-md-6">
+                                    <input class="text-box single-line input-validation-error infoBox_Pathology" data-val="true" data-val-date="The field must be a date." id="salbumineffectiveDate" name="salbumineffectiveDate" type="date" aria-required="true" aria-describedby="DOB-error" aria-invalid="true" value="@DateTime.Now.ToString("yyyy-MM-dd")" min="@DateTime.Now.ToString("1900-01-01")" max="@DateTime.Now.ToString("yyyy-MM-dd")" oninvalid="InvalidMsg(this);">
+                                </div>
+                                @Html.ValidationMessage("salbumineffectiveDate", "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                    <!--Line 9-->
+                    <div class="form-group">
+                        <div class="col-md-12" style="margin-left: 7.5%!important">
+                            <div class="col-md-3">
+                                @Html.LabelFor(model => model.pathology.ualbuminuria, htmlAttributes: new { @class = "control-label col-md-5 " })
+                                <div class="col-md-6">
+                                    @Html.EditorFor(model => model.pathology.ualbuminuria, new { htmlAttributes = new { @class = "infoBox_Pathology", placeholder = "0.00" } })
+                                    @Html.ValidationMessageFor(model => model.pathology.ualbuminuria, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-12" style="margin-left: 7.5%!important;margin-top: -1.5%">
+                            <div class="col-md-3 text-right margin-bottom-x">
+                                @Html.LabelFor(model => model.pathology.ualbuminuriaeffectiveDate, htmlAttributes: new { @class = "control-label col-md-5" })
+                                <div class="col-md-6">
+                                    <input class="text-box single-line input-validation-error infoBox_Pathology" data-val="true" data-val-date="The field must be a date." id="ualbuminuriaeffectiveDate" name="ualbuminuriaeffectiveDate" type="date" aria-required="true" aria-describedby="DOB-error" aria-invalid="true" value="@DateTime.Now.ToString("yyyy-MM-dd")" min="@DateTime.Now.ToString("1900-01-01")" max="@DateTime.Now.ToString("yyyy-MM-dd")" oninvalid="InvalidMsg(this);">
+                                </div>
+                                @Html.ValidationMessage("ualbuminuriaeffectiveDate", "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                    <!--Line 10-->
+                    <h4 class="tableDivider-heading text-divider"><span>blood pressure</span></h4>
+                    <br />
+                    <br />
+                    <div class="form-group">
+                        <div class="col-md-12" style="margin-left: 7.5%!important">
+                            <div class="col-md-3">
+                                @Html.LabelFor(model => model.pathology.systolicBP, htmlAttributes: new { @class = "control-label col-md-5 " })
+                                <div class="col-md-6">
+                                    @Html.EditorFor(model => model.pathology.systolicBP, new { htmlAttributes = new { @class = "infoBox_Pathology nodecimal", placeholder = "0", @onblur = "CheckDecimal1();" } })
+                                    @Html.ValidationMessageFor(model => model.pathology.systolicBP, "", new { @class = "text-danger", @style = "font-size: 75%;" })
+                                    <input type="hidden" name="systolicBP-decimal" id="systolicBP-decimal" />
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                @Html.LabelFor(model => model.pathology.diastolicBP, htmlAttributes: new { @class = "control-label col-md-5 " })
+                                <div class="col-md-6">
+                                    @Html.EditorFor(model => model.pathology.diastolicBP, new { htmlAttributes = new { @class = "infoBox_Pathology nodecimal", placeholder = "0", @onblur = "CheckDecimal2();" } })
+                                    @Html.ValidationMessageFor(model => model.pathology.diastolicBP, "", new { @class = "text-danger", @style = "font-size: 75%;" })
+                                    <input type="hidden" name="diastolicBP-decimal" id="diastolicBP-decimal" />
+                                </div>
+                            </div>
+                            <div class="col-md-3 text-right margin-bottom-x">
+                                @Html.LabelFor(model => model.pathology.BPeffectiveDate, htmlAttributes: new { @class = "control-label col-md-5" })
+                                <div class="col-md-6">
+                                    <input class="text-box single-line input-validation-error infoBox_Pathology" data-val="true" data-val-date="The field must be a date." id="BPeffectiveDate" name="BPeffectiveDate" type="date" aria-required="true" aria-describedby="DOB-error" aria-invalid="true" value="@DateTime.Now.ToString("yyyy-MM-dd")" min="@DateTime.Now.ToString("1900-01-01")" max="@DateTime.Now.ToString("yyyy-MM-dd")" oninvalid="InvalidMsg(this);">
+                                </div>
+                                @Html.ValidationMessage("BPeffectiveDate", "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                    <br />
+                    <!--Comment-->
+                    <h4 class="tableDivider-heading text-divider"><span>comments</span></h4>
+                    <div class="form-group">
+                        <div class="col-md-12">
+                            @*<h2 style="margin-left: 20%; font-family: 'Century Gothic'; font-weight: 200; font-size: 18px; color: #003366">Comments</h2>*@
+                            <div class="col-md-12">
+                                @Html.TextAreaFor(model => model.pathology.comment, htmlAttributes: new { @class = "" })
+                                @Html.ValidationMessageFor(model => model.pathology.comment, "", new { @class = "text-danger" })
+                            </div>
+                            <div class="col-md-3">
+                                @Html.HiddenFor(model => model.pathology.createdBy, new { htmlAttributes = new { @class = "infoBox_Pathology", @id = "createdBy" } })
+
+                            </div>
+                            <div class="col-md-3"></div>
+                            <div class="col-md-1"></div>
+                        </div>
+                    </div>
+                </div>
+                <br />
+                <!--Submit-->
+                <div class="">
+                    <div class="actionButton" style="margin-bottom: 1%; text-align: center!important">
+                        <input type="submit" value="Submit" class="btn questionnaireButton" onclick="storageKey()" id="pathologySubmit" />
+                        <br />
+                        <input value="Back" class="btn buttonRound_formBack go_back" onclick="backKey()" style="width: 8%" />
+                    </div>
+
+                </div>
+                <div class="row"></div>
+            </div>
+        }
+
+    </div>
+</div>
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+
+<!--Lab refence validation Alert-->
+@if (ViewBag.Message != null)
+{
+    <script type="text/javascript">
+
+    window.onload = function () {
+        toastr.options.positionClass = 'toast-bottom-right';
+        toastr.options.timeOut = 5000;
+
+        toastr.error("@ViewBag.Message");
+    }
+    </script>
+}
+<!--Attachment Aleart-->
+@if (ViewBag.attachmentError != null)
+{
+    <script type="text/javascript">
+
+    window.onload = function () {
+        toastr.options.positionClass = 'toast-bottom-right';
+        toastr.options.timeOut = 5000;
+
+        toastr.error("@ViewBag.attachmentError");
+    }
+    </script>
+}
+<!--Future dates Alert-->
+<script type="text/javascript">
+
+    var refNo = $('#pathology_labReferenceNo');
+    var labs = $('#laboratories');
+
+    if (refNo.val() == "" && labs.val() == "") {
+        window.onload = function () {
+            toastr.options.positionClass = 'toast-bottom-right';
+            toastr.options.timeOut = 5000;
+            toastr.warning("Dates cannot be future dated!", "Please note:");
+
+
+        }
+    }
+
+</script>
+@if (ViewBag.futuredateError != null)
+{
+    <script type="text/javascript">
+
+    window.onload = function () {
+        toastr.options.positionClass = 'toast-bottom-right';
+        toastr.options.timeOut = 5000;
+
+        toastr.error("@ViewBag.futuredateError");
+    }
+    </script>
+}
+
+@section Scripts {
+    <script src="~/bundles/jqueryval"></script>
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <!-- date-mirror -->
+    <script>
+        $(document).ready(function () {
+            $('#effectiveDate').on('blur', function () {
+                var date = $(this).val();
+                $("#CD4CounteffectiveDate").val(date);
+                $("#CD4PercentageeffectiveDate").val(date);
+                $("#viralLoadeffectiveDate").val(date);
+                $("#haemoglobineffectiveDate").val(date);
+                $("#bilirubineffectiveDate").val(date);
+                $("#totalCholestroleffectiveDate").val(date);
+                $("#hdleffectiveDate").val(date);
+                $("#ldleffectiveDate").val(date);
+                $("#triglycerideseffectiveDate").val(date);
+                $("#glucoseeffectiveDate").val(date);
+                $("#hba1ceffectiveDate").val(date);
+                $("#alteffectiveDate").val(date);
+                $("#asteffectiveDate").val(date);
+                $("#ureaeffectiveDate").val(date);
+                $("#creatinineeffectiveDate").val(date);
+                $("#eGfreffectiveDate").val(date);
+                $("#mauCreatRatioeffectiveDate").val(date);
+                $("#FEV1effectiveDate").val(date);
+                $("#EosinophyliaeffectiveDate").val(date);
+                $("#hivElizaeffectiveDate").val(date);
+                $("#ucreatinineeffectiveDate").val(date);
+                $("#normGtteffectiveDate").val(date);
+                $("#abnGtteffectiveDate").val(date);
+                $("#salbumineffectiveDate").val(date);
+                $("#ualbuminuriaeffectiveDate").val(date);
+                $("#BPeffectiveDate").val(date);
+            });
+        });
+    </script>
+    <!-- date-validation -->
+    <script>
+        $(document).ready(function () {
+            $('#CD4CounteffectiveDate').on('blur', function () {
+                if ($('#pathology_CD4Count').val() != '') {
+                    $("[name='CD4CounteffectiveDate']").attr("required", true);
+                }
+                else {
+                    $("[name='CD4CounteffectiveDate']").attr("required", false);
+                }
+            });
+            $('#CD4PercentageeffectiveDate').on('blur', function () {
+                if ($('#pathology_CD4Percentage').val() != '') {
+                    $("[name='CD4PercentageeffectiveDate']").attr("required", true);
+                }
+                else {
+                    $("[name='CD4PercentageeffectiveDate']").attr("required", false);
+                }
+            });
+            $('#viralLoadeffectiveDate').on('blur', function () {
+                if ($('#pathology_viralLoad').val() != '') {
+                    $("[name='viralLoadeffectiveDate']").attr("required", true);
+                }
+                else {
+                    $("[name='viralLoadeffectiveDate']").attr("required", false);
+                }
+            });
+            $('#haemoglobineffectiveDate').on('blur', function () {
+                if ($('#pathology_haemoglobin').val() != '') {
+                    $("[name='haemoglobineffectiveDate']").attr("required", true);
+                }
+                else {
+                    $("[name='haemoglobineffectiveDate']").attr("required", false);
+                }
+            });
+            $('#bilirubineffectiveDate').on('blur', function () {
+                if ($('#pathology_bilirubin').val() != '') {
+                    $("[name='bilirubineffectiveDate']").attr("required", true);
+                }
+                else {
+                    $("[name='bilirubineffectiveDate']").attr("required", false);
+                }
+            });
+            $('#totalCholestroleffectiveDate').on('blur', function () {
+                if ($('#pathology_totalCholestrol').val() != '') {
+                    $("[name='totalCholestroleffectiveDate']").attr("required", true);
+                }
+                else {
+                    $("[name='totalCholestroleffectiveDate']").attr("required", false);
+                }
+            });
+            $('#hdleffectiveDate').on('blur', function () {
+                if ($('#pathology_hdl').val() != '') {
+                    $("[name='hdleffectiveDate']").attr("required", true);
+                }
+                else {
+                    $("[name='hdleffectiveDate']").attr("required", false);
+                }
+            });
+            $('#ldleffectiveDate').on('blur', function () {
+                if ($('#pathology_ldl').val() != '') {
+                    $("[name='ldleffectiveDate']").attr("required", true);
+                }
+                else {
+                    $("[name='ldleffectiveDate']").attr("required", false);
+                }
+            });
+            $('#triglycerideseffectiveDate').on('blur', function () {
+                if ($('#pathology_triglycerides').val() != '') {
+                    $("[name='triglycerideseffectiveDate']").attr("required", true);
+                }
+                else {
+                    $("[name='triglycerideseffectiveDate']").attr("required", false);
+                }
+            });
+            $('#glucoseeffectiveDate').on('blur', function () {
+                if ($('#pathology_glucose').val() != '') {
+                    $("[name='glucoseeffectiveDate']").attr("required", true);
+                }
+                else {
+                    $("[name='glucoseeffectiveDate']").attr("required", false);
+                }
+            });
+            $('#hba1ceffectiveDate').on('blur', function () {
+                if ($('#pathology_hba1c').val() != '') {
+                    $("[name='hba1ceffectiveDate']").attr("required", true);
+                }
+                else {
+                    $("[name='hba1ceffectiveDate']").attr("required", false);
+                }
+            });
+            $('#alteffectiveDate').on('blur', function () {
+                if ($('#pathology_alt').val() != '') {
+                    $("[name='alteffectiveDate']").attr("required", true);
+                }
+                else {
+                    $("[name='alteffectiveDate']").attr("required", false);
+                }
+            });
+            $('#asteffectiveDate').on('blur', function () {
+                if ($('#pathology_ast').val() != '') {
+                    $("[name='asteffectiveDate']").attr("required", true);
+                }
+                else {
+                    $("[name='asteffectiveDate']").attr("required", false);
+                }
+            });
+            $('#ureaeffectiveDate').on('blur', function () {
+                if ($('#pathology_urea').val() != '') {
+                    $("[name='ureaeffectiveDate']").attr("required", true);
+                }
+                else {
+                    $("[name='ureaeffectiveDate']").attr("required", false);
+                }
+            });
+            $('#creatinineeffectiveDate').on('blur', function () {
+                if ($('#pathology_creatinine').val() != '') {
+                    $("[name='creatinineeffectiveDate']").attr("required", true);
+                }
+                else {
+                    $("[name='creatinineeffectiveDate']").attr("required", false);
+                }
+            });
+            $('#eGfreffectiveDate').on('blur', function () {
+                if ($('#pathology_eGfr').val() != '') {
+                    $("[name='eGfreffectiveDate']").attr("required", true);
+                }
+                else {
+                    $("[name='eGfreffectiveDate']").attr("required", false);
+                }
+            });
+            $('#mauCreatRatioeffectiveDate').on('blur', function () {
+                if ($('#pathology_mauCreatRatio').val() != '') {
+                    $("[name='mauCreatRatioeffectiveDate']").attr("required", true);
+                }
+                else {
+                    $("[name='mauCreatRatioeffectiveDate']").attr("required", false);
+                }
+            });
+            $('#FEV1effectiveDate').on('blur', function () {
+                if ($('#pathology_FEV1').val() != '') {
+                    $("[name='FEV1effectiveDate']").attr("required", true);
+                }
+                else {
+                    $("[name='FEV1effectiveDate']").attr("required", false);
+                }
+            });
+            $('#EosinophyliaeffectiveDate').on('blur', function () {
+                if ($('#pathology_Eosinophylia').val() != '') {
+                    $("[name='EosinophyliaeffectiveDate']").attr("required", true);
+                }
+                else {
+                    $("[name='EosinophyliaeffectiveDate']").attr("required", false);
+                }
+            });
+            $('#hivElizaeffectiveDate').on('blur', function () {
+                if ($('#pathology_hivEliza').val() != '') {
+                    $("[name='hivElizaeffectiveDate']").attr("required", true);
+                }
+                else {
+                    $("[name='hivElizaeffectiveDate']").attr("required", false);
+                }
+            });
+            $('#ucreatinineeffectiveDate').on('blur', function () {
+                if ($('#pathology_ucreatinine').val() != '') {
+                    $("[name='ucreatinineeffectiveDate']").attr("required", true);
+                }
+                else {
+                    $("[name='ucreatinineeffectiveDate']").attr("required", false);
+                }
+            });
+            $('#normGtteffectiveDate').on('blur', function () {
+                if ($('#pathology_normGtt').val() != '') {
+                    $("[name='normGtteffectiveDate']").attr("required", true);
+                }
+                else {
+                    $("[name='normGtteffectiveDate']").attr("required", false);
+                }
+            });
+            $('#abnGtteffectiveDate').on('blur', function () {
+                if ($('#pathology_abnGtt').val() != '') {
+                    $("[name='abnGtteffectiveDate']").attr("required", true);
+                }
+                else {
+                    $("[name='abnGtteffectiveDate']").attr("required", false);
+                }
+            });
+            $('#salbumineffectiveDate').on('blur', function () {
+                if ($('#pathology_salbumin').val() != '') {
+                    $("[name='salbumineffectiveDate']").attr("required", true);
+                }
+                else {
+                    $("[name='salbumineffectiveDate']").attr("required", false);
+                }
+            });
+            $('#ualbuminuriaeffectiveDate').on('blur', function () {
+                if ($('#pathology_ualbuminuria').val() != '') {
+                    $("[name='ualbuminuriaeffectiveDate']").attr("required", true);
+                }
+                else {
+                    $("[name='ualbuminuriaeffectiveDate']").attr("required", false);
+                }
+            });
+            $('#BPeffectiveDate').on('blur', function () {
+                if ($('#pathology_systolicBP').val() != '') {
+                    $("[name='BPeffectiveDate']").attr("required", true);
+                }
+                else {
+                    $("[name='BPeffectiveDate']").attr("required", false);
+                }
+            });
+            $('#BPeffectiveDate').on('blur', function () {
+                if ($('#pathology_diastolicBP').val() != '') {
+                    $("[name='BPeffectiveDate']").attr("required", true);
+                }
+                else {
+                    $("[name='BPeffectiveDate']").attr("required", false);
+                }
+            });
+        });
+    </script>
+    <!-- attachment-check -->
+    <script>
+        $('#chkNoAttachment').change(function () {
+            if (this.checked)
+                $("[name='Pathfile']").attr("required", false);
+            else
+                $("[name='Pathfile']").attr("required", true);
+
+        });
+    </script>
+    <!-- submit disable -->
+    <script>
+        $('#pathologyCreate').change(function () {
+            $(this).find('#pathologySubmit').prop('disabled', false);
+        });
+        $('#pathologyCreate').submit(function () {
+            $(this).find('#pathologySubmit').prop('disabled', true);
+        });
+    </script>
+    <!-- select dropdown -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+    <script>
+        $(document).ready(function () { $("#pathologyType").select2({ selectOnClose: true, multiple: false, placeholder: "Select" }); });
+
+        //script that allows you to type your own name into select dropdown menu
+        $("#laboratories").select2({
+            selectOnClose: true,
+            placeholder: "Select",
+            tags: true,
+            createTag: function (params) {
+                return {
+                    id: params.term,
+                    text: params.term,
+                    newOption: true,
+                }
+            },
+            templateResult: function (data) {
+                var $result = $("<span></span>");
+
+                $result.text(data.text);
+
+                if (data.newOption) {
+                    $result.append(" <em>(new)</em>");
+                }
+
+                return $result;
+            }
+        });
+    </script>
+    <!-- local-storage-redirect -->
+    <script>
+        function backKey() {
+            localStorage.setItem("back_pathologyCreate", Date.now());
+        }
+        function storageKey() {
+            localStorage.setItem("create_pathologyCreate", Date.now());
+        }
+    </script>
+    <script>
+        //HCare-1190
+        function CheckDecimal1() {
+            var inputtxt = $('#pathology_systolicBP').val();
+            var decimal = /[^\d].+/;
+
+            if (inputtxt.match(decimal)) {
+                $('span[data-valmsg-for="pathology.systolicBP"]').html('<span style="font-size: 10px"><i class="fas fa-exclamation-circle"></i> </span> Decimal point not allowed!');
+                $("#systolicBP-decimal").val(inputtxt);
+            }
+            else {
+                $('span[data-valmsg-for="pathology.systolicBP"]').html('');
+                $("#systolicBP-decimal").val('');
+            }
+        }
+        function CheckDecimal2() {
+            var inputtxt = $('#pathology_diastolicBP').val();
+            var decimal = /[^\d].+/;
+
+            if (inputtxt.match(decimal)) {
+                $('span[data-valmsg-for="pathology.diastolicBP"]').html('<span style="font-size: 10px"><i class="fas fa-exclamation-circle"></i> </span> Decimal point not allowed!');
+                $("#diastolicBP-decimal").val(inputtxt);
+            }
+            else {
+                $('span[data-valmsg-for="pathology.diastolicBP"]').html('');
+                $("#diastolicBP-decimal").val('');
+            }
+        }
+        $("#pathologySubmit").click(function () {
+            if ($("#diastolicBP-decimal").val().length > 0) {
+                $("#pathology_diastolicBP").focus();
+                return false;
+            }
+        });
+        $("#pathologySubmit").click(function () {
+            if ($("#systolicBP-decimal").val().length > 0) {
+                $("#pathology_systolicBP").focus();
+                return false;
+            }
+        });
+
+    </script>
+}
+

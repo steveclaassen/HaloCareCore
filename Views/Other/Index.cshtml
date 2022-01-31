@@ -1,0 +1,568 @@
+﻿@model HaloCareCore.Models.ViewModels.OtherVM
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Other";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<comment>
+    <!--
+        28 September 2020 -- HCare-821
+     -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+</style>
+<javascript>
+    <script src="https://www.jqueryscript.net/demo/jQuery-Plugin-For-Sortable-Bootstrap-Tables-Bootstrap-Sortable/Scripts/bootstrap-sortable.js"></script>
+</javascript>
+
+<div class="fullScreen_container">
+    <!----------------------------------------------------------------------------- html-top-navigation-panel  ---------------------------------------------------------------------------->
+    <navigation>
+        <nav id="global-nav" class="nav">
+            <div class="pull-left title">
+                <h1 class="site-title_patientProfile">
+                    <span><i class="fas fa-square"></i>&emsp; Other</span>
+                </h1>
+            </div>
+            <div class="pull-right title">
+                <div class="site-title_userID pull-right">
+                    <div class="halocareLogoX"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+                </div>
+                <h1 class="site-title_userID pull-right">
+                    @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                    {
+                        <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                    }
+                </h1>
+                <h1 class="site-waffleIcon pull-right">
+                    <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+                </h1>
+            </div>
+        </nav>
+        <ul class="breadcrumbs_fullScreens">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+            <li><a href="@Url.Action("Index", "Administration", new {})">Settings</a></li>
+            <li><a href="#">@ViewBag.Title</a></li>
+        </ul>
+        <div class="navCollection_fullScreens">
+            @Html.Partial("_navCollection")
+        </div>
+
+        <div style="margin-bottom: 3%"></div>
+    </navigation>
+    <!-------------------------------------------------------------------------------------- html-body ------------------------------------------------------------------------------------>
+    <div class="container-tab">
+        <div class="row">
+            <div class="span12">
+                <div class="container-tab">
+                    <!------------------------------------------------------------------------------------ tab-navigation ----------------------------------------------------------------------------------->
+                    <ul class="nav nav-pills nav-justified" role="tablist">
+                        <li role="presentation" class="tab-clinical active"><a href="#attachmenttypes" aria-controls="attachmenttypes" class="tab-label" data-toggle="tab" id="attachment_types">Attachment types</a></li>
+                        <li role="presentation" class="tab-clinical"><a href="#laboratories" aria-controls="laboratories" class="tab-label" role="tab" data-toggle="tab" id="labs_tab">Laboratories</a></li>
+                        <li role="presentation" class="tab-clinical"><a href="#noncdlflags" aria-controls="noncdlflags" class="tab-label" role="tab" data-toggle="tab" id="non_cdl_flags">Non-CDL flags</a></li>
+                        <li role="presentation" class="tab-clinical"><a href="#pathologytypes" aria-controls="pathologytypes" class="tab-label" role="tab" data-toggle="tab" id="pathology_types">Pathology types</a></li>
+                        <li role="presentation" class="tab-clinical"><a href="#pmoc" aria-controls="pmoc" class="tab-label" role="tab" data-toggle="tab" id="pmoc_tab">PMOC</a></li>
+                        <li role="presentation" class="tab-clinical"><a href="#icd-10" aria-controls="icd-10" class="tab-label" role="tab" data-toggle="tab" id="icd10_tab">Program ICD-10</a></li>
+                    </ul>
+                    <div class="tab-content">
+                        <!------------------------------------------------------------------------ attachment-types ---------------------------------------------------------------------->
+                        <div role="tabpanel" class="tab-pane active" id="attachmenttypes">
+                            <div class="row">
+                                <br />
+                                <div class="col-md-12 row">
+                                    <div class="col-md-6">
+                                        <h4 class="subHeading">
+                                            Attachment types overview
+                                            <a class="create-new" href="@Url.Action("AttachmentType_Create", "Administration", new { })" style="font-size: 14px">Create new <span><i class="fa fa-plus-circle" style="font-size: 12px"></i></span></a>
+                                        </h4>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="input-wrapper-new-search">
+                                            <input type="text" class="form-control-new-search" id="atSearch" placeholder="Search..." />
+                                        </div>
+                                    </div>
+                                </div>
+                                <table class="table settings-table sortable">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 8%; text-align: center!important">@Html.DisplayNameFor(model => model.AttachmentTypes[0].attachmentType) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="width: 40%">@Html.DisplayNameFor(model => model.AttachmentTypes[0].typeDescription) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="width: 10%; text-align: center!important">@Html.DisplayNameFor(model => model.AttachmentTypes[0].assignmentItemType)</th><!--Hcare-1339-->
+                                            <th style="width: 10%; text-align: center!important">@Html.DisplayNameFor(model => model.AttachmentTypes[0].active)</th>
+                                            <th style="width: 10%; text-align: center!important">@Html.DisplayName("Action")</th>
+                                        </tr>
+                                    </thead>
+
+                                    @foreach (var item in Model.AttachmentTypes)
+                                    {
+                                        <tbody id="at-search">
+                                            <tr style="text-indent: 5px">
+                                                <td class="text-center"><span class="@(item.active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.attachmentType)</span></td>
+                                                <td class="text-left"><span class="@(item.active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.typeDescription)</span></td>
+                                                <td class="text-left"><span class="@(item.active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.assignmentItemType)</span></td><!--Hcare-1339-->
+                                                <td class="row-information text-center"><span class="@(item.active == true ? "chk-yes fas fa-circle" : "chk-no fas fa-circle")"></span></td>
+                                                <td class="text-center">
+                                                    <input type="submit" class="link-button" value="View" onclick="location.href='@Url.Action("AttachmentType_Details", "Administration", new { id = item.attachmentType })'" /> /
+                                                    <input type="submit" class="link-button" value="Edit" onclick="location.href='@Url.Action("AttachmentType_Edit", "Administration", new { id = item.attachmentType })'" />
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    }
+
+                                </table>
+                            </div>
+                        </div>
+                        <!-------------------------------------------------------------------------- laboratories ------------------------------------------------------------------------>
+                        <div role="tabpanel" class="tab-pane" id="laboratories">
+                            <div class="row">
+                                <br />
+                                <div class="col-md-12 row">
+                                    <div class="col-md-6">
+                                        <h4 class="subHeading">
+                                            Laboratories overview
+                                            <a class="create-new" href="@Url.Action("LaboratoryCreate", "Administration", new { })" style="font-size: 14px">Create new <span><i class="fa fa-plus-circle" style="font-size: 12px"></i></span></a>
+                                        </h4>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="input-wrapper-new-search">
+                                            <input type="text" class="form-control-new-search" id="labSearch" placeholder="Search..." />
+                                        </div>
+                                    </div>
+                                </div>
+                                <table class="table settings-table sortable">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 60%">@Html.DisplayNameFor(model => model.Laboratories[0].name) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="width: 10%">@Html.DisplayNameFor(model => model.Laboratories[0].telephoneNo) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="width: 10%">@Html.DisplayNameFor(model => model.Laboratories[0].email) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="text-align: center!important; width: 10%">@Html.DisplayNameFor(model => model.Laboratories[0].active) </th>
+                                            <th style="text-align: center!important; width: 10%">Action</th>
+                                        </tr>
+                                    </thead>
+
+                                    @foreach (var item in Model.Laboratories)
+                                    {
+                                        <tbody id="lab-search">
+                                            <tr>
+                                                <td class="text-left"><span class="@(item.active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.name)</span></td>
+                                                <td class="text-left"><span class="@(item.active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.telephoneNo)</span></td>
+                                                <td class="text-left"><span class="@(item.active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.email)</span></td>
+                                                <td class="row-information text-center"><span class="@(item.active == true ? "chk-yes fas fa-circle" : "chk-no fas fa-circle")"></span></td>
+
+                                                <td class="text-center">
+                                                    <input type="submit" class="link-button" value="View" onclick="location.href='@Url.Action("LaboratoryDetails", "Administration", new { id = item.id })'" /> /
+                                                    <input type="submit" class="link-button" value="Edit" onclick="location.href='@Url.Action("LaboratoryEdit", "Administration", new { id = item.id })'" />
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    }
+
+                                </table>
+
+                            </div>
+                        </div>
+                        <!-------------------------------------------------------------------------- non-cdl-flags ------------------------------------------------------------------------>
+                        <div role="tabpanel" class="tab-pane" id="noncdlflags">
+                            <div class="row">
+                                <br />
+                                <div class="col-md-12 row">
+                                    <div class="col-md-6">
+                                        <h4 class="subHeading">
+                                            Non-CDL flags overview
+                                            <a class="create-new" href="@Url.Action("NonCDLFlags_Create", "Administration", new { })" style="font-size: 14px">Create new <span><i class="fa fa-plus-circle" style="font-size: 12px"></i></span></a>
+                                        </h4>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="input-wrapper-new-search">
+                                            <input type="text" class="form-control-new-search" id="ncfSearch" placeholder="Search..." />
+                                        </div>
+                                    </div>
+                                </div>
+                                <table class="table settings-table sortable">
+                                    <thead>
+                                        <tr>
+                                            <th style="text-align: center!important; width: 10%">@Html.DisplayNameFor(model => model.NonCLDFlags[0].flagCode) <i class="fa fa-fw fa-sort"></i></th>
+                                            <th>@Html.DisplayNameFor(model => model.NonCLDFlags[0].programCode) <i class="fa fa-fw fa-sort"></i></th>
+                                            <th style="text-align: center!important; width: 10%">@Html.DisplayNameFor(model => model.NonCLDFlags[0].active)</th>
+                                            <th style="text-align: center!important; width: 10%">Action</th>
+                                        </tr>
+                                    </thead>
+
+                                    @foreach (var item in Model.NonCLDFlags)
+                                    {
+                                        <tbody id="flag-search">
+                                            <tr>
+                                                <td class="text-center"><span class="@(item.active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.flagCode)</span></td>
+                                                <td class="text-left"><span class="@(item.active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.programCode)</span></td>
+                                                <td class="row-information text-center"><span class="@(item.active == true ? "chk-yes fas fa-circle" : "chk-no fas fa-circle")"></span></td>
+                                                <td class="text-center">
+                                                    <input type="submit" class="link-button" value="View" onclick="location.href='@Url.Action("NonCDLFlags_Details", "Administration", new { id = item.Id })'" /> /
+                                                    <input type="submit" class="link-button" value="Edit" onclick="location.href='@Url.Action("NonCDLFlags_Edit", "Administration", new { id = item.Id })'" />
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    }
+                                </table>
+                            </div>
+                        </div>
+                        <!------------------------------------------------------------------------- pathology-types ----------------------------------------------------------------------->
+                        <div role="tabpanel" class="tab-pane" id="pathologytypes">
+                            <div class="row">
+                                <br />
+                                <div class="col-md-12 row">
+                                    <div class="col-md-6">
+                                        <h4 class="subHeading">
+                                            Pathology types overview
+                                            <a class="create-new" href="@Url.Action("PathologyType_Create", "Member", new { })" style="font-size: 14px">Create new <span><i class="fa fa-plus-circle" style="font-size: 12px"></i></span></a>
+                                        </h4>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="input-wrapper-new-search">
+                                            <input type="text" class="form-control-new-search" id="ptSearch" placeholder="Search..." />
+                                        </div>
+                                    </div>
+                                </div>
+                                <table class="table settings-table sortable">
+                                    <thead>
+                                        <tr>
+                                            <th style="text-align: left!important">@Html.DisplayNameFor(model => model.PathologyTypes[0].id) <i class="fa fa-fw fa-sort"></i></th>
+                                            <th style="text-align: left!important">@Html.DisplayNameFor(model => model.PathologyTypes[0].pathologyType) <i class="fa fa-fw fa-sort"></i></th>
+                                            <th style="text-align: left!important">@Html.DisplayNameFor(model => model.PathologyTypes[0].createdDate) <i class="fa fa-fw fa-sort"></i></th>
+                                            <th style="text-align: left!important">@Html.DisplayNameFor(model => model.PathologyTypes[0].createdBy) <i class="fa fa-fw fa-sort"></i></th>
+                                            <th style="text-align: center!important">@Html.DisplayNameFor(model => model.PathologyTypes[0].active)</th>
+                                            <th style="text-align: center!important; width: 10%">Action</th>
+                                        </tr>
+                                    </thead>
+
+                                    @foreach (var item in Model.PathologyTypes)
+                                    {
+                                        <tbody id="pt-search">
+                                            <tr>
+                                                <td class="row-information"><span class="@(item.active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.id)</span></td>
+                                                <td class="row-information"><span class="@(item.active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.pathologyType)</span></td>
+                                                <td data-dateformat="DD-MM-YYYY"><span class="@(item.active == true ? "" : "active-false")">@(item.createdDate == null ? "" : item.createdDate.ToString("dd-MM-yyyy"))</span></td>
+                                                <td class="row-information"><span class="@(item.active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.createdBy)</span></td>
+                                                <td class="row-information text-center"><span class="@(item.active == true ? "chk-yes fas fa-circle" : "chk-no fas fa-circle")"></span></td>
+                                                <td class="text-center">
+                                                    <input type="submit" class="link-button" value="View" onclick="location.href='@Url.Action("PathologyType_Details", "Member", new { id = item.id })'" /> /
+                                                    <input type="submit" class="link-button" value="Edit" onclick="location.href='@Url.Action("PathologyType_Edit", "Member", new { id = item.id })'" />
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    }
+                                </table>
+                            </div>
+                        </div>
+                        <!------------------------------------------------------------------------------ pmoc ------------------------------------------------------------------------------>
+                        <div role="tabpanel" class="tab-pane" id="pmoc">
+                            <div class="row">
+                                <br />
+                                <div class="col-md-12 row">
+                                    <div class="col-md-6">
+                                        <h4 class="subHeading">
+                                            Preferred method of contact overview
+                                            <a class="create-new" href="@Url.Action("pmocCreate", "Administration", new { })" style="font-size: 14px">Create new <span><i class="fa fa-plus-circle" style="font-size: 12px"></i></span></a>
+                                        </h4>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="input-wrapper-new-search">
+                                            <input type="text" class="form-control-new-search" id="pmocSearch" placeholder="Search..." />
+                                        </div>
+                                    </div>
+                                </div>
+                                <table class="table settings-table sortable">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 5%; text-align: center!important">@Html.DisplayNameFor(model => model.PreferredMethodOfContacts[0].pmocCode) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th>@Html.DisplayNameFor(model => model.PreferredMethodOfContacts[0].pmocDescription) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="text-align: center!important; width: 10%">@Html.DisplayNameFor(model => model.PreferredMethodOfContacts[0].active) </th>
+                                            <th style="text-align: center!important; width: 10%">Action</th>
+                                        </tr>
+                                    </thead>
+
+                                    @foreach (var item in Model.PreferredMethodOfContacts)
+                                    {
+                                        <tbody id="pmoc-search">
+                                            <tr>
+                                                <td class="text-center"><span class="@(item.active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.pmocCode)</span></td>
+                                                <td class="text-left"><span class="@(item.active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.pmocDescription)</span></td>
+                                                <td class="row-information text-center"><span class="@(item.active == true ? "chk-yes fas fa-circle" : "chk-no fas fa-circle")"></span></td>
+                                                <td class="statusCode linkNav" style="text-align: center!important">
+                                                    <input type="submit" class="link-button" value="View" onclick="location.href='@Url.Action("pmocDetails", "Administration", new { id = item.id })'" /> /
+                                                    <input type="submit" class="link-button" value="Edit" onclick="location.href='@Url.Action("pmocEdit", "Administration", new { id = item.id })'" />
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    }
+                                </table>
+                            </div>
+                        </div>
+                        <!------------------------------------------------------------------------------ icd-10 ------------------------------------------------------------------------------>
+                        <div role="tabpanel" class="tab-pane" id="icd-10">
+                            <div class="row">
+                                <br />
+                                <div class="col-md-12 row">
+                                    <div class="col-md-6">
+                                        <h4 class="subHeading">
+                                            Program ICD-10
+                                            <a class="create-new" href="@Url.Action("ICD10_Create", "Administration", new { })" style="font-size: 14px">Create new <span><i class="fa fa-plus-circle" style="font-size: 12px"></i></span></a>
+                                        </h4>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="input-wrapper-new-search">
+                                            <input type="text" class="form-control-new-search" id="icd10Search" placeholder="Search..." />
+                                        </div>
+                                    </div>
+                                </div>
+                                <table class="table settings-table sortable">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 15%; text-align: center!important">@Html.DisplayNameFor(model => model.Icd10Codes[0].icd10CodeID) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th>@Html.DisplayNameFor(model => model.Icd10Codes[0].codeType) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="text-align: center!important; width: 10%">@Html.DisplayNameFor(model => model.Icd10Codes[0].Active) </th>
+                                            <th style="text-align: center!important; width: 10%">Action</th>
+                                        </tr>
+                                    </thead>
+
+                                    @foreach (var item in Model.Icd10Codes)
+                                    {
+                                        <tbody id="icd10-search">
+                                            <tr>
+                                                <td class="text-center"><span class="@(item.Active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.icd10CodeID)</span></td>
+                                                <td class="text-left"><span class="@(item.Active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.codeType)</span></td>
+                                                <td class="row-information text-center"><span class="@(item.Active == true ? "chk-yes fas fa-circle" : "chk-no fas fa-circle")"></span></td>
+                                                <td class="statusCode linkNav" style="text-align: center!important">
+                                                    <input type="submit" class="link-button" value="View" onclick="location.href='@Url.Action("ICD10_Details", "Administration", new { id = item.Id})'" /> /
+                                                    <input type="submit" class="link-button" value="Edit" onclick="location.href='@Url.Action("ICD10_Edit", "Administration", new { id = item.Id})'" />
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    }
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixedBack">
+        <input value="Back" class="btn buttonRound_formBack " onclick="MainbackBtn();" style="width: 15%" />
+    </div>
+</div>
+
+<script src="js/jquery.tablesorter.min.js"></script>
+
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+    <script>
+            function MainbackBtn() {
+            window.location.href = '@Url.Action("Index", "Administration")';
+        }
+    </script>
+    <script type="text/javascript">
+        var $rowa = $('#at-search tr');
+        $('#atSearch').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $rowa.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+
+        var $rowb = $('#lab-search tr');
+        $('#labSearch').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $rowb.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+
+        var $rowc = $('#log-search tr');
+        $('#logSearch').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $rowc.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+
+        var $rowd = $('#flag-search tr');
+        $('#ncfSearch').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $rowd.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+
+        var $rowe = $('#pt-search tr');
+        $('#ptSearch').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $rowe.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+
+        var $rowf = $('#pmoc-search tr');
+        $('#pmocSearch').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $rowf.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+
+        var $rowg = $('#icd10-search tr');
+        $('#icd10Search').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $rowg.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+    </script>
+    <script>
+        //create-labs
+        $(document).ready(function () {
+            if (localStorage.key(0) == "create_labs") {
+                $("#labs_tab").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("create_labs");
+            }
+        });
+        //edit-labs
+        $(document).ready(function () {
+            if (localStorage.key(0) == "edit_labs") {
+                $("#labs_tab").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("edit_labs");
+            }
+        });
+        //back-labs
+        $(document).ready(function () {
+            if (localStorage.key(0) == "back_labs") {
+                $("#labs_tab").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("back_labs");
+            }
+        });
+
+        //create-non-cdl
+        $(document).ready(function () {
+            if (localStorage.key(0) == "create_noncdl") {
+                $("#non_cdl_flags").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("create_noncdl");
+            }
+        });
+        //edit-non-cdl
+        $(document).ready(function () {
+            if (localStorage.key(0) == "edit_noncdl") {
+                $("#non_cdl_flags").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("edit_noncdl");
+            }
+        });
+        //back-non-cdl
+        $(document).ready(function () {
+            if (localStorage.key(0) == "back_noncdl") {
+                $("#non_cdl_flags").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("back_noncdl");
+            }
+        });
+
+        //create-pathologytype
+        $(document).ready(function () {
+            if (localStorage.key(0) == "create_pathologytype") {
+                $("#pathology_types").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("create_pathologytype");
+            }
+        });
+        //edit-pathologytype
+        $(document).ready(function () {
+            if (localStorage.key(0) == "edit_pathologytype") {
+                $("#pathology_types").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("edit_pathologytype");
+            }
+        });
+        //back-pathologytype
+        $(document).ready(function () {
+            if (localStorage.key(0) == "back_pathologytype") {
+                $("#pathology_types").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("back_pathologytype");
+            }
+        });
+
+        //create-pmoc
+        $(document).ready(function () {
+            if (localStorage.key(0) == "create_pmoc") {
+                $("#pmoc_tab").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("create_pmoc");
+            }
+        });
+        //edit-pmoc
+        $(document).ready(function () {
+            if (localStorage.key(0) == "edit_pmoc") {
+                $("#pmoc_tab").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("edit_pmoc");
+            }
+        });
+        //back-pmoc
+        $(document).ready(function () {
+            if (localStorage.key(0) == "back_pmoc") {
+                $("#pmoc_tab").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("back_pmoc");
+            }
+        });
+
+        //create-icd10
+        $(document).ready(function () {
+            if (localStorage.key(0) == "create_icd10") {
+                $("#icd10_tab").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("create_icd10");
+            }
+        });
+        //edit-icd10
+        $(document).ready(function () {
+            if (localStorage.key(0) == "edit_icd10") {
+                $("#icd10_tab").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("edit_icd10");
+            }
+        });
+        //back-icd10
+        $(document).ready(function () {
+            if (localStorage.key(0) == "back_icd10") {
+                $("#icd10_tab").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("back_icd10");
+            }
+        });
+    </script>
+}
+

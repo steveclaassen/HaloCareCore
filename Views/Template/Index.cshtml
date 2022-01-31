@@ -1,0 +1,512 @@
+﻿@model HaloCareCore.Models.CommunicationViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Templates";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<comment>
+    <!--
+        19 June 2020 -- HCare-953(Settings - Assignment tabs - page tabs)
+        Create a new layout for the updated tabs in the Settings/AssignmentTypes view.
+    -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+</style>
+<javascript>
+    <script src="https://www.jqueryscript.net/demo/jQuery-Plugin-For-Sortable-Bootstrap-Tables-Bootstrap-Sortable/Scripts/bootstrap-sortable.js"></script>
+</javascript>
+
+<div class="fullScreen_container">
+    <!----------------------------------------------------------------------------- html-top-navigation-panel  ---------------------------------------------------------------------------->
+    <navigation>
+        <nav id="global-nav" class="nav">
+            <div class="pull-left title">
+                <h1 class="site-title_patientProfile">
+                    <span><i class="fas fa-comments"></i></span>&emsp; Templates
+                </h1>
+            </div>
+            <div class="pull-right title">
+                <div class="site-title_userID pull-right">
+                    <div class="halocareLogoX"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+                </div>
+                <h1 class="site-title_userID pull-right">
+                    @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                    {
+                        <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                    }
+                </h1>
+                <h1 class="site-waffleIcon pull-right">
+                    <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+                </h1>
+            </div>
+        </nav>
+        <ul class="breadcrumbs_fullScreens">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+            <li><a href="@Url.Action("Index", "Administration", new {})">Settings</a></li>
+            <li><a href="#">@ViewBag.Title</a></li>
+        </ul>
+        <div class="navCollection_fullScreens">
+            @Html.Partial("_navCollection")
+        </div>
+
+        <div style="margin-bottom: 3%"></div>
+    </navigation>
+
+    <!-------------------------------------------------------------------------------------- html-body ------------------------------------------------------------------------------------>
+    <div class="container-tab">
+        <div class="row">
+            <div class="span12">
+                <div class="container-tab">
+                    <!------------------------------------------------------------------------------------ tab-navigation ----------------------------------------------------------------------------------->
+                    <ul class="nav nav-pills nav-justified" role="tablist">
+                        <li role="presentation" class="tab-clinical active"><a href="#text-templates" aria-controls="text-templates" class="tab-label" data-toggle="tab" id="text_template">Text</a></li>
+                        <li role="presentation" class="tab-clinical"><a href="#email-templates" aria-controls="email-templates" class="tab-label" role="tab" data-toggle="tab" id="email_template">Email</a></li>
+                        <li role="presentation" class="tab-clinical"><a href="#education-templates" aria-controls="education-templates" class="tab-label" role="tab" data-toggle="tab" id="education_template">Education</a></li>
+                        <li role="presentation" class="tab-clinical"><a href="#popup-templates" aria-controls="popup-templates" class="tab-label" role="tab" data-toggle="tab" id="popup_template">Popup</a></li>
+                        <li role="presentation" class="tab-clinical"><a href="#email-attachments" aria-controls="email-attachments" class="tab-label" role="tab" data-toggle="tab" id="email_attachments">Email attachments</a></li>
+                        <li role="presentation" class="tab-clinical"><a href="#email-layouts" aria-controls="email-layouts" class="tab-label" role="tab" data-toggle="tab" id="email_layouts">Email layout</a></li>
+                    </ul>
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="text-templates">
+                            <div class="row">
+                                <br />
+                                <!--------------------------------------------------------------------------- new/search -------------------------------------------------------------------------->
+                                <div class="col-md-12 row">
+                                    <div class="col-md-6">
+                                        <h4 class="subHeading">
+                                            Text templates
+                                            <a class="create-new" href="@Url.Action("Create", "Template", new { })" style="font-size: 14px">Create new <span><i class="fa fa-plus-circle" style="font-size: 12px"></i></span></a>
+                                        </h4>
+                                    </div>
+                                    <!--------------------------------------------------------------------------- jq-search -------------------------------------------------------------------------->
+                                    <div class="col-md-6">
+                                        <div class="input-wrapper-new-search">
+                                            <input type="text" class="form-control-new-search" id="text-template-search" onkeyup="myFunction()" placeholder="Search..." />
+                                        </div>
+                                    </div>
+                                </div>
+                                <!------------------------------------------------------------------------ text-template-table ---------------------------------------------------------------------->
+                                <table class="table taskSetupTable sortable" id="text-template-table">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 10%">@Html.DisplayNameFor(model => model.smsMessageTemplate.title) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="width: 30%">@Html.DisplayNameFor(model => model.smsMessageTemplate.template) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="width: 10%">@Html.DisplayNameFor(model => model.smsMessageTemplate.program) <i class="fa fa-fw fa-sort sortArrow"></i></th><!--HCare-1043-->
+                                            <th style="width: 12%">@Html.DisplayName("Created") <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="width: 12%">@Html.DisplayName("Modified") <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="width: 8%">@Html.DisplayNameFor(model => model.smsMessageTemplate.smsLanguage) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="text-align: center!important; width: 7%">@Html.DisplayNameFor(model => model.smsMessageTemplate.Active)</th>
+                                            <th style="text-align: center!important; width: 7%">Action</th>
+                                        </tr>
+                                    </thead>
+
+                                    @foreach (var item in Model.smsMessageTemplates)
+                                    {
+                                        <tbody id="text-template-filter">
+                                            <tr>
+                                                <td><span class="@(item.Active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.title)</span></td>
+                                                <td><span class="@(item.Active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.template)</span></td>
+                                                <td><span class="@(item.Active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.program)</span></td><!--HCare-1043-->
+                                                <td>@Html.DisplayFor(modelItem => item.createdBy) <span style="font-size: 10px">@(item.createdDate == null ? "" : item.createdDate.ToString("(dd-MM-yyyy)"))</span></td>
+                                                <td>@Html.DisplayFor(modelItem => item.modifiedBy) <span style="font-size: 10px">@(item.modifiedDate == null ? "" : item.modifiedDate.Value.ToString("(dd-MM-yyyy)"))</span></td>
+                                                <td><span class="@(item.Active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.smsLanguage)</span></td>
+                                                <td class="row-information text-center"><span class="@(item.Active == true ? "chk-yes fas fa-circle" : "chk-no fas fa-circle")"></span></td>
+                                                <td class="text-center">
+                                                    <input type="submit" class="link-button" value="View" onclick="location.href='@Url.Action("Details", "Template", new { id = item.templateID })'" /> /
+                                                    <input type="submit" class="link-button" value="Edit" onclick="location.href='@Url.Action("Edit", "Template", new { id = item.templateID })'" />
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    }
+                                </table>
+                            </div>
+                        </div>
+                        <div role="tabpanel" class="tab-pane" id="email-templates">
+                            <div class="row">
+                                <br />
+                                <!--------------------------------------------------------------------------- new/search -------------------------------------------------------------------------->
+                                <div class="col-md-12 row">
+                                    <div class="col-md-6">
+                                        <h4 class="subHeading">
+                                            Email templates
+                                            <a class="create-new" href="@Url.Action("Create_EmailTemplates", "Template", new { })" style="font-size: 14px">Create new <span><i class="fa fa-plus-circle" style="font-size: 12px"></i></span></a>
+                                        </h4>
+                                    </div>
+                                    <!--------------------------------------------------------------------------- jq-search -------------------------------------------------------------------------->
+                                    <div class="col-md-6">
+                                        <div class="input-wrapper-new-search">
+                                            <input type="text" class="form-control-new-search" id="email-template-search" onkeyup="myFunction()" placeholder="Search..." />
+                                        </div>
+                                    </div>
+                                </div>
+                                <!------------------------------------------------------------------------ email-template-table ---------------------------------------------------------------------->
+                                <table class="table taskSetupTable sortable" id="email-template-table">
+                                    <thead>
+                                        <tr>
+                                            <th>@Html.DisplayNameFor(model => model.emailTemplate.title) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="text-align: center!important; width: 12%">@Html.DisplayNameFor(model => model.emailTemplate.program) <i class="fa fa-fw fa-sort sortArrow"></i></th> <!--HCare-1043-->
+                                            <th style="text-align: center!important; width: 10%">@Html.DisplayNameFor(model => model.emailTemplate.Active)</th>
+                                            <th style="text-align: center!important; width: 10%">Action</th>
+                                        </tr>
+                                    </thead>
+
+                                    @foreach (var item in Model.emailTemplates)
+                                    {
+                                        <tbody id="email-template-filter">
+                                            <tr>
+                                                <td><span class="@(item.Active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.title)</span></td>
+                                                <td class="text-center">
+                                                    @if (!String.IsNullOrEmpty(item.program))
+                                                    {
+                                                        <span class="@(item.Active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.program)</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="@(item.Active == true ? "" : "active-false")"><span class="default-badge">All programs</span></span>
+                                                    }
+                                                </td>
+                                                <td class="row-information text-center"><span class="@(item.Active == true ? "chk-yes fas fa-circle" : "chk-no fas fa-circle")"></span></td>
+                                                <td class="text-center">
+                                                    <input type="submit" class="link-button" value="View" onclick="location.href='@Url.Action("Details_EmailTemplates", "Template", new { id = item.templateID })'" /> /
+                                                    <input type="submit" class="link-button" value="Edit" onclick="location.href='@Url.Action("Edit_EmailTemplates", "Template", new { id = item.templateID })'" />
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    }
+                                </table>
+                            </div>
+                        </div>
+                        <div role="tabpanel" class="tab-pane" id="email-attachments">
+                            <div class="row">
+                                <br />
+                                <!--------------------------------------------------------------------------- new/search -------------------------------------------------------------------------->
+                                <div class="col-md-12 row">
+                                    <div class="col-md-6">
+                                        <h4 class="subHeading">
+                                            Email attachments
+                                            <a class="create-new" href="@Url.Action("Attachment_Create", "Template", new { })" style="font-size: 14px">Create new <span><i class="fa fa-plus-circle" style="font-size: 12px"></i></span></a>
+                                        </h4>
+                                    </div>
+                                    <!--------------------------------------------------------------------------- jq-search -------------------------------------------------------------------------->
+                                    <div class="col-md-6">
+                                        <div class="input-wrapper-new-search">
+                                            <input type="text" class="form-control-new-search" id="attachment-search" onkeyup="myFunction()" placeholder="Search..." />
+                                        </div>
+                                    </div>
+                                </div>
+                                <!------------------------------------------------------------------------ email-template-table ---------------------------------------------------------------------->
+                                <table class="table taskSetupTable sortable" id="email-template-table">
+                                    <thead>
+                                        <tr>
+                                            <th>@Html.DisplayNameFor(model => model.Attachments[0].AttachmentName) <i class="fa fa-fw fa-sort"></i></th>
+                                            <th>@Html.DisplayNameFor(model => model.Attachments[0].FileName) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="text-align: center !important; width: 12%">@Html.DisplayName("Type") <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="text-align: center !important; width: 12%">@Html.DisplayNameFor(model => model.Attachments[0].Program) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="text-align: center!important; width: 10%">@Html.DisplayNameFor(model => model.Attachments[0].Active)</th>
+                                            <th style="text-align: center!important; width: 10%">Action</th>
+                                        </tr>
+                                    </thead>
+
+                                    @foreach (var item in Model.Attachments)
+                                    {
+                                        <tbody id="attachment-filter">
+                                            <tr>
+                                                <td><span class="@(item.Active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.AttachmentName)</span></td>
+                                                <td><span class="@(item.Active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.FileName)</span></td>
+                                                <td class="text-center"><span class="@(item.Active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.AttachmentType)</span></td>
+                                                <td class="text-center">
+                                                    @if (!String.IsNullOrEmpty(item.Program))
+                                                    {
+                                                        <span class="@(item.Active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.Program)</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="@(item.Active == true ? "" : "active-false")"><span class="default-badge">All programs</span></span>
+                                                    }
+                                                </td>
+                                                <td class="row-information text-center"><span class="@(item.Active == true ? "chk-yes fas fa-circle" : "chk-no fas fa-circle")"></span></td>
+                                                <td class="text-center">
+                                                    <input type="button" class="link-button" value="View" onclick="location.href='@Url.Action("Attachment_Details", "Template", new { id = item.Id })'" /> /
+                                                    <input type="button" class="link-button" value="Edit" onclick="location.href='@Url.Action("Attachment_Edit", "Template", new { id = item.Id })'" />
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    }
+                                </table>
+                            </div>
+                        </div>
+                        <div role="tabpanel" class="tab-pane" id="email-layouts">
+                            <div class="row">
+                                <br />
+                                <!--------------------------------------------------------------------------- new/search -------------------------------------------------------------------------->
+                                <div class="col-md-12 row">
+                                    <div class="col-md-6">
+                                        <h4 class="subHeading">
+                                            Email layout
+                                            <a class="create-new" href="@Url.Action("Email_Layout_Create", "Template", new { })" style="font-size: 14px">Create new <span><i class="fa fa-plus-circle" style="font-size: 12px"></i></span></a>
+                                        </h4>
+                                    </div>
+                                    <!--------------------------------------------------------------------------- jq-search -------------------------------------------------------------------------->
+                                    <div class="col-md-6">
+                                        <div class="input-wrapper-new-search">
+                                            <input type="text" class="form-control-new-search" id="layout-search" onkeyup="myFunction()" placeholder="Search..." />
+                                        </div>
+                                    </div>
+                                </div>
+                                <!------------------------------------------------------------------------ email-template-table ---------------------------------------------------------------------->
+                                <table class="table taskSetupTable sortable" id="email-template-table">
+                                    <thead>
+                                        <tr>
+                                            <th>@Html.DisplayNameFor(model => model.EmailLayouts[0].Description) <i class="fa fa-fw fa-sort"></i></th>
+                                            <th style="text-align: center!important; width: 12%">@Html.DisplayNameFor(model => model.EmailLayouts[0].LayoutType) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="text-align: center!important; width: 12%">@Html.DisplayNameFor(model => model.EmailLayouts[0].Program) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="text-align: center!important; width: 10%">@Html.DisplayNameFor(model => model.EmailLayouts[0].Active)</th>
+                                            <th style="text-align: center!important; width: 10%">Action</th>
+                                        </tr>
+                                    </thead>
+
+                                    @foreach (var item in Model.EmailLayouts)
+                                    {
+                                        <tbody id="layout-filter">
+                                            <tr>
+                                                <td><span class="@(item.Active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.Description)</span></td>
+                                                <td class="text-center"><span class="@(item.Active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.LayoutType)</span></td>
+                                                <td class="text-center">
+                                                    @if (!String.IsNullOrEmpty(item.Program))
+                                                    {
+                                                        <span class="@(item.Active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.Program)</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="@(item.Active == true ? "" : "active-false")"><span class="default-badge">All programs</span></span>
+                                                    }
+                                                </td>
+                                                <td class="row-information text-center"><span class="@(item.Active == true ? "chk-yes fas fa-circle" : "chk-no fas fa-circle")"></span></td>
+                                                <td class="text-center">
+                                                    <input type="button" class="link-button" value="View" onclick="location.href='@Url.Action("Email_Layout_Details", "Template", new { id = item.Id })'" /> /
+                                                    <input type="button" class="link-button" value="Edit" onclick="location.href='@Url.Action("Email_Layout_Edit", "Template", new { id = item.Id })'" />
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    }
+                                </table>
+                            </div>
+                        </div>
+                        <div role="tabpanel" class="tab-pane active" id="popup-templates">
+                            <div class="row">
+                                <br />
+                                <!--------------------------------------------------------------------------- new/search -------------------------------------------------------------------------->
+                                <div class="col-md-12 row">
+                                    <div class="col-md-6">
+                                        <h4 class="subHeading">
+                                            Popup templates
+                                            <a class="create-new" href="@Url.Action("PopUpTemplates_Create", "Template", new { })" style="font-size: 14px">Create new <span><i class="fa fa-plus-circle" style="font-size: 12px"></i></span></a>
+                                        </h4>
+                                    </div>
+                                    <!--------------------------------------------------------------------------- jq-search -------------------------------------------------------------------------->
+                                    <div class="col-md-6">
+                                        <div class="input-wrapper-new-search">
+                                            <input type="text" class="form-control-new-search" id="pop-search" onkeyup="myFunction()" placeholder="Search..." />
+                                        </div>
+                                    </div>
+                                </div>
+                                <!------------------------------------------------------------------------ text-template-table ---------------------------------------------------------------------->
+                                <table class="table taskSetupTable sortable" id="text-template-table">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 8%">@Html.DisplayNameFor(model => model.PopUpTemplate.Type) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="width: 15%">@Html.DisplayNameFor(model => model.PopUpTemplate.Title) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th>@Html.DisplayNameFor(model => model.PopUpTemplate.Template) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="width: 10%">@Html.DisplayNameFor(model => model.PopUpTemplate.MedicalAids) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="width: 15%">@Html.DisplayNameFor(model => model.PopUpTemplate.Options) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="width: 20%">@Html.DisplayNameFor(model => model.PopUpTemplate.Programs) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="text-align: center!important; width: 6%">@Html.DisplayNameFor(model => model.PopUpTemplate.Active) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="text-align: center!important; width: 6%">@Html.DisplayName("Action")</th>
+                                        </tr>
+                                    </thead>
+
+                                    @foreach (var item in Model.PopUpTemplates)
+                                    {
+                                        <tbody id="pop-filter">
+                                            <tr>
+                                                <td><span class="@(item.Active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.Type)</span></td>
+                                                <td><span class="@(item.Active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.Title)</span></td>
+                                                <td><span class="@(item.Active == true ? "" : "active-false")">@Html.Raw(Html.Encode(item.Template).Replace("(b)", "<b>").Replace("(/b)", "</b>"))</span></td>
+                                                <td><span class="@(item.Active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.selectedSchemes)</span></td>
+
+                                                <td>
+                                                    <span class="@(item.Active == true ? "" : "active-false")">
+                                                        @Html.Raw(Html.Encode(item.selectedOptions).Replace(",", "<br />" + ""))
+                                                    </span>
+                                                </td>
+                                                <td><span class="@(item.Active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.selectedPrograms)</span></td>
+                                                <td class="row-information text-center"><span class="@(item.Active == true ? "chk-yes fas fa-circle" : "chk-no fas fa-circle")"></span></td>
+                                                <td class="text-center">
+                                                    <input type="submit" class="link-button" value="View" onclick="location.href='@Url.Action("PopUpTemplates_Details", "Template", new { id = item.Id })'" /> /
+                                                    <input type="submit" class="link-button" value="Edit" onclick="location.href='@Url.Action("PopUpTemplates_Edit", "Template", new { id = item.Id })'" />
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    }
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixedBack">
+        <input value="Back" class="btn buttonRound_formBack " onclick="MainbackBtn();" style="width: 15%" />
+    </div>
+</div>
+
+<script src="js/jquery.tablesorter.min.js"></script>
+
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+    <script>
+            function MainbackBtn() {
+            window.location.href = '@Url.Action("Index", "Administration")';
+        }
+    </script>
+    <script>
+        var $rowa = $('#text-template-filter tr');
+        $('#text-template-search').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $rowa.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+
+        var $rowb = $('#email-template-filter tr');
+        $('#email-template-search').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $rowb.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+
+        var $rowc = $('#pop-filter tr');
+        $('#pop-search').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $rowc.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+    </script>
+    <script>
+        //create-email
+        $(document).ready(function () {
+            if (localStorage.key(0) == "create_email") {
+                $("#email_templates").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("create_email");
+            }
+        });
+        //edit-email
+        $(document).ready(function () {
+            if (localStorage.key(0) == "edit_email") {
+                $("#email_templates").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("edit_email");
+            }
+        });
+        //back-email
+        $(document).ready(function () {
+            if (localStorage.key(0) == "back_email") {
+                $("#email_templates").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("back_email");
+            }
+        });
+
+        //create-attachment
+        $(document).ready(function () {
+            if (localStorage.key(0) == "create_attachment") {
+                $("#email_attachments").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("create_attachment");
+            }
+        });
+        //edit-attachment
+        $(document).ready(function () {
+            if (localStorage.key(0) == "edit_attachment") {
+                $("#email_attachments").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("edit_attachment");
+            }
+        });
+        //back-attachment
+        $(document).ready(function () {
+            if (localStorage.key(0) == "back_attachment") {
+                $("#email_attachments").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("back_attachment");
+            }
+        });
+
+        //create-layout
+        $(document).ready(function () {
+            if (localStorage.key(0) == "create_layout") {
+                $("#email_layouts").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("create_layout");
+            }
+        });
+        //edit-layout
+        $(document).ready(function () {
+            if (localStorage.key(0) == "edit_layout") {
+                $("#email_layouts").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("edit_layout");
+            }
+        });
+        //back-layout
+        $(document).ready(function () {
+            if (localStorage.key(0) == "back_layout") {
+                $("#email_layouts").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("back_layout");
+            }
+        });
+        //create-popup
+        $(document).ready(function () {
+            if (localStorage.key(0) == "create_popup") {
+                $("#popup_template").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("create_popup");
+            }
+        });
+        //edit-popup
+        $(document).ready(function () {
+            if (localStorage.key(0) == "edit_popup") {
+                $("#popup_template").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("edit_popup");
+            }
+        });
+        //back-popup
+        $(document).ready(function () {
+            if (localStorage.key(0) == "back_popup") {
+                $("#popup_template").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("back_popup");
+            }
+        });
+    </script>
+}
+

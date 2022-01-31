@@ -1,0 +1,188 @@
+﻿@model IEnumerable<HaloCareCore.Models.ScriptViewModel>
+@{
+    Layout = "~/Views/Shared/_LayoutModal.cshtml";
+}
+
+<style>
+    .contentBlock_modal {
+        background-color: #fff;
+        border: 1px solid #ddd;
+        box-shadow: 2px 2px 1px 0px rgba(0,0,0,0.38);
+        position: relative;
+        margin: auto;
+        display: block;
+        padding: 5px;
+        border-radius: 5px;
+        margin-top: 5% !important;
+    }
+
+    .table tr th,
+    .table tr td {
+        text-align: left !important;
+    }
+
+    .assignmentModal_viewScript {
+        width: 90% !important;
+        background-color: #fff;
+        border: none;
+        box-shadow: 2px 2px 1px 0px rgba(0,0,0,0.38);
+        position: relative;
+        margin: auto;
+        display: block;
+        padding: 0px;
+        border-radius: 5px;
+        margin-top: 0% !important;
+        z-index: 10 !important;
+    }
+
+    .assignmentModal_viewScriptX {
+        width: 50% !important;
+        background-color: #fff;
+        border: none;
+        box-shadow: 2px 2px 1px 0px rgba(0,0,0,0.38);
+        position: relative;
+        margin: auto;
+        display: block;
+        padding: 0px;
+        border-radius: 5px;
+        margin-top: 0% !important;
+        z-index: 10 !important;
+    }
+</style>
+
+<div class="row assignmentModal_viewScript">
+
+    <div class="modal-header modal-header-primary">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true" id="assignmentModalClose">×</button>
+        <h2>Script Details</h2>
+    </div>
+    <br />
+    <br />
+
+    <table class="table pathologyTable" style="margin-left: 10px!important; margin-right: 0px!important" >
+        <tr>
+
+            <th>
+                @Html.DisplayNameFor(model => model.scriptID)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.scriptType)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.nappiCode)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.productName)
+            </th>
+            <th style="text-align: center!important; column-width: 50px;">
+                @Html.DisplayNameFor(model => model.quantity)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.directions)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.itemStatus)
+            </th>
+            <th style="text-align: center!important; column-width: 50px;">
+                @Html.DisplayNameFor(model => model.fromDate)
+            </th>
+            <th style="text-align: center!important; column-width: 50px;">
+                @Html.DisplayNameFor(model => model.toDate)
+            </th>
+            <th>
+                @Html.DisplayName("Prescribing Dr")
+            </th>
+        </tr>
+        @if (Model.Count() == 0)
+        {
+            <tr><td>No records available</td></tr>
+        }
+        else
+        {
+            foreach (var item in Model)
+            {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.scriptID)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.scriptType)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.nappiCode)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.productName)
+        </td>
+        <td style="text-align: center!important">
+            @Html.DisplayFor(modelItem => item.quantity)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.directions)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.itemStatus)
+        </td>
+        <td style="text-align: center!important">
+            @Html.DisplayFor(modelItem => item.fromDate)
+        </td>
+        <td style="text-align: center!important">
+            @Html.DisplayFor(modelItem => item.toDate)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.prescribingDr)
+        </td>
+    </tr>
+            }
+        }
+
+    </table>
+
+    <!--
+
+    <div class="col-md-12">
+        <div class="col-md-1"></div>
+
+        <div class="col-md-3 verticalLine_script" style="font-weight: bold">
+
+            @Html.DisplayNameFor(model => model.scriptID) : <br />
+            @Html.DisplayNameFor(model => model.scriptType) : <br />
+            @Html.DisplayNameFor(model => model.nappiCode) : <br />
+            @Html.DisplayNameFor(model => model.productName) : <br />
+            @Html.DisplayNameFor(model => model.strength) : <br />
+            @Html.DisplayNameFor(model => model.quantity) : <br />
+            @Html.DisplayNameFor(model => model.directions) : <br />
+            @Html.DisplayNameFor(model => model.itemStatus) : <br />
+            @Html.DisplayNameFor(model => model.fromDate) : <br />
+            @Html.DisplayNameFor(model => model.toDate) : <br />
+            @Html.DisplayNameFor(model => model.prescribingDr)
+
+        </div>
+        <div class="col-md-6">
+            @foreach (var item in Model)
+            {
+                @Html.DisplayFor(modelItem => item.scriptID) <br />
+                @Html.DisplayFor(modelItem => item.scriptType) <br />
+                @Html.DisplayFor(modelItem => item.nappiCode) <br />
+                @Html.DisplayFor(modelItem => item.productName) <br />
+                @Html.DisplayFor(modelItem => item.strength) <br />
+                @Html.DisplayFor(modelItem => item.quantity) <br />
+                @Html.DisplayFor(modelItem => item.directions) <br />
+                @Html.DisplayFor(modelItem => item.itemStatus) <br />
+                @Html.DisplayFor(modelItem => item.fromDate) <br />
+                @Html.DisplayFor(modelItem => item.toDate) <br />
+                @Html.DisplayFor(modelItem => item.prescribingDr) <br />
+            }
+
+
+        </div>
+        <br />
+    </div>
+    <div style="margin-bottom: 5%">&nbsp;</div>
+        -->
+    <div class="">
+        <div class="actionButton" style="margin-left: 43%!important; margin-bottom: 3%">
+            <button type="button" class="btn buttonRound_scriptCancel" data-dismiss="modal" style="width: 20%!important">Close</button>
+        </div>
+    </div>
+</div>

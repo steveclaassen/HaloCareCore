@@ -1,0 +1,342 @@
+﻿@model HaloCareCore.Models.Questionnaire.MH_DepressionResponse
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Depression questionnaire";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<comment>
+    <!--
+        07 August 2020 -- HCare-1126(Mental Health Disease: QUESTIONNAIRE - DEPRESSION)
+    -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+</style>
+
+<!---------------------------------------------------------------------- header ---------------------------------------------------------------------->
+<nav id="global-nav" class="nav">
+    <div class="pull-left title">
+        <h1 class="site-title_patientProfile">
+            <span><img src="~/Content/Images/_2020/icons/banner-icon/mental-health-white.png" /></span>&emsp; Depression questionnaire
+        </h1>
+    </div>
+    <div class="pull-right title">
+        <h1 class="site-title_userID pull-right">
+            <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+        </h1>
+        <h1 class="site-title_userID pull-right">
+            @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+            {
+                <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+            }
+        </h1>
+        <h1 class="site-waffleIcon pull-right">
+            <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+        </h1>
+    </div>
+</nav>
+
+<div class="dashboardContainer zero-padding">
+    <div class="patientDashboard_View">
+        <!------------------------------------------------------------------------ bread-crumbs ------------------------------------------------------------------------>
+        <ul class="breadcrumbs_patientDashboard">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new { })">Home</a></li>
+            <li><a href="@Url.Action("patientClinical", "Member", new { DependentID = Context.Request.Query["DependentID"] })">Patient</a></li>
+            <li><a href="#">@ViewBag.Title</a></li>
+        </ul>
+
+        <!--------------------------------------------------------------------- left-navigation-bar --------------------------------------------------------------------->
+        @Html.Partial("_navSlider_blank", new { DependentID = Context.Request.Query["DependentID"] })
+
+        <!----------------------------------------------------------------------- nav-collection ----------------------------------------------------------------------->
+        <div class="navCollection_patientDashboard">
+            @Html.Partial("_navCollection")
+        </div>
+
+        <!----------------------------------------------------------------------- patient-profile ----------------------------------------------------------------------->
+        <div class="profileBar">
+            @Html.Action("_profileBar_edit", "Member", new { DependentID = Model.DependantID })
+        </div>
+    </div>
+    <br />
+    <!----------------------------------------------------------------------- form ----------------------------------------------------------------------->
+    <div class="profilebar-spacer"></div>
+
+    <div id="schizophrenia-panel" class="patientDashboard_container">
+        <div class="col-md-12 row">
+            <div class="heading-spacer"></div>
+            <div class="col-md-6"><div class="page-heading">Details</div></div>
+            <hr class="heading-ruler">
+        </div>
+        <div class="col-md-6 row"></div>
+        <div class="col-md-12">
+            <div class="row">
+                <table class="table details-table table-hover" id="schizophrenia-details">
+                    <tbody>
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayNameFor(model => model.AssignmentID)</td>
+                            <td class="row-information">@Html.DisplayFor(model => model.AssignmentID)</td>
+                        </tr>
+
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayNameFor(model => model.Outcome)</td>
+                            <td class="row-information">
+                                <span class="@(Model.Outcome.ToLower().Contains("normal") ? "chk-absent fas fa-circle" : Model.Outcome.ToLower().Contains("mild") ? "chk-mild fas fa-circle" : Model.Outcome.ToLower().Contains("moderate") ? "chk-moderate fas fa-circle" : Model.Outcome.ToLower().Contains("severe") ? "chk-severe fas fa-circle" : Model.Outcome.ToLower().Contains("urgent") ? "chk-urgent fas fa-circle" : "chk-followup fas fa-circle")"></span>
+                                &emsp;@Html.DisplayFor(model => model.Outcome)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayNameFor(model => model.TotalScore)</td>
+                            <td class="row-information">@Html.DisplayFor(model => model.TotalScore)</td>
+                        </tr>
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayNameFor(model => model.Comment)</td>
+                            <td class="row-information">@Html.DisplayFor(model => model.Comment)</td>
+                        </tr>
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayNameFor(model => model.CreatedDate)</td>
+                            <td class="row-information">@Html.DisplayFor(model => model.CreatedDate)</td>
+                        </tr>
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayNameFor(model => model.CreatedBy)</td>
+                            <td class="row-information">@Html.DisplayFor(model => model.CreatedBy)</td>
+                        </tr>
+                        @if (Model.ModifiedDate != null)
+                        {
+                            <tr>
+                                <td class="row-heading subject">@Html.DisplayNameFor(model => model.ModifiedDate)</td>
+                                <td class="row-information">@Html.DisplayFor(model => model.ModifiedDate)</td>
+                            </tr>
+                            <tr>
+                                <td class="row-heading subject">@Html.DisplayNameFor(model => model.ModifiedBy)</td>
+                                <td class="row-information">@Html.DisplayFor(model => model.ModifiedBy)</td>
+                            </tr>
+                        }
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayNameFor(model => model.Program)</td>
+                            <td class="row-information">@Html.DisplayFor(model => model.Program)</td>
+                        </tr>
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayNameFor(model => model.Active)</td>
+                            <td class="row-information"><span class="@(Model.Active == true ? "chk-yes fas fa-circle" : "chk-no fas fa-circle")"></span>&emsp;@((Model.Active == true) ? "Yes" : "No")</td>
+                        </tr>
+
+                    </tbody>
+                </table>
+                <br />
+                <br />
+                <div class="col-md-12 row">
+                    <div class="heading-spacer"></div>
+                    <div class="col-md-6"><div class="page-heading">Questionnaire results</div></div>
+                    <hr class="heading-ruler">
+                </div>
+
+                <table id="schizophrenia-table" class="table mental-health-table">
+                    <tr>
+                        <td style="width: 6%; text-align:center!important">Q1</td>
+                        <td style="width: 80%">
+                            Depressed mood: Sadness, hopeless, helpless, worthless
+                        </td>
+                        <td style="width: 50%">
+                            <span class="@(Model.Depression.ToLower() == "absent" ? "chk-absent fas fa-circle" : Model.Depression.ToLower() == "mild" ? "chk-mild fas fa-circle" : Model.Depression.ToLower() == "moderate" ? "chk-moderate fas fa-circle" : Model.Depression.ToLower() == "severe" ? "chk-severe fas fa-circle" : Model.Depression.ToLower() == "urgent" ? "chk-urgent fas fa-circle" : "chk-followup fas fa-circle")"></span>
+                            &emsp;@Html.DisplayName(Model.Depression)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 6%; text-align:center!important">Q2</td>
+                        <td style="width: 80%">
+                            Feelings of guilt
+                        </td>
+                        <td style="width: 50%">
+                            <span class="@(Model.Guilt.ToLower() == "absent" ? "chk-absent fas fa-circle" : Model.Guilt.ToLower() == "mild" ? "chk-mild fas fa-circle" : Model.Guilt.ToLower() == "moderate" ? "chk-moderate fas fa-circle" : Model.Guilt.ToLower() == "severe" ? "chk-severe fas fa-circle" : Model.Guilt.ToLower() == "urgent" ? "chk-urgent fas fa-circle" : "chk-followup fas fa-circle")"></span>
+                            &emsp;@Html.DisplayName(Model.Guilt)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 6%; text-align:center!important">Q3</td>
+                        <td style="width: 80%">
+                            Suicide
+                        </td>
+                        <td style="width: 50%">
+                            <span class="@(Model.Suicidal.ToLower() == "absent" ? "chk-absent fas fa-circle" : Model.Suicidal.ToLower() == "mild" ? "chk-mild fas fa-circle" : Model.Suicidal.ToLower() == "moderate" ? "chk-moderate fas fa-circle" : Model.Suicidal.ToLower() == "severe" ? "chk-severe fas fa-circle" : Model.Suicidal.ToLower() == "urgent" ? "chk-urgent fas fa-circle" : "chk-followup fas fa-circle")"></span>
+                            &emsp;@Html.DisplayName(Model.Suicidal)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 6%; text-align:center!important">Q4</td>
+                        <td style="width: 80%">
+                            Insomnia: early in the night
+                        </td>
+                        <td style="width: 50%">
+                            <span class="@(Model.InsomniaEarlyNight.ToLower() == "absent" ? "chk-absent fas fa-circle" : Model.InsomniaEarlyNight.ToLower() == "mild" ? "chk-mild fas fa-circle" : Model.InsomniaEarlyNight.ToLower() == "moderate" ? "chk-moderate fas fa-circle" : Model.InsomniaEarlyNight.ToLower() == "severe" ? "chk-severe fas fa-circle" : Model.InsomniaEarlyNight.ToLower() == "urgent" ? "chk-urgent fas fa-circle" : "chk-followup fas fa-circle")"></span>
+                            &emsp;@Html.DisplayName(Model.InsomniaEarlyNight)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 6%; text-align:center!important">Q5</td>
+                        <td style="width: 80%">
+                            Insomnia: middle of the night
+                        </td>
+                        <td style="width: 50%">
+                            <span class="@(Model.InsomniaMiddleNight.ToLower() == "absent" ? "chk-absent fas fa-circle" : Model.InsomniaMiddleNight.ToLower() == "mild" ? "chk-mild fas fa-circle" : Model.InsomniaMiddleNight.ToLower() == "moderate" ? "chk-moderate fas fa-circle" : Model.InsomniaMiddleNight.ToLower() == "severe" ? "chk-severe fas fa-circle" : Model.InsomniaMiddleNight.ToLower() == "urgent" ? "chk-urgent fas fa-circle" : "chk-followup fas fa-circle")"></span>
+                            &emsp;@Html.DisplayName(Model.InsomniaMiddleNight)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 6%; text-align:center!important">Q6</td>
+                        <td style="width: 80%">
+                            Insomnia: early hours of the morning
+                        </td>
+                        <td style="width: 50%">
+                            <span class="@(Model.InsomniaEarlyMorning.ToLower() == "absent" ? "chk-absent fas fa-circle" : Model.InsomniaEarlyMorning.ToLower() == "mild" ? "chk-mild fas fa-circle" : Model.InsomniaEarlyMorning.ToLower() == "moderate" ? "chk-moderate fas fa-circle" : Model.InsomniaEarlyMorning.ToLower() == "severe" ? "chk-severe fas fa-circle" : Model.InsomniaEarlyMorning.ToLower() == "urgent" ? "chk-urgent fas fa-circle" : "chk-followup fas fa-circle")"></span>
+                            &emsp;@Html.DisplayName(Model.InsomniaEarlyMorning)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 6%; text-align:center!important">Q7</td>
+                        <td style="width: 80%">
+                            Work and activities
+                        </td>
+                        <td style="width: 50%">
+                            <span class="@(Model.Activity.ToLower() == "absent" ? "chk-absent fas fa-circle" : Model.Activity.ToLower() == "mild" ? "chk-mild fas fa-circle" : Model.Activity.ToLower() == "moderate" ? "chk-moderate fas fa-circle" : Model.Activity.ToLower() == "severe" ? "chk-severe fas fa-circle" : Model.Activity.ToLower() == "urgent" ? "chk-urgent fas fa-circle" : "chk-followup fas fa-circle")"></span>
+                            &emsp;@Html.DisplayName(Model.Activity)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 6%; text-align:center!important">Q8</td>
+                        <td style="width: 80%">
+                            Slowness of thought and speech, impaired ability to concentrate, decreased motor activity
+                        </td>
+                        <td style="width: 50%">
+                            <span class="@(Model.Psychomotor.ToLower() == "absent" ? "chk-absent fas fa-circle" : Model.Psychomotor.ToLower() == "mild" ? "chk-mild fas fa-circle" : Model.Psychomotor.ToLower() == "moderate" ? "chk-moderate fas fa-circle" : Model.Psychomotor.ToLower() == "severe" ? "chk-severe fas fa-circle" : Model.Psychomotor.ToLower() == "urgent" ? "chk-urgent fas fa-circle" : "chk-followup fas fa-circle")"></span>
+                            &emsp;@Html.DisplayName(Model.Psychomotor)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 6%; text-align:center!important">Q9</td>
+                        <td style="width: 80%">
+                            Agitation
+                        </td>
+                        <td style="width: 50%">
+                            <span class="@(Model.Agitation.ToLower() == "absent" ? "chk-absent fas fa-circle" : Model.Agitation.ToLower() == "mild" ? "chk-mild fas fa-circle" : Model.Agitation.ToLower() == "moderate" ? "chk-moderate fas fa-circle" : Model.Agitation.ToLower() == "severe" ? "chk-severe fas fa-circle" : Model.Agitation.ToLower() == "urgent" ? "chk-urgent fas fa-circle" : "chk-followup fas fa-circle")"></span>
+                            &emsp;@Html.DisplayName(Model.Agitation)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 6%; text-align:center!important">Q10</td>
+                        <td style="width: 80%">
+                            Anxiety psychic
+                        </td>
+                        <td style="width: 50%">
+                            <span class="@(Model.AnxietyPsychic.ToLower() == "absent" ? "chk-absent fas fa-circle" : Model.AnxietyPsychic.ToLower() == "mild" ? "chk-mild fas fa-circle" : Model.AnxietyPsychic.ToLower() == "moderate" ? "chk-moderate fas fa-circle" : Model.AnxietyPsychic.ToLower() == "severe" ? "chk-severe fas fa-circle" : Model.AnxietyPsychic.ToLower() == "urgent" ? "chk-urgent fas fa-circle" : "chk-followup fas fa-circle")"></span>
+                            &emsp;@Html.DisplayName(Model.AnxietyPsychic)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 6%; text-align:center!important">Q11</td>
+                        <td style="width: 80%">
+                            Anxiety somatic: Do you have any symptoms of: gastro-intestinal – dry mouth, wind, indigestion, diarrhoea, cramps, belching cardio-vascular – palpitations, headaches respiratory – hyperventilation, sighing Increased urinary frequency
+                            sweating.
+                        </td>
+                        <td style="width: 50%">
+                            <span class="@(Model.AnxietySomatic.ToLower() == "absent" ? "chk-absent fas fa-circle" : Model.AnxietySomatic.ToLower() == "mild" ? "chk-mild fas fa-circle" : Model.AnxietySomatic.ToLower() == "moderate" ? "chk-moderate fas fa-circle" : Model.AnxietySomatic.ToLower() == "severe" ? "chk-severe fas fa-circle" : Model.AnxietySomatic.ToLower() == "urgent" ? "chk-urgent fas fa-circle" : "chk-followup fas fa-circle")"></span>
+                            &emsp;@Html.DisplayName(Model.AnxietySomatic)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 6%; text-align:center!important">Q12</td>
+                        <td style="width: 80%">
+                            Somatic symptoms Gastro-intestinal
+                        </td>
+                        <td style="width: 50%">
+                            <span class="@(Model.SomaticSymGastro.ToLower() == "absent" ? "chk-absent fas fa-circle" : Model.SomaticSymGastro.ToLower() == "mild" ? "chk-mild fas fa-circle" : Model.SomaticSymGastro.ToLower() == "moderate" ? "chk-moderate fas fa-circle" : Model.SomaticSymGastro.ToLower() == "severe" ? "chk-severe fas fa-circle" : Model.SomaticSymGastro.ToLower() == "urgent" ? "chk-urgent fas fa-circle" : "chk-followup fas fa-circle")"></span>
+                            &emsp;@Html.DisplayName(Model.SomaticSymGastro)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 6%; text-align:center!important">Q13</td>
+                        <td style="width: 80%">
+                            General somatic symptoms
+                        </td>
+                        <td style="width: 50%">
+                            <span class="@(Model.SomaticSymGeneral.ToLower() == "absent" ? "chk-absent fas fa-circle" : Model.SomaticSymGeneral.ToLower() == "mild" ? "chk-mild fas fa-circle" : Model.SomaticSymGeneral.ToLower() == "moderate" ? "chk-moderate fas fa-circle" : Model.SomaticSymGeneral.ToLower() == "severe" ? "chk-severe fas fa-circle" : Model.SomaticSymGeneral.ToLower() == "urgent" ? "chk-urgent fas fa-circle" : "chk-followup fas fa-circle")"></span>
+                            &emsp;@Html.DisplayName(Model.SomaticSymGeneral)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 6%; text-align:center!important">Q14</td>
+                        <td style="width: 80%">
+                            Symptoms such as loss of libido and menstrual disturbances
+                        </td>
+                        <td style="width: 50%">
+                            <span class="@(Model.Sexology.ToLower() == "absent" ? "chk-absent fas fa-circle" : Model.Sexology.ToLower() == "mild" ? "chk-mild fas fa-circle" : Model.Sexology.ToLower() == "moderate" ? "chk-moderate fas fa-circle" : Model.Sexology.ToLower() == "severe" ? "chk-severe fas fa-circle" : Model.Sexology.ToLower() == "urgent" ? "chk-urgent fas fa-circle" : "chk-followup fas fa-circle")"></span>
+                            &emsp;@Html.DisplayName(Model.Sexology)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 6%; text-align:center!important">Q15</td>
+                        <td style="width: 80%">
+                            Hypochondriasis
+                        </td>
+                        <td style="width: 50%">
+                            <span class="@(Model.Hypochondriasis.ToLower() == "absent" ? "chk-absent fas fa-circle" : Model.Hypochondriasis.ToLower() == "mild" ? "chk-mild fas fa-circle" : Model.Hypochondriasis.ToLower() == "moderate" ? "chk-moderate fas fa-circle" : Model.Hypochondriasis.ToLower() == "severe" ? "chk-severe fas fa-circle" : Model.Hypochondriasis.ToLower() == "urgent" ? "chk-urgent fas fa-circle" : "chk-followup fas fa-circle")"></span>
+                            &emsp;@Html.DisplayName(Model.Hypochondriasis)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 6%; text-align:center!important">Q16</td>
+                        <td style="width: 80%">
+                            Loss of weight
+                        </td>
+                        <td style="width: 50%">
+                            <span class="@(Model.WeightLoss.ToLower() == "absent" ? "chk-absent fas fa-circle" : Model.WeightLoss.ToLower() == "mild" ? "chk-mild fas fa-circle" : Model.WeightLoss.ToLower() == "moderate" ? "chk-moderate fas fa-circle" : Model.WeightLoss.ToLower() == "severe" ? "chk-severe fas fa-circle" : Model.WeightLoss.ToLower() == "urgent" ? "chk-urgent fas fa-circle" : "chk-followup fas fa-circle")"></span>
+                            &emsp;@Html.DisplayName(Model.WeightLoss)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 6%; text-align:center!important">Q17</td>
+                        <td style="width: 80%">
+                            Insight
+                        </td>
+                        <td style="width: 50%">
+                            <span class="@(Model.Insight.ToLower() == "absent" ? "chk-absent fas fa-circle" : Model.Insight.ToLower() == "mild" ? "chk-mild fas fa-circle" : Model.Insight.ToLower() == "moderate" ? "chk-moderate fas fa-circle" : Model.Insight.ToLower() == "severe" ? "chk-severe fas fa-circle" : Model.Insight.ToLower() == "urgent" ? "chk-urgent fas fa-circle" : "chk-followup fas fa-circle")"></span>
+                            &emsp;@Html.DisplayName(Model.Insight)
+                        </td>
+                    </tr>
+                </table>
+
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="text-center">
+                <input id="edit-other" value="Edit" class="btn edit-button" onclick="location.href = '@Url.Action("MH_Depression_Edit", "Member", new { id = Model.Id, pro = Context.Request.Query["pro"] })'; editKey();" style="width: 15%!important" /><br />
+                <input value="Back" class="btn reset-button go_back" onclick="backKey()" style="width: 15%!important" />
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <script>
+        function backKey() {
+            localStorage.clear();
+            localStorage.removeItem("details_depression");
+            localStorage.setItem("back_depression", Date.now());
+        }
+        function editKey() {
+            localStorage.clear();
+            localStorage.removeItem("details_depression");
+            localStorage.setItem("edit_depression", Date.now());
+        }
+
+    </script>
+}

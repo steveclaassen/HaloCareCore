@@ -1,0 +1,363 @@
+﻿@model HaloCareCore.Models.DoctorViewModel
+
+@{
+    ViewBag.Title = "DetailedDoctorView";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+</style>
+
+<div class="fullScreen_container zero-padding">
+
+    <!--pageHeader-->
+    <nav id="global-nav" class="nav">
+        <div class="pull-left title">
+            <h1 class="site-title_patientProfile">
+                <span><i class="fas fa-user-md"></i>&emsp; Doctors</span>
+            </h1>
+        </div>
+        <div class="pull-right title">
+            <h1 class="site-title_userID pull-right">
+                <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+            </h1>
+            <h1 class="site-title_userID pull-right">
+                @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                {
+                    <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                }
+            </h1>
+            <h1 class="site-waffleIcon pull-right">
+                <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+            </h1>
+        </div>
+    </nav>
+
+    <!--breadCrumbs-->
+    <ul class="breadcrumbs_fullScreens">
+        <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+        <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+        <li><a href="@Url.Action("Index", "Doctor", new {})">Doctors</a></li>
+        <li><a href="#">Detail</a></li>
+    </ul>
+
+    <!--navCollection-->
+    <div class="navCollection_fullScreens">
+        @Html.Partial("_navCollection")
+    </div>
+
+    <div style="margin-bottom: 1%"></div>
+
+    <h4 class="summaryHeading" style="margin-bottom: -30px">Doctor search</h4>
+
+    <div class="row adminContentBlock">
+        <h4 class="tableHeading">Doctor details</h4>
+        <hr class="reportRuler" />
+
+        <dl class="dl-horizontal editForm">
+            <dt>
+                @Html.DisplayNameFor(model => model.doctor.title)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.doctor.title)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.doctor.drFirstName)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.doctor.drFirstName)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.doctor.drLastName)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.doctor.drLastName)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.doctor.sex)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.doctor.sex)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.doctor.language)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.doctor.language)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.doctor.idNo)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.doctor.idNo)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.doctor.position)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.doctor.position)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.doctor.createdBy)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.doctor.createdBy)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.doctor.createdDate)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.doctor.createdDate)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.doctor.modifiedBy)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.doctor.modifiedBy)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.doctor.modifiedDate)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.doctor.modifiedDate)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.doctor.practiceNo)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.doctor.practiceNo)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.doctor.active)
+            </dt>
+
+            <dd style="margin-top: -0.6%">
+                @Html.DisplayFor(model => model.doctor.active)
+            </dd>
+
+        </dl>
+    </div>
+    <br />
+    <div class="row adminContentBlock">
+        <h4 class="tableHeading">Address details</h4>
+        <hr class="fancyruler" />
+        <dl class="dl-horizontal editForm">
+            <dt>
+                @Html.DisplayNameFor(model => model.address.line1)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.address.line1)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.address.line2)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.address.line2)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.address.line3)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.address.line3)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.address.city)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.address.city)
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(model => model.address.province)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.address.province)
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(model => model.address.zip)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.address.zip)
+            </dd>
+        </dl>
+    </div>
+    <div class="row adminContentBlock">
+        <h4 class="tableHeading">Contact details</h4>
+        <hr class="fancyruler" />
+        <dl class="dl-horizontal editForm">
+            <dt>
+                @Html.DisplayNameFor(model => model.contact.contactName)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.contact.contactName)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.contact.email)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.contact.email)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.contact.cell)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.contact.cell)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.contact.landLine)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.contact.landLine)
+            </dd>
+
+
+            <dt>
+                @Html.DisplayNameFor(model => model.contact.fax)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.contact.fax)
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(model => model.contact.workNo)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.contact.workNo)
+            </dd>
+        </dl>
+    </div>
+    <br />
+
+
+    <div class="row adminContentBlock">
+        <h4 class="tableHeading">Patients linked</h4>
+
+        <table class="table administration_Table" id="doctorTable">
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.dependants[0].dependentCode)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.dependants[0].initials)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.dependants[0].firstName)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.dependants[0].lastName)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.dependants[0].idNumber)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.dependants[0].birthDate)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.dependants[0].sex)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.dependants[0].demographic)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.dependants[0].isPrinciple)
+                </th>
+                <th>
+                    Action
+                </th>
+            </tr>
+
+            @foreach (var item in Model.dependants)
+            {
+                <tr ondblclick="location.href='@Url.Action("MemberFileView", "Member", new { DependentID = item.DependantID }, null)'">
+
+                    <td>
+                        @Html.DisplayFor(modelItem => item.dependentCode)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.initials)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.firstName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.lastName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.idNumber)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.birthDate)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.sex)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.demographic)
+                    </td>
+                    <td class="enrolmentCheck">
+                        @Html.DisplayFor(modelItem => item.isPrinciple)
+                    </td>
+                    <td>
+                        @Html.ActionLink("Details", "MemberFileView", new { DependentID = item.DependantID })
+                    </td>
+                </tr>
+            }
+
+        </table>
+
+    </div>
+    <div class="form-group">
+        <div class="actionButton" style="margin-left: 39%; margin-bottom: 0.5%; margin-top: 6.5%">
+            <input value="Back" class="btn buttonRound_formBack go_back" style="width: 15%!important" />
+            <a href="@Url.Action("Edit", "MedicalAids", new { id = Model.doctor.doctorID})" value="Edit" class="btn buttonRound_formEdit" style="width: 15%!important">Edit</a>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/bundles/jqueryval"></script>
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+}

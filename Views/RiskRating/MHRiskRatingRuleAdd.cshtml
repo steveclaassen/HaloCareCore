@@ -1,0 +1,209 @@
+﻿@model HaloCareCore.Models.Management.MHRiskRatingRules
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "MHRiskRatingRuleAdd";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .field-validation-error:before {
+        font-family: FontAwesome;
+        content: "\f06a\00a0";
+        animation: pulse 2s ease infinite;
+    }
+
+    .error-alert {
+        width: 100%;
+        margin: 0 auto;
+        background-color: rgba(217, 83, 79, 0.1);
+        padding: 10px;
+        border-left-color: #d9534f !important;
+        border: 1px solid transparent;
+        border-left-width: 5px;
+        border-radius: 3px;
+        margin: 0 auto;
+        font-family: 'Open Sans', sans-serif;
+        font-size: 12px;
+        margin: 0 0 5px 0;
+        margin-top: -10px;
+        margin-bottom: 20px;
+    }
+
+        .error-alert span {
+            color: #d9534f;
+            text-align: center;
+        }
+</style>
+<javascript>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet" />
+    <link href='http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.min.css' rel='stylesheet' type='text/css'>
+</javascript>
+
+<div class="fullScreen_container zero-padding">
+
+    <!--pageHeader-->
+    <nav id="global-nav" class="nav">
+        <div class="pull-left title">
+            <h1 class="site-title_patientProfile">
+                <span><i class="fab fa-digital-ocean fa-rotate-90"></i>&emsp; HIV Risk Rating Rules Add</span>
+            </h1>
+        </div>
+        <div class="pull-right title">
+            <h1 class="site-title_userID pull-right">
+                <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+            </h1>
+            <h1 class="site-title_userID pull-right">
+                @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                {
+                    <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                }
+            </h1>
+            <h1 class="site-waffleIcon pull-right">
+                <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+            </h1>
+        </div>
+    </nav>
+
+    <!--breadCrumbs-->
+    <ul class="breadcrumbs_fullScreens">
+        <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+        <li><a href="@Url.Action("Index", "Administration", new {})">Settings</a></li>
+        <li><a href="@Url.Action("MHIndex", "RiskRating", new {})">Mental Health Risk Rating Rules List</a></li>
+        <li><a href="#">Create</a></li>
+    </ul>
+
+    <!--navCollection-->
+    <div class="navCollection_fullScreens">
+        @Html.Partial("_navCollection")
+    </div>
+
+    <div style="margin-bottom: 1%"></div>
+
+    <div class="col-md-12 row">
+        <div class="col-md-6"><h4 class="subHeading">Create new</h4></div>
+        <hr class="fancyruler">
+
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+            <div class="hidden-fields">
+                <input type="hidden" name="error-rule" id="error-rule" value="@ViewBag.Rule" />
+                <div class="col-md-12"><div id="error-duplicate" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; This combination, <b>Depression:</b> @ViewBag.Depression, <b>Schizophrenia:</b> @ViewBag.Schizophrenia, <b>Bipolar:</b> @ViewBag.Bipolar, <b>Higher value:</b> @ViewBag.Higher, <b>Lower value:</b> @ViewBag.Lower, <b>Risk rating:</b> @ViewBag.Risk & <b>Suicidal:</b> @ViewBag.Suicide already exists!</span></div></div></div>
+            </div>
+            <div class="form-horizontal createForm">
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Depression, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        <div class="checkbox">
+                            @Html.EditorFor(model => model.Depression)
+                            @Html.ValidationMessageFor(model => model.Depression, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Schizophrenia, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        <div class="checkbox">
+                            @Html.EditorFor(model => model.Schizophrenia)
+                            @Html.ValidationMessageFor(model => model.Schizophrenia, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Bipolar, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        <div class="checkbox">
+                            @Html.EditorFor(model => model.Bipolar)
+                            @Html.ValidationMessageFor(model => model.Bipolar, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.ltValue, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.ltValue, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                        @Html.ValidationMessageFor(model => model.ltValue, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.gtValue, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.gtValue, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                        @Html.ValidationMessageFor(model => model.gtValue, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.rating, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.DropDownListFor(model => model.rating, new List<SelectListItem>
+                           {
+                                new SelectListItem() { Text = "Low (Green)", Value = "G"},
+                                new SelectListItem() { Text = "Medium (Yellow)", Value = "Y"},
+                                new SelectListItem() { Text = "High (Red)", Value = "R"},
+
+                            }, "", new { @class = "infoBox_editMember" })
+                        @Html.ValidationMessageFor(model => model.rating, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.suicidal, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        <div class="checkbox">
+                            @Html.EditorFor(model => model.suicidal)
+                            @Html.ValidationMessageFor(model => model.suicidal, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="fixedBack" style="margin-left: 42.4%">
+                    <input value="Back" class="btn buttonRound_formBack go_back" onclick="backKey()" style="width: 15%!important" />
+                    <input type="submit" value="Submit" class="btn buttonRound_formCreate" onclick="storageKey()" style="width: 15%!important" />
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+@section scripts{
+    <script src="~/bundles/jqueryval"></script>
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+    <script>
+        function backKey() {
+            localStorage.setItem("back_mhrules", Date.now());
+        }
+        function storageKey() {
+            localStorage.setItem("create_mhrules", Date.now());
+        }
+    </script>
+    <script>
+        $(document).ready(function () {
+            var r = $('#error-rule').val();
+            if (r.length > 0) {
+                $("#error-duplicate").removeClass("hidden");
+            }
+        });
+    </script>
+
+
+
+}
+
+

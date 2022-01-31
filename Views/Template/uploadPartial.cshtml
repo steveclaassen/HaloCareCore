@@ -1,0 +1,22 @@
+﻿@model IEnumerable<HaloCareCore.Models.ViewModels.ImagesViewModel>
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+@foreach (var image in Model)
+{
+    <a href="#" class="returnImage" data-url="@Request.Url.GetLeftPart(UriPartial.Authority)@image.Url">
+        <img src="@image.Url" alt="Hejsan" id="#image" data-source="@image.Url" width="200" height="200" />
+    </a>
+}
+<script type="text/javascript">
+    $(document).ready(function () {
+        $(".returnImage").click("click", function (e) {
+            var urlImage = $(this).attr("data-url");
+            window.opener.updateValue("cke_72_textInput", urlImage);
+            window.close();
+        });
+    });
+</script>

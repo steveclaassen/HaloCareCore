@@ -1,0 +1,485 @@
+﻿@model HaloCareCore.Models.Management.PatientManagementStatusHistory
+@using HaloCareCore.Extensions
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Managed care";
+    Layout = "~/Views/Shared/_LayoutMember.cshtml";
+}
+<comment>
+    <!--
+        03 July 2020 -- HCare-991(Management statusses - edit - DM enrolment)
+        Added jquery to disable the dropdown if the status is set to ERH or ERD. This will re-enable when you submit in order to post to the controller. I also updated the view with
+        date inputs in order to have more control.
+
+        06 July 2020 -- HCare-1067(Dependant created date vs First Management status date)
+        Management status create / edit and assignment has been amended to use ajax which will pull the dependant’s created date into a variable and compare it to the date inserted into the Effective date input tag. This will render an error message should the effective date be less than the members created date and will also disable the submit button until the date is corrected.
+
+        14 September 2020 -- HCare-1162
+    -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .input-group-addon {
+        visibility: hidden;
+    }
+
+    .select2-container--default .select2-selection--single {
+        display: block;
+        max-width: 500px !important;
+        width: 400px !important;
+        max-height: 50px;
+        height: 32px !important;
+        margin-left: 10px;
+        padding: 6px 6px;
+        line-height: 1.428571429;
+        border: 1px solid #f4f4f4 !important;
+        border-radius: 4px;
+        -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+        box-shadow: 1px 1px 1px 0px rgba(0,0,0,0.20);
+        -webkit-transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+        transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+        background-color: transparent !important;
+    }
+
+    span.select2-selection.select2-selection--single {
+        outline: none;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__placeholder {
+        color: white !important;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__arrow b {
+        margin-top: -5px !important;
+        margin-left: 0px !important;
+    }
+
+    .animiate {
+        animation: pulse 2s ease infinite;
+    }
+
+    .field-validation-error:before {
+        font-family: FontAwesome;
+        content: "\f06a\00a0";
+        animation: pulse 2s ease infinite;
+    }
+
+    .error-alert {
+        width: 100%;
+        margin: 0 auto;
+        background-color: rgba(217, 83, 79, 0.1);
+        padding: 10px;
+        border-left-color: #d9534f !important;
+        border: 1px solid transparent;
+        border-left-width: 5px;
+        border-radius: 3px;
+        margin: 0 auto;
+        font-family: 'Open Sans', sans-serif;
+        font-size: 12px;
+        margin: 0 0 5px 0;
+        margin-top: -10px;
+        margin-bottom: 20px;
+    }
+
+        .error-alert span {
+            color: #d9534f;
+            text-align: center;
+        }
+</style>
+
+<!---------------------------------------------------------------------- scripts ---------------------------------------------------------------------->
+<javascript>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css" integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">
+</javascript>
+
+<!---------------------------------------------------------------------- header ---------------------------------------------------------------------->
+<nav id="global-nav" class="nav">
+    <div class="pull-left title">
+        <h1 class="site-title_patientProfile">
+            <span><img src="~/Content/Images/memberProfile/topBar Icons/medicalStatus.png" /></span>&emsp; Managed care
+        </h1>
+    </div>
+    <div class="pull-right title">
+        <h1 class="site-title_userID pull-right">
+            <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+        </h1>
+        <h1 class="site-title_userID pull-right">
+            @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+            {
+                <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white !important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+            }
+        </h1>
+        <h1 class="site-waffleIcon pull-right">
+            <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+        </h1>
+    </div>
+</nav>
+
+<div class="dashboardContainer zero-padding">
+    <div class="patientDashboard_View">
+        <!------------------------------------------------------------------------ bread-crumbs ------------------------------------------------------------------------>
+        <ul class="breadcrumbs_patientDashboard">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new { })">Home</a></li>
+            <li><a href="@Url.Action("patientDashboard", "Member", new { DependentID = Model.dependantId })">Patient</a></li>
+            <li><a href="#">@ViewBag.Title</a></li>
+        </ul>
+
+        <!--------------------------------------------------------------------- left-navigation-bar --------------------------------------------------------------------->
+        @Html.Partial("_navSlider", new { DependentID = Model.dependantId })
+
+        <!----------------------------------------------------------------------- nav-collection ----------------------------------------------------------------------->
+        <div class="navCollection_patientDashboard">
+            @Html.Partial("_navCollection")
+        </div>
+
+        <!----------------------------------------------------------------------- patient-profile ----------------------------------------------------------------------->
+        <div class="profileBar">
+            @Html.Action("_profileBar_edit", "Member", new { DependentID = Model.dependantId, pro = Context.Request.Query["pro"] })
+        </div>
+    </div>
+    <!----------------------------------------------------------------------- form ----------------------------------------------------------------------->
+    <div class="profilebar-spacer"></div>
+
+    <div class="patientDashboard_container" id="managementStatusCreate">
+        <div class="form-horizontal editForm">
+            <h4 class="tableHeading">Edit management status</h4>
+            <hr class="fancyruler">
+            @using (Html.BeginForm("EditManagementStatus", "Member", FormMethod.Post, new { id = "management-status-edit" }))
+            {
+                @Html.AntiForgeryToken()
+                <div class="form-horizontal editForm">
+                    <div class="hidden-fields">
+                        @Html.HiddenFor(model => model.id)
+                        @Html.Hidden("pro", (object)ViewBag.pro)
+                        @Html.HiddenFor(model => model.dependantId)
+                        @Html.HiddenFor(model => model.createdBy)
+                        @Html.HiddenFor(model => model.createdDate)
+                        @Html.HiddenFor(model => model.sentToCl)
+                        <input type="text" name="medicalaid" id="medicalaid" value="@TempData["medicalaid"].ToString()" hidden />
+                        <input type="hidden" name="code-validation" id="code-validation" />
+                        <div class="col-md-12"><div id="duplicate-code-notice" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; Start and end date must be the same for a closed status!</span></div></div></div>
+
+                    </div>
+                    <div class="" style="margin-bottom: 1.5%">
+                        @Html.LabelFor(model => model.managementStatusCode, htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-10">
+                            @Html.DropDownListFor(model => model.managementStatusCode, null, "**Select**", htmlAttributes: new { @class = "infoBox_editMember" })
+                            &emsp;<i id="code-tool-tip" class="fas fa-question-circle information-icon hidden" data-toggle="tooltip" data-original-title="This field is disabled"></i>
+                            <br />@Html.ValidationMessageFor(model => model.managementStatusCode, "", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 1%;" })
+                        </div>
+                    </div>
+
+                    @if (Model.effectiveDate != null)
+                    {
+                        <div>
+                            @Html.LabelFor(model => model.effectiveDate, htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-9">
+                                <input class="infoBox_editMember" data-val="true" id="effectiveDate" name="effectiveDate" value="@string.Format("{0:yyyy-MM-dd}", Model.effectiveDate)" type="date" min="1900-01-01" aria-required="true" aria-invalid="true" max="@DateTime.Now.AddDays(1).ToString("yyyy-MM-dd")" onblur="CreatedDateCheck();" required>
+                                @Html.ValidationMessageFor(model => model.effectiveDate, "", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 2%" })
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div>
+                            @Html.LabelFor(model => model.effectiveDate, htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-9">
+                                <input class="infoBox_editMember" data-val="true" id="effectiveDate" name="effectiveDate" value="@string.Format("{0:yyyy-MM-dd}", "yyyy-MM-dd")" type="date" aria-invalid="true" min="1900-01-01" max="@DateTime.Now.AddDays(1).ToString("yyyy-MM-dd")" onblur="CreatedDateCheck();">
+                                @Html.ValidationMessageFor(model => model.effectiveDate, "", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 2%" })
+                            </div>
+                        </div>
+                    }
+                    @if (Model.endDate != null && (User.HasRole("6. Global user") || (User.HasRole("5. Super user"))))
+                    {
+                        <div>
+                            @Html.LabelFor(model => model.endDate, htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-9">
+                                <input class="infoBox_editMember" data-val="true" id="endDate" name="endDate" value="@string.Format("{0:yyyy-MM-dd}", Model.endDate)" type="date" min="1900-01-01" aria-required="true" aria-invalid="true" max="@DateTime.Now.AddDays(1).ToString("yyyy-MM-dd")" onblur="EndDateCheck();">
+                                @Html.ValidationMessageFor(model => model.endDate, "", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 2%" })
+                            </div>
+                        </div>
+                    }
+                    else if (Model.endDate != null)
+                    {
+                        <div>
+                            @Html.LabelFor(model => model.endDate, htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-9">
+                                <input class="infoBox_editMember" data-val="true" id="endDate" name="endDate" value="@string.Format("{0:yyyy-MM-dd}", Model.endDate)" type="date" min="1900-01-01" aria-required="true" aria-invalid="true" max="@DateTime.Now.AddDays(1).ToString("yyyy-MM-dd")" onblur="EndDateCheck();" required>
+                                @Html.ValidationMessageFor(model => model.endDate, "", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 2%" })
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div>
+                            @Html.LabelFor(model => model.endDate, htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-9">
+                                <input class="infoBox_editMember" data-val="true" id="endDate" name="endDate" value="@string.Format("{0:yyyy-MM-dd}", "yyyy-MM-dd")" type="date" aria-invalid="true" min="1900-01-01" max="@DateTime.Now.AddDays(1).ToString("yyyy-MM-dd")" onblur="EndDateCheck();">
+                                @Html.ValidationMessageFor(model => model.endDate, "", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 2%" })
+                            </div>
+                        </div>
+                    }
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.active, htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-10">
+                            <div class="checkbox">
+                                @Html.EditorFor(model => model.active)
+                                @Html.ValidationMessageFor(model => model.active, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 14%"></div>
+                    <div class="form-group">
+                        <div class="actionButton" style="margin-left: 39%; margin-bottom: 1%">
+                            <input value="Back" class="btn buttonRound_formBack go_back" style="width: 15%!important" />
+                            <input type="submit" value="Save" id="submit" class="btn buttonRound_formCreate" style="width: 15%!important" />
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- HCare-991 -->
+<table class="table hidden" id="statushistory">
+    @foreach (var status in ViewBag.StatusHistory)
+    {
+        <tr>
+            <td class="text-center">@status.managementStatusCode</td>
+        </tr>
+    }
+</table>
+
+@section Scripts {
+    <script src="~/bundles/jqueryui"></script>
+    <style src="~/Content/themes/base/css" )
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.7.1/js/bootstrap-datepicker.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+
+    @if (ViewBag.Message != null)
+    {
+        <script type="text/javascript">
+
+        window.onload = function () {
+            toastr.options.positionClass = 'toast-bottom-right';
+            toastr.options.timeOut = 10000;
+
+            toastr.error("@ViewBag.Message");
+
+        }
+        </script>
+    }
+
+    <script>
+        $(function () {
+            $('.input-group.date').datepicker({
+                format: "dd M yyyy",
+                showButtonPanel: true,
+                autoclose: true,
+                endDate: new Date()
+            });
+        });
+
+        $(document).ready(function () {
+            $("#txtFromDate").datepicker({
+                numberOfMonths: 2,
+                onSelect: function (selected) {
+                    $("#txtToDate").datepicker("option", "minDate", selected)
+                }
+            });
+            $("#txtToDate").datepicker({
+                numberOfMonths: 2,
+                onSelect: function (selected) {
+                    $("#txtFromDate").datepicker("option", "maxDate", selected)
+                }
+            });
+        });
+
+    </script>
+
+    <!-- general -->
+    <script>
+        //left-navigation-slider
+        $("#menu-toggle").click(function (e) {
+            e.preventDefault();
+            $("#wrapper").toggleClass("active");
+        });
+        //waffle-navigation-script-open
+        $("#patientMenu-toggle").click(function (e) {
+            e.preventDefault();
+            $("#patientWrapper").toggleClass("active");
+        });
+        //waffle-navigation-script-close
+        $("#exit-toggle").click(function (e) {
+            e.preventDefault();
+            $("#patientWrapper").toggleClass("active");
+        });
+        //special-note
+        $("#alert-toggle").click(function (e) {
+            e.preventDefault();
+            $("#alertWrapper").toggleClass("active");
+        });
+        //program-popup
+        $("#program-toggle").click(function (e) {
+            e.preventDefault();
+            $("#programWrapper").toggleClass("active");
+        });
+        //go-back
+        $(function () {
+            $('.go_back').click(function (e) {
+                e.preventDefault();
+                history.go(-1);
+            });
+        });
+    </script>
+    <!-- disable submit on click - hcare-728 -->
+    <script type="text/javascript">
+        $('form').submit(function () {
+            var button = $('#submit');
+            var oldValue = button.value;
+            var isDisabled = true;
+
+            $(this).find('#submit').prop('disabled', true);
+
+            setTimeout(function () {
+                button.value = "Processing...";
+                button.attr('disabled', !isDisabled);
+            }, 4000)
+
+        });
+
+        $('.statusValidation').change(function () {
+            if ($(this).val() != 'Select') {
+                $("#managementStatus-error").hide();
+                $("#managementStatusError").hide();
+            }
+        });
+    </script>
+    <!-- select-dropdown-menus-->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function () { $("#managementStatusCode").select2({ multiple: false }); });
+    </script>
+    <!-- enrolment-validation - HCare-991 -->
+    <script>
+        var statushistory = $('#statushistory tr td:contains("ERD"), #statushistory tr td:contains("ERH")');
+
+        if ($('#managementStatusCode').val() === "ERD" || $('#managementStatusCode').val() === "ERH") {
+            if (statushistory.length === 1) {
+                $('#managementStatusCode').attr("disabled", true);
+                $('#active').attr("disabled", true);
+                $('#code-tool-tip').removeClass("hidden");
+            }
+        }
+
+        $('#managementStatusCode').change(function () {
+            if ($('#managementStatusCode').val() === "ERD" || $('#managementStatusCode').val() === "ERH") {
+                if (statushistory.length === 1) {
+                    $('span[data-valmsg-for="managementStatusCode"]').html('<span style="font-size: 12px"><i class="fas fa-exclamation-circle"></i> </span>Cannot have more than one Enrolment status!');
+                    $('#submit').attr("disabled", true);
+                }
+            }
+            else {
+                $('span[data-valmsg-for="managementStatusCode"]').text('');
+                $('#submit').attr("disabled", false);
+            }
+        });
+
+        $("#submit").click(function () {
+            $("#managementStatusCode").attr("disabled", false);
+            $('#active').attr("disabled", false);
+        });
+
+    </script>
+    <!-- tooltip -->
+    <script>
+        $(document).ready(function () {
+            $('[data-toggle="tooltip"]').tooltip({
+                placement: 'top'
+            });
+        });
+    </script>
+    <!-- effective-date-validation - HCare-1067 -->
+    <script>
+        function convertToJavaScriptDate(value) {
+            var pattern = /Date\(([^)]+)\)/;
+            var results = pattern.exec(value);
+            var dt = new Date(parseFloat(results[1]));
+            //return dt.getFullYear() + "-" + ("0" + (dt.getMonth() + 1)).slice(-2) + "-" + dt.getDate();
+            return dt.getFullYear() + "-" + ("0" + (dt.getMonth() + 1)).slice(-2) + "-" + ("0" + (dt.getDate())).slice(-2);
+        }
+
+        function CreatedDateCheck() {
+            var DependantID = $('#dependantId').val();
+            var EffectiveDate = $('#effectiveDate').val();
+
+            $.ajax({
+                url: '/Member/DependantCreatedDateCheck',
+                type: "POST",
+                dataType: "JSON",
+                data: { dependantID: DependantID },
+                success: function (result) {
+                    var CreatedDate = convertToJavaScriptDate(result.createdDate);
+                    var medicalaid = $('#medicalaid').val();
+                    if (medicalaid != "OPMED") {
+                        if (EffectiveDate < CreatedDate) {
+                            $('span[data-valmsg-for="effectiveDate"]').html('<span style="font-size: 12px"><i class="fas fa-exclamation-circle"></i> </span>Dependant was not yet created - Created date ' + CreatedDate);
+                            $('#submit').prop('disabled', true);
+                        }
+                        else {
+                            $('span[data-valmsg-for="managementStatusCode"]').text('');
+                            $('#submit').prop('disabled', false);
+                        }
+                    }
+                }
+            });
+        }
+
+    </script>
+    <script>
+        //HCare-1162
+        function EndDateCheck() {
+            var DependantID = $('#dependantId').val();
+            var effectivedate = $('#effectiveDate').val();
+            var enddate = $('#endDate').val();
+            var id = $('#id').val();
+            $("#duplicate-code-notice").addClass("hidden");
+            $("#code-validation").val('');
+
+            $.ajax({
+                url: '/Member/ManagementStatusCheck',
+                type: "POST",
+                dataType: "JSON",
+                data: { dependantID: DependantID, id: id },
+                success: function (result) {
+                    var CodeStatus = result.codeStatus;
+                    if (CodeStatus == 'c' && effectivedate != enddate) {
+                        $("#duplicate-code-notice").removeClass("hidden");
+                        $('span[data-valmsg-for="endDate"]').html('<span style="font-size: 12px"><i class="fas fa-exclamation-circle"></i> </span>Start and end date must be the same for a closed status.');
+                        $("#code-validation").val(CodeStatus);
+                    }
+                }
+            });
+        }
+
+        $("#submit").click(function () {
+            if ($("#code-validation").val().length > 0) {
+                $("#endDate").focus();
+                return false;
+            }
+        });
+    </script>
+}
+
+

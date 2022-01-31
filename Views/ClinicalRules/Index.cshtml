@@ -1,0 +1,187 @@
+﻿@model IEnumerable<HaloCareCore.Models.Management.ClinicalRules>
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<comment>
+    <!--
+        14 May 2019 -- HCare-737 (Account Settings – Clinical rules (Related to HCare-417))
+        Added CSS to the Index, Create, Edit, Details for Risk Rating in settings.
+
+        I have added a search bar as well as a sort function that will allow the user to sort the columns.
+
+        I have added a new table to the database which lists the pathology fields and further provides a dropdown menu to navigate the rules easier for the user. I’ve also added a dropdown for the rule type
+        which is linked to the disease program. A search function can be used inside the dropdown menu as well. This same dropdown logic has been added to the edit view.
+
+        I have added a duplication check into the Create view so that a user can’t add a rule with the same name.
+
+    -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .table tr > td {
+        border-top: none !important
+    }
+</style>
+<javascript>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet" />
+    <link href='http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.min.css' rel='stylesheet' type='text/css'>
+    <script src="https://www.jqueryscript.net/demo/jQuery-Plugin-For-Sortable-Bootstrap-Tables-Bootstrap-Sortable/Scripts/bootstrap-sortable.js"></script>
+</javascript>
+
+<div class="fullScreen_container zero-padding">
+
+    <!--pageHeader-->
+    <nav id="global-nav" class="nav">
+        <div class="pull-left title">
+            <h1 class="site-title_patientProfile">
+                <span><i class="fas fa-tags"></i>&emsp; Clinical rules</span>
+            </h1>
+        </div>
+        <div class="pull-right title">
+            <h1 class="site-title_userID pull-right">
+                <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+            </h1>
+            <h1 class="site-title_userID pull-right">
+                @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                {
+                    <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                }
+            </h1>
+            <h1 class="site-waffleIcon pull-right">
+                <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+            </h1>
+        </div>
+    </nav>
+    <!--breadCrumbs-->
+    <ul class="breadcrumbs_fullScreens">
+        <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+        <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+        <li><a href="@Url.Action("Index", "Administration", new {})">Settings</a></li>
+        <li><a href="#">Life expectancy</a></li>
+    </ul>
+    <!--navCollection-->
+    <div class="navCollection_fullScreens">
+        @Html.Partial("_navCollection")
+    </div>
+    <div style="margin-bottom: 2%"></div>
+
+    <div class="col-md-12 row">
+        <div class="col-md-6">
+            <h4 class="subHeading">
+                Clinical rules overview
+                <a class="create-new" href="@Url.Action("Create", "ClinicalRules", new { })" style="font-size: 14px">Create new <span><i class="fa fa-plus-circle" style="font-size: 12px"></i></span></a>
+            </h4>
+        </div>
+        <!--------------------------------------------------------------------------- jq-search -------------------------------------------------------------------------->
+        <div class="col-md-6">
+            <div class="input-wrapper-new-search">
+                <input type="text" class="form-control-new-search" id="search" onkeyup="myFunction()" placeholder="Search..." />
+            </div>
+        </div>
+    </div>
+
+    <table class="table riskRatingTable sortable" id="tableClinicalRules">
+        <thead>
+            <tr>
+                <th style="width: 20%">@Html.DisplayNameFor(model => model.ruleName) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                <th style="text-align: center!important; width: 7%">@Html.DisplayNameFor(model => model.greater) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                <th style="text-align: center!important; width: 7%">@Html.DisplayNameFor(model => model.less) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                <th style="text-align: center!important; width: 5%">@Html.DisplayNameFor(model => model.male) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                <th style="text-align: center!important; width: 5%">@Html.DisplayNameFor(model => model.female) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                <th style="text-align: center!important; width: 8%">@Html.DisplayName("Program") <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                <th style="text-align: center!important; width: 7%">@Html.DisplayNameFor(model => model.hasAssignment)</th>
+                <th style="text-align: center!important; width: 7%">@Html.DisplayNameFor(model => model.active)</th>
+                <th style="text-align: center!important; width: 7%">Action</th>
+            </tr>
+        </thead>
+
+
+        @foreach (var item in Model)
+        {
+
+            <tbody id="rules-search">
+                <tr style="text-indent: 5px">
+                    <td class="text-left"><span class="@(item.active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.ruleName)</span></td>
+                    <td class="text-center" title="@Html.DisplayFor(modelItem=>item.gtMessage)"><span class="@(item.active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.greater)</span></td>
+                    <td class="text-center" title="@Html.DisplayFor(modelItem=>item.ltMessage)"><span class="@(item.active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.less)</span></td>
+                    <td style="text-align: center!important">
+                        @if (item.active == false)
+                        {
+                            <i class="fas fa-check-square" style="color: rgba(204, 204, 204, 0.50)!important; font-size: 12px"></i>
+                        }
+                        else
+                        {
+                            if (item.male)
+                            {
+                                <i class="fas fa-check-square ruleCheck" style="font-size: 12px"></i>
+                            }
+                            else
+                            {
+                                <i class="fas fa-square" style="color: rgba(204, 204, 204, 0.25)!important; font-size: 12px"></i>
+                            }
+                        }
+                    </td>
+                    <td style="text-align: center!important">
+                        @if (item.active == false)
+                        {
+                            <i class="fas fa-check-square" style="color: rgba(204, 204, 204, 0.50)!important; font-size: 12px"></i>
+                        }
+                        else
+                        {
+                            if (item.female)
+                            {
+                                <i class="fas fa-check-square ruleCheck" style="font-size: 12px"></i>
+                            }
+                            else
+                            {
+                                <i class="fas fa-square" style="color: rgba(204, 204, 204, 0.25)!important; font-size: 12px"></i>
+                            }
+                        }
+                    </td>
+                    <td class="text-center"><span class="@(item.active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.ruleType)</span></td>
+                    <td class="row-information text-center"><span class="@(item.hasAssignment == true ? "chk-yes fas fa-circle" : "chk-null fas fa-circle")"></span></td>
+                    <td class="row-information text-center"><span class="@(item.active == true ? "chk-yes fas fa-circle" : "chk-no fas fa-circle")"></span></td>
+                    <td class="text-center">
+                        <input type="submit" class="link-button" value="View" onclick="location.href='@Url.Action("Details", "ClinicalRules", new { id = item.id })'" /> /
+                        <input type="submit" class="link-button" value="Edit" onclick="location.href='@Url.Action("Edit", "ClinicalRules", new { id = item.id})'" />
+                    </td>
+                </tr>
+            </tbody>
+        }
+
+    </table>
+    <div class="fixedBack">
+        <input value="Back" class="btn buttonRound_formBack " onclick="MainbackBtn();" style="width: 15%" />
+    </div>
+
+</div>
+
+
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+    <script type="text/javascript">
+        var $rows = $('#rules-search tr');
+        $('#search').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $rows.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+    </script>
+    <script>
+         function MainbackBtn() {
+            window.location.href = '@Url.Action("Index", "Administration")';
+        }
+    </script>
+
+}

@@ -1,0 +1,485 @@
+﻿@model HaloCareCore.Models.EnrolmentViewModel
+@using HaloCareCore.Extensions
+@{
+    ViewBag.Title = "Member information";
+    ViewBag.Icon = "fas fa-user-circle";
+    Layout = "~/Views/Shared/_layout-view.cshtml";
+}
+
+<comment>
+    <!--
+        11 February 2020 -- HCare-959(Edit Member changes)
+        Update to Edit Member view which has disabled fields that are controlled by the import of the patient as well as the sync. There are only three fields left as per the SR which allows the user to update accordingly.
+        Corrections were made to the controller queries as the data was not being saved correctly with regard to the fields that are editable. All the editable fields are now being saved correctly.
+        In addition, an update to the view has been made as an example of a test run - The blue button in the middle of the screen will allow you to hide the profile bar to open the page more to see more information.
+
+        17 June 2020 -- HCare-1066(Super user access to amend ID/Auth # on profiles)
+        Updated view to allow super-user access to update the ID/Auth number
+
+    -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .select2-container {
+        border: none !important;
+    }
+
+        .select2-container:focus {
+            outline: none !important
+        }
+
+    .select2-container--default .select2-selection--single {
+        display: block !important;
+        max-width: 1000px !important;
+        width: 410px !important;
+        max-height: 100px;
+        height: 30px;
+        margin-left: 10px;
+        padding: 6px 6px;
+        line-height: 1.428571429;
+        color: #003366;
+        border-radius: 0px !important;
+        border: none !important;
+        border-bottom: 1px solid #e8e6e6 !important;
+        background-color: transparent !important;
+        -webkit-box-shadow: none !important;
+        box-shadow: none !important;
+        outline: none !important
+    }
+
+        .select2-container--default .select2-selection--single .select2-selection__placeholder {
+            color: white !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            margin-top: -5px !important;
+            left: 100% !important
+        }
+
+    .field-validation-error:before {
+        font-family: FontAwesome;
+        content: "\f06a\00a0";
+        animation: pulse 2s ease infinite;
+    }
+</style>
+
+<!------------------------------------------------------------------------------------ jq-links ----------------------------------------------------------------------------------->
+<javascript>
+    <link href="~/Content/css/select2.min.css" rel="stylesheet" />
+    <script src="~/Scripts/select2.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet" />
+</javascript>
+<!---------------------------------------------------------------------------------- bread-crumbs --------------------------------------------------------------------------------->
+<ul class="member-information-bread-crumbs" style="color: #808080!important;">
+    <li style="font-size: 10px; font-weight: 600">You are here:</li>
+    <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+    <li><a href="@Url.Action("patientDashboard", "Member", new { DependentID = Context.Request.Query["DependentID"], pro= Context.Request.Query["pro"]})">Patient</a></li>
+    <li><a href="#">@ViewBag.Title</a></li>
+</ul>
+<!------------------------------------------------------------------------------- profile-information ----------------------------------------------------------------------------->
+<div class="collapse in member-info-panel" id="memberInformation">
+    <div class="card card-body">
+        <div class="collapse-body">
+            <div class="member-information-panel" id="memInfo">
+                @Html.Action("_member_profile_bar", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })
+            </div>
+        </div>
+    </div>
+</div>
+<!--------------------------------------------------------------------------------- form-information ------------------------------------------------------------------------------>
+<div class="collapse in" id="memberInformationData">
+    <div class="card card-body">
+        <div class="collapse-body">
+            <div class="member-information-data-panel">
+                <div class="row col-md-12">
+                    @using (Html.BeginForm())
+                    {
+                        @Html.AntiForgeryToken()
+
+                    <div class="form-horizontal editForm">
+                        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                        @Html.HiddenFor(model => model.member.membershipNo)
+                        @Html.HiddenFor(model => model.dependent.DependantID)
+                        @Html.HiddenFor(model => model.dependent.createdBy)
+                        @Html.HiddenFor(model => model.dependent.createdDate)
+                        @Html.HiddenFor(model => model.member.memberID)
+                        @Html.HiddenFor(model => model.dependent.memberID)
+                        @Html.HiddenFor(model => model.dependent.initials)
+                        @Html.HiddenFor(model => model.dependent.birthDate)
+                        @Html.HiddenFor(model => model.dependent.demographic)
+                        @Html.HiddenFor(model => model.dependent.languageCode)
+                        @Html.HiddenFor(model => model.dependent.sex)
+                        @Html.HiddenFor(model => model.medicalAid.Name)
+                        @Html.HiddenFor(model => model.dependent.dependentCode)
+                        @Html.HiddenFor(model => model.dependent.dependentType)
+                        @Html.HiddenFor(model => model.dependent.icd10Code)
+                        @Html.HiddenFor(model => model.dependent.originationId)
+                        @Html.HiddenFor(model => model.dependent.Active)
+
+                        <div class="form-group">
+                            <div class="col-md-12">
+                                <div class="col-md-6 new-form-control-label">
+                                    @Html.Label(null,"Member number", htmlAttributes: new { @class = "control-label" })
+                                </div>
+                                <div class="col-md-6 new-form-control-data">
+                                    @Html.DisplayFor(model => model.member.membershipNo)
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="col-md-12">
+                                <div class="col-md-6 new-form-control-label">
+                                    @Html.Label(null,"ID/Auth number", htmlAttributes: new { @class = "control-label" })
+                                </div>
+                                <div class="col-md-6 new-form-control-data">
+                                    @if (User.Identity.IsAuthenticated)
+                                    {
+                                        if (User.HasRole("6. Global user") || (User.HasRole("5. Super user")))
+                                        {
+                                            @Html.EditorFor(model => model.dependent.idNumber, new { htmlAttributes = new { @class = "form-control-member", @placeholder = "example: ID/Auth number", autocomplete = "off", @required = "required" } })
+                                            @Html.ValidationMessageFor(model => model.dependent.idNumber, "", new { @class = "text-danger", @style = "font-size: 95%; margin-left: 1%" })
+                                        }
+                                        else
+                                        {
+                                            @Html.DisplayFor(model => model.dependent.idNumber)
+                                            @Html.HiddenFor(model => model.dependent.idNumber)
+
+                                        }
+                                    }
+
+
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="member-information-ruler" />
+
+                        <div class="form-group">
+                            <div class="col-md-12">
+                                <div class="col-md-6 new-form-control-label">
+                                    @Html.Label(null,"Title", htmlAttributes: new { @class = "control-label" })
+                                </div>
+                                @*HCare-1088*@
+                                <div class="col-md-6 new-form-control-data">
+                                    @if ((User.HasRole("6. Global user") || (User.HasRole("5. Super user")) && ViewBag.iChecked == false))
+                                    {
+
+                                        @Html.EditorFor(model => model.dependent.title, new { htmlAttributes = new { @class = "form-control-member", @placeholder = "example: Title", autocomplete = "off" } })
+
+
+                                    }
+                                    else
+                                    {
+                                        @Html.DisplayFor(model => model.dependent.title)
+                                    }
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-12">
+                                <div class="col-md-6 new-form-control-label">
+                                    @Html.Label(null,"Initials", htmlAttributes: new { @class = "control-label" })
+                                </div>
+                                <div class="col-md-6 new-form-control-data">
+                                    @Html.DisplayFor(model => model.dependent.initials)
+                                </div>
+                            </div>
+                        </div>
+                        @*<div class="form-group">
+        <div class="col-md-12">*@
+                        @*<div class="col-md-6 new-form-control-label">
+            @Html.Label(null,"Member name", htmlAttributes: new { @class = "control-label" })
+        </div>*@
+                        @*HCare-1088*@
+                        @*<div class="col-md-6 new-form-control-data">*@
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            if ((User.HasRole("6. Global user") || (User.HasRole("5. Super user")) && ViewBag.iChecked == false))
+                            {
+                                <div class="form-group">
+                                    <div class="col-md-12">
+                                        <div class="col-md-6 new-form-control-label">
+                                            @Html.Label(null,"First name", htmlAttributes: new { @class = "control-label" })@*HCare-1088*@
+                                        </div>
+                                        <div class="col-md-6 new-form-control-data">
+                                            @Html.EditorFor(model => model.dependent.firstName, new { htmlAttributes = new { @class = "form-control-member", @placeholder = "example: Full Name", autocomplete = "off", @required = "required" } })
+                                            @Html.ValidationMessageFor(model => model.dependent.firstName, "", new { @class = "text-danger", @style = "font-size: 95%; margin-left: 1%" })
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-12">
+                                        <div class="col-md-6 new-form-control-label">
+                                            @Html.Label(null,"Last name", htmlAttributes: new { @class = "control-label" })@*HCare-1088*@
+                                        </div>
+                                        <div class="col-md-6 new-form-control-data">
+                                            @Html.EditorFor(model => model.dependent.lastName, new { htmlAttributes = new { @class = "form-control-member", @placeholder = "example: Full Name", autocomplete = "off", @required = "required" } })
+                                            @Html.ValidationMessageFor(model => model.dependent.lastName, "", new { @class = "text-danger", @style = "font-size: 95%; margin-left: 1%" })
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="form-group">
+                                    <div class="col-md-12">
+                                        <div class="col-md-6 new-form-control-label">
+                                            @Html.Label(null,"Member name", htmlAttributes: new { @class = "control-label" })
+                                        </div>
+                                        <div class="col-md-6 new-form-control-data">
+                                            @Html.DisplayFor(model => model.dependent.fullName_ul)
+                                        </div>
+                                    </div>
+                                </div>
+
+                            }
+                        }
+
+                        @*</div>
+                        </div>
+        </div>*@
+                        <div class="form-group">
+                            <div class="col-md-12">
+                                <div class="col-md-6 new-form-control-label">
+                                    @Html.Label(null,"Birth date", htmlAttributes: new { @class = "control-label" })
+                                </div>
+                                <div class="col-md-6 new-form-control-data">
+                                    @Html.DisplayFor(model => model.dependent.birthDate)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-12">
+                                <div class="col-md-6 new-form-control-label">
+                                    @Html.Label(null,"Demographic", htmlAttributes: new { @class = "control-label" })
+                                </div>
+                                <div class="col-md-6 new-form-control-data">
+                                    @Html.DisplayFor(model => model.dependent.demographic)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-12">
+                                <div class="col-md-6 new-form-control-label">
+                                    @Html.Label(null,"Language ", htmlAttributes: new { @class = "control-label" })
+                                </div>
+                                <div class="col-md-6 new-form-control-data">
+                                    @Html.DisplayFor(model => model.memberLanguage)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-12">
+                                <div class="col-md-6 new-form-control-label">
+                                    @Html.Label(null,"Gender ", htmlAttributes: new { @class = "control-label" })
+                                </div>
+                                <div class="col-md-6 new-form-control-data">
+                                    @Html.DisplayFor(model => model.memberGender)
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="member-information-ruler" />
+
+                        <div class="form-group">
+                            <div class="col-md-12">
+                                <div class="col-md-6 new-form-control-label">
+                                    @Html.Label(null,"Medical scheme", htmlAttributes: new { @class = "control-label" })
+                                </div>
+                                <div class="col-md-6 new-form-control-data">
+                                    @Html.DisplayFor(model => model.medicalAid.Name)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-12">
+                                <div class="col-md-6 new-form-control-label">
+                                    @Html.Label(null,"Dependant type", htmlAttributes: new { @class = "control-label" })
+                                </div>
+                                <div class="col-md-6 new-form-control-data">
+                                    @Html.DisplayFor(model => model.memberDependantType)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-12">
+                                <div class="col-md-6 new-form-control-label">
+                                    @Html.Label(null,"Dependant code", htmlAttributes: new { @class = "control-label" })
+                                </div>
+                                <div class="col-md-6 new-form-control-data">
+                                    @Html.DisplayFor(model => model.dependent.dependentCode)
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="member-information-ruler" />
+                        <div class="form-group">
+                            <div class="col-md-12">
+                                <div class="col-md-6 new-form-control-label">
+                                    @Html.Label(null,"Principle member", htmlAttributes: new { @class = "control-label" })
+                                </div>
+                                <div class="col-md-6 new-form-control-data">
+                                    @Html.EditorFor(model => model.dependent.isPrinciple)
+                                    @Html.ValidationMessageFor(model => model.dependent.isPrinciple, "", new { @class = "text-danger pullE" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-12">
+                                <div class="col-md-6" style="text-align: right; margin-left: -0.4%!important; font-family: 'Century Gothic'; font-size: 14px; font-weight: bold; color: #003366">
+                                    @System.Web.Configuration.WebConfigurationManager.AppSettings["Citizen"]
+                                </div>
+                                <div class="col-md-6 new-form-control-data">
+                                    <div class="checkbox citizen-checkbox">
+                                        @Html.EditorFor(model => model.dependent.isSACitizen)
+                                        @Html.ValidationMessageFor(model => model.dependent.isSACitizen, "", new { @class = "text-danger pullE" })
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <br />
+                        <br />
+                    </div>
+
+                        <div class="form-group">
+                            <div class="actionHover" style="text-align: center">
+                                &emsp;<input value="Back" class="btn newBackButton go_back" style="width: 12%!important" />
+                                <input type="submit" value="Save" class="btn newSubmitButton" style="width: 12%!important" />
+                                <div class="glass-button" onclick="topFunction()"><i class="fas fa-chevron-up scroll-top"></i></div>
+                            </div>
+                        </div>
+                        <br />
+                        <br />
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!------------------------------------------------------------------------------------ jq-links ----------------------------------------------------------------------------------->
+<javascript>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+</javascript>
+
+@section scripts{
+    <script src="~/bundles/jqueryval"></script>
+    <!-- date-logic -->
+    <script type="text/javascript">
+
+        $(function () {
+            fillBirthdate();
+        });
+
+        function isNumber(evt) {
+            evt = (evt) ? evt : window.event;
+            var charCode = (evt.which) ? evt.which : evt.keyCode;
+            if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+                return false;
+            }
+            return true;
+        }
+
+        function fillBirthdate() {
+            var stateId = $('#dependent_idNumber').val();
+            if (stateId.length > 5) {
+                var decade = '19';
+                if (stateId.substring(0, 2) < 19) {
+                    decade = '20';
+                }
+
+                $('#dependent_birthDate').val(decade + $('#dependent_idNumber').val().substring(0, 2) + '-' + $('#dependent_idNumber').val().substring(2, 4) + '-' + $('#dependent_idNumber').val().substring(4, 6));
+
+            }
+        }
+
+        function isNumber(evt) {
+            evt = (evt) ? evt : window.event;
+            var charCode = (evt.which) ? evt.which : evt.keyCode;
+            if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+                return false;
+            }
+            return true;
+        }
+
+        function changeBirthdate() {
+            var stateId = $('#dependent_idNumber').val();
+            if (stateId.length > 5) {
+                var decade = '19';
+                if (stateId.substring(0, 2) < 19) {
+                    decade = '20';
+                }
+
+                $('#dependent_birthDate').val(decade + $('#dependent_idNumber').val().substring(0, 2) + '-' + $('#dependent_idNumber').val().substring(2, 4) + '-' + $('#dependent_idNumber').val().substring(4, 6));
+            }
+        }
+
+    </script>
+    <!-- select-dropdowns -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function () { $("#provider").select2({ multiple: false, allowClear: true }); });
+        $(document).ready(function () { $("#dependantType").select2({ multiple: false, allowClear: true }); });
+    </script>
+    <!-- general -->
+    <script>
+        // waffle-navigation-script-open
+        $("#patientMenu-toggle").click(function (e) {
+            e.preventDefault();
+            $("#patientWrapper").toggleClass("active");
+        });
+        // waffle-navigation-script-close
+        $("#exit-toggle").click(function (e) {
+            e.preventDefault();
+            $("#patientWrapper").toggleClass("active");
+        });
+        // special-note
+        $("#alert-toggle").click(function (e) {
+            e.preventDefault();
+            $("#alertWrapper").toggleClass("active");
+        });
+        // left-navigation-slider
+        $("#menu-toggle").click(function (e) {
+            e.preventDefault();
+            $("#wrapper").toggleClass("active");
+        });
+        // go-back
+        $(function () {
+            $('.go_back').click(function (e) {
+                e.preventDefault();
+                history.go(-1);
+            });
+        });
+    </script>
+    <!-- scroll-to-top -->
+    <script>
+        //Get the button
+        var mybutton = document.getElementsByClassName("glass-button");
+
+        // When the user scrolls down 20px from the top of the document, show the button
+        window.onscroll = function () { scrollFunction() };
+
+        function scrollFunction() {
+            if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+                mybutton.style.display = "block";
+            } else {
+                mybutton.style.display = "none";
+            }
+        }
+
+        // When the user clicks on the button, scroll to the top of the document
+        function topFunction() {
+            document.body.scrollTop = 0;
+            document.documentElement.scrollTop = 0;
+        }
+    </script>
+
+}

@@ -1,0 +1,154 @@
+﻿@model HaloCareCore.Models.ComsViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "AddContact";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<comment>
+    <!--
+        06 March 2019 -- HCare-678 (SMS Frontend process -> TRIM SMS number)
+        Added a Replace(" ", "") to AddContact and EditContact method in the MemberController.cs - BM
+
+        21 May 2019 -- HCare-598(Patient Edit and Add contact details - Add the name of patient to this screen)
+        Added the patient profile bar to the Add & Edit Contact details view as well as the Add & Edit Address details view.
+    -->
+</comment>
+
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+</style>
+
+<div class="fullPanel_Container">
+    <div class="profilePanel_pathology">
+        <!--breadCrumbs-->
+        <ul class="breadcrumbs" style="margin-top: -1%; margin-bottom: 2%; margin-left: -1%">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+            <li><a class="go_back">Patient</a></li>
+            <li><a href="#">Add contact</a></li>
+        </ul>
+
+        <!--navCollection-->
+        <div class="navButtons">
+            @Html.Partial("_navCollection")
+        </div>
+
+        <!--profileInformation-->
+        <div>
+            @Html.Action("_profileBar_edit", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })
+        </div>
+    </div>
+    <!--pageHeader-->
+    <nav id="global-nav" class="nav">
+        <div class="pull-left title">
+            <h1 class="site-title_patientProfile">
+                <span><i class="fa fa-phone-square"></i></span>&emsp; Contact information
+            </h1>
+        </div>
+        <div class="pull-right title">
+            <h1 class="site-title_userID pull-right">
+                <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+            </h1>
+            <h1 class="site-title_userID pull-right">
+                @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                {
+                    <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                }
+            </h1>
+            <h1 class="site-waffleIcon pull-right">
+                <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+            </h1>
+        </div>
+    </nav>
+
+    <div class="row assignmentOverview_container">
+
+        <div class="form-horizontal editForm">
+            <h4 class="tableHeading">Add contact</h4>
+            <hr class="fancyruler">
+            <br />
+
+            @using (Html.BeginForm())
+            {
+                @Html.AntiForgeryToken()
+                //@Html.Hidden("depId", null);
+                @Html.Hidden("depId", (object)ViewBag.DependantID)
+
+                <div class="form-horizontal editMember">
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.memberInformation.Contacts.contactName, htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-10">
+                            @Html.EditorFor(model => model.memberInformation.Contacts.contactName, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                            @Html.ValidationMessageFor(model => model.memberInformation.Contacts.contactName, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.memberInformation.Contacts.email, htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-10">
+                            @Html.EditorFor(model => model.memberInformation.Contacts.email, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                            @Html.ValidationMessageFor(model => model.memberInformation.Contacts.email, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.memberInformation.Contacts.cell, htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-10">
+                            @Html.EditorFor(model => model.memberInformation.Contacts.cell, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                            @Html.ValidationMessageFor(model => model.memberInformation.Contacts.cell, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.memberInformation.Contacts.landLine, htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-10">
+                            @Html.EditorFor(model => model.memberInformation.Contacts.landLine, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                            @Html.ValidationMessageFor(model => model.memberInformation.Contacts.landLine, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.memberInformation.Contacts.workNo, htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-10">
+                            @Html.EditorFor(model => model.memberInformation.Contacts.workNo, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                            @Html.ValidationMessageFor(model => model.memberInformation.Contacts.workNo, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.memberInformation.Contacts.fax, htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-10">
+                            @Html.EditorFor(model => model.memberInformation.Contacts.fax, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                            @Html.ValidationMessageFor(model => model.memberInformation.Contacts.fax, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="fixedBack" style="margin-left: 44%">
+                        <input value="Back" class="btn buttonRound_formBack go_back" style="width: 15%!important" />
+                        <input type="submit" value="Submit" class="btn buttonRound_formCreate addContact" style="width: 15%!important" />
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script src="~/bundles/jqueryval"></script>
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+    <script>
+        $(document).ready(function () {
+            $(".addContact").on("click", function () {
+                localStorage.setItem("addContact", "clicked");
+            });
+        });
+    </script>
+
+}

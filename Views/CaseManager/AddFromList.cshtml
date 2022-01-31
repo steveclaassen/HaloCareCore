@@ -1,0 +1,128 @@
+﻿@model HaloCareCore.Models.Management.CaseManagerHistory
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "AddFromList";
+    Layout = "~/Views/Shared/_LayoutMember.cshtml";
+}
+
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+</style>
+
+<!--pageHeader-->
+<nav id="global-nav" class="nav">
+    <div class="pull-left title">
+        <h1 class="site-title_patientProfile">
+            <span><i class="fas fa-medkit"></i>&emsp; Case managers</span>
+        </h1>
+    </div>
+    <div class="pull-right title">
+        <h1 class="site-title_userID pull-right">
+            <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+        </h1>
+        <h1 class="site-title_userID pull-right">
+            @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+            {
+                <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+            }
+        </h1>
+        <h1 class="site-waffleIcon pull-right">
+            <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+        </h1>
+    </div>
+</nav>
+
+<div class="dashboardContainer zero-padding">
+    <div class="patientDashboard_View">
+        <!--breadCrumbs-->
+        <ul class="breadcrumbs_patientDashboard">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Administration", new {})">Settings</a></li>
+            <li><a href="@Url.Action("ListUsers", "Account", new {})">Case managers</a></li>
+            <li><a href="#">Select</a></li>
+        </ul>
+        <!--Left navSlider -->
+        @Html.Partial("_navSlider", new { DependentID = Context.Request.Query["DependentID"] })
+        <!--navCollection-->
+        <div class="navCollection_patientDashboard">
+            @Html.Partial("_navCollection")
+        </div>
+        <!--profileInformation-->
+        <div class="profileBar">
+            @Html.Action("_profileBar_edit", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })
+        </div>
+    </div>
+
+    <div class="profilebar-spacer"></div>
+
+    <!--pageBody-->
+    @using (Html.BeginForm())
+    {
+        <div class="patientDashboard_container">
+            <h4 class="tableHeading">Select a new case manager</h4>
+            <!--createNew-->
+            <div class="createNew_link" style="margin-top: -1%; margin-bottom: 0%">
+                <a href="@Url.Action("Create", "CaseManager", new { })">
+                    <span id="texts">
+                        Create new
+                    </span>
+
+                    <i class="material-icons" id="icon" title="New enrolment">
+                        add_circle_outline
+                    </i>
+                </a>
+            </div>
+            <hr class="fancyruler">
+
+
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(model => model.dependantId)
+            <div class="form-horizontal">
+                <br />
+                <br />
+                <br />
+
+                <div class="form-group editForm" style="margin-left: 5%">
+                    @Html.Label(null,"Case manager", htmlAttributes: new { @class = "control-label col-md-3 dropCM" })
+                    <div class="col-md-10">
+                        @Html.DropDownList("caseMangers", null, "**Select**", htmlAttributes: new { @class = "infoBox_scriptItem" })
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 12%"></div>
+
+
+                <div class="form-group">
+                    <div class="actionButton" style="margin-left: 39%; margin-bottom: 1%">
+                        <input value="Back" class="btn buttonRound_formBack go_back" style="width: 15%!important" />
+                        <input type="submit" value="Add" class="btn buttonRound_formCreate" style="width: 15%!important" />
+                    </div>
+                </div>
+
+            </div>
+            <br />
+        </div>
+
+    }
+
+</div>
+
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <script>
+        var $rows = $('#table tr');
+        $('#search').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $rows.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+
+    </script>
+}

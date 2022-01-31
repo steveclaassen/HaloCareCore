@@ -1,0 +1,386 @@
+﻿
+@{
+    ViewBag.Title = "riskReport";
+    Layout = "~/Views/Shared/_LayoutReport.cshtml";
+}
+
+<style>
+    .indexnav {
+        margin-top: 100px;
+    }
+
+    body {
+        background-image: url('../../Content/Images/Backgrounds/reportDashboard/reportDashboard_two.jpg');
+        background-size: 180%;
+        background-repeat: no-repeat;
+    }
+</style>
+
+<div class="topBar_reports">
+    <h2>Risk Report</h2>
+    <img src="~/Content/Images/memberProfile/topBar Icons/riskReport.png" />
+</div>
+
+
+<!--sideNavigation Bar-->
+<div id=" container tabs">
+    <div class="nav-side-menu_Reports memberNav pull-left">
+        <div class="blank">&nbsp;</div>
+        <div class="blank">&nbsp;</div>
+        <div class="blank">&nbsp;</div>
+
+        <div class="menu-list">
+
+            <ul id="menu-content" class="menu-content collapse out active">
+
+                <!--dashBoard-->
+                <li>
+                    <a href="@Url.Action("reportDashboard", "ReportManagement", null)"><i><img src="~/Content/Images/memberProfile/topBar Icons/Reports.png" style="width: 12%; margin-left: 6%; margin-right: 0%" /></i>&nbsp; Reports &nbsp;</a>
+                </li>
+
+                <!--reportOverview-->
+
+                <li data-toggle="collapse" data-target="#overview" class="collapsed">
+                    <a href="#"><i><img src="~/Content/Images/Icons/Reports/oncologyNav.png" style="width: 15%; margin-left: 4%; margin-right: 2%" /></i>Client &nbsp;&nbsp;<span class="caret" style="margin-left:10%; margin-top: 10%"></span></a>
+                </li>
+                <ul class="sub-menu collapse" id="overview">
+
+                    <li><a href="@Url.Action("clientReport", "ReportManagement", null)">Dashboard</a></li>
+                    <li data-toggle="collapse" data-target="#overviewGeneral" class="collapsed">
+                        <a href="#">Risk Reports<span class="caret"></span></a>
+                    </li>
+                    <ul class="sub-sub-menu collapse" id="overviewGeneral">
+                        <li><a href="@Url.Action("riskReport", "ReportManagement", null)">Home</a></li>
+                        <li><a href="@Url.Action("enrolmentReport", "ReportManagement", null)">Enrolments</a></li>
+                        <li><a href="@Url.Action("activeOnProgram", "ReportManagement", null)">Active on Program</a></li>
+                        <li><a href="@Url.Action("activeOnMedication", "ReportManagement", null)">Active on Medication</a></li>
+                        <li><a href="@Url.Action("#", "ReportManagement", null)">Not Tx Ready</a></li>
+                        <li><a href="@Url.Action("#", "ReportManagement", null)">Gender & Age</a></li>
+                        <li data-toggle="collapse" data-target="#RiskPP" class="collapsed">
+                            <a href="#">PEP<span class="caret"></span></a>
+                        </li>
+                        <ul class="sub-sub-sub-menu collapse" id="RiskPP">
+                            <li><a href="#">&nbsp;Condom Burst</a></li>
+                            <li><a href="#">&nbsp;Needle Stick</a></li>
+                            <li><a href="#">&nbsp;Enrolment</a></li>
+                            <li><a href="#">&nbsp;Not Disclosed</a></li>
+                            <li><a href="#">&nbsp;Unprotected Sex</a></li>
+                            <li><a href="#">&nbsp;Assault</a></li>
+                            <li><a href="#">&nbsp;Other</a></li>
+                        </ul>
+                        <li><a href="@Url.Action("#", "ReportManagement", null)">PrEP</a></li>
+                        <li><a href="@Url.Action("#", "ReportManagement", null)">CD4 & CD4%</a></li>
+                        <li><a href="@Url.Action("#", "ReportManagement", null)">CD4 Migration</a></li>
+                        <li><a href="@Url.Action("#", "ReportManagement", null)">Viral Load</a></li>
+                        <li><a href="@Url.Action("#", "ReportManagement", null)">VL Migration</a></li>
+                        <li><a href="@Url.Action("#", "ReportManagement", null)">Deactivated</a></li>
+                        <li><a href="@Url.Action("#", "ReportManagement", null)">Script</a></li>
+                    </ul>
+                    <li data-toggle="collapse" data-target="#overviewPatient" class="collapsed">
+                        <a href="#">Patient<span class="caret"></span></a>
+                    </li>
+                    <ul class="sub-sub-menu collapse" id="overviewPatient">
+                        <li><a href="@Url.Action("patientList", "ReportManagement", null)">Overview</a></li>
+
+                    </ul>
+                    <li data-toggle="collapse" data-target="#overviewProduction" class="collapsed">
+                        <a href="#">Operations<span class="caret"></span></a>
+                    </li>
+                    <ul class="sub-sub-menu collapse" id="overviewProduction">
+                        <li><a href="@Url.Action("operationsReport", "ReportManagement", null)">Overview</a></li>
+                        <li><a href="#">&nbsp;Email</a></li>
+                        <li><a href="#">&nbsp;Text</a></li>
+                        <li><a href="#">&nbsp;Telephone</a></li>
+                        <li><a href="#">&nbsp;Enquiries</a></li>
+                        <li><a href="#">&nbsp;Notes</a></li>
+                    </ul>
+                </ul>
+
+                <!--boardReports-->
+
+                <li data-toggle="collapse" data-target="#hivaids" class="collapsed">
+                    <a href="#"><i><img src="~/Content/Images/memberProfile/topBar Icons/boardReports.png" style="width: 15%; margin-left: 4%; margin-right: 2%" /></i>Board &nbsp;&nbsp;<span class="caret" style="margin-left:10%; margin-top: 10%"></span></a>
+                </li>
+                <ul class="sub-menu collapse" id="hivaids">
+                    <li><a href="#">&nbsp;New</a></li>
+                    <li><a href="#">&nbsp;Overview</a></li>
+                </ul>
+
+
+                <!--productionReports-->
+
+                <li data-toggle="collapse" data-target="#diabetes" class="collapsed">
+                    <a href="#"><i><img src="~/Content/Images/memberProfile/topBar Icons/productionReports.png" style="width: 9%; margin-left: 6.5%; margin-right: 2%" /></i>&nbsp; Production &nbsp;<span class="caret" style="margin-left:12%; margin-top: 10%"></span></a>
+                </li>
+                <ul class="sub-menu collapse" id="diabetes">
+
+                    <li><a href="#">Dashboard</a></li>
+                    <li data-toggle="collapse" data-target="#diabetesClient" class="collapsed">
+                        <a href="#">Case Manager<span class="caret"></span></a>
+                    </li>
+                    <ul class="sub-sub-menu collapse" id="diabetesClient">
+                        <li><a href="#">&nbsp;Assignments</a></li>
+                        <li><a href="#">&nbsp;Enquiries</a></li>
+                        <li><a href="#">&nbsp;Notes</a></li>
+                        <li><a href="#">&nbsp;Prescriptions</a></li>
+                        <li><a href="#">&nbsp;Enrolments</a></li>
+                        <li><a href="#">&nbsp;Pathology</a></li>
+                        <li><a href="#">&nbsp;Attachments</a></li>
+                        <li><a href="#">&nbsp;SMS</a></li>
+
+
+                    </ul>
+                </ul>
+
+
+                <!--Analytics-->
+
+                <li data-toggle="collapse" data-target="#Analytics" class="collapsed">
+                    <a href="#"><i><img src="~/Content/Images/memberProfile/topBar Icons/Analytics.png" style="width: 13%; margin-left: 6%; margin-right: 0%" /></i>&nbsp; Analytics &nbsp;<span class="caret" style="margin-left:12%; margin-top: 10%"></span></a>
+                </li>
+                <ul class="sub-menu collapse" id="Analytics">
+                    <li><a href="@Url.Action("analyticalReport", "ReportManagement", null)">Overview</a></li>
+
+                </ul>
+
+                <!--oncologyDrop-->
+                <!--
+                                <li data-toggle="collapse" data-target="#oncology" class="collapsed">
+                                    <a href="#"><i><img src="~/Content/Images/Icons/Reports/oncologyNav.png" style="width: 15%" /></i>&nbsp; Oncology &nbsp;&nbsp;<span class="caret" style="margin-left:10%"></span></a>
+                                </li>
+                                <ul class="sub-menu collapse" id="oncology">
+
+                                    <li><a href="#">Dashboard</a></li>
+                                    <li data-toggle="collapse" data-target="#oncologyPatient" class="collapsed">
+                                        <a href="#">Patient<span class="caret"></span></a>
+                                    </li>
+                                    <ul class="sub-sub-menu collapse" id="oncologyPatient">
+                                        <li><a href="#">&nbsp;All</a></li>
+                                        <li><a href="#">&nbsp;Prescriptions</a></li>
+                                        <li><a href="#">&nbsp;Pathology</a></li>
+                                        <li><a href="#">&nbsp;Assignments</a></li>
+                                        <li><a href="#">&nbsp;Enquiries</a></li>
+                                        <li><a href="#">&nbsp;Documents</a></li>
+                                    </ul>
+                                    <li data-toggle="collapse" data-target="#oncologyProduction" class="collapsed">
+                                        <a href="#">Production<span class="caret"></span></a>
+                                    </li>
+                                    <ul class="sub-sub-menu collapse" id="oncologyProduction">
+                                        <li><a href="#">&nbsp;All</a></li>
+                                        <li><a href="#">&nbsp;Assignments</a></li>
+                                        <li><a href="#">&nbsp;Enquiries</a></li>
+                                        <li><a href="#">&nbsp;SMS</a></li>
+                                        <li><a href="#">&nbsp;Documents</a></li>
+                                        <li><a href="#">&nbsp;Patient Profiles</a></li>
+                                        <li><a href="#">&nbsp;Authorisations</a></li>
+                                    </ul>
+                                    <li data-toggle="collapse" data-target="#oncologyScheme" class="collapsed">
+                                        <a href="#">Scheme<span class="caret"></span></a>
+                                    </li>
+                                    <ul class="sub-sub-menu collapse" id="oncologyScheme">
+                                        <li><a href="#">&nbsp;All</a></li>
+                                        <li><a href="#">&nbsp;Active Patients</a></li>
+                                        <li><a href="#">&nbsp;Active by Gender</a></li>
+                                        <li><a href="#">&nbsp;New Registrations</a></li>
+                                        <li><a href="#">&nbsp;Status</a></li>
+                                        <li><a href="#">&nbsp;Pathology</a></li>
+                                    </ul>
+                                </ul>
+                -->
+                <!--Search-->
+                <!--
+                <li>
+                    <a href="@Url.Action("Index", "Projects", null)"><i><img src="~/Content/Images/Icons/Reports/searchNav.png" style="width: 15%" /></i>&nbsp; Search &nbsp;</a>
+                </li>
+                    -->
+
+
+
+            </ul>
+        </div>
+
+    </div>
+</div>
+<br />
+<br />
+<br />
+<br />
+<h2 style="color: #003366; font-size: 250%; text-align: center; margin-bottom: 10%"><i>Risk<span style="color: #0081b3"> Reports</span></i></h2>
+
+
+<!--Navigation Icons-->
+
+
+<div class="container indexnav" style="margin-bottom: 5%">
+    <div class="row">
+
+
+
+        <!--Enrolments-->
+        <div class="col-md-3">
+            <a href="@Url.Action("enrolmentReport", "ReportManagement", null)">
+                <img src="~/Content/Images/Navigation/1. homePage/profileImage_male.png" style="width: 25%; margin-top: 10%; margin-bottom: 5%" />
+                <div class="col-xs-12 homenavbtns">
+                    <h8>Enrolments <span></span></h8>
+                </div>
+            </a>
+        </div>
+        <!--activeOnProgram-->
+        <div class="col-md-3">
+            <a href="@Url.Action("activeOnProgram", "ReportManagement", null)">
+                <img src="~/Content/Images/Navigation/5. Reports/AoP.png" style="width: 25%; margin-top: 10%; margin-bottom: 5%" />
+                <div class="col-xs-12 homenavbtns">
+                    <h8>Active on <span>Program</span></h8>
+                </div>
+            </a>
+        </div>
+        <!--activeOnMedication-->
+        <div class="col-md-3">
+            <a href="@Url.Action("activeOnMedication", "ReportManagement", null)">
+                <img src="~/Content/Images/Navigation/5. Reports/AoM.png" style="width: 25%; margin-top: 10%; margin-bottom: 5%" />
+                <div class="col-xs-12 homenavbtns">
+                    <h8>Active on <span>Medication</span></h8>
+                </div>
+            </a>
+        </div>
+        <!--notTreatmentReady-->
+        <div class="col-md-3">
+            <a href="@Url.Action("reportDAshboard", "ReportManagement", null)">
+                <img src="~/Content/Images/Navigation/5. Reports/notTxReady.png" style="width: 25%; margin-top: 10%; margin-bottom: 5%" />
+                <div class="col-xs-12 homenavbtns">
+                    <h8>Not Treatment <span>Ready</span></h8>
+                </div>
+            </a>
+        </div>
+
+    </div>
+</div>
+
+<div class="container indexnav" style="margin-bottom: 5%">
+    <div class="row">
+
+
+
+        <!--gender&Age-->
+        <div class="col-md-3">
+            <a href="@Url.Action("Index", "PatientManagement", null)">
+                <img src="~/Content/Images/Navigation/5. Reports/gender.png" style="width: 25.8%; margin-top: 10%; margin-bottom: 5%" />
+                <div class="col-xs-12 homenavbtns">
+                    <h8>Gender & <span>Age</span></h8>
+                </div>
+            </a>
+        </div>
+        <!--pep&PrEP-->
+        <div class="col-md-3">
+            <a href="@Url.Action("Index", "Clinical", null)">
+                <img src="~/Content/Images/Navigation/5. Reports/operationsReport.png" style="width: 20%; margin-top: 10%; margin-bottom: 5%" />
+                <div class="col-xs-12 homenavbtns">
+                    <h8>PEP & <span>PrEP</span></h8>
+                </div>
+            </a>
+        </div>
+        <!--CD4-->
+        <div class="col-md-3">
+            <a href="@Url.Action("Index", "Administration", null)">
+                <img src="~/Content/Images/Navigation/5. Reports/cd4.png" style="width: 25%; margin-top: 15%; margin-bottom: 5%" />
+                <div class="col-xs-12 homenavbtns">
+                    <h8>CD4 & <span>CD4%</span></h8>
+                </div>
+            </a>
+        </div>
+        <!--CD4-->
+        <div class="col-md-3">
+            <a href="@Url.Action("reportDAshboard", "ReportManagement", null)">
+                <img src="~/Content/Images/Navigation/5. Reports/OperationsSummary.png" style="width: 18%; margin-top: 10%; margin-bottom: 6%" />
+                <div class="col-xs-12 homenavbtns">
+                    <h8>CD4 <span>Migration</span></h8>
+                </div>
+            </a>
+        </div>
+
+    </div>
+</div>
+
+<div class="container indexnav" style="margin-bottom: 2%">
+    <div class="row">
+
+
+
+        <!--viralLoad-->
+        <div class="col-md-3">
+            <a href="@Url.Action("Index", "PatientManagement", null)">
+                <img src="~/Content/Images/Navigation/5. Reports/viralLoad.png" style="width: 25%; margin-top: 10%; margin-bottom: 5%" />
+                <div class="col-xs-12 homenavbtns">
+                    <h8>Viral <span>Load</span></h8>
+                </div>
+            </a>
+        </div>
+        <!--viralLoad-->
+        <div class="col-md-3">
+            <a href="@Url.Action("Index", "Clinical", null)">
+                <img src="~/Content/Images/Navigation/5. Reports/OperationsSummary.png" style="width: 18%; margin-top: 12%; margin-bottom: 7%" />
+                <div class="col-xs-12 homenavbtns">
+                    <h8>Viral Load <span>Migration</span></h8>
+                </div>
+            </a>
+        </div>
+        <!--deactivatedPatients-->
+        <div class="col-md-3">
+            <a href="@Url.Action("Index", "Administration", null)">
+                <img src="~/Content/Images/Navigation/5. Reports/Deactivated.png" style="width: 25%; margin-top: 10%; margin-bottom: 4%" />
+                <div class="col-xs-12 homenavbtns">
+                    <h8>Deactivated <span>Patients</span></h8>
+                </div>
+            </a>
+        </div>
+
+
+
+        <!--Regime-->
+        <div class="col-md-3">
+            <a href="@Url.Action("reportDAshboard", "ReportManagement", null)">
+                <img src="~/Content/Images/Navigation/5. Reports/Regime.png" style="width: 18%; margin-top: 10%; margin-bottom: 5%" />
+                <div class="col-xs-12 homenavbtns">
+                    <h8>Script <span></span></h8>
+                </div>
+            </a>
+        </div>
+
+    </div>
+</div>
+
+
+
+
+
+
+
+<br />
+<br />
+<br />
+<br />
+<div class="backButton_Navigation" style="margin-left: 10%">
+    @Html.ActionLink("Back", "Index", "Home")
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<footer>
+    <img src="~/Content/Images/Navigation/5. Reports/riskReport.png" style="position:fixed; bottom:3.2%; right: 0; left: 0; margin-left: 95%; width: 1.5%">
+</footer>
+
+
+
+

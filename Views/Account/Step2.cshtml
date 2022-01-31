@@ -1,0 +1,182 @@
+﻿@model List<HaloCareCore.Models.ViewModels.ClinicalRulesSetupInitialViewModel>
+@using HaloCareCore.Extensions
+@{
+    ViewBag.Title = "Accounts";
+    Layout = "~/Views/Shared/_layout-view-x.cshtml";
+}
+
+<comment>
+    <!-- 4 June 2021 -- HCare-1338 -->
+</comment>
+<javascript>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+    <script src="https://www.jqueryscript.net/demo/jQuery-Plugin-For-Sortable-Bootstrap-Tables-Bootstrap-Sortable/Scripts/bootstrap-sortable.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/js/standalone/selectize.js"></script>
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.default.css">
+</javascript>
+<style>
+    .error-alert {
+        background-color: rgba(217, 48, 78, 0.2);
+        padding: 10px 12px 10px 12px;
+        border: 1px solid transparent;
+        border-radius: 0px;
+        font: 100 12px 'Open Sans', sans-serif;
+        color: rgb(217, 48, 78);
+        margin: 0 0 0 0;
+        margin-top: -10px;
+        margin-bottom: -10px;
+        margin-left: -15px;
+        width: 102%;
+        vertical-align: middle;
+    }
+
+        .error-alert span a {
+            color: rgb(217, 48, 78);
+            margin-top: -5px;
+        }
+
+    .account-options-alert {
+        display: inline-block;
+        min-width: 10px;
+        padding: 8px 12px 8px 0px;
+        font: 100 12px 'Open Sans', sans-serif;
+        color: rgb(217, 48, 78);
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: middle;
+        background-color: rgba(217, 48, 78, 0.2);
+        border-radius: 3px;
+        margin-left: 15px;
+        margin-bottom: 15px;
+    }
+
+        .account-options-alert span a {
+            color: rgb(217, 48, 78);
+        }
+
+    .select2-container--default .select2-selection--multiple {
+        display: block !important;
+        max-width: 1500px !important;
+        width: 111% !important;
+        max-height: 100px;
+        height: auto;
+        margin-left: 5px;
+        padding: 6px 0px;
+        line-height: 1.428571429;
+        color: #003366;
+        border-radius: 0px !important;
+        border: none !important;
+        border-bottom: 1px solid #e8e6e6 !important;
+        background-color: transparent !important;
+        -webkit-box-shadow: none !important;
+        box-shadow: none !important;
+    }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice {
+            background-color: #0081b3 !important;
+            color: white !important;
+            border: 1px solid transparent !important;
+            border-radius: 5px;
+            cursor: default;
+            float: left;
+            margin-right: 5px;
+            margin-top: 0px !important;
+            padding: 5px 6px 5px 0px !important;
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+            color: white !important;
+            cursor: pointer;
+            display: inline-block;
+            font-weight: bold;
+            margin-right: 2px;
+        }
+
+    .select2-container--open .select2-dropdown {
+        left: 10px !important;
+    }
+</style>
+
+<div id="instruction-wrapper">
+    <div class="instruction-panel">
+        <h class="account-step">Step 2</h>
+        <p class="account-step-instruction">Programs</p>
+        <ul style="padding: 0">
+            <li class="account-step-list acc-1"><span class="number-circle a-circle-1 complete-circle">✓</span>Account setup</li>
+            <li class="account-step-list acc-2 active-step"><span class="number-circle a-circle-2 active-circle">2</span>Program setup</li>
+            <li class="account-step-list acc-3"><span class="number-circle a-circle-3">3</span>Clinical rules</li>
+            <li class="account-step-list acc-4"><span class="number-circle a-circle-4">4</span>Management status</li>
+            <li class="account-step-list acc-5"><span class="number-circle a-circle-5">5</span>Text messages</li>
+        </ul>
+    </div>
+</div>
+
+<div class="collapse in">
+    <div class="card card-body">
+        <div class="collapse-body">
+            <div class="new-account-panel">
+                @using (Html.BeginForm("Step2", "Account", FormMethod.Post, new { id = "account-step-2" }))
+                {
+                    <input type="hidden" id="accountID" name="accountID" value="@ViewBag.AccountID" />
+                    <input type="hidden" id="programID" name="programID" value="@ViewBag.ProgramID" />
+                    <input type="hidden" id="medicalaidID" name="medicalaidID" value="@ViewBag.MedicalAidID" />
+
+                    <div class="col-md-12 row">
+                        <div class="account-heading">Program setup</div>
+                        <p class="account-sub-header-new">Select a program setup to complete settings.</p>
+                    </div>
+                    <hr class="fancyruler">
+                    <div style="margin-bottom: 20px"></div>
+
+                    <table class="table mh-table table-hover" style="margin-left: 1.6%">
+                        <thead>
+                            <tr>
+                                <th>@Html.DisplayNameFor(model => model[0].programName)</th>
+                                <th style="text-align: center!important; width: 10%">@Html.DisplayName("Status")</th>
+                                <th style="text-align: center!important; width: 10%">@Html.DisplayName("Action")</th>
+                            </tr>
+                        </thead>
+
+                        @for (int i = 0; i < Model.Count(); i++)
+                        {
+                            <tbody>
+                                <tr>
+                                    @Html.HiddenFor(model => model[i].accountID)
+                                    @Html.HiddenFor(model => model[i].programID)
+                                    @Html.HiddenFor(model => model[i].done)
+
+                                    <td>@Html.DisplayFor(model => model[i].programName)</td>
+                                    @if (Model[i].done == true)
+                                    {
+                                        <td class="row-information" style="text-align: center!important"><span class="chk-yes fas fa-circle"></span></td>
+                                    }
+                                    else
+                                    {
+                                        <td class="row-information" style="text-align: center!important"><span class="chk-no fas fa-circle"></span></td>
+                                    }
+                                    @*<td class="row-information" style="text-align: center!important"><span class="@(Model[i].done == true ? "chk-yes fas fa-circle" : "chk-no fas fa-circle")"></span></td>*@
+                                    <td style="text-align: center!important">
+                                        <input type="button" class="link-button" value="Setup" onclick="location.href='@Url.Action("Step3", "Account", new { id = Model[i].accountID, progrID = Model[i].programID, medId = Context.Request.Query["medId"]})'" />
+                                    </td>
+                                </tr>
+                            </tbody>
+                        }
+
+                    </table>
+                    <div class="sf-footer">
+                        <input type="button" id="account-skip-step-2" value="Skip" class="btn modal-button-previous" onclick="location.href='@Url.Action("Details", "Account", new { Id = ViewBag.AccountID })'"/>
+                        <input type="button" id="account-next-step-2" value="Finish" class="btn modal-button-next" onclick="location.href='@Url.Action("Index", "Account", null)'" />
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script src="~/bundles/jqueryval"></script>
+  
+}

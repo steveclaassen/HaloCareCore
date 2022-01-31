@@ -1,0 +1,425 @@
+﻿@*@model HaloCareCore.Models.Communications.Emails*@
+@model HaloCareCore.Models.ComsViewModel
+
+@{
+    Layout = "~/Views/Shared/_LayoutModal.cshtml";
+}
+
+<comment>
+    <!-- 15 September 2021 -- hare-1392 -->
+</comment>
+<style>
+    .cke_toolbar_last {
+        display: none !important;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__placeholder {
+        color: #ffffff !important;
+    }
+
+    .select2-container {
+        width: 975px !important;
+        margin-left: 0px;
+    }
+
+    .select2-container--default .select2-selection--single {
+        display: block !important;
+        max-width: 1000px !important;
+        width: 90% !important;
+        max-height: 100px;
+        height: auto;
+        margin-left: 12px !important;
+        padding: 4px 10px !important;
+        line-height: 1.428571429;
+        color: #003366;
+        border-radius: 0px !important;
+        border: none !important;
+        border-bottom: 1px solid #e8e6e6 !important;
+        background-color: transparent !important;
+        -webkit-box-shadow: none !important;
+        box-shadow: none !important;
+    }
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            border-radius: 0px !important;
+            padding: 2px 8px !important;
+            margin-bottom: 1px !important;
+            margin-top: -5px !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow b {
+            margin-left: -98px !important;
+            margin-top: -7px !important;
+        }
+
+    #email-message-2 {
+        display: none;
+    }
+
+    .error-alert-email {
+        background-color: rgba(217, 48, 78, 0.2);
+        padding: 10px 12px 10px 12px;
+        border: 1px solid transparent !important;
+        border-radius: 0px;
+        font: 100 12px 'Open Sans', sans-serif;
+        color: rgb(217, 48, 78);
+        margin: 0 0 0 0;
+        margin-top: 0px;
+        margin-bottom: 0px;
+        margin-left: -10px;
+        width: 102%;
+        vertical-align: middle;
+    }
+
+        .error-alert-email span a {
+            color: rgb(217, 48, 78);
+            margin-top: -5px;
+        }
+
+    .email-control-new {
+        display: block;
+        max-width: 1000px !important;
+        width: 95% !important;
+        max-height: 100px;
+        height: 30px;
+        margin-top: 5px;
+        margin-left: 0px;
+        padding: 5px 8px;
+        line-height: 1.428571429;
+        color: #505050;
+        border-radius: 0px;
+        border: none;
+        border-bottom: 1px solid #e8e6e6;
+        background-color: transparent !important;
+        font-family: 'Century Gothic' !important;
+    }
+
+
+    .dr-assignment-popup-box {
+        display: block;
+        background: #fff;
+        color: #FFFFFF;
+        border: none;
+        border-radius: 2px;
+        position: absolute;
+        width: 650px;
+        height: auto;
+        left: 50%;
+        top: 50%;
+        margin-left: -300px;
+        padding: 0px;
+        box-sizing: border-box;
+        z-index: 605;
+    }
+
+    .dea-table {
+        max-width: 2200px;
+        width: 100%;
+        margin: auto;
+        margin-top: 0.5% !important;
+        margin-left: 0% !important;
+        margin-bottom: 2% !important;
+        position: relative;
+        z-index: 4;
+    }
+
+        .dea-table thead tr th {
+            border: 1px solid transparent;
+            color: white !important;
+            font-family: 'Century Gothic' !important;
+            font-weight: 600 !important;
+            text-align: left !important;
+            font-size: 12px !important;
+            background-color: #606060;
+            cursor: pointer;
+            text-indent: 1px;
+        }
+
+        .dea-table tr td {
+            text-align: left !important;
+            font-family: 'Century Gothic' !important;
+            color: #003366 !important;
+            font-size: 11px !important;
+            border: 1px solid transparent;
+            cursor: pointer;
+            background-color: #ffffff;
+            text-indent: 1px;
+            border-bottom: 1px solid transparent;
+            padding: 10px;
+        }
+
+        .dea-table tbody {
+            border: none !important;
+        }
+
+        .dea-table tr:hover {
+            background-color: rgba(204, 204, 204, 0.04);
+        }
+</style>
+
+<div id="dr-attachment-overlay" class="attachment-overlay"></div>
+<div class="email-assignment-modal">
+    @using (Ajax.BeginForm("_DoctorEmailAssignment", "Clinical", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "divPath", OnSuccess = "hideModal(); alert('Saved');" }, new { id = "dr-email-assignment" }))
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="col-md-12">
+            <button type="button" class="email-close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <div class="new-email-panel">
+                <div class="hidden-fields">
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                    @Html.HiddenFor(model => model.emailMessages.dependantID, new { htmlAttributes = new { @class = "form-control" } })
+                    @Html.Hidden("taskId", (object)ViewBag.task)
+                    @Html.Hidden("id", (object)ViewBag.id)
+                    @Html.Hidden("pro", (object)ViewBag.pro)
+                    <input id="e2-dependantid" name="e2-dependantid" value="@ViewBag.DependantID" hidden />
+                    <input id="e2-programid" name="e2-programid" value="@ViewBag.ProgramID" hidden />
+                    <input id="e2-medicalaidid" name="e2-medicalaidid" value="@ViewBag.MedicalAidID" hidden />
+                    <input id="e2-userid" name="e2-userid" value="@ViewBag.UserID" hidden />
+                    <input id="e2-member-name" name="e2-member-name" value="@ViewBag.MemberName" hidden />
+                </div>
+
+                <div class="form-horizontal">
+
+                    <div class="form-group" style="margin-bottom: 0">
+                        <div class="col-md-12">
+                            <table class="table ne-table">
+                                <tr>
+                                    <td style="width: 8%; text-align: right!important"></td>
+                                    <td style="width: 2%"></td>
+                                    <td style="width: 85%; text-indent: 18px">
+                                        @if (ViewBag.DoctorName == null)
+                                        {
+                                            <span id="doctor-information" style="font-size: 16px; color: #ccc">No doctor selected &emsp;</span><span>&nbsp;<input type="button" id="doctor-edit" value="Add" class="doctor-email-button" /></span>
+                                        }
+                                        else
+                                        {
+                                            <span id="doctor-information" style="font-size: 16px">@ViewBag.DoctorName | Practice # @ViewBag.DoctorPractice &emsp;</span><span>&nbsp;<input type="button" id="doctor-edit" value="Edit" class="doctor-email-button" /></span>
+                                        }
+                                    </td>
+                                    <td style="width: 2%"></td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 8%; text-align: right!important">To</td>
+                                    <td style="width: 2%"><span id="email-validation-error"></span></td>
+                                    <td style="width: 85%">
+                                        <input type="text" id="doctor-email-to" name="doctor-email-to" value="@ViewBag.DoctorEmail" class="email-control-new" onblur="ValidateEmail2()" required />
+                                    </td>
+                                    <td style="width: 2%"></td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 8%; text-align: right !important">Cc</td>
+                                    <td style="width: 2%"></td>
+                                    <td>
+                                        <input type="text" id="doctor-email-cc" name="doctor-email-cc" class="email-control-new" placeholder="Cc" />
+                                    </td>
+                                    <td style="width: 2%"></td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 8%; text-align: right!important">Subject</td>
+                                    <td style="width: 2%"></td>
+                                    <td>
+                                        @Html.TextBox("Subject", (object)ViewBag.schemeSubject + " Disease Management: Member # " + (object)ViewBag.MemberNo + " Dep " + (object)ViewBag.Dep + " " + (object)ViewBag.Intial + " " + (object)ViewBag.Surname, htmlAttributes: new { @class = "email-control-new", @disabled = "disabled", @id = "@model.emailMessages.subject" })
+                                        @Html.TextBoxFor(m => m.emailMessages.subject, new { @Value = "HaloCare Disease Management: Member # " + (object)ViewBag.MemberNo + " Dep " + (object)ViewBag.Dep + " " + (object)ViewBag.Intial + " " + (object)ViewBag.Surname, @type = "hidden" })
+                                    </td>
+                                    <td style="width: 2%"></td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 8%; text-align: right!important">Template</td>
+                                    <td style="width: 2%"><span id="template-validation-error"></span></td>
+                                    <td>
+                                        <select id="emailTemplate2" name="emailTemplate2" class="form-control select2" style="width: 100%;" onchange="EmailTemplate2()" required>
+                                            <option subtext="" selected="selected" disabled>Select</option>
+                                            @foreach (var item in ViewBag.Templates)
+                                            {
+                                                <option value="@item.Value" subtext=" ">@item.Text</option>
+                                            }
+                                        </select>
+                                    </td>
+                                    <td style="width: 2%"></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div id="email-message-2" class="form-group">
+                        <div class="col-md-12" style="width: 100%!important">
+                            @Html.TextAreaFor(model => model.emailMessages.emailMassage, htmlAttributes: new { @class = "emailTemplate_Bodys", @id = "emailMessage2" })
+                            @Html.HiddenFor(model => model.emailMessages.emailMassage, htmlAttributes: new { @class = "textMessage_messageBox" })
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="email-attachment-header">Attachments <span>&nbsp;<input type="button" value="Add" class="email-attachment-button-one-2" /></span></div>
+                        <span class="ea-placeholder-2">Select a file to upload. &emsp;<input type="button" value="Add" class="email-attachment-button-two-2" /></span>
+                        <div class="email-attachments">
+                            <table class="table ea-table" id="attachment-table-2">
+                                <tr class="hidden"><td style="width: 5%"></td><td style="width: 85%"></td><td style="width: 10%"></td></tr>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div id="validation-email-error-2" class="error-alert hidden" style="margin-top: 5px"></div>
+            <div id="validation-error-2" class="error-alert hidden" style="margin-top: 5px"></div>
+        </div>
+
+        <div class="col-md-12 email-info-panel">@ViewBag.MedicalAid • @ViewBag.Program</div>
+
+        <div class="col-md-12 new-email-pop-footer">
+            <button type="submit" class="popup-button hidden" id="email-2-send">Send</button>
+            <button type="button" class="popup-button" id="email-2-button">Send</button>
+        </div>
+    }
+</div>
+<div id="dr-email-attachment-popup" class="popup-box">
+    <div class="col-md-12">
+        <button type="button" class="popup-close" onclick="close_email_attachments()"><span aria-hidden="true">&times;</span></button>
+        <div class="popup-scheme">Email</div>
+        <div class="popup-title">Attachments</div>
+        <hr class="settings-ruler" />
+        <div class="popup-template">
+            @if (Model.AttachmentTemplates.Count() > 0)
+            {
+                <table class="table mh-table table-hover">
+                    <thead>
+                        <tr>
+                            <th>@Html.DisplayNameFor(model => model.AttachmentTemplates[0].FileName)</th>
+                        </tr>
+                    </thead>
+                    @foreach (var item in Model.AttachmentTemplates)
+                    {
+                        <tbody>
+                            <tr>
+                                <td class="attachment-icon">
+                                    <input type="checkbox" id="attachment-2-@item.Id" class="check-box-attachment" name="attachments-2" value="@item.Id" />
+                                    <label for="attachment-2-@item.Id" class="attachment-row"><i class="far fa-circle" id="check-2-@item.Id"></i> &nbsp; @item.AttachmentName</label>
+                                </td>
+                            </tr>
+                        </tbody>
+                    }
+                </table>
+            }
+            else
+            {
+                <div class="no-results-1">
+                    <img src="~/Content/Images/_2020/tables/no-results-3.png" />
+                </div>
+                <h4 class="no-results-attachments">Attachments for account have not been set up.<br />Please contact your administrator.</h4>
+            }
+        </div>
+    </div>
+
+    <div class="col-md-12 popup-info-panel">@ViewBag.MedicalAid • @ViewBag.Program</div>
+
+    @if (Model.AttachmentTemplates.Count() > 0)
+    {
+        <div class="col-md-12 popup-footer">
+            <button class="popup-button" id="popup-close-btn-2">Submit</button>
+        </div>
+    }
+    else
+    {
+        <div class="col-md-12 popup-footer">
+            <button class="popup-button" id="popup-close-btn-2">Close</button>
+        </div>
+    }
+</div>
+<div id="doctor-email-popup" class="dr-assignment-popup-box">
+    <div class="col-md-12">
+        <button type="button" class="popup-close" onclick="email_doctor_clear()"><span aria-hidden="true">&times;</span></button>
+        <div class="popup-scheme">Email</div>
+        <div class="popup-title">Doctors</div>
+        <hr class="settings-ruler" style="margin-bottom: 0" />
+        <div class="popup-template">
+            <table class="table ea-table">
+                <tr>
+                    <td style="width: 25%; text-align: right!important">Doctor name</td>
+                    <td style="width: 75%">
+                        <input type="text" id="dr-name-search" name="dr-name-search" class="email-control-new" />
+                    </td>
+                </tr>
+                <tr>
+                    <td style="width: 25%; text-align: right!important">Practice #</td>
+                    <td style="width: 75%">
+                        <input type="text" id="practice-number-search" name="practice-number-search" class="email-control-new" />
+                    </td>
+                </tr>
+                <tr>
+                    <td style="width: 25%; text-align: right!important">Practice name</td>
+                    <td style="width: 75%">
+                        <input type="text" id="practice-name-search" name="practice-name-search" class="email-control-new" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <div class="dr-email-detail">
+        <table class="table dea-table" id="dr-email-details">
+            <tbody>
+                <tr></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="col-md-12 popup-footer-dr-email">
+        <button class="popup-button" id="dr-email-search-btn">Search</button>
+    </div>
+
+</div>
+
+@section Scripts {
+    <script src="~/bundles/jqueryval"></script>
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script>
+        $(document).ready(function () { $("#Templates").select2({ multiple: false, placeholder: "Select", allowClear: false }); });
+    </script>
+    <script>
+        $(function () {
+            $(".select2").select2({ matcher: matchCustom, templateResult: formatCustom });
+        })
+
+        function stringMatch(term, candidate) {
+            return candidate && candidate.toLowerCase().indexOf(term.toLowerCase()) >= 0;
+        }
+
+        function matchCustom(params, data) {
+            // If there are no search terms, return all of the data
+            if ($.trim(params.term) === '') {
+                return data;
+            }
+            // Do not display the item if there is no 'text' property
+            if (typeof data.text === 'undefined') {
+                return null;
+            }
+            // Match text of option
+            if (stringMatch(params.term, data.text)) {
+                return data;
+            }
+            // Match attribute "data-foo" of option
+            if (stringMatch(params.term, $(data.element).attr('subtext'))) {
+                return data;
+            }
+            // Return `null` if the term should not be displayed
+            return null;
+        }
+
+        function formatCustom(state) {
+            return $(
+                '<div><div>' + state.text + '</div><div class="subtext">'
+                + $(state.element).attr('subtext')
+                + '</div></div>'
+            );
+        }
+    </script>
+
+    <script src="~/Scripts/pc-email-hcare-1392.js"></script>
+
+}

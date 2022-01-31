@@ -1,0 +1,248 @@
+﻿@model HaloCareCore.Models.Questionnaire.QuestionnaireOther
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Other";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<comment>
+    <!--
+    04 June 2020 -- HCare-968(Pregnancy information Questionnaire et al)
+    Request is to split Pregnancy out of the General/Other section of Patient Clinical/Patient History/General panel.
+    I have added three more views to allow for the separation of the fields (General vs Pregnancy) and amended the methods to accomodate the post requirements.
+        -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+</style>
+
+<!---------------------------------------------------------------------- header ---------------------------------------------------------------------->
+<nav id="global-nav" class="nav">
+    <div class="pull-left title">
+        <h1 class="site-title_patientProfile">
+            <span><img src="~/Content/Images/_2020/icons/banner-icon/other-white.png" /></span>&emsp; Other
+        </h1>
+    </div>
+    <div class="pull-right title">
+        <h1 class="site-title_userID pull-right">
+            <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+        </h1>
+        <h1 class="site-title_userID pull-right">
+            @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+            {
+                <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+            }
+        </h1>
+        <h1 class="site-waffleIcon pull-right">
+            <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+        </h1>
+    </div>
+</nav>
+
+<div class="dashboardContainer zero-padding">
+    <div class="patientDashboard_View">
+        <!------------------------------------------------------------------------ bread-crumbs ------------------------------------------------------------------------>
+        <ul class="breadcrumbs_patientDashboard">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new { })">Home</a></li>
+            <li><a href="@Url.Action("patientClinical", "Member", new { DependentID = Context.Request.Query["DependentID"] })">Patient</a></li>
+            <li><a href="#">Other</a></li>
+        </ul>
+
+        <!--------------------------------------------------------------------- left-navigation-bar --------------------------------------------------------------------->
+        @Html.Partial("_navSlider", new { DependentID = Context.Request.Query["DependentID"] })
+
+        <!----------------------------------------------------------------------- nav-collection ----------------------------------------------------------------------->
+        <div class="navCollection_patientDashboard">
+            @Html.Partial("_navCollection")
+        </div>
+
+        <!----------------------------------------------------------------------- patient-profile ----------------------------------------------------------------------->
+        <div class="profileBar">
+            @Html.Action("_profileBar_edit", "Member", new { DependentID = Model.dependentID })
+        </div>
+    </div>
+    <br />
+    <!----------------------------------------------------------------------- form ----------------------------------------------------------------------->
+    <div class="profilebar-spacer"></div>
+    <div id="general-other-panel" class="patientDashboard_container">
+        <div class="col-md-12 row">
+            <div class="heading-spacer"></div>
+            <div class="col-md-6"><div class="page-heading">Details</div></div>
+            <hr class="heading-ruler">
+        </div>
+        <div class="col-md-12">
+            <div class="row">
+                <table class="table details-table" id="other-details">
+                    <tbody>
+                        <tr>
+                            <td class="row-heading">Occupation</td>
+                            <td class="row-information">@(!String.IsNullOrEmpty(Model.occupation) ? @Model.occupation : "-")</td>
+                        </tr>
+                        <tr>
+                            <td class="row-heading">Shift worker</td>
+                            <td class="row-information"><span class="@(Model.shiftWorkCheck == true ? "check-yes far fa-check-circle" : "check-no far fa-times-circle")"></span>@((Model.shiftWorkCheck == true) ? " Yes" : " No")</td>
+                        </tr>
+                        @if (Model.shiftWorkCheck == true)
+                        {
+                            <tr>
+                                <td class="row-heading">Shift worker</td>
+                                <td class="row-information">@Html.DisplayFor(model => model.shiftWorker)</td>
+                            </tr>
+                        }
+                        <tr>
+                            <td class="row-heading">Lypohypertophy</td>
+                            <td class="row-information"><span class="@(Model.lypohypertrophyCheck == true ? "check-yes far fa-check-circle" : "check-no far fa-times-circle")"></span>@((Model.lypohypertrophyCheck == true) ? " Yes" : " No")</td>
+                        </tr>
+                        @if (Model.lypohypertrophyCheck == true)
+                        {
+                            <tr>
+                                <td class="row-heading">Comment</td>
+                                <td class="row-information">@(!String.IsNullOrEmpty(Model.lypohypertrophy) ? @Model.lypohypertrophy : "-")</td>
+                            </tr>
+                            <tr>
+                                <td class="row-heading">Diagnosis date</td>
+                                <td class="row-information">@(!String.IsNullOrEmpty(Model.lypohypertrophyDate.ToString()) ? @Model.lypohypertrophyDate.ToString() : "-")</td>
+                            </tr>
+                        }
+                        <tr>
+                            <td class="row-heading">Recreational drug use</td>
+                            <td class="row-information"><span class="@(Model.recDrugs == true ? "check-yes far fa-check-circle" : "check-no far fa-times-circle")"></span>@((Model.recDrugs == true) ? " Yes" : " No")</td>
+                        </tr>
+                        @if (Model.recDrugs == true)
+                        {
+                            <tr>
+                                <td class="row-heading">Diagnosis date</td>
+                                <td class="row-information">@(!String.IsNullOrEmpty(Model.recDrugsLastUsed.ToString()) ? @Model.recDrugsLastUsed.ToString() : "-")</td>
+                            </tr>
+                        }
+                        <tr>
+                            <td class="row-heading">Depression</td>
+                            <td class="row-information"><span class="@(Model.depression == true ? "check-yes far fa-check-circle" : "check-no far fa-times-circle")"></span>@((Model.depression == true) ? " Yes" : " No")</td>
+                        </tr>
+                        @if (Model.depression == true)
+                        {
+                            <tr>
+                                <td class="row-heading">Depression comment</td>
+                                <td class="row-information">@Html.DisplayFor(model => model.depressionComment)</td>
+                            </tr>
+                        }
+                        <tr>
+                            <td class="row-heading">TB screened</td>
+                            <td class="row-information"><span class="@(Model.TBScreen == true ? "check-yes far fa-check-circle" : "check-no far fa-times-circle")"></span>@((Model.TBScreen == true) ? " Yes" : " No")</td>
+                        </tr>
+                        @if (Model.TBScreen == true)
+                        {
+                            <tr>
+                                <td class="row-heading">TB screen date</td>
+                                <td class="row-information">@(!String.IsNullOrEmpty(Model.TBScreenDate.ToString()) ? @Model.TBScreenDate.ToString() : "-")</td>
+                            </tr>
+                            <tr>
+                                <td class="row-heading">TB screen result</td>
+                                <td class="row-information">@Html.DisplayFor(model => model.TBScreenResult)</td>
+                            </tr>
+                            <tr>
+                                <td class="row-heading">TB treatment start</td>
+                                <td class="row-information">@(!String.IsNullOrEmpty(Model.tbTreatmentStartDate.ToString()) ? @Model.tbTreatmentStartDate.ToString() : "-")</td>
+                            </tr>
+                            <tr>
+                                <td class="row-heading">TB treatment end</td>
+                                <td class="row-information">@(!String.IsNullOrEmpty(Model.tbTreatmentEndDate.ToString()) ? @Model.tbTreatmentEndDate.ToString() : "-")</td>
+                            </tr>
+                        }
+                        <tr>
+                            <td class="row-heading">Kidney infection</td>
+                            <td class="row-information"><span class="@(Model.hasKidneyInfection == true ? "check-yes far fa-check-circle" : "check-no far fa-times-circle")"></span>@((Model.hasKidneyInfection == true) ? " Yes" : " No")</td>
+                        </tr>
+                        <tr>
+                            <td class="row-heading">Frail care required</td>
+                            <td class="row-information"><span class="@(Model.frailCareCheck == true ? "check-yes far fa-check-circle" : "check-no far fa-times-circle")"></span>@((Model.frailCareCheck == true) ? " Yes" : " No")</td>
+                        </tr>
+                        @if (Model.frailCareCheck == true)
+                        {
+                            <tr>
+                                <td class="row-heading">Frail care</td>
+                                <td class="row-information">@(!String.IsNullOrEmpty(Model.frailCare) ? @Model.frailCare : "-")</td>
+                            </tr>
+                            <tr>
+                                <td class="row-heading">Frail care comment</td>
+                                <td class="row-information">@Html.DisplayFor(model => model.frailCareComment)</td>
+                            </tr>
+                        }
+                        <tr>
+                            <td class="row-heading">Created by</td>
+                            <td class="row-information">@Html.DisplayFor(model => model.createdBy)</td>
+                        </tr>
+                        <tr>
+                            <td class="row-heading">Created date</td>
+                            <td class="row-information">@Html.DisplayFor(model => model.createdDate)</td>
+                        </tr>
+                        @if (Model.modifiedDate != null)
+                        {
+                            <tr>
+                                <td class="row-heading">Modified by</td>
+                                <td class="row-information">@Html.DisplayFor(model => model.modifiedBy)</td>
+                            </tr>
+                            <tr>
+                                <td class="row-heading">Modified date</td>
+                                <td class="row-information">@(!String.IsNullOrEmpty(Model.modifiedDate.ToString()) ? @Model.modifiedDate.Value.ToString("dd-MM-yyyy") : "-")</td>
+                            </tr>
+                        }
+                        <tr>
+                            <td class="row-heading">Program</td>
+                            <td class="row-information">@(!String.IsNullOrEmpty(Model.programType) ? @Model.programType : "-")</td>
+                        </tr>
+                        <tr>
+                            <td class="row-heading">Comments</td>
+                            <td class="row-information">@(!String.IsNullOrEmpty(Model.generalComments) ? @Model.generalComments : "-")</td>
+                        </tr>
+                        @if (Model.followUp == true)
+                        {
+                            <tr>
+                                <td class="row-heading">Follow up</td>
+                                <td class="row-information"><span class="@(Model.followUp == true ? "check-yes far fa-check-circle" : "check-no far fa-times-circle")"></span>@((Model.followUp == true) ? " Yes" : " No")</td>
+
+                            </tr>
+                        }
+                        <tr>
+                            <td class="row-heading">Active</td>
+                            <td class="row-information"><span class="@(Model.active == true ? "check-yes far fa-check-circle" : "check-no far fa-times-circle")"></span>@((Model.active == true) ? " Yes" : " No")</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="text-center">
+                <input value="Back" class="btn bck-button go_back" onclick="backKey()" style="width: 15%!important" />
+                <input id="edit-other" value="Edit" class="btn edit-button" onclick="location.href = '@Url.Action("Clinical_General_Other_Edit", "Member", new { id = Model.QuestionnaireOtherID, pro = Context.Request.Query["pro"] })'; editKey();" style="width: 15%!important" />
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@section scripts{
+
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <!-- local-storage-redirect -->
+    <script>
+        function backKey() {
+            localStorage.clear();
+            localStorage.removeItem("details_other");
+            localStorage.setItem("back_clinicalGeneral", Date.now());
+        }
+        function editKey() {
+            localStorage.clear();
+            localStorage.removeItem("details_other");
+            localStorage.setItem("edit_other", Date.now());
+        }
+
+    </script>
+}
+

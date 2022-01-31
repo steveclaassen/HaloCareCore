@@ -1,0 +1,129 @@
+﻿@model HaloCareCore.Models.Validation.AttachmentTypes
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Attachment types";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<comment>
+    <!--
+        21 August 2020 -- HCare-1154(Attachment type setup)
+    -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+</style>
+
+<!---------------------------------------------------------------------- header ---------------------------------------------------------------------->
+<div class="fullScreen_container zero-padding">
+
+    <nav id="global-nav" class="nav">
+        <div class="pull-left title">
+            <h1 class="site-title_patientProfile">
+                <span><i class="fas fa-square"></i></span>&emsp; Attachment types
+            </h1>
+        </div>
+        <div class="pull-right title">
+            <h1 class="site-title_userID pull-right">
+                <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+            </h1>
+            <h1 class="site-title_userID pull-right">
+                @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                {
+                    <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                }
+            </h1>
+            <h1 class="site-waffleIcon pull-right">
+                <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+            </h1>
+        </div>
+    </nav>
+
+    <!--breadCrumbs-->
+    <ul class="breadcrumbs_fullScreens">
+        <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+        <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+        <li><a href="@Url.Action("PathologyType_Index", "Member", new {})">Pathology types</a></li>
+        <li><a href="#">@ViewBag.Title</a></li>
+    </ul>
+
+    <!--navCollection-->
+    <div class="navCollection_fullScreens">
+        @Html.Partial("_navCollection")
+    </div>
+    <!----------------------------------------------------------------------- form ----------------------------------------------------------------------->
+    <div style="margin-bottom: 3%"></div>
+
+    <div id="panel">
+        <div class="col-md-12 row">
+            <div class="col-md-6"><h4 class="subHeading">Attachment type detail</h4></div>
+            <hr class="settings-ruler">
+        </div>
+        <div class="col-md-12">
+            <div class="row">
+                <table class="table details-table table-hover" id="attachment-type-details">
+                    <tbody>
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayNameFor(model => model.attachmentType)</td>
+                            <td class="row-information">@Html.DisplayFor(model => model.attachmentType)</td>
+                        </tr>
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayNameFor(model => model.typeDescription)</td>
+                            <td class="row-information">@Html.DisplayFor(model => model.typeDescription)</td>
+                        </tr>
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayNameFor(model => model.createdDate)</td>
+                            <td class="row-information">@Html.DisplayFor(model => model.createdDate)</td>
+                        </tr>
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayNameFor(model => model.createdBy)</td>
+                            <td class="row-information">@Html.DisplayFor(model => model.createdBy)</td>
+                        </tr>
+                        @if (Model.modifiedDate != null)
+                        {
+                            <tr>
+                                <td class="row-heading subject">@Html.DisplayNameFor(model => model.modifiedDate)</td>
+                                <td class="row-information">@Html.DisplayFor(model => model.modifiedDate)</td>
+                            </tr>
+                            <tr>
+                                <td class="row-heading subject">@Html.DisplayNameFor(model => model.modifiedBy)</td>
+                                <td class="row-information">@Html.DisplayFor(model => model.modifiedBy)</td>
+                            </tr>
+                        }
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayNameFor(model => model.active)</td>
+                            <td class="row-information"><span class="@(Model.active == true ? "chk-yes fas fa-circle" : "chk-no fas fa-circle")"></span>&emsp;@((Model.active == true) ? "Yes" : "No")</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="fixed-btn text-center">
+                <input id="edit-other" value="Edit" class="btn edit-button" onclick="location.href = '@Url.Action("AttachmentType_Edit", "Administration", new { id = Model.attachmentType })'; editKey();" style="width: 15%!important" /><br />
+                <input value="Back" class="btn reset-button go_back" onclick="MainbackBtn()" style="width: 15%!important" />
+            </div>
+        </div>
+    </div>
+
+</div>
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+    <script>
+        function MainbackBtn() {
+            window.location.href = '@Url.Action("PathologyType_Index", "Member")';
+        }
+
+            function editKey() {
+                localStorage.clear();
+                localStorage.removeItem("details_pt");
+                localStorage.setItem("edit_pt", Date.now());
+            }
+
+    </script>
+
+}

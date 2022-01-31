@@ -1,0 +1,954 @@
+﻿@model HaloCareCore.Models.DoctorQuestionnaireViewModel
+@{
+    ViewBag.Title = "Doctor Questionnaire";
+    Layout = "~/Views/Shared/_LayoutModal.cshtml";
+}
+
+<style>
+    ::-webkit-input-placeholder { /* Chrome */
+        color: #333;
+        font-weight: 500;
+        font-size: 14px;
+        transition: opacity 250ms ease-in-out;
+    }
+
+    :focus::-webkit-input-placeholder {
+        opacity: 0.5;
+    }
+</style>
+
+
+<div class="doctorQuestionnaire_Modal">
+    @using (Ajax.BeginForm("_DoctorQuestionnaire", "Clinical", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "divPath", OnSuccess = "hideModal(); alert('Saved');" }))
+    {
+        @Html.Hidden("taskId", (object)ViewBag.task)
+        @Html.Hidden("DependantID", (object)ViewBag.DependantID)
+        @Html.Hidden("id", (object)ViewBag.id)
+        @Html.Hidden("template", (object)ViewBag.templateID)
+        @Html.AntiForgeryToken()
+
+        <div class="modal-header modal-header-primary">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true" id="assignmentModalClose">×</button>
+            <h2>Clinical History</h2>
+        </div>
+
+        <div class="form-horizontal" style="margin-left: 2%">
+
+            <!--Diagnosis-->
+            <div class="questionnaireContainer">
+                <h3 style="margin-left: 2%">Patient History</h3>
+                <hr class="questionnaire_Ruler" />
+                <br />
+                <div class="form-group">
+                    <div class="col-md-3" style="margin-left: 3.5%; text-align: right">
+                        @Html.Label(null,"HIV Diagnosis Date: ", htmlAttributes: new { @class = "control-label" })
+                    </div>
+                    <div class="col-md-8">
+                        @Html.EditorFor(model => model.drquestionnaireResults.diagnosisDate, new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire" } })
+                    </div>
+                </div>
+                <br />
+                <br />
+            </div>
+
+            <!--ARV History-->
+            <div class="questionnaireContainer">
+
+                <h3 style="margin-left: 2%">ARV History</h3>
+                <hr class="questionnaire_Ruler" />
+                <br />
+                <div class="form-group">
+                    <div class="col-md-3" style="margin-left: 3.5%; text-align: right">
+                        @Html.Label(null,"Date HAART first initiated: ", htmlAttributes: new { @class = "control-label" })
+                    </div>
+                    <div class="col-md-8">
+                        @Html.EditorFor(model => model.programHistory.effectiveDate, new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire" } })
+                    </div>
+                </div>
+                <br />
+
+                <div class="col-md-12">
+                    <table class="table questionTable" id="tab_logic">
+                        <thead>
+                            <tr>
+                                <th>
+                                    Treatement Name
+                                </th>
+                                <th>
+                                    Reason for Change
+                                </th>
+                                <th style="width: 50px"></th>
+
+                            </tr>
+                        </thead>
+                        <tbody class="arvHistory" id="historyTable">
+                            <tr id='arvHistory0' data-id="0" class="hidden" style="background-color: #fff">
+                                <td data-name="Treatment">
+                                    <input type="text" name='prod0' placeholder='Product Name' class="infoBox_doctorQuestionnaire"
+                                           @Html.EditorFor(model => model.MedicationHistory.productName, new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire", @type = "text", @name = "prod0", @placeholder = "Product", } }) />
+
+                                </td>
+                                <td data-name="Comment">
+                                    <input type="text" style="max-width: 1000px" name='comm0' placeholder='Comment' class="infoBox_doctorQuestionnaire"
+                                           @Html.EditorFor(model => model.MedicationHistory.comment, new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire" } }) />
+                                </td>
+                                <td data-name="del">
+                                    <button nam"del0" class='glyphicon glyphicon-remove row-remove col-md-1'></button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <a id="add_row" class="btn btn-default addButton questionButton">Add New</a>
+            </div>
+            
+            <!--Co-Morbid Conditions-->
+            <div class="questionnaireContainer" id="comorbidDiv">
+
+                <h3 style="margin-left: 2%">Co-morbid Conditions</h3>
+                <hr class="questionnaire_Ruler" />
+
+                <div class="col-md-12">
+                    <table class="table questionTable" id="tab_logic_CM">
+                        <thead>
+                            <tr>
+                                <th width="32%">
+                                    Condition
+                                </th>
+                                <th width="32%">
+                                    Date diagnosed
+                                </th>
+                                <th width="32%">
+                                    Treatment Name
+                                </th>
+                                <th style="width: 50px"></th>
+
+                            </tr>
+                        </thead>
+
+                        <tbody class="cmHistory" id="coMorbidHistoryTable">
+                            <tr id='coMorbidHistory0' data-id="0" class="hidden" style="background-color: #fff">
+                                <td data-name="cmCondition">
+                                    @Html.DropDownListFor(model => model.coMorbidType.condition, new SelectList(Model.coMorbidTypes, "id", "condition"), "**Select**", new { @class = "infoBox_doctorQuestionnaire", @name = "cmId", @title = "Co-Morbid conditions" })
+                                </td>
+                                <td data-name="cmDateDiagnosed">
+                                    <input type="date" style="max-width: 1000px" name='cmEffDate' placeholder='Date Diagnosed' class="infoBox_doctorQuestionnaire"
+                                           @Html.EditorFor(model => model.comormidCondition.effectiveDate, new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire " } }) />
+                                </td>
+                                <td data-name="cmTreatement">
+                                    <input type="text" style="max-width: 1000px" name='cmTreatement' placeholder='Treatment' class="infoBox_doctorQuestionnaire"
+                                           @Html.EditorFor(model => model.comormidCondition.CoMorbidTreatement, new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire" } }) />
+                                </td>
+                                <td data-name="del">
+                                    <button nam"del0" class='glyphicon glyphicon-remove row-remove col-md-1'></button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <a id="add_row_CM" class="btn btn-default CM_addButton questionButton" style="margin-bottom: 2%;margin-left: 28%;width: 40%; color: #5e5e5e; font-size: 15px ">Add New</a>
+
+
+                <br />
+                <div class="form-group">
+                    <div class="col-md-3" style="margin-left: 3.5%; text-align: right">
+                        @Html.Label(null,"Allergies: ", htmlAttributes: new { @class = "control-label" })
+                    </div>
+                    <div class="col-md-8">
+                        @Html.EditorFor(model => model.allergy.Allergy, new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire", @placeholder = "Allergy Details" } })
+                    </div>
+                </div>
+                <br />
+                <br />
+
+            </div>
+            
+            <!--Co-Morbid_N/A-->
+            <div class="form-group" style="margin-left: 94%; margin-top: -3.5%; margin-bottom: 1.5%">
+                <div class="col-md-2">
+                    @Html.Label(null,"N/A", htmlAttributes: new { @class = "control-label" })
+                </div>
+                <div class="col-md-8" style="margin-top: 20%">
+                    @Html.CheckBox("comorbids_NA", new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire" } })
+                </div>
+            </div>
+
+            <!--HospitalizationHistory-->
+            <div class="questionnaireContainer" id="hospitalDiagnosed">
+
+                <h3 style="margin-left: 2%">Hospitalisations in the past 12 months</h3>
+                <hr class="questionnaire_Ruler" />
+                <br />
+
+                <div class="col-md-12">
+                    <table class="table questionTable" id="tab_logic_hZ">
+                        <thead>
+                            <tr>
+                                <th width="25%">
+                                    Hospitalisation Date
+                                </th>
+                                <th width="72%">
+                                    Diagnosed
+                                </th>
+                                <th style="width: 50px"></th>
+
+                            </tr>
+                        </thead>
+
+                        <tbody class="hzHistory" id="hospitalHistTable">
+                            <tr id='hospitalHist0' data-id="0" class="hidden" style="background-color: #fff">
+                                <td data-name="hzDiagDate">
+                                    <input type="date" name='hzDate' placeholder='Hospitalisation Date' class="infoBox_doctorQuestionnaire"
+                                           @Html.EditorFor(model => model.HospitalAuth.createdDate, new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire" } }) />
+                                </td>
+                                <td data-name="hzDiagnosis">
+                                    <input type="text" style="max-width: 1000px" name='hzDiagnosis' placeholder='Diagnosis' class="infoBox_doctorQuestionnaire"
+                                           @Html.EditorFor(model => model.HospitalAuth.authType, new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire" } }) />
+                                </td>
+                                <td data-name="del">
+                                    <button nam"del0" class='glyphicon glyphicon-remove row-remove col-md-1'></button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <a id="add_row_hZ" class="btn btn-default hZ_addButton questionButton" style="margin-bottom: 2%;margin-left: 28%;width: 40%; color: #5e5e5e; font-size: 15px ">Add New</a>
+
+                <br />
+                <br />
+            </div>
+
+            <!--Hospitalization_N/A-->
+            <div class="form-group" style="margin-left: 94%; margin-top: -3.5%; margin-bottom: 1.5%">
+                <div class="col-md-2">
+                    @Html.Label(null,"N/A", htmlAttributes: new { @class = "control-label" })
+                </div>
+                <div class="col-md-8" style="margin-top: 20%">
+                    @Html.CheckBox("hospitalisationDDate_NA", new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire" } })
+                </div>
+            </div>
+
+            <!--Social History-->
+            <div class="questionnaireContainer" id="hospitalisationDiv">
+
+                <h3 style="margin-left: 2%">Social History</h3>
+                <hr class="questionnaire_Ruler" />
+                <div class="form-horizontal" style="width: 1200px; margin-left: 5%">
+                    <br />
+
+                    <div class="form-group">
+                        <div class="col-md-2" style="margin-left: 1%; text-align: right">
+                            &nbsp;
+                        </div>
+                        <div class="col-md-1 questionnaireHeader" style="margin-left: -1%">
+                            @Html.Label(null,"Applicable", htmlAttributes: new { @class = "control-label" })
+                        </div>
+
+                        <div class="col-md-4 questionnaireHeader" style="margin-left: 6%">
+                            @Html.Label(null,"Action", htmlAttributes: new { @class = "control-label " })
+                        </div>
+
+                        <div class="col-md-4 questionnaireHeader" style="margin-left: 1%">
+                            @Html.Label(null,"Educational Note", htmlAttributes: new { @class = "control-label" })
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="col-md-2" style="margin-left: 1%; text-align: right">
+                            @Html.Label(null,"Alcohol:", htmlAttributes: new { @class = "control-label" })
+                        </div>
+
+                        <div class="col-md-1 drQuestionnarie_checkBox">
+                            @Html.CheckBoxFor(model => model.questionnaire.drinker, new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire" } })
+                        </div>
+
+                        <div class="col-md-4">
+                            <p style="font-size: 12px; position: absolute; margin-left: 70%; margin-top: 3%; color: black">Daily Amount</p>
+                            @Html.EditorFor(model => model.questionnaire.NrDrinks, new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire", @placeholder = "" } })
+                        </div>
+
+                        <div class="col-md-4">
+                            <ul class="infoBox_doctorQuestionnaire" style="width: 420px">
+                                <li>Excessive use of alcohol may have negative health risk to your liver. </li>
+                                <li>Some medicine passes through the liver and the combination of alcohol and medicine increase this risk which could cause liver toxicity. – Chemical-driven liver damage. </li>
+                                <li>The use of alcohol may alter your judgement leading a person to engage in risky sexual behaviours. </li>
+                                <li>Alcohol misuse may make it difficult for infected patients to follow the complex medications regimen that is often prescribed to treat HIV/AIDS.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="col-md-2" style="margin-left: 1%; text-align: right">
+                            @Html.Label(null,"Recreational drugs:", htmlAttributes: new { @class = "control-label" })
+                        </div>
+
+                        <div class="col-md-1 drQuestionnarie_checkBox">
+                            @Html.CheckBoxFor(model => model.drquestionnaireResults.recDrugs, new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire" } })
+                        </div>
+
+                        <div class="col-md-4">
+                            <p style="font-size: 12px; position: absolute; margin-left: 76%; margin-top: 3.6%; color: black">Last Used</p>
+                            @Html.EditorFor(model => model.drquestionnaireResults.recDrugsLastUsed, new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire" } })
+                        </div>
+
+                        <div class="col-md-4">
+                            <ul class="infoBox_doctorQuestionnaire" style="width: 420px">
+                                <li>The use of drugs may alter your judgement leading a person to engage in risky sexual behaviours. </li>
+                                <li>Alcohol misuse may make it difficult for infected patients to follow the complex medications regimen that is often prescribed to treat HIV/AIDS. </li>
+                                <li>Do not share needles with other users and dispose of needles after use.</li>
+                                <li>Do not have sex when you are high. Make sure to protect yourself and our partner by using condoms. </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="col-md-2" style="margin-left: 1%; text-align: right">
+                            @Html.Label(null,"Smoker:", htmlAttributes: new { @class = "control-label" })
+                        </div>
+
+                        <div class="col-md-1 drQuestionnarie_checkBox">
+                            @Html.CheckBoxFor(model => model.questionnaire.smoker, new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire", @placeholder = "Educational Info" } })
+                        </div>
+
+                        <div class="col-md-4">
+                            <p style="font-size: 12px; position: absolute; margin-left: 70%; margin-top: 3%; color: black">Daily Amount</p>
+                            @Html.EditorFor(model => model.questionnaire.NoCigs, new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire" } })
+                        </div>
+
+                        <div class="col-md-4">
+                            <ul class="infoBox_doctorQuestionnaire" style="width: 420px">
+                                <li>Smoking influence the CD4 count. It increases the risk for certain pneumonias. The CD4 cells help the body fight infections like pneumonia. </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="col-md-2" style="margin-left: 1%; text-align: right">
+                            @Html.Label(null,"Depression:", htmlAttributes: new { @class = "control-label" })
+                        </div>
+
+                        <div class="col-md-1 drQuestionnarie_checkBox">
+                            @Html.CheckBoxFor(model => model.drquestionnaireResults.depression, new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire" } })
+                        </div>
+
+                        <div class="col-md-4">
+                            <p style="font-size: 12px; position: absolute; margin-left: 75%; margin-top: 3%; color: black">Comment</p>
+                            @Html.EditorFor(model => model.drquestionnaireResults.depressionComment, new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire" } })
+                        </div>
+
+                        <div class="col-md-4">
+                            <ul class="infoBox_doctorQuestionnaire" style="width: 420px">
+                                <li>Efavirenz (Sustiva) may cause or worsen the symptoms of depression.</li>
+                                <li>Is the patient using any treatment for this? Advise that the patient communicate this to his treating doctor for assistance/treatment.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+
+                    <div class="form-group">
+                        <div class="col-md-2" style="margin-left: 1%; text-align: right">
+                            @Html.Label(null,"Are you Pregnant?:", htmlAttributes: new { @class = "control-label" })
+                        </div>
+
+                        <div class="col-md-1 drQuestionnarie_checkBox">
+                            @Html.CheckBoxFor(model => model.drquestionnaireResults.Pregnant, new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire", @placeholder = "Educational Info" } })
+                        </div>
+
+                        <div class="col-md-4">
+                            <p style="font-size: 12px; position: absolute; margin-left: 67.5%; margin-top: 3.5%; color: black">Expected Date</p>
+                            @Html.EditorFor(model => model.drquestionnaireResults.EDD, new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire" } })
+                        </div>
+
+                        <div class="col-md-4">
+                            <ul class="infoBox_doctorQuestionnaire" style="width: 420px">
+                                <li>Did you use any medication during the pregnancy?</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="col-md-2" style="margin-left: 1%; text-align: right">
+                            @Html.Label(null,"PEP:", htmlAttributes: new { @class = "control-label" })
+                        </div>
+
+                        <div class="col-md-1 drQuestionnarie_checkBox">
+                            @Html.CheckBoxFor(model => model.drquestionnaireResults.PEP, new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire", @placeholder = "Educational Info" } })
+                        </div>
+
+                        <div class="col-md-4">
+                            <p style="font-size: 12px; position: absolute; margin-left: 76%; margin-top: 3.5%; color: black">Exposure</p>
+                            @Html.EditorFor(model => model.drquestionnaireResults.pepDateofExposure, new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire" } })
+                        </div>
+
+                        <div class="col-md-4">
+                            <ul class="infoBox_doctorQuestionnaire" style="width: 420px"></ul>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="col-md-2" style="margin-left: 1%; text-align: right">
+                            @Html.Label(null,"Genotyping:", htmlAttributes: new { @class = "control-label" })
+                        </div>
+
+                        <div class="col-md-1 drQuestionnarie_checkBox">
+                            @Html.CheckBoxFor(model => model.drquestionnaireResults.GenotypingDone, new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire", @placeholder = "Educational Info" } })
+                        </div>
+
+                        <div class="col-md-4">
+                            <p style="font-size: 12px; position: absolute; margin-left: 72%; margin-top: 3.5%; color: black">Genotyping</p>
+                            @Html.EditorFor(model => model.drquestionnaireResults.GenotyingDate, new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire" } })
+                        </div>
+
+                        <div class="col-md-4">
+                            <ul class="infoBox_doctorQuestionnaire" style="width: 420px"></ul>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="col-md-2" style="margin-left: 1%; text-align: right">
+                            @Html.Label(null,"TB:", htmlAttributes: new { @class = "control-label" })
+                        </div>
+
+                        <div class="col-md-1 drQuestionnarie_checkBox">
+                            @Html.CheckBoxFor(model => model.drquestionnaireResults.tbDiagnosed, new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire", @placeholder = "Educational Info" } })
+                        </div>
+
+                        @*<div class="col-md-4">
+                        <div class="col-md-6">
+                            <p style="font-size: 12px; position: absolute; margin-left: 63%; margin-top: 5%!important; color: #ccc">From</p>
+                            @Html.EditorFor(model => model.drquestionnaireResults.tbTreatmentStartDate, new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire", title = "From Date" } })
+                        </div>
+                        <div class="col-md-6">
+                            <p style="font-size: 12px; position: absolute; margin-left: 68%; margin-top: 5%; color: #ccc">To</p>
+                            @Html.EditorFor(model => model.drquestionnaireResults.tbTreatmentEndDate, new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire", title = "To Date" } })
+                        </div>
+                    </div>*@
+                        <div class="col-md-4">
+                            <!--tbAdditional-->
+                            <div class="form-group">
+                                <table class="questionTable" id="tab_logic_tB" style="width: 5%!important; margin-left: 5%">
+
+                                    <tbody class="tbHistory" id="tbHistoryTable" style="border-color: transparent!important">
+                                        <tr id='tBHistory0' data-id="0" class="hidden" style="background-color: #fff">
+
+                                            <td data-name="tbDateDiagnosedFrom" style="max-width: 200px!important">
+                                                <input type="date" name='tbFrom' class="infoBox_doctorQuestionnaire_TB col-md-5"
+                                                       @Html.EditorFor(model => model.drquestionnaireResults.tbTreatmentStartDate, new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire_TB " } }) />
+                                            </td>
+                                            <td data-name="tbDateDiagnosedTo" style="max-width: 200px!important">
+                                                <input type="date" name='tbTo' class="infoBox_doctorQuestionnaire_TB col-md-5"
+                                                       @Html.EditorFor(model => model.drquestionnaireResults.tbTreatmentEndDate, new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire_TB" } }) />
+                                            </td>
+                                            <td data-name="del">
+                                                <button nam"del0" class='glyphicon glyphicon-remove row-remove col-md-1' style="margin-left: -40%"></button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <a id="add_row_tb" class="btn btn-default tb_addButton questionButton" style="margin-top: -2% ;margin-bottom: 2%;margin-left: 38%!important;width: 20%!important; color: #5e5e5e; font-size: 13px ">Add New</a>
+                        </div>
+                        <!--tbAdditional-->
+
+                        <div class="col-md-4">
+                            <ul class="infoBox_doctorQuestionnaire" style="width: 420px">
+                                <li>HIV weakens the immune system, increasing the risk of TB in people with HIV. </li>
+                            </ul>
+                        </div>
+                    </div>
+
+
+
+
+
+
+                    <div class="form-group">
+                        <div class="col-md-2" style="margin-left: 1%; text-align: right">
+                            @Html.Label(null,"Partner's Status:", htmlAttributes: new { @class = "control-label" })
+                        </div>
+
+                        <div class="col-md-1"></div>
+
+                        <div class="col-md-4">
+                            <p style="font-size: 12px; position: absolute; margin-left: 75%; margin-top: 3%; color: black">Comment</p>
+                            @Html.EditorFor(model => model.drquestionnaireResults.PartnerStatus, new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire" } })
+                        </div>
+
+                        <div class="col-md-4">
+                            <ul class="infoBox_doctorQuestionnaire" style="width: 420px">
+                                <li>It is always advisable to use a condom during intercourse. Even though your partner is also positive. </li>
+                            </ul>
+                        </div>
+                    </div>
+
+
+
+                </div>
+                <br />
+                <br />
+                <br />
+
+            </div>
+
+            <!--Social History_N/A-->
+            <div class="form-group" style="margin-left: 94%; margin-top: -3.5%; margin-bottom: 1.5%">
+                <div class="col-md-2">
+                    @Html.Label(null,"N/A", htmlAttributes: new { @class = "control-label" })
+                </div>
+                <div class="col-md-8" style="margin-top: 20%">
+                    @Html.CheckBox("hospitalisations_NA", new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire" } })
+                </div>
+            </div>
+
+            <!--Doctors Rooms-->
+            <div class="questionnaireContainer">
+
+                <h3 style="margin-left: 2%">Laboratory Results</h3>
+                <hr class="questionnaire_Ruler" />
+
+                <h5 style="margin-left: 2%"><b>HAART Experienced Patients: </b>Please send us a copy of the latest results including secondary pathology</h5>
+                <h5 style="margin-left: 2%"><b>HAART Naive Patients: </b>All laboratory results including the Eliza test for newly diagnosed patients.</h5>
+                <br />
+                <table class="table questionTable" id="tab_logic">
+                    <thead>
+                        <tr>
+                            <th style="width: 10%; background-color: none!important">
+
+                            </th>
+                            <th style="width: 30%">
+                                Date
+                            </th>
+                            <th style="width: 30%">
+                                Result
+                            </th>
+
+                        </tr>
+                    </thead>
+                    <tbody class="arvHistory" id="historyTable">
+                        <tr style="background-color: #fff">
+                            <td style="text-align: right!important; padding-top: 1.5%!important;">
+                                Height
+                            </td>
+
+                            <td data-name="Treatment">
+                                @Html.EditorFor(model => model.clinicalexam.effectiveDate, new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire", @id = "theDateHeight" } })
+                            </td>
+                            <td data-name="Comment">
+                                @Html.EditorFor(model => model.clinicalexam.height, new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire", @placeholder = "height in m", data_val = "false" } })
+                            </td>
+                        </tr>
+                        <tr style="background-color: #fff">
+                            <td style="text-align: right!important; padding-top: 1.5%!important;">
+                                Weight
+                            </td>
+
+                            <td data-name="Treatment">
+                                @Html.EditorFor(model => model.clinicalexam.effectiveDate, new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire", @id = "theDateWeight" } })
+                            </td>
+                            <td data-name="Comment">
+                                @Html.EditorFor(model => model.clinicalexam.weight, new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire", @placeholder = "weight in kg", data_val = "false" } })
+                            </td>
+                        </tr>
+                        <tr style="background-color: #fff">
+                            <td style="text-align: right!important; padding-top: 1.5%!important;">
+                                Blood pressure
+                            </td>
+
+                            <td data-name="Treatment">
+                                @Html.EditorFor(model => model.pathology.effectiveDate, new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire", @id = "theDateBP" } })
+                            </td>
+                            <td data-name="Comment">
+                                <div class="col-md-12">
+                                    <div class="col-md-6" style="text-align: center">
+                                        @Html.EditorFor(model => model.pathology.systolicBP, new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire", @placeholder = "Systolic" } })
+                                    </div>
+                                    <div class="col-md-6" style="text-align: center">
+                                        @Html.EditorFor(model => model.pathology.diastolicBP, new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire", @placeholder = "Diastolic" } })
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+
+
+                    </tbody>
+                </table>
+
+            </div>
+
+
+            <!--formButton-->
+            <div class="questionnaireContainer">
+
+                <div class="form-group">
+                    <div class="actionButton" style="margin-top: 0.5%; margin-left: 40%; margin-bottom: 0.5%">
+                        <input type="submit" value="Save" class="btn buttonRound_formCreate" style="width: 15%!important" />
+                        <button type="button" class="btn buttonRound_formClose" data-dismiss="modal" style="width: 15%!important;">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!--formButton-->
+    }
+
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#hospitalisations_NA').change(function () {
+                if (this.checked)
+                    $('#hospitalisationDiv').addClass('blur');
+                else
+                    $('#hospitalisationDiv').removeClass('blur');
+
+            });
+            $('#hospitalisationDDate_NA').change(function () {
+                if (this.checked)
+                    $('#hospitalDiagnosed').addClass('blur');
+                else
+                    $('#hospitalDiagnosed').removeClass('blur');
+
+            });
+            $('#comorbids_NA').change(function () {
+                if (this.checked)
+                    $('#comorbidDiv').addClass('blur');
+                else
+                    $('#comorbidDiv').removeClass('blur');
+
+            });
+        });
+
+
+        $(function () { // will trigger when the document is ready
+            $('.datepicker').datepicker(); //Initialise any date pickers
+        });
+
+        $('input[type=checkbox]').removeAttr('checked');
+
+
+        $(document).ready(function () {
+            var dateNewFormat, onlyDate, today = new Date();
+
+            dateNewFormat = today.getFullYear() + '-';
+            if (today.getMonth().length == 2) {
+
+                dateNewFormat += (today.getMonth() + 1);
+            }
+            else {
+                dateNewFormat += '0' + (today.getMonth() + 1);
+            }
+
+            onlyDate = today.getDate();
+            if (onlyDate.toString().length == 2) {
+
+                dateNewFormat += "-" + onlyDate;
+            }
+            else {
+                dateNewFormat += '-0' + onlyDate;
+            }
+
+            $('#createDate').val(dateNewFormat);
+            $('#modifiedDate').val(dateNewFormat);
+
+
+        });
+
+
+        //ajaxPost_arvHistory
+        $(document).ready(function () {
+            $("#btnSubmit").click(function () {
+                var data = $("arvHistory").serialize();
+
+                $.ajax({
+                    type: "POST",
+                    url: "/Clinical/_InsertARVHistory",
+                    data: data,
+
+                })
+            })
+        })
+
+
+        //ARV History
+        $(document).ready(function () {
+            $("#add_row").on("click", function () {
+                // Dynamic Rows Code
+
+                // Get max row id and set new id
+                var newid = 0;
+                $.each($("#tab_logic tr"), function () {
+                    if (parseInt($(this).data("id")) > newid) {
+                        newid = parseInt($(this).data("id"));
+                    }
+                });
+                newid++;
+
+                var tr = $("<tr></tr>", {
+                    id: "arvHistory" + newid,
+                    "data-id": newid
+                });
+
+                // loop through each td and create new elements with name of newid
+                $.each($("#tab_logic tbody tr:nth(0) td"), function () {
+                    var cur_td = $(this);
+
+                    var children = cur_td.children();
+
+                    // add new td and element if it has a name
+                    if ($(this).data("name") != undefined) {
+                        var td = $("<td></td>", {
+                            "data-name": $(cur_td).data("name")
+                        });
+
+                        var c = $(cur_td).find($(children[0]).prop('tagName')).clone().val("");
+                        c.attr("name", $(cur_td).data("name") + newid);
+                        c.appendTo($(td));
+                        td.appendTo($(tr));
+                    } else {
+                        var td = $("<td></td>", {
+                            'text': $('#tab_logic tr').length
+                        }).appendTo($(tr));
+                    }
+                });
+
+
+                // add the new row
+                $(tr).appendTo($('#tab_logic'));
+
+                $(tr).find("td button.row-remove").on("click", function () {
+                    $(this).closest("tr").remove();
+                });
+            });
+
+
+            $("#add_row").trigger("click");
+        });
+
+        //coMorbid Conditions
+        $(document).ready(function () {
+            $("#add_row_CM").on("click", function () {
+                // Dynamic Rows Code
+
+                // Get max row id and set new id
+                var newid = 0;
+                $.each($("#tab_logic_CM tr"), function () {
+                    if (parseInt($(this).data("id")) > newid) {
+                        newid = parseInt($(this).data("id"));
+                    }
+                });
+                newid++;
+
+                var tr = $("<tr></tr>", {
+                    id: "cmHistory" + newid,
+                    "data-id": newid
+                });
+
+                // loop through each td and create new elements with name of newid
+                $.each($("#tab_logic_CM tbody tr:nth(0) td"), function () {
+                    var cur_td = $(this);
+
+                    var children = cur_td.children();
+
+                    // add new td and element if it has a name
+                    if ($(this).data("name") != undefined) {
+                        var td = $("<td></td>", {
+                            "data-name": $(cur_td).data("name")
+                        });
+
+                        var c = $(cur_td).find($(children[0]).prop('tagName')).clone().val("");
+                        c.attr("name", $(cur_td).data("name") + newid);
+                        c.appendTo($(td));
+                        td.appendTo($(tr));
+                    } else {
+                        var td = $("<td></td>", {
+                            'text': $('#tab_logic_CM tr').length
+                        }).appendTo($(tr));
+                    }
+                });
+
+
+                // add the new row
+                $(tr).appendTo($('#tab_logic_CM'));
+
+                $(tr).find("td button.row-remove").on("click", function () {
+                    $(this).closest("tr").remove();
+                });
+            });
+
+
+            $("#add_row_CM").trigger("click");
+        });
+
+
+        //Hospitalisation History
+        $(document).ready(function () {
+            $("#add_row_hZ").on("click", function () {
+                // Dynamic Rows Code
+
+                // Get max row id and set new id
+                var newid = 0;
+                $.each($("#tab_logic_hZ tr"), function () {
+                    if (parseInt($(this).data("id")) > newid) {
+                        newid = parseInt($(this).data("id"));
+                    }
+                });
+                newid++;
+
+                var tr = $("<tr></tr>", {
+                    id: "hzHistory" + newid,
+                    "data-id": newid
+                });
+
+                // loop through each td and create new elements with name of newid
+                $.each($("#tab_logic_hZ tbody tr:nth(0) td"), function () {
+                    var cur_td = $(this);
+
+                    var children = cur_td.children();
+
+                    // add new td and element if it has a name
+                    if ($(this).data("name") != undefined) {
+                        var td = $("<td></td>", {
+                            "data-name": $(cur_td).data("name")
+                        });
+
+                        var c = $(cur_td).find($(children[0]).prop('tagName')).clone().val("");
+                        c.attr("name", $(cur_td).data("name") + newid);
+                        c.appendTo($(td));
+                        td.appendTo($(tr));
+                    } else {
+                        var td = $("<td></td>", {
+                            'text': $('#tab_logic_hZ tr').length
+                        }).appendTo($(tr));
+                    }
+                });
+
+
+                // add the new row
+                $(tr).appendTo($('#tab_logic_hZ'));
+
+                $(tr).find("td button.row-remove").on("click", function () {
+                    $(this).closest("tr").remove();
+                });
+            });
+
+
+            $("#add_row_hZ").trigger("click");
+        });
+
+
+        //TB From and To dates
+
+        $(document).ready(function () {
+            $("#add_row_tb").on("click", function () {
+                // Dynamic Rows Code
+
+                // Get max row id and set new id
+                var newid = 0;
+                $.each($("#tab_logic_tB tr"), function () {
+                    if (parseInt($(this).data("id")) > newid) {
+                        newid = parseInt($(this).data("id"));
+                    }
+                });
+                newid++;
+
+                var tr = $("<tr></tr>", {
+                    id: "tbHistory" + newid,
+                    "data-id": newid
+                });
+
+                // loop through each td and create new elements with name of newid
+                $.each($("#tab_logic_tB tbody tr:nth(0) td"), function () {
+                    var cur_td = $(this);
+
+                    var children = cur_td.children();
+
+                    // add new td and element if it has a name
+                    if ($(this).data("name") != undefined) {
+                        var td = $("<td></td>", {
+                            "data-name": $(cur_td).data("name")
+                        });
+
+                        var c = $(cur_td).find($(children[0]).prop('tagName')).clone().val("");
+                        c.attr("name", $(cur_td).data("name") + newid);
+                        c.appendTo($(td));
+                        td.appendTo($(tr));
+                    } else {
+                        var td = $("<td></td>", {
+                            'text': $('#tab_logic_tB tr').length
+                        }).appendTo($(tr));
+                    }
+                });
+
+
+                // add the new row
+                $(tr).appendTo($('#tab_logic_tB'));
+
+                $(tr).find("td button.row-remove").on("click", function () {
+                    $(this).closest("tr").remove();
+                });
+            });
+
+
+            $("#add_row_tb").trigger("click");
+        });
+
+
+
+
+        /*AutoDate*/
+
+        $(document).ready(function () {
+            var date = new Date();
+
+            var day = date.getDate();
+            var month = date.getMonth() + 1;
+            var year = date.getFullYear();
+
+            if (month < 10) month = "0" + month;
+            if (day < 10) day = "0" + day;
+
+            var today = year + "-" + month + "-" + day;
+            $("#theDateHeight").attr("value", today);
+        });
+
+        $(document).ready(function () {
+            var date = new Date();
+
+            var day = date.getDate();
+            var month = date.getMonth() + 1;
+            var year = date.getFullYear();
+
+            if (month < 10) month = "0" + month;
+            if (day < 10) day = "0" + day;
+
+            var today = year + "-" + month + "-" + day;
+            $("#theDateWeight").attr("value", today);
+        });
+
+        $(document).ready(function () {
+            var date = new Date();
+
+            var day = date.getDate();
+            var month = date.getMonth() + 1;
+            var year = date.getFullYear();
+
+            if (month < 10) month = "0" + month;
+            if (day < 10) day = "0" + day;
+
+            var today = year + "-" + month + "-" + day;
+            $("#theDateBP").attr("value", today);
+        });
+
+
+
+    </script>
+}

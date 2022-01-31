@@ -1,0 +1,689 @@
+﻿@model HaloCareCore.Models.ScriptAuthViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "AuthoriseScript";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+</style>
+
+<!--pageHeader-->
+<nav id="global-nav" class="nav">
+    <div class="pull-left title">
+        <h1 class="site-title_patientProfile">
+            <span><i class="fas fa-check-circle"></i>&emsp; Authorisation summary</span>
+        </h1>
+    </div>
+    <div class="pull-right title">
+        <h1 class="site-title_userID pull-right">
+            <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+        </h1>
+        <h1 class="site-title_userID pull-right">
+            @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+            {
+                <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+            }
+        </h1>
+        <h1 class="site-waffleIcon pull-right">
+            <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+        </h1>
+    </div>
+</nav>
+
+<div class="dashboardContainer zero-padding">
+    <div class="patientDashboard_View">
+        <!--breadCrumbs-->
+        <ul class="breadcrumbs_patientDashboard">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+            <li><a href="@Url.Action("patientClinical", "Member", new { DependentID = Model.script.dependentID})">Patient</a></li>
+            <li><a href="#">Summary</a></li>
+        </ul>
+        <!--Left navSlider -->
+        @Html.Partial("_navSlider_blank", new { })
+        <!--navCollection-->
+        <div class="navCollection_patientDashboard">
+            @Html.Partial("_navCollection")
+        </div>
+        <!--profileInformation-->
+        <div class="profileBar">
+            @Html.Action("_profileBar_edit", "Member", new { DependentID = Model.script.dependentID })
+        </div>
+    </div>
+
+    <div class="profilebar-spacer-assignment"></div>
+
+    <div class="authSummary_container">
+        <h4 class="summaryHeading">Pathology overview</h4>
+        <hr class="patientProfile_Ruler" />
+
+        <div class="form-horizontal">
+            <div class="row">
+                <table class="table patientHistory_Table" id="pathTable">
+                    <tr>
+                        <th>
+                            @Html.DisplayName("Created")
+                        </th>
+                        <th onclick="sortPath(1)">
+                            @Html.DisplayName("CD4 #") <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th onclick="sortPath(2)">
+                            @Html.DisplayNameFor(model => model.pathology[0].CD4Percentage) <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th onclick="sortPath(3)">
+                            @Html.DisplayName("V/Load") <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th onclick="sortPath(4)">
+                            @Html.DisplayName("hB") <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th onclick="sortPath(5)">
+                            @Html.DisplayNameFor(model => model.pathology[0].urea) <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th onclick="sortPath(6)">
+                            @Html.DisplayName("Crea") <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th onclick="sortPath(7)">
+                            @Html.DisplayName("HIV El") <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th onclick="sortPath(8)">
+                            @Html.DisplayName("N/GTT") <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th onclick="sortPath(9)">
+                            @Html.DisplayName("A/GTT") <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th onclick="sortPath(10)">
+                            @Html.DisplayNameFor(model => model.pathology[0].bilirubin) <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th onclick="sortPath(11)">
+                            @Html.DisplayNameFor(model => model.pathology[0].alt) <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th onclick="sortPath(12)">
+                            @Html.DisplayNameFor(model => model.pathology[0].eGfr) <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th onclick="sortPath(13)">
+                            @*@Html.DisplayNameFor(model => model.pathology[0].systolicBP)/@Html.DisplayNameFor(model => model.pathology[0].diastolicBP)*@
+                            @Html.DisplayName("BP") <i class="fa fa-fw fa-sort"></i>
+
+                        </th>
+                        <th onclick="sortPath(14)">
+                            @Html.DisplayName("MauC") <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th onclick="sortPath(15)">
+                            @Html.DisplayNameFor(model => model.pathology[0].hba1c) <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        @*<th>
+                                @Html.DisplayNameFor(model => model.pathology[0].createdBy)
+                            </th>*@
+
+                        <th>
+                            @Html.DisplayName("Effective")
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.pathology[0].labName)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.pathology[0].labReferenceNo)
+                        </th>
+                    </tr>
+
+                    @foreach (var item in Model.pathology)
+                    {
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.createdDate)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.CD4Count)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.CD4Percentage)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.viralLoad)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.haemoglobin)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.urea)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.creatinine)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.hivEliza)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.normGtt)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.abnGtt)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.bilirubin)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.alt)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.eGfr)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.systolicBP)/@Html.DisplayFor(modelItem => item.diastolicBP)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.mauCreatRatio)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.hba1c)
+                            </td>
+                            @*<td>
+                                    @Html.DisplayFor(modelItem => item.createdBy)
+                                </td>*@
+                            <td>
+                                @Html.DisplayFor(modelItem => item.effectiveDate)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.labName)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.labReferenceNo)
+                            </td>
+                        </tr>
+                    }
+
+                </table>
+
+            </div>
+            <script>
+                /*Pathology tableSorting*/
+                function sortPath(n) {
+                    var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+                    table = document.getElementById("pathTable");
+                    switching = true;
+                    dir = "asc";
+                    while (switching) {
+                        switching = false;
+                        rows = table.rows;
+                        for (i = 1; i < (rows.length - 1); i++) {
+                            shouldSwitch = false;
+                            x = rows[i].getElementsByTagName("TD")[n];
+                            y = rows[i + 1].getElementsByTagName("TD")[n];
+                            if (dir == "asc") {
+                                if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                                    shouldSwitch = true;
+                                    break;
+                                }
+                            } else if (dir == "desc") {
+                                if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                                    shouldSwitch = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (shouldSwitch) {
+                            rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                            switching = true;
+                            switchcount++;
+                        } else {
+                            if (switchcount == 0 && dir == "asc") {
+                                dir = "desc";
+                                switching = true;
+                            }
+                        }
+                    }
+                }
+            </script>
+        </div>
+    </div>
+
+    <div style="margin-bottom: 1%"></div>
+
+    <!--medicationHistory-->
+    <div class="authSummary_container">
+
+        <h4 class="summaryHeading">Medication overview</h4>
+        <hr class="patientProfile_Ruler" />
+
+        <div class="form-horizontal">
+            <div class="row">
+                <table class="table patientHistory_Table" id="medicationTable">
+                    <tr>
+                        <th>
+                            @Html.DisplayNameFor(model => model.scriptItems[0].effectiveDate)
+                        </th>
+                        <th onclick="medicationTable(1)">
+                            @Html.DisplayNameFor(model => model.scriptItems[0].scriptID) <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th onclick="medicationTable(2)">
+                            @Html.DisplayNameFor(model => model.scriptItems[0].nappiCode) <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th onclick="medicationTable(3)">
+                            @Html.DisplayNameFor(model => model.scriptItems[0].productName) <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th onclick="medicationTable(4)">
+                            @Html.DisplayNameFor(model => model.scriptItems[0].quantity) <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th onclick="medicationTable(5)">
+                            @Html.DisplayNameFor(model => model.scriptItems[0].directions) <i class="fa fa-fw fa-sort"></i>
+                        </th>
+
+                        <th>
+                            @Html.DisplayNameFor(model => model.scriptItems[0].fromDate)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.scriptItems[0].toDate)
+                        </th>
+                        <th onclick="medicationTable(6)">
+                            @Html.DisplayNameFor(model => model.scriptItems[0].repeats) <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th onclick="medicationTable(7)">
+                            @Html.DisplayNameFor(model => model.scriptItems[0].prescribingDr) <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                    </tr>
+                    @if (Model.scriptItems.Count == 0)
+                    {
+                        <tr><td colspan="10" style="text-align: center!important">No records available</td></tr>
+                    }
+                    else
+                    {
+                        foreach (var item in Model.scriptItems)
+                        {
+                            <tr>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.effectiveDate)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.scriptID)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.nappiCode)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.productName)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.quantity)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.directions)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.fromDate)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.toDate)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.repeats)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.prescribingDr)
+                                </td>
+                            </tr>
+                        }
+                    }
+
+                </table>
+            </div>
+            <script>
+                /*medication tableSorting*/
+                function medicationTable(n) {
+                    var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+                    table = document.getElementById("medicationTable");
+                    switching = true;
+                    dir = "asc";
+                    while (switching) {
+                        switching = false;
+                        rows = table.rows;
+                        for (i = 1; i < (rows.length - 1); i++) {
+                            shouldSwitch = false;
+                            x = rows[i].getElementsByTagName("TD")[n];
+                            y = rows[i + 1].getElementsByTagName("TD")[n];
+                            if (dir == "asc") {
+                                if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                                    shouldSwitch = true;
+                                    break;
+                                }
+                            } else if (dir == "desc") {
+                                if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                                    shouldSwitch = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (shouldSwitch) {
+                            rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                            switching = true;
+                            switchcount++;
+                        } else {
+                            if (switchcount == 0 && dir == "asc") {
+                                dir = "desc";
+                                switching = true;
+                            }
+                        }
+                    }
+                }
+            </script>
+        </div>
+    </div>
+
+    <div style="margin-bottom: 1%"></div>
+
+    <!--patientScript-->
+    <div class="authSummary_container">
+
+        <h4 class="summaryHeading">Script overview</h4>
+        <hr class="patientProfile_Ruler" />
+
+        <div class="form-horizontal">
+            <div class="row">
+
+                @using (Html.BeginForm("AuthoriseScript", "Scripts", FormMethod.Post, new { ScriptAuthmodel = Model }))
+                {
+                    @Html.AntiForgeryToken()
+                    <br />
+                    <!--currentScript-->
+                    <div>
+                        <div class="row tablinks">
+                            <div class="form-horizontal">
+                                <br />
+                                <div class="row">
+                                    <div class="col-md-5 contentBlock_authScript">
+                                        <h6 style="text-align: center">
+                                            Script Reference Number: @Html.DisplayFor(model => model.script.scriptID) @Html.HiddenFor(model => model.script.scriptID)
+                                            @Html.HiddenFor(model => model.script.dependentID)
+                                        </h6>
+                                        <hr class="fancyruler" />
+                                        <div style="margin-left: 20%">
+                                            <div class="col-md-6">Effective date: </div>
+                                            <div class="col-md-6">@Html.DisplayFor(model => model.script.effectiveDate) @Html.HiddenFor(model => model.script.effectiveDate)</div>
+                                            <br />
+                                            <div class="col-md-6">Number of Repeats: </div>
+                                            <div class="col-md-6">@Html.DisplayFor(model => model.script.repeats)</div>
+                                            <br />
+
+                                            <div class="col-md-6">&nbsp;</div>
+                                            <div class="col-md-6">&nbsp;</div>
+                                            <div class="col-md-6">&nbsp;</div>
+                                        </div>
+
+
+
+                                        @Html.HiddenFor(model => model.script.doctorID)
+
+                                    </div>
+                                    <div class="col-md-5 contentBlock_authLine">
+                                        <h6 style="text-align: center">HIV Category</h6>
+                                        <hr class="fancyruler" />
+                                        <div class="form-group scriptCategory" style="margin-left: 0%">
+                                            <div class="col-md-1"></div>
+                                            <div class="col-md-5">First Line</div>
+                                            <div class="col-md-5 authLine">@Html.CheckBoxFor(model => model.script.firstLine)</div>
+                                            <div class="col-md-1"></div>
+                                            <br />
+                                            <div class="col-md-1"></div>
+                                            <div class="col-md-5">Second Line</div>
+                                            <div class="col-md-5 authLine">@Html.CheckBoxFor(model => model.script.secondLine)</div>
+                                            <div class="col-md-1"></div>
+                                            <br />
+                                            <div class="col-md-1"></div>
+                                            <div class="col-md-5">Salvage</div>
+                                            <div class="col-md-5 authLine">@Html.CheckBoxFor(model => model.script.salvageTherapy)</div>
+                                            <div class="col-md-1"></div>
+                                            <br />
+                                            <div class="col-md-1"></div>
+                                            <div class="col-md-5">Resistance</div>
+                                            <div class="col-md-5 authLine">@Html.CheckBoxFor(model => model.script.resistanceTest)</div>
+                                            <div class="col-md-1"></div>
+                                            <br />
+
+
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="row">
+                                    <br />
+                                    <br />
+
+                                    <table class="table patientHistory_Table" id="scriptSort">
+                                        <tr>
+                                            <th style="text-align: center!important; width: 100px">
+                                                @Html.DisplayName("Authorise")
+                                            </th>
+                                            <th onclick="scriptSort(1)" style="width: 100px">
+                                                @Html.DisplayNameFor(model => model.items[0].nappiCode) <i class="fa fa-fw fa-sort"></i>
+                                            </th>
+                                            <th onclick="scriptSort(2)" style="width: 300px">
+                                                @Html.DisplayNameFor(model => model.items[0].productName) <i class="fa fa-fw fa-sort"></i>
+                                            </th>
+                                            <th onclick="scriptSort(3)" style="width: 100px">
+                                                @Html.DisplayNameFor(model => model.items[0].strength) <i class="fa fa-fw fa-sort"></i>
+                                            </th>
+                                            <th onclick="scriptSort(4)" style="width: 80px">
+                                                @Html.DisplayNameFor(model => model.items[0].quantity) <i class="fa fa-fw fa-sort"></i>
+                                            </th>
+                                            <th onclick="scriptSort(5)">
+                                                @Html.DisplayNameFor(model => model.items[0].directions) <i class="fa fa-fw fa-sort"></i>
+                                            </th>
+                                            <th onclick="scriptSort(6)" style="width: 150px">
+                                                @Html.DisplayNameFor(model => model.items[0].itemStatus) <i class="fa fa-fw fa-sort"></i>
+                                            </th>
+                                            <th style="width: 120px">
+                                                @Html.DisplayNameFor(model => model.items[0].fromDate)
+                                            </th>
+                                            <th style="width: 120px">
+                                                @Html.DisplayNameFor(model => model.items[0].toDate)
+                                            </th>
+                                            <th style="text-align: center!important; width: 80px;">
+                                                Action
+                                            </th>
+                                        </tr>
+                                        @if (Model.items.Count() == 0)
+                                        {
+                                            <tr><td colspan="10" style="text-align: center!important">No records available</td></tr>
+                                        }
+                                        else
+                                        {
+                                            for (int i = 0; i < Model.items.Count(); i++)
+                                            {
+                                                <tr>
+                                                    <td class="authCheck">
+                                                        @Html.CheckBoxFor(modelItem => Model.items[i].authItem)
+                                                        @Html.HiddenFor(modelItem => Model.items[i].itemNo)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => Model.items[i].nappiCode)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => Model.items[i].productName)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => Model.items[i].strength)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => Model.items[i].quantity)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => Model.items[i].directions)
+                                                    </td>
+                                                    <td>
+                                                        @*@Html.DisplayFor(modelItem => Model.items[i].itemStatus)*@
+                                                        @if (Model.items[i].itemStatus == "Not yet authorised")
+                                                        {
+                                                            <span style="color: darkred; font-weight: bold">
+                                                                Not yet authorised
+                                                            </span>
+
+                                                        }
+                                                        else if (Model.items[i].itemStatus == "Authorised")
+                                                        {
+                                                            <span style="color: forestgreen; font-weight: bold">
+                                                                Authorised
+                                                            </span>
+
+                                                        }
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => Model.items[i].fromDate)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => Model.items[i].toDate)
+                                                    </td>
+                                                    <td class="statusCode linkNav" style="text-align: center!important">
+                                                        @Html.ActionLink("Edit", "EditScriptItem", "Member", new { itemId = Model.items[i].itemNo }, null)
+                                                    </td>
+                                                </tr>
+                                            }
+                                        }
+
+                                    </table>
+
+                                </div>
+                                <script>
+                                    /*scriptSort tableSorting*/
+                                    function scriptSort(n) {
+                                        var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+                                        table = document.getElementById("scriptSort");
+                                        switching = true;
+                                        dir = "asc";
+                                        while (switching) {
+                                            switching = false;
+                                            rows = table.rows;
+                                            for (i = 1; i < (rows.length - 1); i++) {
+                                                shouldSwitch = false;
+                                                x = rows[i].getElementsByTagName("TD")[n];
+                                                y = rows[i + 1].getElementsByTagName("TD")[n];
+                                                if (dir == "asc") {
+                                                    if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                                                        shouldSwitch = true;
+                                                        break;
+                                                    }
+                                                } else if (dir == "desc") {
+                                                    if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                                                        shouldSwitch = true;
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                            if (shouldSwitch) {
+                                                rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                                                switching = true;
+                                                switchcount++;
+                                            } else {
+                                                if (switchcount == 0 && dir == "asc") {
+                                                    dir = "desc";
+                                                    switching = true;
+                                                }
+                                            }
+                                        }
+                                    }
+                                </script>
+                                <br />
+
+                            </div>
+                        </div>
+                        <hr class="patientProfile_Ruler" style="margin-bottom: 10px" />
+
+                        <div class="form-group">
+                            <div class="actionButton" style="margin-left: 40%">
+                                <input value="Back" class="btn buttonRound_formBack go_back" style="width: 15%!important" />
+                                <input type="submit" value="Authorise" class="btn buttonRound_formCreate" style="width: 15%!important" />
+                                <br />
+                                @if (Model.script.Status == "Active")
+                                {
+                                    <input type="button" class="btn newEnquiry" style="margin-top: 0.5%;margin-left: 1.5%!important; width: 15%" value="Authorisation Letter" onclick="location.href='@Url.Action("AuthLetter", "Member", new { id = Model.script.scriptID }, null)'" />
+                                    <br />
+                                    <br />
+                                }
+
+
+                            </div>
+
+                        </div>
+                    </div>
+
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="//code.jquery.com/jquery-3.2.1.min.js"></script>
+<script src="@Url.Content("~/Scripts/jquery-ui-1.8.11.js")" type="text/javascript"></script>
+<script src="js/jquery.tablesorter.min.js"></script>
+
+
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <script>
+        var $rows = $('#table tr');
+        $('#search').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $rows.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+
+        /*tableSorting*/
+        function sortTable(n) {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("table");
+            switching = true;
+            dir = "asc";
+
+            while (switching) {
+                switching = false;
+                rows = table.getElementsByTagName("TR");
+
+                for (i = 1; i < (rows.length - 1); i++) {
+
+                    shouldSwitch = false;
+
+                    x = rows[i].getElementsByTagName("TD")[n];
+                    y = rows[i + 1].getElementsByTagName("TD")[n];
+
+                    if (dir == "asc") {
+                        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                            //if so, mark as a switch and break the loop:
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (dir == "desc") {
+                        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                            //if so, mark as a switch and break the loop:
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+                if (shouldSwitch) {
+                    /*If a switch has been marked, make the switch
+                    and mark that a switch has been done:*/
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                    //Each time a switch is done, increase this count by 1:
+                    switchcount++;
+                } else {
+                    /*If no switching has been done AND the direction is "asc",
+                    set the direction to "desc" and run the while loop again.*/
+                    if (switchcount == 0 && dir == "asc") {
+                        dir = "desc";
+                        switching = true;
+                    }
+                }
+            }
+        }
+
+    </script>
+}

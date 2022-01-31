@@ -1,0 +1,217 @@
+﻿@model List<HaloCareCore.Models.ViewModels.EmailTemplateViewModel>
+@using HaloCareCore.Extensions
+@{
+    ViewBag.Title = "Accounts";
+    Layout = "~/Views/Shared/_layout-view-x.cshtml";
+}
+
+<comment>
+    <!-- 4 June 2021 -- HCare-1338 -->
+</comment>
+<javascript>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+    <script src="https://www.jqueryscript.net/demo/jQuery-Plugin-For-Sortable-Bootstrap-Tables-Bootstrap-Sortable/Scripts/bootstrap-sortable.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/js/standalone/selectize.js"></script>
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.default.css">
+</javascript>
+
+<div class="collapse in">
+    <div class="card card-body">
+        <div class="collapse-body">
+            <div class="account-setting-panel">
+                <!-------------------------------------------------------------------------- bread-crumbs ------------------------------------------------------------------------->
+                <ul class="bread-crumbs-full-screen" style="color: #808080 !important;">
+                    <li style="font-size: 10px; font-weight: 600">You are here:</li>
+                    <li><a href="@Url.Action("Details", "Account" , new { Id = ViewBag.AccountID })">Details</a></li>
+                    <li><a class="go_back">Options</a></li>
+                    <li><a href="#">Email message templates</a></li>
+                </ul>
+                <!------------------------------------------------------------------------- nav-collection ------------------------------------------------------------------------>
+                @if (User.Identity.IsAuthenticated)
+                {
+                    if (User.HasRole("6. Global user") || (User.HasRole("5. Super user")))
+                    {
+                        <div class="navCollection_fullScreens">
+                            <div class="buttonCollection">
+                                <div class="col-md-12">
+                                    <div class="col-md-4"></div>
+                                    <div class="col-md-4">
+                                        <div class="col-md-2"></div>
+                                        <div class="col-md-10">
+                                            <div class="col-md-2">
+                                                <a href="@Url.Action("Index", "Home" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Home"><span style="font-size: 12px" class="sub_icon fas fa-home"></span></a>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <a href="@Url.Action("OpenAssignments", "Clinical" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Assignments"><span style="font-size: 12px" class="sub_icon fas fa-bell"></span></a>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <a href="@Url.Action("Search", "Member" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Patient"><span style="font-size: 12px" class="sub_icon fas fa-user-circle"></span></a>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <a href="@Url.Action("searchManagement", "patientManagement" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Search"><span style="font-size: 12px" class="sub_icon fas fa-search"></span></a>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <a href="@Url.Action("Index", "Administration" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Settings"><span style="font-size: 12px" class="sub_icon fas fa-cog"></span></a>
+                                            </div>
+                                            <div class="col-md-2"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4"></div>
+
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else if (User.HasRole("4. Advisor"))
+                    {
+                        <div class="navCollection_fullScreens">
+                            <div class="buttonCollection">
+                                <div class="col-md-12">
+                                    <div class="col-md-4"></div>
+                                    <div class="col-md-4">
+                                        <div class="col-md-2"></div>
+                                        <div class="col-md-10">
+                                            <div class="col-md-1"></div>
+                                            <div class="col-md-2">
+                                                <a href="@Url.Action("Index", "Home" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Home"><span style="font-size: 12px" class="sub_icon fas fa-home"></span></a>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <a href="@Url.Action("OpenAssignments", "Clinical" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Assignments"><span style="font-size: 12px" class="sub_icon fas fa-bell"></span></a>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <a href="@Url.Action("Search", "Member" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Patient"><span style="font-size: 12px" class="sub_icon fas fa-user-circle"></span></a>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <a href="@Url.Action("searchManagement", "patientManagement" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Search"><span style="font-size: 12px" class="sub_icon fas fa-search"></span></a>
+                                            </div>
+                                            <div class="col-md-2"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4"></div>
+
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else if (User.HasRole("1. Consultant") || (User.HasRole("2. Case manager") || (User.HasRole("3. Specialist"))))
+                    {
+                        <div class="navCollection_fullScreens">
+                            <div class="buttonCollection">
+                                <div class="col-md-12">
+                                    <div class="col-md-4"></div>
+                                    <div class="col-md-4">
+                                        <div class="col-md-1"></div>
+                                        <div class="col-md-10">
+                                            <div class="col-md-2"></div>
+                                            <div class="col-md-2">
+                                                <a href="@Url.Action("Index", "Home" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Home"><span style="font-size: 12px" class="sub_icon fas fa-home"></span></a>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <a href="@Url.Action("OpenAssignments", "Clinical" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Assignments"><span style="font-size: 12px" class="sub_icon fas fa-bell"></span></a>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <a href="@Url.Action("Search", "Member" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Patient"><span style="font-size: 12px" class="sub_icon fas fa-user-circle"></span></a>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <a href="@Url.Action("searchManagement", "patientManagement" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Search"><span style="font-size: 12px" class="sub_icon fas fa-search"></span></a>
+                                            </div>
+                                            <div class="col-md-2"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4"></div>
+
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                <div style="margin-bottom: 2%"></div>
+                @using (Html.BeginForm("EmailTemplateEdit", "Account", FormMethod.Post))
+                {
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="optionID" name="optionID" value="@ViewBag.OptionID" />
+
+                    if (Model.Count > 0)
+                    {
+                        <!--------------------------------------------------------------------------- new/search -------------------------------------------------------------------------->
+                        <div class="col-md-12 row">
+                            <div class="col-md-6">
+                                <h4 class="subHeading">
+                                    Email template overview: @ViewBag.ProgramName
+                                </h4>
+                            </div>
+                            <!--------------------------------------------------------------------------- jq-search -------------------------------------------------------------------------->
+                            <div class="col-md-6">
+                                <div class="input-wrapper-new-search">
+                                    <input type="text" class="form-control-new-search" id="et-search" onkeyup="myFunction()" placeholder="Search..." />
+                                </div>
+                            </div>
+                        </div>
+                        <table class="table mh-table table-hover" style="margin-left: 1.6%">
+                            <thead>
+                                <tr>
+                                    <th style="text-align: center!important; width: 10%">@Html.DisplayNameFor(model => model[0].Added)</th>
+                                    <th>@Html.DisplayNameFor(model => model[0].title)</th>
+                                </tr>
+                            </thead>
+
+                            @for (int i = 0; i < Model.Count(); i++)
+                            {
+                                <tbody id="et-search">
+                                    <tr>
+                                        @Html.HiddenFor(model => model[i].accountId)
+                                        @Html.HiddenFor(model => model[i].programId)
+                                        @Html.HiddenFor(model => model[i].medicalAidId)
+                                        @Html.HiddenFor(model => model[i].planId)
+                                        @Html.HiddenFor(model => model[i].templateId)
+
+                                        <td class="accountCheck">@Html.EditorFor(model => model[i].Added)</td>
+                                        <td>@Html.DisplayFor(model => model[i].title)</td>
+                                    </tr>
+                                </tbody>
+                            }
+                        </table>
+                        <div>
+                            <span class="@(Model.Count <= 12 ? "sf-footer" : "account-footer pull-right")">
+                                <input type="button" id="account-back-et" value="Back" class="btn modal-button-previous go_back" />
+                                <input type="submit" id="account-update-et" value="Update" class="btn modal-button-next" />
+                            </span>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="no-results-1">
+                            <img src="~/Content/Images/_2020/tables/no-results-5.png" />
+                        </div>
+                        <h4 class="no-results">No email message templates found for program</h4>
+                        <div style="text-align: center">
+                            <input type="button" onclick="location.href='@Url.Action("Index", "Template" , null)'" value="Settings" class="btn modal-button-default" />
+                        </div>
+
+                        <div class="sf-footer">
+                            <input type="button" id="account-back-et" value="Back" class="btn modal-button-previous go_back" />
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script src="~/bundles/jqueryval"></script>
+    <script type="text/javascript">
+        var $rows = $('#et-search tr');
+        $('#et-search').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $rows.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+    </script>
+}

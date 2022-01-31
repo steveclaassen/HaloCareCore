@@ -1,0 +1,1187 @@
+﻿@model HaloCareCore.Models.ViewModels.RulesVM
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Rules";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<comment>
+    <!--
+        28 September 2020 -- HCare-821
+        08 October 2020 -- HCare-1185
+     -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .capitalize {
+        text-transform: capitalize;
+    }
+
+    .info-alert {
+        width: 100%;
+        margin: 0 auto;
+        background-color: rgb(30 144 255 / 0.50);
+        padding: 10px;
+        border: 1px solid transparent;
+        border-left-width: 5px;
+        border-radius: 3px;
+        margin: 0 auto;
+        color: white;
+        font-family: 'Open Sans', sans-serif;
+        font-size: 12px;
+    }
+</style>
+<javascript>
+    <script src="https://www.jqueryscript.net/demo/jQuery-Plugin-For-Sortable-Bootstrap-Tables-Bootstrap-Sortable/Scripts/bootstrap-sortable.js"></script>
+</javascript>
+
+<div class="fullScreen_container">
+    <!----------------------------------------------------------------------------- html-top-navigation-panel  ---------------------------------------------------------------------------->
+    <navigation>
+        <nav id="global-nav" class="nav">
+            <div class="pull-left title">
+                <h1 class="site-title_patientProfile">
+                    <span><i class="fas fa-exclamation-triangle"></i>&emsp; Rules</span>
+                </h1>
+            </div>
+            <div class="pull-right title">
+                <div class="site-title_userID pull-right">
+                    <div class="halocareLogoX"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+                </div>
+                <h1 class="site-title_userID pull-right">
+                    @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                    {
+                        <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                    }
+                </h1>
+                <h1 class="site-waffleIcon pull-right">
+                    <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+                </h1>
+            </div>
+        </nav>
+        <ul class="breadcrumbs_fullScreens">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+            <li><a href="@Url.Action("Index", "Administration", new {})">Settings</a></li>
+            <li><a href="#">@ViewBag.Title</a></li>
+        </ul>
+        <div class="navCollection_fullScreens">
+            @Html.Partial("_navCollection")
+        </div>
+
+        <div style="margin-bottom: 3%"></div>
+    </navigation>
+    <!-------------------------------------------------------------------------------------- html-body ------------------------------------------------------------------------------------>
+    <div class="container-tab">
+        <div class="row">
+            <div class="span12">
+                <div class="container-tab">
+                    <!------------------------------------------------------------------------------------ tab-navigation ----------------------------------------------------------------------------------->
+                    <ul class="nav nav-pills nav-justified" role="tablist">
+                        <li role="presentation" class="tab-clinical active"><a href="#clinicalRules" aria-controls="clinicalRules" class="tab-label" data-toggle="tab" id="clinical_rules">Clinical rules</a></li>
+                        <li role="presentation" class="tab-clinical"><a href="#hivRules" aria-controls="hivRules" class="tab-label" role="tab" data-toggle="tab" id="hiv_rules">HIV stage rules</a></li>
+                        <li role="presentation" class="tab-clinical"><a href="#hivStageRules" aria-controls="hivStageRules" class="tab-label" role="tab" data-toggle="tab" id="hiv_rules">HIV stage risk rules</a></li>
+                        <li role="presentation" class="tab-clinical"><a href="#hivcomorbidRules" aria-controls="hivcomorbidRules" class="tab-label" role="tab" data-toggle="tab" id="hiv_cm_rules">HIV comorbid addition</a></li>
+                        <li role="presentation" class="tab-clinical"><a href="#mhRules" aria-controls="mhRules" class="tab-label" role="tab" data-toggle="tab" id="mh_rules">Mental health rules</a></li>
+                        @*<li role="presentation" class="tab-clinical"><a href="#riskRating" aria-controls="riskRating" class="tab-label" role="tab" data-toggle="tab" id="risk_rating">Diabetes risk rating</a></li>*@
+                        <li role="presentation" class="tab-clinical"><a href="#lifeExpectancy" aria-controls="lifeExpectancy" class="tab-label" role="tab" data-toggle="tab" id="life_expectancy">Diabetes life expectancy</a></li>
+                        <li role="presentation" class="tab-clinical"><a href="#risk-rating-monitor" aria-controls="risk-rating-monitor" class="tab-label" role="tab" data-toggle="tab" id="risk_rating_monitor">Risk rating monitor</a></li>
+                    </ul>
+                    <!-------------------------------------------------------------------------------------- tab-panels ------------------------------------------------------------------------------------->
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="clinicalRules">
+                            <div class="row">
+                                <br />
+                                <!--------------------------------------------------------------------------- new/search -------------------------------------------------------------------------->
+                                <div class="col-md-12 row">
+                                    <div class="col-md-6">
+                                        <h4 class="subHeading">
+                                            Clinical rules overview
+                                            <a class="create-new" href="@Url.Action("Create", "ClinicalRules", new { })" style="font-size: 14px">Create new <span><i class="fa fa-plus-circle" style="font-size: 12px"></i></span></a>
+                                        </h4>
+                                    </div>
+                                    <!--------------------------------------------------------------------------- jq-search -------------------------------------------------------------------------->
+                                    <div class="col-md-6">
+                                        <div class="input-wrapper-new-search">
+                                            <input type="text" class="form-control-new-search" id="crSearch" placeholder="Search..." />
+                                        </div>
+                                    </div>
+                                </div>
+                                <!------------------------------------------------------------------------ medical-aid-table ---------------------------------------------------------------------->
+                                <table class="table settings-table sortable">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 20%">@Html.DisplayNameFor(model => model.ClinicalRules[0].ruleName) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="text-align: center!important; width: 7%">@Html.DisplayNameFor(model => model.ClinicalRules[0].greater) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="text-align: center!important; width: 7%">@Html.DisplayNameFor(model => model.ClinicalRules[0].less) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="text-align: center!important; width: 5%">@Html.DisplayNameFor(model => model.ClinicalRules[0].male) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="text-align: center!important; width: 5%">@Html.DisplayNameFor(model => model.ClinicalRules[0].female) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="text-align: center!important; width: 8%">@Html.DisplayName("Program") <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="text-align: center!important; width: 7%">@Html.DisplayNameFor(model => model.ClinicalRules[0].hasAssignment)</th>
+                                            <th style="text-align: center!important; width: 7%">@Html.DisplayNameFor(model => model.ClinicalRules[0].active)</th>
+                                            <th style="text-align: center!important; width: 7%">Action</th>
+                                        </tr>
+                                    </thead>
+
+                                    @foreach (var item in Model.ClinicalRules)
+                                    {
+                                        <tbody id="clinical-rules-search">
+                                            <tr style="text-indent: 5px">
+                                                <td class="text-left"><span class="@(item.active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.ruleName)</span></td>
+                                                <td class="text-center" title="@Html.DisplayFor(modelItem=>item.gtMessage)"><span class="@(item.active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.greater)</span></td>
+                                                <td class="text-center" title="@Html.DisplayFor(modelItem=>item.ltMessage)"><span class="@(item.active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.less)</span></td>
+                                                <td style="text-align: center!important">
+                                                    @if (item.active == false)
+                                                    {
+                                                        <i class="fas fa-check-square" style="color: rgba(204, 204, 204, 0.50)!important; font-size: 12px"></i>
+                                                    }
+                                                    else
+                                                    {
+                                                        if (item.male)
+                                                        {
+                                                            <i class="fas fa-check-square ruleCheck" style="font-size: 12px"></i>
+                                                        }
+                                                        else
+                                                        {
+                                                            <i class="fas fa-square" style="color: rgba(204, 204, 204, 0.25)!important; font-size: 12px"></i>
+                                                        }
+                                                    }
+                                                </td>
+                                                <td style="text-align: center!important">
+                                                    @if (item.active == false)
+                                                    {
+                                                        <i class="fas fa-check-square" style="color: rgba(204, 204, 204, 0.50)!important; font-size: 12px"></i>
+                                                    }
+                                                    else
+                                                    {
+                                                        if (item.female)
+                                                        {
+                                                            <i class="fas fa-check-square ruleCheck" style="font-size: 12px"></i>
+                                                        }
+                                                        else
+                                                        {
+                                                            <i class="fas fa-square" style="color: rgba(204, 204, 204, 0.25)!important; font-size: 12px"></i>
+                                                        }
+                                                    }
+                                                </td>
+                                                <td class="text-center"><span class="@(item.active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.ruleType)</span></td>
+                                                <td class="row-information text-center"><span class="@(item.hasAssignment == true ? "chk-yes fas fa-circle" : "chk-null fas fa-circle")"></span></td>
+                                                <td class="row-information text-center"><span class="@(item.active == true ? "chk-yes fas fa-circle" : "chk-no fas fa-circle")"></span></td>
+                                                <td class="text-center">
+                                                    <input type="submit" class="link-button" value="View" onclick="location.href='@Url.Action("Details", "ClinicalRules", new { id = item.id })'" /> /
+                                                    <input type="submit" class="link-button" value="Edit" onclick="location.href='@Url.Action("Edit", "ClinicalRules", new { id = item.id})'" />
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    }
+
+                                </table>
+                            </div>
+                        </div>
+                        <div role="tabpanel" class="tab-pane" id="hivRules">
+                            <div class="row">
+                                <br />
+                                <!--------------------------------------------------------------------------- new/search -------------------------------------------------------------------------->
+                                <div class="col-md-12 row">
+                                    <div class="col-md-6">
+                                        <h4 class="subHeading">
+                                            HIV staging rules overview
+                                            <a class="create-new" href="@Url.Action("HIVRiskRatingRulesAdd", "Administration", new { })" style="font-size: 14px">Create new <span><i class="fa fa-plus-circle" style="font-size: 12px"></i></span></a>
+                                        </h4>
+                                    </div>
+                                    <!--------------------------------------------------------------------------- jq-search -------------------------------------------------------------------------->
+                                    <div class="col-md-6">
+                                        <div class="input-wrapper-new-search">
+                                            <input type="text" class="form-control-new-search" id="hrSearch" placeholder="Search..." />
+                                        </div>
+                                    </div>
+                                </div>
+                                <!------------------------------------------------------------------------ medical-plan-table ---------------------------------------------------------------------->
+                                <table class="table settings-table sortable">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 10%; text-align: center!important">@Html.DisplayNameFor(model => model.HIVRiskRatingRules[0].effectiveDate) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="width: 10%; text-align: center!important">@Html.DisplayNameFor(model => model.HIVRiskRatingRules[0].CD4Count) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="width: 10%; text-align: center!important">@Html.DisplayNameFor(model => model.HIVRiskRatingRules[0].CD4Percentage) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="width: 10%; text-align: center!important">@Html.DisplayNameFor(model => model.HIVRiskRatingRules[0].viralLoad) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="width: 10%; text-align: center!important">@Html.DisplayNameFor(model => model.HIVRiskRatingRules[0].ltValue) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="width: 10%; text-align: center!important">@Html.DisplayNameFor(model => model.HIVRiskRatingRules[0].gtValue) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="width: 10%; text-align: center!important">@Html.DisplayNameFor(model => model.HIVRiskRatingRules[0].stage) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="width: 10%; text-align: center!important">@Html.DisplayNameFor(model => model.HIVRiskRatingRules[0].active) </th>
+                                            <th style="width: 10%; text-align: center!important">@Html.DisplayName("Action")</th>
+                                        </tr>
+                                    </thead>
+
+                                    @foreach (var item in Model.HIVRiskRatingRules)
+                                    {
+                                        <tbody id="hiv-rules-table">
+                                            <tr>
+                                                <td data-dateformat="DD-MM-YYYY" class="text-center"><span class="@(item.active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.effectiveDate)</span></td>
+                                                <td style="text-align: center!important">
+                                                    @if (item.active == false)
+                                                    {
+                                                        <i class="fas fa-check-square" style="color: rgba(204, 204, 204, 0.50)!important; font-size: 12px"></i>
+                                                    }
+                                                    else
+                                                    {
+                                                        if (item.CD4Count)
+                                                        {
+                                                            <i class="fas fa-check-square ruleCheck" style="font-size: 12px"></i>
+                                                        }
+                                                        else
+                                                        {
+                                                            <i class="fas fa-square" style="color: rgba(204, 204, 204, 0.25)!important; font-size: 12px"></i>
+                                                        }
+                                                    }
+                                                </td>
+                                                <td style="text-align: center!important">
+                                                    @if (item.active == false)
+                                                    {
+                                                        <i class="fas fa-check-square" style="color: rgba(204, 204, 204, 0.50)!important; font-size: 12px"></i>
+                                                    }
+                                                    else
+                                                    {
+                                                        if (item.CD4Percentage)
+                                                        {
+                                                            <i class="fas fa-check-square ruleCheck" style="font-size: 12px"></i>
+                                                        }
+                                                        else
+                                                        {
+                                                            <i class="fas fa-square" style="color: rgba(204, 204, 204, 0.25)!important; font-size: 12px"></i>
+                                                        }
+                                                    }
+                                                </td>
+                                                <td style="text-align: center!important">
+                                                    @if (item.active == false)
+                                                    {
+                                                        <i class="fas fa-check-square" style="color: rgba(204, 204, 204, 0.50)!important; font-size: 12px"></i>
+                                                    }
+                                                    else
+                                                    {
+                                                        if (item.viralLoad)
+                                                        {
+                                                            <i class="fas fa-check-square ruleCheck" style="font-size: 12px"></i>
+                                                        }
+                                                        else
+                                                        {
+                                                            <i class="fas fa-square" style="color: rgba(204, 204, 204, 0.25)!important; font-size: 12px"></i>
+                                                        }
+                                                    }
+                                                </td>
+
+                                                <td class="text-center"><span class="@(item.active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.ltValue)</span></td>
+                                                <td class="text-center"><span class="@(item.active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.gtValue)</span></td>
+                                                <td class="text-center"><span class="@(item.active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.stage)</span></td>
+                                                <td class="row-information text-center"><span class="@(item.active == true ? "chk-yes fas fa-circle" : "chk-no fas fa-circle")"></span></td>
+
+                                                <td class="text-center">
+                                                    <input type="submit" class="link-button" value="View" onclick="location.href='@Url.Action("HIVRiskRatingRulesDetails", "Administration", new { id = item.id })'" /> /
+                                                    <input type="submit" class="link-button" value="Edit" onclick="location.href='@Url.Action("HIVRiskRatingRulesEdit", "Administration", new { id = item.id })'" />
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    }
+
+                                </table>
+
+                            </div>
+                        </div>
+                        <div role="tabpanel" class="tab-pane" id="hivStageRules">
+                            <div class="row">
+                                <br />
+                                <!--------------------------------------------------------------------------- new/search -------------------------------------------------------------------------->
+                                <div class="col-md-12 row">
+                                    <div class="col-md-6">
+                                        <h4 class="subHeading">
+                                            HIV staging risk rules overview
+                                            <a class="create-new" href="@Url.Action("HIVStageRiskAdd", "Administration", new { })" style="font-size: 14px">Create new <span><i class="fa fa-plus-circle" style="font-size: 12px"></i></span></a>
+                                        </h4>
+                                    </div>
+                                    <!--------------------------------------------------------------------------- jq-search -------------------------------------------------------------------------->
+                                    <div class="col-md-6">
+                                        <div class="input-wrapper-new-search">
+                                            <input type="text" class="form-control-new-search" id="hrSearch" placeholder="Search..." />
+                                        </div>
+                                    </div>
+                                </div>
+                                <!------------------------------------------------------------------------ medical-plan-table ---------------------------------------------------------------------->
+                                <table class="table settings-table sortable">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 10%; text-align: center!important">@Html.DisplayNameFor(model => model.HIVStagingRiskRules[0].stage) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="width: 10%; text-align: center!important">@Html.DisplayNameFor(model => model.HIVStagingRiskRules[0].TB) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="width: 10%; text-align: center!important">@Html.DisplayNameFor(model => model.HIVStagingRiskRules[0].cancer) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="width: 10%; text-align: center!important">@Html.DisplayNameFor(model => model.HIVStagingRiskRules[0].cdl) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="width: 10%; text-align: center!important">@Html.DisplayNameFor(model => model.HIVStagingRiskRules[0].renal) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="width: 10%; text-align: center!important">@Html.DisplayNameFor(model => model.HIVStagingRiskRules[0].RiskId) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="width: 10%; text-align: center!important">@Html.DisplayNameFor(model => model.HIVStagingRiskRules[0].active) </th>
+                                            <th style="width: 10%; text-align: center!important">@Html.DisplayName("Action")</th>
+                                        </tr>
+                                    </thead>
+
+                                    @foreach (var item in Model.HIVStagingRiskRules)
+                                    {
+                                        <tbody id="hiv-rules-table">
+                                            <tr>
+                                                <td class="text-center"><span class="@(item.active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.stage)</span></td>
+                                                <td style="text-align: center!important">
+                                                    @if (item.active == false)
+                                                    {
+                                                        <i class="fas fa-check-square" style="color: rgba(204, 204, 204, 0.50)!important; font-size: 12px"></i>
+                                                    }
+                                                    else
+                                                    {
+                                                        if (item.TB)
+                                                        {
+                                                            <i class="fas fa-check-square ruleCheck" style="font-size: 12px"></i>
+                                                        }
+                                                        else
+                                                        {
+                                                            <i class="fas fa-square" style="color: rgba(204, 204, 204, 0.25)!important; font-size: 12px"></i>
+                                                        }
+                                                    }
+                                                </td>
+                                                <td style="text-align: center!important">
+                                                    @if (item.active == false)
+                                                    {
+                                                        <i class="fas fa-check-square" style="color: rgba(204, 204, 204, 0.50)!important; font-size: 12px"></i>
+                                                    }
+                                                    else
+                                                    {
+                                                        if (item.cancer)
+                                                        {
+                                                            <i class="fas fa-check-square ruleCheck" style="font-size: 12px"></i>
+                                                        }
+                                                        else
+                                                        {
+                                                            <i class="fas fa-square" style="color: rgba(204, 204, 204, 0.25)!important; font-size: 12px"></i>
+                                                        }
+                                                    }
+                                                </td>
+                                                <td style="text-align: center!important">
+                                                    @if (item.active == false)
+                                                    {
+                                                        <i class="fas fa-check-square" style="color: rgba(204, 204, 204, 0.50)!important; font-size: 12px"></i>
+                                                    }
+                                                    else
+                                                    {
+                                                        if (item.cdl)
+                                                        {
+                                                            <i class="fas fa-check-square ruleCheck" style="font-size: 12px"></i>
+                                                        }
+                                                        else
+                                                        {
+                                                            <i class="fas fa-square" style="color: rgba(204, 204, 204, 0.25)!important; font-size: 12px"></i>
+                                                        }
+                                                    }
+                                                </td>
+                                                <td style="text-align: center!important">
+                                                    @if (item.active == false)
+                                                    {
+                                                        <i class="fas fa-check-square" style="color: rgba(204, 204, 204, 0.50)!important; font-size: 12px"></i>
+                                                    }
+                                                    else
+                                                    {
+                                                        if (item.renal)
+                                                        {
+                                                            <i class="fas fa-check-square ruleCheck" style="font-size: 12px"></i>
+                                                        }
+                                                        else
+                                                        {
+                                                            <i class="fas fa-square" style="color: rgba(204, 204, 204, 0.25)!important; font-size: 12px"></i>
+                                                        }
+                                                    }
+                                                </td>
+                                                <td class="text-center"><span class="@(item.active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.RiskId)</span></td>
+                                                <td style="text-align: center!important">
+                                                    @if (item.active == false)
+                                                    {
+                                                        <i class="fas fa-check-square" style="color: rgba(204, 204, 204, 0.50)!important; font-size: 12px"></i>
+                                                    }
+                                                    else
+                                                    {
+                                                        if (item.active)
+                                                        {
+                                                            <i class="fas fa-check-square ruleCheck" style="font-size: 12px"></i>
+                                                        }
+                                                        else
+                                                        {
+                                                            <i class="fas fa-square" style="color: rgba(204, 204, 204, 0.25)!important; font-size: 12px"></i>
+                                                        }
+                                                    }
+                                                </td>
+
+                                                <td class="text-center">
+                                                    <input type="submit" class="link-button" value="Edit" onclick="location.href='@Url.Action("HIVStageRiskEdit", "Administration", new { id = item.id })'" />
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    }
+
+                                </table>
+
+                            </div>
+                        </div>
+                        <div role="tabpanel" class="tab-pane" id="hivcomorbidRules">
+                            <div class="row">
+                                <div class="info-alert" style="margin-bottom: 12px">Additional comorbid setup for the HIV stage risk rules. These comorbid additions will be used within the staging rules in addition to the existing setup.</div>
+                                <!--------------------------------------------------------------------------- new/search -------------------------------------------------------------------------->
+                                <div class="col-md-12 row">
+                                    <div class="col-md-6">
+                                        <h4 class="subHeading">
+                                            HIV comorbids addition overview
+                                            <a class="create-new" href="@Url.Action("hiv_comorbid_rule_create", "Administration", new { })" style="font-size: 14px">Create new <span><i class="fa fa-plus-circle" style="font-size: 12px"></i></span></a>
+                                        </h4>
+                                    </div>
+                                    <!--------------------------------------------------------------------------- jq-search -------------------------------------------------------------------------->
+                                    <div class="col-md-6">
+                                        <div class="input-wrapper-new-search">
+                                            <input type="text" class="form-control-new-search" id="hiv-cm-search" placeholder="Search..." />
+                                        </div>
+                                    </div>
+                                </div>
+                                <!------------------------------------------------------------------------ medical-plan-table ---------------------------------------------------------------------->
+                                <table class="table settings-table sortable">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 10%; text-align: center!important">@Html.DisplayNameFor(model => model.HivcomorbidRules[0].stage) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th>@Html.DisplayNameFor(model => model.HivcomorbidRules[0].Comorbid) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="width: 10%; text-align: center!important">@Html.DisplayNameFor(model => model.HIVStagingRiskRules[0].active) </th>
+                                            <th style="width: 10%; text-align: center!important">@Html.DisplayName("Action")</th>
+                                        </tr>
+                                    </thead>
+
+                                    @foreach (var item in Model.HivcomorbidRules)
+                                    {
+                                        <tbody id="hiv-cm-rules-table">
+                                            <tr>
+                                                <td class="text-center"><span class="@(item.active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.stage)</span></td>
+                                                <td><span class="@(item.active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.Comorbid)</span></td>
+                                                <td class="row-information" style="text-align: center!important"><span class="@(item.active == true ? "chk-yes fas fa-circle" : "chk-no fas fa-circle")"></span></td>
+                                                <td class="text-center">
+                                                    <input type="submit" class="link-button" value="View" onclick="location.href='@Url.Action("hiv_comorbid_rule_details", "Administration", new { id = item.Id })'" /> /
+                                                    <input type="submit" class="link-button" value="Edit" onclick="location.href='@Url.Action("hiv_comorbid_rule_edit", "Administration", new { id = item.Id })'" />
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    }
+                                </table>
+                            </div>
+                        </div>
+                        <div role="tabpanel" class="tab-pane" id="mhRules">
+                            <div class="row">
+                                <br />
+                                <!--------------------------------------------------------------------------- new/search -------------------------------------------------------------------------->
+                                <div class="col-md-12 row">
+                                    <div class="col-md-6">
+                                        <h4 class="subHeading">
+                                            Mental health rules overview
+                                            <a class="create-new" href="@Url.Action("MHRiskRatingRuleAdd", "RiskRating", new { })" style="font-size: 14px">Create new <span><i class="fa fa-plus-circle" style="font-size: 12px"></i></span></a>
+                                        </h4>
+                                    </div>
+                                    <!--------------------------------------------------------------------------- jq-search -------------------------------------------------------------------------->
+                                    <div class="col-md-6">
+                                        <div class="input-wrapper-new-search">
+                                            <input type="text" class="form-control-new-search" id="mhSearch" placeholder="Search..." />
+                                        </div>
+                                    </div>
+                                </div>
+                                <!------------------------------------------------------------------------ medical-plan-table ---------------------------------------------------------------------->
+                                <table class="table settings-table sortable">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 10%; text-align: center!important">@Html.DisplayNameFor(model => model.MHRiskRatingRules[0].effectiveDate) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="width: 10%; text-align: center!important">@Html.DisplayNameFor(model => model.MHRiskRatingRules[0].Depression) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="width: 10%; text-align: center!important">@Html.DisplayNameFor(model => model.MHRiskRatingRules[0].Schizophrenia) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="width: 10%; text-align: center!important">@Html.DisplayNameFor(model => model.MHRiskRatingRules[0].Bipolar) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="width: 10%; text-align: center!important">@Html.DisplayNameFor(model => model.MHRiskRatingRules[0].ltValue) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="width: 10%; text-align: center!important">@Html.DisplayNameFor(model => model.MHRiskRatingRules[0].gtValue) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="width: 10%; text-align: center!important">@Html.DisplayNameFor(model => model.MHRiskRatingRules[0].rating) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="width: 10%; text-align: center!important">@Html.DisplayNameFor(model => model.MHRiskRatingRules[0].suicidal) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="width: 10%; text-align: center!important">@Html.DisplayNameFor(model => model.MHRiskRatingRules[0].active) </th>
+                                            <th style="width: 10%; text-align: center!important">@Html.DisplayName("Action")</th>
+                                        </tr>
+                                    </thead>
+
+                                    @foreach (var item in Model.MHRiskRatingRules)
+                                    {
+                                        <tbody id="mh-rules-table">
+                                            <tr>
+                                                <td data-dateformat="DD-MM-YYYY" class="text-center"><span class="@(item.active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.effectiveDate)</span></td>
+                                                <td style="text-align: center!important">
+                                                    @if (item.active == false)
+                                                    {
+                                                        <i class="fas fa-check-square" style="color: rgba(204, 204, 204, 0.50)!important; font-size: 12px"></i>
+                                                    }
+                                                    else
+                                                    {
+                                                        if (item.Depression)
+                                                        {
+                                                            <i class="fas fa-check-square ruleCheck" style="font-size: 12px"></i>
+                                                        }
+                                                        else
+                                                        {
+                                                            <i class="fas fa-square" style="color: rgba(204, 204, 204, 0.25)!important; font-size: 12px"></i>
+                                                        }
+                                                    }
+                                                </td>
+                                                <td style="text-align: center!important">
+                                                    @if (item.active == false)
+                                                    {
+                                                        <i class="fas fa-check-square" style="color: rgba(204, 204, 204, 0.50)!important; font-size: 12px"></i>
+                                                    }
+                                                    else
+                                                    {
+                                                        if (item.Schizophrenia)
+                                                        {
+                                                            <i class="fas fa-check-square ruleCheck" style="font-size: 12px"></i>
+                                                        }
+                                                        else
+                                                        {
+                                                            <i class="fas fa-square" style="color: rgba(204, 204, 204, 0.25)!important; font-size: 12px"></i>
+                                                        }
+                                                    }
+                                                </td>
+                                                <td style="text-align: center!important">
+                                                    @if (item.active == false)
+                                                    {
+                                                        <i class="fas fa-check-square" style="color: rgba(204, 204, 204, 0.50)!important; font-size: 12px"></i>
+                                                    }
+                                                    else
+                                                    {
+                                                        if (item.Bipolar)
+                                                        {
+                                                            <i class="fas fa-check-square ruleCheck" style="font-size: 12px"></i>
+                                                        }
+                                                        else
+                                                        {
+                                                            <i class="fas fa-square" style="color: rgba(204, 204, 204, 0.25)!important; font-size: 12px"></i>
+                                                        }
+                                                    }
+                                                </td>
+
+                                                <td class="text-center"><span class="@(item.active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.ltValue)</span></td>
+                                                <td class="text-center"><span class="@(item.active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.gtValue)</span></td>
+                                                <td class="text-center"><span class="@(item.active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.rating)</span></td>
+                                                <td class="text-center"><span class="@(item.active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.suicidal)</span></td>
+                                                <td class="row-information text-center"><span class="@(item.active == true ? "chk-yes fas fa-circle" : "chk-no fas fa-circle")"></span></td>
+
+                                                <td class="text-center">
+                                                    <input type="submit" class="link-button" value="Edit" onclick="location.href='@Url.Action("MHRiskRatingRuleEdit", "RiskRating", new { id = item.id })'" />
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    }
+
+                                </table>
+
+                            </div>
+                        </div>
+                        <div role="tabpanel" class="tab-pane" id="riskRating">
+                            <div class="row">
+                                <br />
+                                <!--------------------------------------------------------------------------- new/search -------------------------------------------------------------------------->
+                                <div class="col-md-12 row">
+                                    <div class="col-md-6">
+                                        <h4 class="subHeading">
+                                            Diabetes risk rating overview
+                                            <a class="create-new" href="@Url.Action("Create", "RiskRating", new { })" style="font-size: 14px">Create new <span><i class="fa fa-plus-circle" style="font-size: 12px"></i></span></a>
+                                        </h4>
+                                    </div>
+                                    <!--------------------------------------------------------------------------- jq-search -------------------------------------------------------------------------->
+                                    <div class="col-md-6">
+                                        <div class="input-wrapper-new-search">
+                                            <input type="text" class="form-control-new-search" id="rrSearch" placeholder="Search..." />
+                                        </div>
+                                    </div>
+                                </div>
+                                <!------------------------------------------------------------------------ medical-plan-table ---------------------------------------------------------------------->
+                                <table class="table settings-table sortable">
+                                    <thead>
+                                        <tr>
+                                            <th style="text-align: left!important  ; width: 10%">@Html.DisplayNameFor(model => model.RiskRules[0].effectiveDate) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="text-align: center!important; width: 10%">@Html.DisplayNameFor(model => model.RiskRules[0].ltAge) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="text-align: center!important; width: 10%">@Html.DisplayNameFor(model => model.RiskRules[0].gtAge) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="text-align: center!important; width: 10%">@Html.DisplayNameFor(model => model.RiskRules[0].Insulin) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="text-align: center!important; width: 10%">@Html.DisplayNameFor(model => model.RiskRules[0].Sulphonylureas) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="text-align: center!important; width: 10%">@Html.DisplayNameFor(model => model.RiskRules[0].Glucose) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="text-align: center!important; width: 10%">@Html.DisplayNameFor(model => model.RiskRules[0].Renal) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="text-align: center!important; width: 11%">@Html.DisplayNameFor(model => model.RiskRules[0].hypo) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="text-align: center!important; width: 10%">@Html.DisplayNameFor(model => model.RiskRules[0].active)</th>
+                                            <th style="text-align: center!important; width: 10%!important">Action</th>
+                                        </tr>
+                                    </thead>
+
+                                    @foreach (var item in Model.RiskRules)
+                                    {
+                                        <tbody id="rr-rules-table">
+                                            <tr>
+                                                <td data-dateformat="DD-MM-YYYY" class="text-center"><span class="@(item.active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.effectiveDate)</span></td>
+                                                <td class="text-center"><span class="@(item.active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.ltAge)</span></td>
+                                                <td class="text-center"><span class="@(item.active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.gtAge)</span></td>
+                                                <td style="text-align:center!important">
+                                                    @if (item.active == false)
+                                                    {
+                                                        <i class="fas fa-check-square" style="color: rgba(204, 204, 204, 0.50)!important; font-size: 12px"></i>
+                                                    }
+                                                    else
+                                                    {
+                                                        if (item.Insulin)
+                                                        {
+                                                            <i class="fas fa-check-square ruleCheck" style="font-size: 12px"></i>
+                                                        }
+                                                        else
+                                                        {
+                                                            <i class="fas fa-square" style="color: rgba(204, 204, 204, 0.25)!important; font-size: 12px"></i>
+                                                        }
+                                                    }
+
+                                                </td>
+                                                <td style="text-align:center!important">
+                                                    @if (item.active == false)
+                                                    {
+                                                        <i class="fas fa-check-square" style="color: rgba(204, 204, 204, 0.50)!important; font-size: 12px"></i>
+                                                    }
+                                                    else
+                                                    {
+                                                        if (item.Sulphonylureas)
+                                                        {
+                                                            <i class="fas fa-check-square ruleCheck" style="font-size: 12px"></i>
+                                                        }
+                                                        else
+                                                        {
+                                                            <i class="fas fa-square" style="color: rgba(204, 204, 204, 0.25)!important; font-size: 12px"></i>
+                                                        }
+                                                    }
+                                                </td>
+                                                <td class="text-center"><span class="@(item.active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.Glucose)</span></td>
+                                                <td style="text-align:center!important">
+                                                    @if (item.active == false)
+                                                    {
+                                                        <i class="fas fa-check-square" style="color: rgba(204, 204, 204, 0.50)!important; font-size: 12px"></i>
+                                                    }
+                                                    else
+                                                    {
+                                                        if (item.Renal)
+                                                        {
+                                                            <i class="fas fa-check-square ruleCheck" style="font-size: 12px"></i>
+                                                        }
+                                                        else
+                                                        {
+                                                            <i class="fas fa-square" style="color: rgba(204, 204, 204, 0.25)!important; font-size: 12px"></i>
+                                                        }
+                                                    }
+                                                </td>
+                                                <td style="text-align:center!important">
+                                                    @if (item.active == false)
+                                                    {
+                                                        <i class="fas fa-check-square" style="color: rgba(204, 204, 204, 0.50)!important; font-size: 12px"></i>
+                                                    }
+                                                    else
+                                                    {
+                                                        if (item.hypo)
+                                                        {
+                                                            <i class="fas fa-check-square ruleCheck" style="font-size: 12px"></i>
+                                                        }
+                                                        else
+                                                        {
+                                                            <i class="fas fa-square" style="color: rgba(204, 204, 204, 0.25)!important; font-size: 12px"></i>
+                                                        }
+                                                    }
+                                                </td>
+                                                <td class="row-information text-center"><span class="@(item.active == true ? "chk-yes fas fa-circle" : "chk-no fas fa-circle")"></span></td>
+                                                <td class="text-center">
+                                                    <input type="submit" class="link-button" value="View" onclick="location.href='@Url.Action("Details", "RiskRating", new { id = item.id })'" /> /
+                                                    <input type="submit" class="link-button" value="Edit" onclick="location.href='@Url.Action("Edit", "RiskRating", new { id = item.id })'" />
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    }
+                                </table>
+                            </div>
+                        </div>
+                        <div role="tabpanel" class="tab-pane" id="lifeExpectancy">
+                            <div class="row">
+                                <br />
+                                <!--------------------------------------------------------------------------- new/search -------------------------------------------------------------------------->
+                                <div class="col-md-12 row">
+                                    <div class="col-md-6">
+                                        <h4 class="subHeading">
+                                            Diabetes life expectancy overview
+                                            <a class="create-new" href="@Url.Action("LifeCreate", "RiskRating", new { })" style="font-size: 14px">Create new <span><i class="fa fa-plus-circle" style="font-size: 12px"></i></span></a>
+                                        </h4>
+                                    </div>
+                                    <!--------------------------------------------------------------------------- jq-search -------------------------------------------------------------------------->
+                                    <div class="col-md-6">
+                                        <div class="input-wrapper-new-search">
+                                            <input type="text" class="form-control-new-search" id="leSearch" placeholder="Search..." />
+                                        </div>
+                                    </div>
+                                </div>
+                                <!------------------------------------------------------------------------ medical-plan-table ---------------------------------------------------------------------->
+                                <table class="table settings-table sortable">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 8%;text-align: center!important">@Html.DisplayNameFor(model => model.LifeExpectancyRules[0].effectiveDate) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="width: 7.5%; text-align: center!important">@Html.DisplayNameFor(model => model.LifeExpectancyRules[0].gender) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="width: 7.5%; text-align: center!important">@Html.DisplayNameFor(model => model.LifeExpectancyRules[0].RiskId) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="width: 8%; text-align: center!important">@Html.DisplayNameFor(model => model.LifeExpectancyRules[0].smoker) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="width: 8%; text-align: center!important">@Html.DisplayNameFor(model => model.LifeExpectancyRules[0].hypertension) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="width: 8%; text-align: center!important">@Html.DisplayNameFor(model => model.LifeExpectancyRules[0].hychol) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="width: 8%; text-align: center!important">@Html.DisplayName("Age greater") <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="width: 8%; text-align: center!important">@Html.DisplayName("Age less") <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="width: 7%; text-align: center!important">@Html.DisplayNameFor(model => model.LifeExpectancyRules[0].active)</th>
+                                            <th style="text-align: center!important; width: 8%">Action</th>
+                                        </tr>
+                                    </thead>
+
+                                    @foreach (var item in Model.LifeExpectancyRules)
+                                    {
+                                        <tbody id="le-rules-table">
+                                            <tr>
+                                                <td data-dateformat="DD-MM-YYYY" style="text-align: center!important"><span class="@(item.active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.effectiveDate)</span></td>
+                                                <td style="text-align: center!important">
+                                                    @if (item.active == false)
+                                                    {
+                                                        if (item.gender == "M")
+                                                        {
+                                                            <p style="color: rgba(204, 204, 204, 0.50)">Male</p>
+                                                        }
+                                                        else if (item.gender == "F")
+                                                        {
+                                                            <p style="color: rgba(204, 204, 204, 0.50)">female</p>
+                                                        }
+                                                        else
+                                                        {
+                                                            @Html.DisplayFor(modelItem => item.gender)
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        if (item.gender == "M")
+                                                        {
+                                                            <p>Male</p>
+                                                        }
+                                                        else if (item.gender == "F")
+                                                        {
+                                                            <p>Female</p>
+                                                        }
+                                                        else
+                                                        {
+                                                            @Html.DisplayFor(modelItem => item.gender)
+                                                        }
+                                                    }
+                                                </td>
+                                                <td style="text-align: center!important">
+                                                    @if (item.active == false)
+                                                    {
+                                                        if (item.RiskId == "G")
+                                                        {
+                                                            <p style="color: rgba(204, 204, 204, 0.50)">Green</p>
+                                                        }
+                                                        else if (item.RiskId == "Y")
+                                                        {
+                                                            <p style="color: rgba(204, 204, 204, 0.50)">Yellow</p>
+                                                        }
+                                                        else if (item.RiskId == "R")
+                                                        {
+                                                            <p style="color: rgba(204, 204, 204, 0.50)">Red</p>
+                                                        }
+                                                        else
+                                                        {
+                                                            @Html.DisplayFor(modelItem => item.RiskId)
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        if (item.RiskId == "G")
+                                                        {
+                                                            <p style="color: forestgreen; font-weight: bold">Green</p>
+                                                        }
+                                                        else if (item.RiskId == "Y")
+                                                        {
+                                                            <p style="color: orange; font-weight: bold">Yellow</p>
+                                                        }
+                                                        else if (item.RiskId == "R")
+                                                        {
+                                                            <p style="color: darkred; font-weight: bold">Red</p>
+                                                        }
+                                                        else
+                                                        {
+                                                            @Html.DisplayFor(modelItem => item.RiskId)
+                                                        }
+                                                    }
+                                                </td>
+                                                <td style="text-align: center!important">
+                                                    @if (item.active == false)
+                                                    {
+                                                        <i class="fas fa-check-square" style="color: rgba(204, 204, 204, 0.50)!important; font-size: 12px"></i>
+                                                    }
+                                                    else
+                                                    {
+                                                        if (item.smoker)
+                                                        {
+                                                            <i class="fas fa-check-square ruleCheck" style="font-size: 12px"></i>
+                                                        }
+                                                        else
+                                                        {
+                                                            <i class="fas fa-square" style="color: rgba(204, 204, 204, 0.25)!important; font-size: 12px"></i>
+                                                        }
+                                                    }
+                                                </td>
+                                                <td style="text-align: center!important">
+                                                    @if (item.active == false)
+                                                    {
+                                                        <i class="fas fa-check-square" style="color: rgba(204, 204, 204, 0.50)!important; font-size: 12px"></i>
+                                                    }
+                                                    else
+                                                    {
+                                                        if (item.hypertension)
+                                                        {
+                                                            <i class="fas fa-check-square ruleCheck" style="font-size: 12px"></i>
+                                                        }
+                                                        else
+                                                        {
+                                                            <i class="fas fa-square" style="color: rgba(204, 204, 204, 0.25)!important; font-size: 12px"></i>
+                                                        }
+                                                    }
+                                                </td>
+                                                <td style="text-align: center!important">
+                                                    @if (item.active == false)
+                                                    {
+                                                        <i class="fas fa-check-square" style="color: rgba(204, 204, 204, 0.50)!important; font-size: 12px"></i>
+                                                    }
+                                                    else
+                                                    {
+                                                        if (item.hychol)
+                                                        {
+                                                            <i class="fas fa-check-square ruleCheck" style="font-size: 12px"></i>
+                                                        }
+                                                        else
+                                                        {
+                                                            <i class="fas fa-square" style="color: rgba(204, 204, 204, 0.25)!important; font-size: 12px"></i>
+                                                        }
+                                                    }
+                                                </td>
+                                                <td class="text-center"><span class="@(item.active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.gtAge)</span></td>
+                                                <td class="text-center"><span class="@(item.active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.ltAge)</span></td>
+                                                <td class="row-information text-center"><span class="@(item.active == true ? "chk-yes fas fa-circle" : "chk-no fas fa-circle")"></span></td>
+                                                <td class="text-center">
+                                                    <input type="submit" class="link-button" value="View" onclick="location.href='@Url.Action("LifeDetails", "RiskRating", new { id = item.id })'" /> /
+                                                    <input type="submit" class="link-button" value="Edit" onclick="location.href='@Url.Action("LifeEdit", "RiskRating", new { id = item.id })'" />
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    }
+                                </table>
+                            </div>
+                        </div>
+                        <div role="tabpanel" class="tab-pane" id="risk-rating-monitor">
+                            <div class="row">
+                                <br />
+                                <!--------------------------------------------------------------------------- new/search -------------------------------------------------------------------------->
+                                <div class="col-md-12 row">
+                                    <div class="col-md-6">
+                                        <h4 class="subHeading">
+                                            Risk rating monitor overview
+                                            <a class="create-new" href="@Url.Action("Risk_Rating_Monitor_Create", "Administration", new { })" style="font-size: 14px">Create new <span><i class="fa fa-plus-circle" style="font-size: 12px"></i></span></a>
+                                        </h4>
+                                    </div>
+                                    <!--------------------------------------------------------------------------- jq-search -------------------------------------------------------------------------->
+                                    <div class="col-md-6">
+                                        <div class="input-wrapper-new-search">
+                                            <input type="text" class="form-control-new-search" id="rrm-search" placeholder="Search..." />
+                                        </div>
+                                    </div>
+                                </div>
+                                <!------------------------------------------------------------------------ medical-plan-table ---------------------------------------------------------------------->
+                                <table class="table settings-table sortable">
+                                    <thead>
+                                        <tr>
+                                            <th>@Html.DisplayNameFor(model => model.RiskRatingMonitors[0].Description) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="width: 10%">@Html.DisplayNameFor(model => model.RiskRatingMonitors[0].From) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="width: 10%">@Html.DisplayNameFor(model => model.RiskRatingMonitors[0].To) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="width: 8%; text-align: center !important">@Html.DisplayNameFor(model => model.RiskRatingMonitors[0].Percentage) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="width: 8%; text-align: center !important">@Html.DisplayNameFor(model => model.RiskRatingMonitors[0].Program) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="width: 8%; text-align: center !important">@Html.DisplayNameFor(model => model.RiskRatingMonitors[0].Active) </th>
+                                            <th style="text-align: center!important; width: 8%">Action</th>
+                                        </tr>
+                                    </thead>
+
+                                    @foreach (var item in Model.RiskRatingMonitors)
+                                    {
+                                        <tbody id="rrm-table">
+                                            <tr>
+                                                <td class="text-left"><span class="@(item.Active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.Description)</span></td>
+                                                <td class="text-left capitalize"><span class="@(item.Active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.From)</span></td>
+                                                <td class="text-left capitalize"><span class="@(item.Active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.To)</span></td>
+                                                <td class="text-center"><span class="@(item.Active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.Percentage)%</span></td>
+                                                <td class="text-center">
+                                                    @if (!String.IsNullOrEmpty(item.Program))
+                                                    {
+                                                        <span class="@(item.Active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.Program)</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="@(item.Active == true ? "" : "active-false")"><span class="default-badge">All programs</span></span>
+                                                    }
+                                                </td>
+                                                <td class="row-information text-center"><span class="@(item.Active == true ? "chk-yes fas fa-circle" : "chk-no fas fa-circle")"></span></td>
+                                                <td class="text-center">
+                                                    <input type="submit" class="link-button" value="View" onclick="location.href='@Url.Action("Risk_Rating_Monitor_Details", "Administration", new { id = item.Id })'" /> /
+                                                    <input type="submit" class="link-button" value="Edit" onclick="location.href='@Url.Action("Risk_Rating_Monitor_Edit", "Administration", new { id = item.Id })'" />
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    }
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixedBack">
+        <input value="Back" class="btn buttonRound_formBack " onclick="MainbackBtn();" style="width: 15%" />
+    </div>
+</div>
+
+<script src="js/jquery.tablesorter.min.js"></script>
+
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+    <script>
+            function MainbackBtn() {
+            window.location.href = '@Url.Action("Index", "Administration")';
+        }
+    </script>
+    <script type="text/javascript">
+        var $rows = $('#clinical-rules-search tr');
+        $('#crSearch').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $rows.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+
+        var $hrrows = $('#hiv-rules-table tr');
+        $('#hrSearch').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $hrrows.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+
+        var $mhrows = $('#mh-rules-table tr');
+        $('#mhSearch').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $mhrows.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+
+        var $rrrows = $('#rr-rules-table tr');
+        $('#rrSearch').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $rrrows.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+
+        var $lerows = $('#le-rules-table tr');
+        $('#leSearch').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $lerows.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+
+        var $rrmrows = $('#rrm-table tr');
+        $('#rrm-search').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $rrmrows.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+
+        var $hivcmrows = $('#hiv-cm-rules-table tr');
+        $('#hiv-cm-search').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $hivcmrows.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+    </script>
+    <script>
+        //create-hivrules
+        $(document).ready(function () {
+            if (localStorage.key(0) == "create_hivrules") {
+                $("#hiv_rules").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("create_hivrules");
+            }
+        });
+        //edit-hivrules
+        $(document).ready(function () {
+            if (localStorage.key(0) == "edit_hivrules") {
+                $("#hiv_rules").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("edit_hivrules");
+            }
+        });
+        //back-hivrules
+        $(document).ready(function () {
+            if (localStorage.key(0) == "back_mhrules") {
+                $("#hiv_rules").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("back_mhrules");
+            }
+        });
+        //create-mhrules
+        $(document).ready(function () {
+            if (localStorage.key(0) == "create_mhrules") {
+                $("#mh_rules").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("create_mhrules");
+            }
+        });
+        //edit-mhrules
+        $(document).ready(function () {
+            if (localStorage.key(0) == "edit_mhrules") {
+                $("#mh_rules").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("edit_mhrules");
+            }
+        });
+        //back-mhrules
+        $(document).ready(function () {
+            if (localStorage.key(0) == "back_mhrules") {
+                $("#mh_rules").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("back_mhrules");
+            }
+        });
+        //create-rrrules
+        $(document).ready(function () {
+            if (localStorage.key(0) == "create_rrrules") {
+                $("#risk_rating").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("create_rrrules");
+            }
+        });
+        //edit-rrrules
+        $(document).ready(function () {
+            if (localStorage.key(0) == "edit_rrrules") {
+                $("#risk_rating").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("edit_rrrules");
+            }
+        });
+        //back-rrrules
+        $(document).ready(function () {
+            if (localStorage.key(0) == "back_rrrules") {
+                $("#risk_rating").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("back_rrrules");
+            }
+        });
+        //create-lerules
+        $(document).ready(function () {
+            if (localStorage.key(0) == "create_lerules") {
+                $("#life_expectancy").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("create_lerules");
+            }
+        });
+        //edit-lerules
+        $(document).ready(function () {
+            if (localStorage.key(0) == "edit_lerules") {
+                $("#life_expectancy").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("edit_lerules");
+            }
+        });
+        //back-lerules
+        $(document).ready(function () {
+            if (localStorage.key(0) == "back_lerules") {
+                $("#life_expectancy").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("back_lerules");
+            }
+        });
+
+        //create-rrm
+        $(document).ready(function () {
+            if (localStorage.key(0) == "rrm-create") {
+                $("#risk_rating_monitor").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("rrm-create");
+            }
+        });
+        //edit-rrm
+        $(document).ready(function () {
+            if (localStorage.key(0) == "rrm-edit") {
+                $("#risk_rating_monitor").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("rrm-edit");
+            }
+        });
+        //back-rrm
+        $(document).ready(function () {
+            if (localStorage.key(0) == "rrm-back") {
+                $("#risk_rating_monitor").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("rrm-back");
+            }
+        });
+
+        //create-hiv-cm
+        $(document).ready(function () {
+            if (localStorage.key(0) == "create-hiv-cm") {
+                $("#hiv_cm_rules").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("create-hiv-cm");
+            }
+        });
+        //edit-hiv-cm
+        $(document).ready(function () {
+            if (localStorage.key(0) == "edit-hiv-cm") {
+                $("#hiv_cm_rules").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("edit-hiv-cm");
+            }
+        });
+        //back-hiv-cm
+        $(document).ready(function () {
+            if (localStorage.key(0) == "back-hiv-cm") {
+                $("#hiv_cm_rules").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("back-hiv-cm");
+            }
+        });
+
+
+
+    </script>
+}
+

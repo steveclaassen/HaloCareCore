@@ -1,0 +1,563 @@
+﻿@model HaloCareCore.Models.AuthLetterView
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@using HaloCareCore.Extensions
+
+@{
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+</style>
+
+<div class="authFullScreen_container">
+
+    <!--pageHeader-->
+    <nav id="global-nav" class="nav">
+        <div class="pull-left title">
+            <h1 class="site-title_patientProfile">
+                <span><i class="fas fa-check-circle"></i>&emsp; Authorisations</span>
+            </h1>
+        </div>
+        <div class="pull-right title">
+            <h1 class="site-title_userID pull-right">
+                <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+            </h1>
+            <h1 class="site-title_userID pull-right">
+                @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                {
+                    <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                }
+            </h1>
+            <h1 class="site-waffleIcon pull-right">
+                <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+            </h1>
+        </div>
+    </nav>
+
+    <!--breadCrumbs-->
+    <ul class="breadcrumbs_fullScreens">
+        <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+        <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+        <li><a href="@Url.Action("AuthoriseScript", "Scripts", new { DependentID = Model.dependantID })">Summary</a></li>
+        <li><a href="#">Authorisation letter</a></li>
+    </ul>
+
+    <!--navCollection-->
+    @if (User.Identity.IsAuthenticated)
+    {
+        if (User.HasRole("6. Global user") || (User.HasRole("5. Super user")))
+        {
+            <div class="navCollection_fullScreens">
+                <div class="buttonCollection">
+                    <div class="col-md-12">
+                        <div class="col-md-4"></div>
+                        <div class="col-md-4">
+                            <div class="col-md-2">
+                                <a href="@Url.Action("Index", "Home", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Home"><span style="font-size: 15px" class="sub_icon fas fa-home"></span></a>
+                            </div>
+                            <div class="col-md-2">
+                                <a href="@Url.Action("OpenAssignments", "Clinical", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Assignments"><span style="font-size: 15px" class="sub_icon fas fa-bell"></span></a>
+                            </div>
+                            <div class="col-md-2">
+                                <a href="@Url.Action("Search", "Member", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Patient"><span style="font-size: 15px" class="sub_icon fas fa-user-circle"></span></a>
+                            </div>
+                            <div class="col-md-2">
+                                <span style="font-size: 15px; background: -webkit-linear-gradient(#e80a89, #f15b2a);-webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow (10px 10px 1px rgba(34, 34, 34, 0.50))" title="Authorisations" class="sub_icon fas fa-check-circle"></span>
+                            </div>
+                            <div class="col-md-2">
+                                <a href="@Url.Action("searchManagement", "patientManagement", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Search"><span style="font-size: 15px" class="sub_icon fas fa-search"></span></a>
+                            </div>
+                            <div class="col-md-2">
+                                <a href="@Url.Action("Index", "Administration", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Settings"><span style="font-size: 15px" class="sub_icon fas fa-cog"></span></a>
+                            </div>
+                        </div>
+                        <div class="col-md-4"></div>
+
+                    </div>
+                </div>
+            </div>
+        }
+        else if (User.HasRole("4. Advisor"))
+        {
+            <div class="navCollection_fullScreens">
+                <div class="buttonCollection">
+                    <div class="col-md-12">
+                        <div class="col-md-4"></div>
+                        <div class="col-md-4">
+                            <div class="col-md-1"></div>
+                            <div class="col-md-2">
+                                <a href="@Url.Action("Index", "Home", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Home"><span style="font-size: 15px" class="sub_icon fas fa-home"></span></a>
+                            </div>
+                            <div class="col-md-2">
+                                <a href="@Url.Action("OpenAssignments", "Clinical", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Assignments"><span style="font-size: 15px" class="sub_icon fas fa-bell"></span></a>
+                            </div>
+                            <div class="col-md-2">
+                                <a href="@Url.Action("Search", "Member", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Patient"><span style="font-size: 15px" class="sub_icon fas fa-user-circle"></span></a>
+                            </div>
+                            <div class="col-md-2">
+                                <span style="font-size: 15px; background: -webkit-linear-gradient(#e80a89, #f15b2a);-webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow (10px 10px 1px rgba(34, 34, 34, 0.50))" title="Authorisations" class="sub_icon fas fa-check-circle"></span>
+                            </div>
+                            <div class="col-md-2">
+                                <a href="@Url.Action("searchManagement", "patientManagement", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Search"><span style="font-size: 15px" class="sub_icon fas fa-search"></span></a>
+                            </div>
+                            <div class="col-md-1"></div>
+                        </div>
+                        <div class="col-md-4"></div>
+
+                    </div>
+                </div>
+            </div>
+        }
+        else if (User.HasRole("1. Consultant") || (User.HasRole("2. Case manager") || (User.HasRole("3. Specialist"))))
+        {
+            <div class="navCollection_fullScreens">
+                <div class="buttonCollection">
+                    <div class="col-md-12">
+                        <div class="col-md-4"></div>
+                        <div class="col-md-4">
+                            <div class="col-md-2"></div>
+                            <div class="col-md-2">
+                                <a href="@Url.Action("Index", "Home", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Home"><span style="font-size: 15px" class="sub_icon fas fa-home"></span></a>
+                            </div>
+                            <div class="col-md-2">
+                                <a href="@Url.Action("OpenAssignments", "Clinical", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Assignments"><span style="font-size: 15px" class="sub_icon fas fa-bell"></span></a>
+                            </div>
+                            <div class="col-md-2">
+                                <a href="@Url.Action("Search", "Member", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Patient"><span style="font-size: 15px" class="sub_icon fas fa-user-circle"></span></a>
+                            </div>
+                            <div class="col-md-2">
+                                <a href="@Url.Action("searchManagement", "patientManagement", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Search"><span style="font-size: 15px" class="sub_icon fas fa-search"></span></a>
+                            </div>
+                            <div class="col-md-2"></div>
+                        </div>
+                        <div class="col-md-4"></div>
+
+                    </div>
+                </div>
+            </div>
+        }
+    }
+
+
+
+    <div style="margin-bottom: 2%"></div>
+    <br />
+    <div>
+
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(model => model.authletter.dependantID)
+            @Html.HiddenFor(model => model.scriptNo)
+
+            <div class="form-group">
+                <div class="col-md-12">
+                    <div class="col-md-8_auth">
+                        <br />
+                        <div class="row ">
+
+                            <div class="authLogo">
+                                <img src="~/Content/Images/memberProfile/topBar Icons/haloCare_logo.png" />
+                            </div>
+                            <div class="medicalAid_logo">
+                                <img src=@Url.Content(@Model.medaidpic) />
+                            </div>
+                            <br />
+                            <hr class="fancyruler" />
+                            <h4 class="tableHeading">Authorisation letter</h4>
+                            <table style="margin-left: 2%">
+                                <tr>
+                                    <td>&nbsp;</td>
+                                    <td>&nbsp;</td>
+                                    <td style="width: 150px">
+                                        <b>Date:</b>
+                                    </td>
+                                    <td style="width: 150px">
+                                        @DateTime.Now.ToShortDateString()
+                                    </td>
+                                </tr>
+                                <tr><td><br /></td></tr>
+                                <tr>
+                                    <td>&nbsp;</td>
+                                    <td>&nbsp;</td>
+                                    <td style="width: 150px">
+                                        <b>Member #:</b>
+                                    </td>
+                                    <td style="width: 150px">
+                                        @Html.DisplayFor(model => model.membershipno)
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td>&nbsp;</td>
+                                    <td>&nbsp;</td>
+                                    <td style="width: 150px">
+                                        <b>Surname:</b>
+                                    </td>
+                                    <td style="width: 150px">
+                                        @Html.DisplayFor(model => model.surname)
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td>&nbsp;</td>
+                                    <td>&nbsp;</td>
+                                    <td style="width: 150px">
+                                        <b>Name:</b>
+                                    </td>
+                                    <td style="width: 150px">
+                                        @Html.DisplayFor(model => model.name)
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td>
+                                        <b>Address</b>
+                                    </td>
+                                    <td>&nbsp;</td>
+                                    <td style="width: 150px">
+                                        <b>Mobile:</b>
+                                    </td>
+                                    <td style="width: 150px">
+                                        @Html.DisplayFor(model => model.contact.cell)
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td>@Html.DisplayFor(model => model.address.line1)</td>
+                                    <td>&nbsp;</td>
+                                    <td style="width: 150px">
+                                        <b>Doctor:</b>
+                                    </td>
+                                    <td style="width: 150px">
+                                        @Html.DisplayFor(model => model.drName)
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td>@Html.DisplayFor(model => model.address.line2)</td>
+                                    <td>&nbsp;</td>
+                                    <td style="width: 150px">
+                                        <b>Dependant:</b>
+                                    </td>
+                                    <td style="width: 150px">
+                                        @Html.DisplayFor(model => model.dependentCode)
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td>@Html.DisplayFor(model => model.address.line3)</td>
+                                    <td>&nbsp;</td>
+                                    <td style="width: 150px">
+                                        <b>Date of Birth:</b>
+                                    </td>
+                                    <td style="width: 150px">
+                                        @Html.DisplayFor(model => model.dateOfBirth)
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td>&nbsp;</td>
+                                    <td>&nbsp;</td>
+                                    <td style="width: 150px">
+                                        <b>Option:</b>
+                                    </td>
+                                    <td style="width: 150px">
+                                        @Html.DisplayFor(model => model.medoption)
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td>&nbsp;</td>
+                                    <td>&nbsp;</td>
+                                    <td style="width: 150px">
+                                        <b>Medical scheme:</b>
+                                    </td>
+                                    <td style="width: 150px">
+                                        @Html.DisplayFor(model => model.schemeName)
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>&nbsp;</td>
+                                    <td>&nbsp;</td>
+                                    <td>&nbsp;</td>
+                                    <td style="width: 150px"></td>
+                                    <td style="width: 150px"></td>
+                                </tr>
+
+                                <tr><td colspan="4">&nbsp;</td></tr>
+
+                                <tr><td colspan="2">Dear @Html.DisplayFor(model => model.name) @Html.DisplayFor(model => model.surname)</td></tr>
+                                <tr><td colspan="4">&nbsp;</td></tr>
+                                <tr>
+                                    <td colspan="4">
+                                        Your prescription has been received, reviewed and authorised according to clinical guidelines and current medical scheme rules.
+                                    </td>
+                                </tr>
+                                <tr><td colspan="4">&nbsp;</td></tr>
+                                <tr>
+                                    <td colspan="4">
+                                        Please ensure that you take your medication exactly as prescribed by your doctor. Six monthly follow-up pathology test results
+                                        are recommended to monitor your medical condition on an ongoing basis. Remember to notify HaloCare of any change in medication script or dose.
+                                    </td>
+                                </tr>
+                                <tr><td colspan="4"><br></td></tr>
+                                <tr><th colspan="4" class="tableHeading">Authorisation Details</th></tr>
+                            </table>
+                            <br />
+
+                            <table class="indexTable_products">
+                                <tr class="header" style="text-indent: 5px">
+                                    <th style="text-align: center; width: 10%">NAPPI/Tariff code</th>
+                                    <th style="text-align: center;">Product</th>
+                                    <th style="text-align: center;">Qty</th>
+                                    <th style="text-align: left">Medicaction instructions</th>
+                                    <th style="text-align: center;">Item from date</th>
+                                    <th style="text-align: center;">Item to date</th>
+                                    <th style="text-align: center;">Comment</th>
+                                </tr>
+                                @foreach (var item in Model.scriptItems)
+                                {
+                                    <tr style="text-indent: 5px">
+                                        <td style="text-align: center">@item.nappiCode</td>
+                                        <td style="text-align: left">@item.productName</td>
+                                        <td style="text-align: center">@item.quantity</td>
+                                        <td style="text-align: left">@item.directions</td>
+                                        <td style="text-align: center">@item.fromDate.ToShortDateString()</td>
+                                        <td style="text-align: center">@item.toDate.Value.ToShortDateString()</td>
+                                        <td></td>
+                                    </tr>
+                                }
+                            </table>
+                            <br />
+
+                            <table style="margin-left: 2%">
+                                <tr>
+                                    <td>
+                                        <b>Please note:</b>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        All medication authorisations are subject to clinical review and approval. Medication claims payment is subject to
+                                        medical scheme rules and medicine formulary.
+                                    </td>
+                                </tr>
+                                <tr><td>&nbsp;</td></tr>
+                                <tr>
+                                    <td>
+                                        <b>Renewal or change of medication authorisation.</b>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        Prescriptions and relevant pathology results to be forwarded to documents@halocare.co.za or faxed to 086 570 2523.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        @Html.Raw(@"Weight must be noted on prescription for all members up to 13 years of age or < 40kg.")
+                                    </td>
+                                </tr>
+                                <tr><td>&nbsp;</td></tr>
+                                <tr><td><b>Disclaimer:</b></td></tr>
+                                <tr>
+                                    <td>
+                                        1.This authorisation is based on clinical guidelines and scheme rules. Authorisation is not a guarantee of payment.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        2.The payment of claims is subject to the validity of the membership, the Scheme rules and the available benefits as on the date when the service was rendered.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        3.The authorisation is only valid for the dependant listed in this authorisation schedule and is granted based on the information available at the time.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        4.The authorisation is only valid for the time period indicated and a new prescription is required to renew the authorisation.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        5.Any changes to the approved items must be communicated to the Halocare Managed Care and failure to do so may result in non-payment of medication.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        6.In the event of an option change, it remains the responsibility of the member to confirm how the option change will affect the authorisation.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        7.Medication is restricted to formularies (medicine lists), clinical entry criteria and disease management protocols where applicable.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        8.Medication requires a prescription from a person legally entitled to prescribe as well as the relevant ICD 10 diagnosis code, visible and valid date and signature of the prescriber, before it will be considered for benefits.
+                                    </td>
+                                </tr>
+                                <tr><td>&nbsp;</td></tr>
+                                <tr>
+                                    <td>
+                                        Kind Regards
+                                    </td>
+                                </tr>
+                                <tr><td>Halocare</td></tr>
+
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+                <br />
+                <!--Action-->
+                <div class="col-md-12">
+                    <div class="row fullScreen_container" style="margin-top: 1%!important">
+
+                        <h5 style="text-align: center; font-weight: bold" class="tableHeading">Action required</h5>
+                        <hr class="reportRuler">
+                        <br />
+                        <br />
+                        <div class="col-md-12 form-group" style="margin-left: 38%">
+                            <div class="col-md-2">
+                                @Html.RadioButtonFor(x => x.authletter.sentVia, "Email") &nbsp; Email
+                            </div>
+                            <div class="col-md-2">
+                                @Html.RadioButtonFor(x => x.authletter.sentVia, "Save") &nbsp; Save
+                            </div>
+                            <div class="col-md-8">&nbsp;</div>
+                        </div>
+
+                        <br />
+                        <br />
+                        <br />
+
+
+                        <div id="emailOptions" class="col-md-12 form-group">
+                            <div class="col-md-6" style="margin-left: 45%; margin-bottom: 2%">
+                                <b style="color: #003366">Email options</b>
+                            </div>
+
+                            <br />
+                            <br />
+
+                            <div class="row col-md-12" style="margin-left: 10%;">
+                                <div class="row col-md-4">
+                                    <div class="checkbox-inline" style="margin-left: 12%">@Html.CheckBox("Patient") Patient</div>
+                                    <div>@Html.TextBoxFor(x => x.contact.email, htmlAttributes: new { @class = "infoBox_Auth" })</div>
+                                </div>
+                                <div class="row col-md-4">
+                                    <div class="checkbox-inline" style="margin-left: 12%">@Html.CheckBox("Doctor") Doctor</div>
+                                    <div>@Html.TextBoxFor(x => x.drEmail, htmlAttributes: new { @class = "infoBox_Auth" })</div>
+                                </div>
+                                <div class="row col-md-4">
+                                    <div class="checkbox-inline" style="margin-left: 12%">@Html.CheckBox("DispensingProvider") Provider</div>
+                                    <div>@Html.TextBoxFor(x => x.dipensingEmail, htmlAttributes: new { @class = "infoBox_Auth" })</div>
+
+
+
+
+                                </div>
+                            </div>
+
+                            <br />
+                            <br />
+                            <br />
+                            <br />
+                            <br />
+
+
+                            <div class="col-md-6" style="margin-left: 44%; margin-bottom: 1%">
+                                <b style="color: #003366">Attachment options</b>
+                            </div>
+                            <div class="col-md-12">
+                                <table class="table indexTable_products">
+                                    <tr>
+                                        <th style="width: 85px">
+                                            Include <i class="fa fa-fw fa-sort"></i>
+                                        </th>
+                                        <th>
+                                            @Html.DisplayNameFor(model => model.attachments[0].Link) <i class="fa fa-fw fa-sort"></i>
+                                        </th>
+                                        <th>
+                                            @Html.DisplayNameFor(model => model.attachments[0].attachmentType) <i class="fa fa-fw fa-sort"></i>
+                                        </th>
+                                    </tr>
+                                    @if (Model.attachments.Count() == 0)
+                                    {
+                                        <tr><td colspan="3" style="text-align: center!important">No records available</td></tr>
+                                    }
+                                    else
+                                    {
+                                        for (int i = 0; i < Model.attachments.Count(); i++)
+                                        {
+                                            <tr>
+                                                <td class="authCheck">
+                                                    @Html.CheckBox(Model.attachments[i].attachmentID.ToString())
+                                                    @Html.HiddenFor(modelItem => Model.attachments[i].attachmentID)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => Model.attachments[i].Link)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => Model.attachments[i].attachmentType)
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+
+                                </table>
+                            </div>
+
+                        </div>
+                        <br />
+                        <br />
+                        <br />
+                        <br />
+                        <div class="form-group">
+                            <div class="actionButton" style="margin-left: 40%">
+                                <input value="Back" class="btn buttonRound_formBack go_back" style="width: 15%!important" />
+                                <input type="submit" value="Process" class="btn buttonRound_formCreate" style="width: 15%" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        }
+    </div>
+</div>
+
+
+@section Scripts {
+    <script src="~/bundles/jqueryval"></script>
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+    <script src="~/Scripts/select2.min.js"></script>
+    <script>
+
+        $('#authletter_sentVia').change(function () {
+            var c = this.checked ? $('#emailOptions').show() : $('#emailOptions').hide();
+        });
+
+        $(document).ready(function () {
+            $('#authletter_sentVia').change(function () {
+                if (this.checked)
+                    $('#emailOptions').fadeIn('slow');
+                else
+                    $('#emailOptions').fadeOut('slow');
+
+            });
+        });
+
+    </script>
+
+}

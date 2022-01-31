@@ -1,0 +1,344 @@
+﻿@model HaloCareCore.Models.GeneralContactViewModel
+
+@{
+    Layout = "~/Views/Shared/_LayoutModal.cshtml";
+}
+
+<comment>
+    <!--
+        21 May 2019 -- HCare-595(Allow a user to click on a 'Edit' link to change contact details in the assignment pop-up)
+        Added a popup Modal to the Edit Contact details task that will open an edit popup inside the task which will update and then close the task.
+    -->
+</comment>
+
+<style>
+    #editModal {
+        position: relative;
+    }
+
+    .modal-dialog {
+        position: fixed;
+        width: 100%;
+        margin: 0;
+        padding: 0px;
+    }
+</style>
+
+
+<div class="row assignmentModal_Call">
+    <div>
+        <div class="modal-header modal-header-primary">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true" id="assignmentModalClose">×</button>
+            <h2 class="modalHeading">Contact Details</h2>
+        </div>
+        <br />
+        @using (Ajax.BeginForm("_Call", "Clinical", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "assignmentModal_Status", OnSuccess = "hideModal(); alert('Saved');" }))
+        {
+            @Html.Hidden("taskId", (object)ViewBag.task)
+            @Html.Hidden("id", (object)ViewBag.id)
+            @Html.Hidden("pro", (object)ViewBag.pro)
+            if (Model != null)
+            {
+                <dl class="dl-horizontal modalContent">
+                    <dt>
+                        @Html.DisplayName("Member name")
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.PatientName)
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayName("Member #")
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.membershipNo)
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayName("ID #")
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.IdNumber)
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayName("Patient mobile")
+                    </dt>
+
+                    <dd>
+                        @if (Model.cell != null || Model.cell == "")
+                        {
+                            @Html.DisplayFor(model => model.cell)
+                        }
+                        else
+                        {
+                            <p>No records</p>
+                        }
+                    </dd>
+                    <br />
+                    <dt>
+                        @Html.DisplayName("Contact name")
+                    </dt>
+                    <dd>
+                        @if (Model.contactName != null || Model.contactName == "")
+                        {
+                            @Html.DisplayFor(model => model.contactName)
+                        }
+                        else
+                        {
+                            <p>No records</p>
+                        }
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayName("Contact telephone")
+                    </dt>
+
+                    <dd>
+                        @if (Model.contactNumber != null || Model.contactNumber == "")
+                        {
+                            @Html.DisplayFor(model => model.contactNumber)
+                        }
+                        else
+                        {
+                            <p>No records</p>
+                        }
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayName("Email")
+                    </dt>
+
+                    <dd>
+                        @if (Model.email != null || Model.email == "")
+                        {
+                            @Html.DisplayFor(model => model.email)
+                        }
+                        else
+                        {
+                            <p>No records</p>
+                        }
+                    </dd>
+                    <br />
+                    <div class="form-group">
+                        <div class="actionButton" style="margin-left: 43%;margin-bottom: 1%">
+                            <div class="btn buttonRound_formBack" style="width: 20%!important" title="Edit Contact" id="btn1">Edit </div>
+                            @*<div class="btn buttonRound_formBack" style="width: 20%!important" onclick="location.href='@Url.Action("EditContact", "Member", new { id = Model.ContactID })'" title="Edit Contact">Edit </div>*@
+
+                        </div>
+                    </div>
+
+                    <hr class="modalRuler">
+                    <br />
+
+                    <dt>
+                        @Html.DisplayName("Doctor name")
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.drContactName)
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayName("Practice #")
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.drPracticeNo)
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayName("Doctor telephone")
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.drContactNumber)
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayName("Doctor mobile")
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.drcell)
+                    </dd>
+
+
+                </dl>
+            }
+            <br />
+
+            <div class="form-group">
+                <div class="actionButton" style="margin-left: 43%;">
+                    <input type="submit" value="Close" id="createpath" class="btn buttonRound_close" style="width: 20%!important" />
+                </div>
+            </div>
+        }
+    </div>
+
+</div>
+
+<!-- Contact details edit Modal -->
+<div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="row assignmentModal_contactEdit">
+            @using (Html.BeginForm("ContactDetails_Edit", "Member", FormMethod.Post, new { enctype = "multipart/form-data", OnSuccess = "hideModal(); alert('Saved');" }))
+            {
+                @Html.Hidden("taskId", (object)ViewBag.task)
+                @Html.Hidden("id", (object)ViewBag.id)
+                @Html.AntiForgeryToken()
+
+                <div class="modal-header modal-header-primary">
+                    <button type="button" class="close" aria-hidden="true" id="editModal">×</button>
+                    <h2 class="modalHeading">Edit contact details</h2>
+                </div>
+                <br />
+
+                <div class="form-horizontal">
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                    @Html.HiddenFor(model => model.ContactID)
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.contactName, htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-10">
+                            @Html.EditorFor(model => model.contactName, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                            @Html.ValidationMessageFor(model => model.contactName, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.email, htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-10">
+                            @Html.EditorFor(model => model.email, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                            @Html.ValidationMessageFor(model => model.email, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.cell, htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-10">
+                            @Html.EditorFor(model => model.cell, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                            @Html.ValidationMessageFor(model => model.cell, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.landLine, htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-10">
+                            @Html.EditorFor(model => model.landLine, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                            @Html.ValidationMessageFor(model => model.landLine, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.workNo, htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-10">
+                            @Html.EditorFor(model => model.workNo, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                            @Html.ValidationMessageFor(model => model.workNo, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.fax, htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-10">
+                            @Html.EditorFor(model => model.fax, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                            @Html.ValidationMessageFor(model => model.fax, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <br />
+                </div>
+                <div class="" style="text-align: center!important">
+                    <input type="submit" value="Save" class="btn questionnaireButton" /><br />
+                    <input value="back" class="btn buttonRound_formBack" style="width: 10%!important" id="backButton" />
+                </div>
+                <br />
+
+            }
+
+        </div>
+    </div>
+</div>
+
+
+
+@section Scripts {
+    <script src="~/bundles/jqueryval"></script>
+
+    <script src="https://code.jquery.com/ui/1.11.3/jquery-ui.min.js"></script>
+    <script type="text/javascript">
+        $('.modal-content').resizable({
+            //alsoResize: ".modal-dialog",
+            minHeight: 300,
+            minWidth: 300
+        });
+        $('.modal-dialog').draggable();
+
+        $('#editModal').on('show.bs.modal', function () {
+            $(this).find('.modal-body').css({
+                'max-height': '100%'
+            });
+        });
+
+        $('#backButton').on('click', function (e) {
+            e.preventDefault();
+            $('#editModal').modal('hide');
+        })
+
+        $('.close').on('click', function (e) {
+            e.preventDefault();
+            $('#editModal').modal('hide');
+        })
+
+    </script>
+
+    <script>
+        $(document).ready(function () {
+            var dateNewFormat, onlyDate, today = new Date();
+
+            dateNewFormat = today.getFullYear() + '-';
+            if (today.getMonth().length == 2) {
+
+                dateNewFormat += (today.getMonth() + 1);
+            }
+            else {
+                dateNewFormat += '0' + (today.getMonth() + 1);
+            }
+
+            onlyDate = today.getDate();
+            if (onlyDate.toString().length == 2) {
+
+                dateNewFormat += "-" + onlyDate;
+            }
+            else {
+                dateNewFormat += '-0' + onlyDate;
+            }
+
+            $('#createDate').val(dateNewFormat);
+            $('#modifiedDate').val(dateNewFormat);
+
+
+        });
+
+        $('#btn1').click(function () {
+            // reset modal if it isn't visible
+            if (!($('.modal.in').length)) {
+                $('.modal-dialog').css({
+                    top: 0,
+                    left: 0
+                });
+            }
+            $('#editModal').modal({
+                backdrop: true,
+                show: true
+            });
+
+            $('.modal-dialog').draggable({
+                handle: ".modal-header"
+            });
+        });
+
+    </script>
+}

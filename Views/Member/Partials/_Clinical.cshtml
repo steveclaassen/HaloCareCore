@@ -1,0 +1,1784 @@
+﻿@model HaloCareCore.Models.ClinicalViewModel
+
+<style>
+    .container {
+        max-width: 1600px !important;
+        width: 1400px !important;
+        margin: auto;
+        display: block;
+        padding: 0;
+    }
+
+    * {
+        color: #003366;
+    }
+
+    .table tr th {
+        color: black !important;
+        font-weight: 600 !important;
+        border-top: none !important;
+        font-size: 10px !important;
+    }
+
+    .table tr td {
+        font-size: 10px !important;
+    }
+
+    .table th:hover {
+        cursor: pointer;
+    }
+
+    .fullWidth_table {
+        max-width: 1250px !important;
+        width: 1250px !important;
+        margin: auto;
+        margin-bottom: 5% !important;
+        font-size: 94% !important;
+    }
+
+    .pathologyTable {
+        max-width: 1400px !important;
+        width: 1320px !important;
+        margin: auto;
+        margin-bottom: 5% !important;
+        font-size: 12px !important;
+        margin-left: -2.8%;
+    }
+
+    .regimeTable {
+        max-width: 1400px !important;
+        width: 1320px !important;
+        margin: auto;
+        margin-bottom: 5% !important;
+        font-size: 12px !important;
+        margin-left: -4% !important;
+    }
+
+    .clinicalTable {
+        max-width: 1400px !important;
+        width: 1200px !important;
+        margin: auto;
+        margin-bottom: 5% !important;
+        font-size: 12px !important;
+        margin-left: 0% !important;
+    }
+
+
+
+    .regimeTable a {
+        color: black !important;
+    }
+
+    .checkQuest input {
+        margin-left: 8% !important;
+    }
+
+    .addScriptBtn a {
+        color: #003366 !important;
+    }
+
+        .addScriptBtn a:hover {
+            color: white !important;
+        }
+
+    .modal-backdrop {
+        z-index: 3 !important;
+    }
+
+    .clinicalSummary,
+    .clinicalSummary span {
+        font-family: 'Century Gothic';
+        font-size: 12px;
+    }
+
+    .patientHistory_Table {
+        max-width: 1600px !important;
+        width: 1300px !important;
+        margin: auto;
+        margin-bottom: 5% !important;
+        font-size: 12px !important;
+        margin-left: 0% !important;
+    }
+
+</style>
+
+
+<!--pageHeader-->
+<div class="container zero-padding">
+    <div class="topBar_reports img-responsive">
+        <h2>Patient Clinical</h2>
+        <img src="~/Content/Images/memberProfile/clinicalIcon_member.png" style="width: 3.5%; margin-top: -0.5%;" />
+        <img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" style="width: 8%; float: right; margin-right: 100px; margin-top: 3px" />
+    </div>
+</div>
+
+
+<!--NEW - Tabs_Patient Clinical-->
+<!--NEW - Tabs_Patient Clinical-->
+<!--Patient Clinical -->
+
+<div class="row" style="margin-top: 0%">
+    <div class="form-horizontal">
+        <div class="col-md-12 col-sm-12 ">
+            <div id="tabs4">
+
+                <ul class="nav navbar-nav tablinksMember">
+                    <li><a href="#clin">Clinical</a></li>
+                    <li><a href="#tabs-2">Pathology</a></li>
+                    <li><a href="#tabs-3">Script</a></li>
+                    <li><a href="#tabs-4">Patient History</a></li>
+                    <li><a href="#tabs-5">Script History</a></li>
+                </ul>
+
+                <!--Pathology Details-->
+                <div class="row" style="margin-top:0px;">&nbsp;</div>
+                <section id="clin">
+                    <div class="row tablinks">
+                        <div class="form-horizontal">
+                            <h4 style="color: #003366; margin-top: 0%; margin-left: 2%; margin-bottom: 0.5%!important; font-size: 22px; font-family: 'Century Gothic'; font-weight: 300; font-style: normal;">Clinical Summary</h4>
+                            <hr class="fancyruler" />
+                            <div class="row">
+
+                                <!--Pathology Details-->
+
+                                <div class="row tablinks">
+                                    <h4 style="color: #003366; margin-top: 1%; margin-left: 3%; margin-bottom: 0.5%!important; font-size: 16px; font-family: 'Century Gothic'; font-weight: 300; font-style: normal;">Pathology Details</h4>
+                                    <hr class="fancyruler" />
+                                    <br />
+                                    <div class="clinicalSummary">
+                                        <div class="row col-md-6" style="margin-left: 1%; margin-right: -2%; margin-bottom: 2%">
+                                            <div class="col-md-5">
+                                                <p1>Next Pathology Due Date: </p1><br /><br />
+                                                <p1>Last Pathology Date: </p1><br /><br />
+                                                <p1>Pathology Due: </p1><br /><br />
+                                                <p1>Pathology Outstanding for: </p1>
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <p2 style="color: darkred; font-weight:bold">@Html.DisplayFor(model => model.nextPathologyDate)</p2><br /><br />
+                                                <p2 style="color: darkred; font-weight:bold">@Html.DisplayFor(model => model.lastPathologyDate)</p2><br /><br />
+                                                <p2 style="color: darkred; font-weight:bold">@Html.DisplayFor(model => model.isPathologyDue)</p2><br />
+                                                <p2 style="color: darkred; font-weight:bold">@Html.DisplayFor(model => model.pathologyBehind) days</p2>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <hr class="fancyruler" />
+                                    <!--rulesStart-->
+                                    <div class="col-md-12">
+                                        <div class="blockbck">
+                                            <div class="blockbcksubrulz">
+                                                <table class="table" style="color: darkred; margin-left: 0%">
+                                                    <tr>
+                                                        <div class="col-md-4">
+                                                            <th style="column-width: 120px">
+                                                                @Html.DisplayNameFor(model => model.rulesBroken[0].effectiveDate)
+                                                            </th>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <th>
+                                                                @Html.DisplayNameFor(model => model.rulesBroken[0].ruleName)
+                                                            </th>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <th>
+                                                                @Html.DisplayNameFor(model => model.rulesBroken[0].messages)
+                                                            </th>
+                                                        </div>
+
+
+                                                    </tr>
+
+                                                    @foreach (var item in Model.rulesBroken)
+                                                    {
+                                                        <tr>
+                                                            <div class="col-md-4">
+                                                                <td>
+                                                                    @Html.DisplayFor(modelItem => item.effectiveDate)
+                                                                </td>
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <td>
+                                                                    @Html.DisplayFor(modelItem => item.ruleName)
+                                                                </td>
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <td>
+                                                                    @foreach (var message in item.messages)
+                                                                    {
+                                                                        @Html.DisplayFor(messageItem => message.instruction)<br />
+                                                                    }
+                                                                </td>
+                                                            </div>
+                                                        </tr>
+                                                    }
+
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!--rulesEnd-->
+                                    <!--Collapse-->
+                                    <div class="row col-md-12">
+                                        <div style="margin-left: 45%">
+                                            <a data-toggle="collapse" href="#clinicalCollapse" aria-expanded="false" input type="button" class="btn buttonRound_scriptAdd" style="width: 20%;">Show Full Details</a>
+                                        </div>
+                                        <div class="collapse" id="clinicalCollapse">
+                                            <br />
+                                            <div class="contentBlock">
+                                                <div class="row" style="text-align:center">
+
+                                                    <h4 style="color: #003366; margin-top: 1%; margin-left: 2%; margin-bottom: 1%!important; font-size: 18px; font-family: 'Century Gothic'; font-weight: 300; font-style: normal;">Patient Treatment Details</h4>
+                                                    <hr class="fancyruler">
+                                                    <h4 style="color: #003366; margin-top: 0%; margin-left: 2%; margin-bottom: 0%!important; font-size: 16px; font-family: 'Century Gothic'; font-weight: 300; font-style: normal;">Last Order Details</h4>
+                                                    <hr class="fancyruler">
+                                                </div>
+                                                <br />
+
+                                                <!--Full Details / Last Order Details-->
+
+                                                <div class="row col-md-12">
+                                                    <div class="col-md-3">
+                                                        Has Claimed Before
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        unavailable
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        Date Due for Reorder
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        unavailable
+                                                    </div>
+                                                </div>
+
+                                                <div class="row col-md-12">
+                                                    <div class="col-md-3">
+                                                        Last Claim Date
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        unavailable
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        Has Open Assignment
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        yes/no
+                                                    </div>
+                                                </div>
+
+                                                <div class="row col-md-12">
+                                                    <div class="col-md-3">
+                                                        Due for Reorder
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        unavailable
+                                                    </div>
+                                                </div>
+                                                <div class="row"></div>
+                                                <br />
+                                                <hr class="fancyruler">
+
+                                                <!--Full Details / Script Details-->
+                                                <div style="text-align:center">
+                                                    <h4 style="color: #003366; margin-top: 0%; margin-left: 2%; margin-bottom: 0%!important; font-size: 16px; font-family: 'Century Gothic'; font-weight: 300; font-style: normal;">Script Details</h4>
+                                                    <hr class="fancyruler">
+                                                </div>
+                                                <br />
+
+                                                <div class="row col-md-12">
+                                                    <div class="col-md-3">
+                                                        Patient has a script
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        @Html.DisplayFor(model => model.hasScript)
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        Patient script outstanding
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        @Html.DisplayFor(model => model.requiresNewScript)
+                                                    </div>
+                                                </div>
+
+                                                <div class="row col-md-12">
+                                                    <div class="col-md-3">
+                                                        Patient last script effective date
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        @Html.DisplayFor(model => model.scriptEffectiveDate)
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        Patient effective script date time created
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        @Html.DisplayFor(model => model.scriptEffectiveDate)
+                                                    </div>
+                                                </div>
+
+                                                <div class="row col-md-12">
+                                                    <div class="col-md-3">
+                                                        Patient effective script repeats
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        @Html.DisplayFor(model => model.scriptRepeats)
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        Patient effective script created by
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        @Html.DisplayFor(model => model.scriptCreatedBy)
+                                                    </div>
+                                                </div>
+
+                                                <div class="row col-md-12">
+                                                    <div class="col-md-3">
+                                                        Number of orders on current script
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        unavailable
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        Script extension allowed
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        unavailable
+                                                    </div>
+                                                </div>
+
+                                                <div class="row col-md-12">
+                                                    <div class="col-md-3">
+                                                        Patient estimated expiry date
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        @Html.DisplayFor(model => model.scriptExpiry)
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        Script warning SMS
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        yes/no
+                                                    </div>
+                                                </div>
+
+                                                <div class="row col-md-12">
+                                                    <div class="col-md-3 ">
+                                                        Patient estimated expiry date
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        @Html.DisplayFor(model => model.pathologyBehind)
+                                                    </div>
+                                                    <div class="col-md-3 ">
+                                                        Script overdue SMS
+                                                    </div>
+                                                    <div class="col-md-3 ">
+                                                        yes/no
+                                                    </div>
+                                                </div>
+                                                <div class="row"></div>
+                                                <br />
+                                                <hr class="fancyruler">
+
+
+                                                <!--Full Details / Pathology Details-->
+                                                <div class="row" style="text-align:center">
+                                                    <h4 style="color: #003366; margin-top: 0%; margin-left: 2%; margin-bottom: 0%!important; font-size: 16px; font-family: 'Century Gothic'; font-weight: 300; font-style: normal;">Pathology Details</h4>
+                                                    <hr class="fancyruler">
+                                                </div>
+
+                                                <br />
+                                                <div class="row col-md-12">
+                                                    <div class="col-md-3">
+                                                        Patient Has A Pathology
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        @Html.DisplayFor(model => model.hasPathology)
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        Patient pathology due date
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        @Html.DisplayFor(model => model.nextPathologyDate)
+                                                    </div>
+                                                </div>
+
+                                                <div class="row col-md-12">
+                                                    <div class="col-md-3">
+                                                        Patient Last Pathology Effective Date
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        @Html.DisplayFor(model => model.lastPathologyDate)
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        Patient requires warning SMS
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        unavailable
+                                                    </div>
+                                                </div>
+
+                                                <div class="row col-md-12">
+                                                    <div class="col-md-3">
+                                                        Patient Requires Pathology
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        @Html.DisplayFor(model => model.pathologyBehind)
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        Patient requires SMS
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        unavailable
+                                                    </div>
+
+                                                </div>
+                                                <br />
+                                                <br />
+                                                <br />
+                                                <br />
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <br />
+                </section>
+                <!--Patient Pathology-->
+                <section id="tabs-2">
+
+                    <div class="row tablinks">
+                        <div class="form-horizontal">
+
+                            <div class="col-md-6">
+                                <h4 style="color: #003366; margin-top: 0%; margin-left: 2%; margin-bottom: 0.5%!important; font-size: 20px; font-family: 'Century Gothic'; font-weight: 300; font-style: normal;">Patient Pathology</h4>
+                            </div>
+                            <!--addNew-->
+                            <div class="col-md-6">
+                                <div class="insertPathology" style="margin-left: 85%">
+                                    <input type="button" class="btn buttonRound_scriptAdd" value="Insert Pathology" onclick="location.href='@Url.Action("CreatePathology", "Clinical", new { DependentID = Model.DependentID}, null)'" />
+                                </div>
+                            </div>
+                            <!--addNew-->
+
+                            <hr class="fancyruler">
+                            <div class="row">
+
+                                <div class="row">
+                                    <table class="table pathologyTable">
+                                        <tr>
+                                            <th>
+                                                @Html.DisplayName("Effective")
+                                            </th>
+                                            <th>
+                                                @Html.DisplayName("CD4#")
+                                            </th>
+                                            <th>
+                                                @Html.DisplayName("CD4%")
+                                            </th>
+                                            <th>
+                                                @Html.DisplayName("V/Load")
+                                            </th>
+                                            <th>
+                                                @Html.DisplayName("hB")
+                                            </th>
+                                            <th>
+                                                @Html.DisplayNameFor(model => model.Pathologies[0].urea)
+                                            </th>
+                                            <th>
+                                                @Html.DisplayName("Crea")
+                                            </th>
+                                            <th>
+                                                @Html.DisplayName("HIV El")
+                                            </th>
+                                            <th>
+                                                @Html.DisplayName("N/GTT")
+                                            </th>
+                                            <th>
+                                                @Html.DisplayName("Ab/GTT")
+                                            </th>
+                                            <th>
+                                                @Html.DisplayNameFor(model => model.Pathologies[0].bilirubin)
+                                            </th>
+                                            <th>
+                                                @Html.DisplayNameFor(model => model.Pathologies[0].alt)
+                                            </th>
+                                            <th>
+                                                @Html.DisplayNameFor(model => model.Pathologies[0].eGfr)
+                                            </th>
+                                            <th>
+                                                @Html.DisplayName("BP")
+                                            </th>
+                                            <th>
+                                                @Html.DisplayName("MauC")
+                                            </th>
+                                            <th>
+                                                @Html.DisplayNameFor(model => model.Pathologies[0].hba1c)
+                                            </th>
+                                            <th>
+                                                @Html.DisplayName("Created")
+                                            </th>
+                                            <th>
+                                                @Html.DisplayNameFor(model => model.Pathologies[0].labName)
+                                            </th>
+                                            <th>
+                                                @Html.DisplayNameFor(model => model.Pathologies[0].labReferenceNo)
+                                            </th>
+                                            <th style="text-align: center">
+                                                Action
+                                            </th>
+                                        </tr>
+
+                                        @foreach (var item in Model.Pathologies)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.effectiveDate)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.CD4Count, "0.00")
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.CD4Percentage)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.viralLoad)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.haemoglobin)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.urea)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.creatinine)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.hivEliza)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.normGtt)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.abnGtt)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.bilirubin)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.alt)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.eGfr)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.systolicBP)/@Html.DisplayFor(modelItem => item.diastolicBP)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.mauCreatRatio)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.hba1c)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.createdBy)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.labName)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.labReferenceNo)
+                                                </td>
+                                                <td class="actionHover">
+                                                    @Html.ActionLink("Edit", "EditPathology", new { id = item.pathologyID }) |
+                                                    @Html.ActionLink("Details", "PathologyDetails", new { id = item.pathologyID })
+                                                </td>
+                                            </tr>
+                                        }
+
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        </div>
+                    <br />
+                </section>
+                <!--Patient Clinical / Current Script-->
+                <section id="tabs-3">
+
+                    <div class="row tablinks">
+                        <div class="form-horizontal">
+                            <h4 style="color: #003366; margin-top: 0%; margin-left: 2%; margin-bottom: 0.5%!important; font-size: 20px; font-family: 'Century Gothic'; font-weight: 300; font-style: normal;">Current Script</h4>
+                            <hr class="fancyruler" />
+
+                            <div class="row">
+
+                                <!--<div class="row contentBlock_scriptReference">
+                                    <div class="col-md-12 ">
+                                        @if (Model.Scripts.Count() == 0)
+                                        {
+                                            <div class="col-md-12">
+                                                <h6>Script Reference Number: not set</h6>
+                                                <hr class="fancyruler" />
+                                                <div class="col-md-6">Script Classification: </div>
+                                                <div class="col-md-6">not set </div>
+                                                <div class="col-md-6">Effective date: </div>
+                                                <div class="col-md-6">not set </div>
+                                                <div class="col-md-6">Number of Repeats: </div>
+                                                <div class="col-md-6">not set </div>
+                                                <div class="col-md-6">Script Status: </div>
+                                                <div class="col-md-6">not set </div>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="col-md-12">
+                                                <h6>Script Reference Number: @Html.DisplayFor(model => model.Scripts[0].scriptID)</h6>
+                                                <hr class="fancyruler" />
+                                                <div class="col-md-6">Script Classification: </div>
+                                                <div class="col-md-6">@Html.DisplayFor(model => model.Scripts[0].repeats) </div>
+                                                <div class="col-md-6">Effective date: </div>
+                                                <div class="col-md-6">@Html.DisplayFor(model => model.Scripts[0].effectiveDate)</div>
+                                                <div class="col-md-6">Number of Repeats: </div>
+                                                <div class="col-md-6">@Html.DisplayFor(model => model.Scripts[0].repeats)</div>
+                                                <div class="col-md-6">Script Status: </div>
+                                                <div class="col-md-6">@Html.DisplayFor(model => model.Scripts[0].active)</div>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                                <br />-->
+                                <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+                                <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+                                <script type="text/javascript">
+                                    $(function () {
+                                        $('.edit-mode').hide();
+                                        $('.edit-user, .cancel-user').on('click', function () {
+                                            var tr = $(this).parents('tr:first');
+                                            tr.find('.edit-mode, .display-mode').toggle();
+                                        });
+
+                                        $('.save-user').on('click', function () {
+                                            var tr = $(this).parents('tr:first');
+                                            var itemNo = tr.find("#lblitemNo").html();
+                                            var fromDate = tr.find("#fromDate").val();
+                                            var toDate = tr.find("#toDate").val();
+                                            var scriptID = tr.find("#scriptID").html();
+                                            var act = tr.find("#active").is(":checked");
+                                            var qty = tr.find("#txtquantity").val();
+                                            var dir = tr.find("#txtdirections").val();
+                                            tr.find("#lblFirstName").text(toDate);
+                                            tr.find("#lblFrom").text(fromDate);
+                                            tr.find("#lblact").text(act);
+                                            tr.find("lblqty").text(qty);
+                                            tr.find("lbldir").text(dir);
+                                            tr.find('.edit-mode, .display-mode').toggle();
+                                            var ScriptItems =
+                                                {
+                                                    "ScriptID": scriptID,
+                                                    "ItemNo": itemNo,
+                                                    "Active": act,
+                                                    "toDate": toDate,
+                                                    "quantity": qty,
+                                                    "directions": dir,
+                                                    "fromDate": fromDate
+                                                };
+                                            $.ajax({
+                                                url: '/Member/UpdateScriptItem',
+                                                data: JSON.stringify(ScriptItems),
+                                                type: 'POST',
+                                                contentType: 'application/json; charset=utf-8',
+                                                success: function (data) {
+                                                    //alert(data);
+                                                }
+                                            });
+
+                                        });
+                                    })
+
+
+                                </script>
+
+                                <div class="row">
+                                    @{
+                                        var grid = new WebGrid(Model.ScriptItems);
+                                    }
+
+                                    <div id="gridContent" style="padding:20px;">
+                                        @grid.GetHtml(
+tableStyle: "table regimeTable",
+headerStyle: "webgrid-header",
+footerStyle: "webgrid-footer",
+alternatingRowStyle: "webgrid-alternating-row",
+selectedRowStyle: "webgrid-selected-row",
+rowStyle: "webgrid-row-style",
+mode: WebGridPagerModes.All,
+columns:
+grid.Columns(
+grid.Column("Script ID", format: @<text>
+                                <span class="display-mode">@item.scriptID </span>
+                                <label id="scriptID" class="edit-mode">@item.scriptID</label>
+</text>, style: "col1Width"),
+grid.Column("Item #", format: @<text>
+    <span class="display-mode">@item.itemNo </span>
+    <label id="lblitemNo" class="edit-mode">@item.itemNo</label>
+</text>, style: "col1Width"),
+grid.Column("NAPPI", format: @<text>
+    <span class="display-mode">@item.nappiCode </span>
+    <label id="nappiCode" class="edit-mode">@item.nappiCode</label>
+</text>, style: "col1Width"),
+grid.Column("Product Name", format: @<text>
+    <span class="display-mode">@item.productName </span>
+    <label id="pName" class="edit-mode">@item.productName</label>
+</text>, style: "col1Width"),
+grid.Column("Qty", "Qty", format: @<text>
+    <span class="display-mode"><label id="lblqty">@item.quantity</label> </span>
+    <input id="txtquantity" class="edit-mode" value="@item.quantity" />
+</text>, style: "col1Width"),
+grid.Column("Directions", format: @<text>
+    <span class="display-mode"><label id="lbldir">@item.directions</label></span>
+    <input id="txtdirections" class="edit-mode" value="@item.directions" />
+</text>, style: "col1Width"),
+grid.Column("Item", format: @<text>
+    <span class="display-mode">@item.itemStatus </span>
+    <label id="itemStatus" class="edit-mode">@item.itemStatus</label>
+</text>, style: "col1Width"),
+grid.Column("fromDate", "From", format: @<text>
+    <span class="display-mode"> <label id="lblFromDate">@item.fromDate.ToString("dd-MM-yyyy")</label> </span>
+    <input type="datetime" id="fromDate" value="@item.fromDate.ToString("dd-MM-yyyy")" class="edit-mode datepicker" data-provide="" />
+</text>, style: "col2Width"),
+grid.Column("toDate", "To", format: @<text>
+    <span class="display-mode"> <label id="lblFirstName">@item.toDate.ToString("dd-MM-yyyy")</label> </span>
+    <input type="datetime" id="toDate" value="@item.toDate.ToString("dd-MM-yyyy")" class="edit-mode datepicker" data-provide="" />
+</text>, style: "col2Width"),
+grid.Column("Prescribing Dr", format: @<text>
+    <span class="display-mode">@item.prescribingDr </span>
+    <label id="prescribingDr" class="edit-mode">@item.prescribingDr</label>
+</text>, style: "col1Width"),
+grid.Column("active", "Active", format: @<text>
+    <span class="display-mode"> <label id="lblact">@item.active</label> </span>
+    <input type="checkbox" id="active" checked="@item.active" class="edit-mode" />
+</text>, style: "col2Width"),
+grid.Column("", format: @<text>
+    @if (item.itemStatus != "Authorised")
+{
+        <button class="btn buttonRound_edit edit-user display-mode">Edit</button>
+}
+    <button class="btn buttonRound_save save-user edit-mode">Save</button>
+    <button class="btn buttonRound_cancelScript cancel-user edit-mode">Cancel</button>
+</text>, style: "col3Width", canSort: false)
+))
+                                    </div>
+                                </div>
+
+
+                                <br />
+                                <hr class="fancyruler">
+                                <br />
+                                @if (Model.Scripts.Count != 0)
+                                {
+                                    <div class="modal fade" id="myScriptModal" tabindex="-1" style="z-index:10" role="dialog" aria-labelledby="myModalLabel">
+                                        <div class="modal-dialog" role="document" style="width: 1000px; height: 200px; left: 0%; right: 0%; padding-top: 40px; ">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                                    <h4 class="modal-title" id="myModalLabel" style="font-size: 28px; font-family: 'Century Gothic'">&nbsp;&nbsp; Add item</h4>
+                                                </div>
+                                                <div class="modal-body">
+                                                    @{Html.RenderAction("_AddScriptItem", "Member", new { script = Model.Scripts[0].scriptID, member = 1 }); }
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+
+                                <div style="margin-left: 15%" class="addScriptBtn">
+
+
+                                    @if (Model.Scripts.Count != 0)
+                                    {
+                                        <a data-toggle="modal" href="#myScriptModal" input type="button" class="btn buttonRound_login" style="margin-top: -20px!important; margin-left: 0.8%!important; width: 20%">Add item</a>
+
+                                        <input type="button" class="btn buttonRound_login" style="margin-top: -20px!important; margin-left: 0.8%!important; width: 20%" value="Authorise" onclick="location.href='@Url.Action("AuthoriseScript", "Scripts", new { id = Model.Scripts[0].scriptID }, null)'" />
+                                        <input type="button" class="btn buttonRound_login" style="margin-top: -20px!important; margin-left: 0.8%!important; width: 20%" value="Add Reference" onclick="location.href='@Url.Action("AddReferenceScript", "Member", new { id = Model.Scripts[0].scriptID }, null)'" />
+                                    }
+                                    <a data-toggle="modal" href="#myModal" class="btn buttonRound_login" style="margin-top: -20px!important; margin-left: 0.8%!important; width: 20%">Add Script</a>
+
+                                </div>
+
+                                <!-- Modal -->
+                                <div class="modal fade" id="myModal" tabindex="-1" role="dialog" style="z-index:10" aria-labelledby="myModalLabel" aria-hidden="true">
+                                    <div class="">
+                                        <div class="">
+                                            <div class="modal-body">
+                                                @Html.Action("_AddScript", "Member", new { DependentID = Model.DependentID, id = 0, taskId = 0 })
+                                            </div>
+                                        </div><!-- /.modal-content -->
+                                    </div><!-- /.modal-dialog -->
+                                </div><!-- /.modal -->
+                                <!-- Modal -->
+                                <!-- Modal -->
+
+                            </div>
+
+                        </div>
+                    </div>
+                    <br />
+                </section>
+
+                <section id="tabs-4">
+                    <h4 style="color: #003366; margin-top: 0%; margin-left: 2%; margin-bottom: 0.5%!important; font-size: 20px; font-family: 'Century Gothic'; font-weight: 300; font-style: normal;">Patient History</h4>
+                    <hr class="fancyruler" />
+                    <div class="row">
+                        <div id="tab">
+                            <ul class="nav navbar-nav tablinksMember">
+                                <li><a href="#tab1">Clinical History</a></li>
+                                <li><a href="#tab2">Hospitalisations</a></li>
+                                <li><a href="#tab4">Consultations</a></li>
+                            </ul>
+                            <div class="row">&nbsp;</div>
+                            <section id="tab1">
+                                <div class="row tablinks">
+                                    <div class="form-horizontal editMember">
+                                        <div class="row contentBlock_patientHistory">
+                                            <h4 style="color: #003366; margin-top: 0%; margin-left: 2%; margin-bottom: 0%!important; font-size: 18px; font-family: 'Century Gothic'; font-weight: 300; font-style: normal;">Social Record</h4>
+                                            <hr class="fancyruler">
+
+                                            <div class="row">
+
+                                                <div class="col-md-12">
+                                                    <div class="row">
+                                                        <table class="table patientHistory_Table">
+                                                            <tr>
+                                                                <th onclick="sortTable(0)">
+                                                                    @Html.DisplayName("Diagnosis Date")
+                                                                </th>
+                                                                <th onclick="sortTable(1)">
+                                                                    @Html.DisplayName("Smoker")
+                                                                </th>
+                                                                <th onclick="sortTable(2)">
+                                                                    @Html.DisplayName("Amount")
+                                                                </th>
+                                                                <th onclick="sortTable(3)">
+                                                                    @Html.DisplayName("Drinker")
+                                                                </th>
+                                                                <th onclick="sortTable(4)">
+                                                                    @Html.DisplayName("Amount")
+                                                                </th>
+
+                                                            </tr>
+
+                                                            @if (Model.summary.clinicalexams.Count() == 0)
+                                                            {
+                                                                <tr><td>No records available</td></tr>
+                                                            }
+                                                            else
+                                                            {
+                                                                foreach (var item in Model.summary.clinicalexams)
+                                                                {
+                                                                    <tr>
+                                                                        <td>
+                                                                            @Html.DisplayFor(model => model.summary.questionaire.DiagnosisDate)
+                                                                        </td>
+
+                                                                        <td class="checkQuest">
+                                                                            @Html.DisplayFor(model => model.summary.questionaire.smoker)
+                                                                        </td>
+                                                                        <td>
+                                                                            @Html.DisplayFor(model => model.summary.questionaire.NoCigs)
+                                                                        </td>
+                                                                        <td class="checkQuest">
+                                                                            @Html.DisplayFor(model => model.summary.questionaire.drinker)
+
+                                                                        </td>
+                                                                        <td>
+                                                                            @Html.DisplayFor(model => model.summary.questionaire.NrDrinks)
+                                                                        </td>
+
+                                                                    </tr>
+                                                                }
+                                                            }
+
+                                                        </table>
+                                                    </div>
+
+                                                </div>
+                                                <br />
+
+
+                                                <div class="detailsdrop">
+                                                    <input type="button" class="btn buttonRound_scriptAdd" style="width: 8%; margin-left: 45%!important; margin-bottom: -0.4%" value="Edit" onclick="location.href='@Url.Action("EditQuestionaire", "Member", new { DependentID = Model.DependentID }, null)'" />
+                                                </div>
+                                                <br />
+                                            </div>
+
+                                        </div>
+                                        <div class="row contentBlock_patientHistory">
+                                            <h4 style="color: #003366; margin-top: 0%; margin-left: 2%; margin-bottom: 0%!important; font-size: 18px; font-family: 'Century Gothic'; font-weight: 300; font-style: normal;">Clinical Exams</h4>
+                                            <hr class="fancyruler">
+                                            <div class="col-md-12">
+                                                <div class="row">
+                                                    <table class="table patientHistory_Table">
+                                                        <tr>
+                                                            <th onclick="sortTable(5)">
+                                                                @Html.DisplayNameFor(model => model.summary.clinicalexams[0].effectiveDate)
+                                                            </th>
+                                                            <th onclick="sortTable(6)">
+                                                                @Html.DisplayNameFor(model => model.summary.clinicalexams[0].height)
+                                                            </th>
+                                                            <th onclick="sortTable(7)">
+                                                                @Html.DisplayNameFor(model => model.summary.clinicalexams[0].weight)
+                                                            </th>
+                                                            <th onclick="sortTable(8)">
+                                                                @Html.DisplayNameFor(model => model.summary.clinicalexams[0].bmi)
+                                                            </th>
+                                                            <th onclick="sortTable(9)">
+                                                                @Html.DisplayNameFor(model => model.summary.clinicalexams[0].bodyServiceArea)
+                                                            </th>
+                                                            <th onclick="sortTable(10)">
+                                                                @Html.DisplayNameFor(model => model.summary.clinicalexams[0].createdBy)
+                                                            </th>
+                                                            <th onclick="sortTable(11)">
+                                                                @Html.DisplayNameFor(model => model.summary.clinicalexams[0].createdDate)
+                                                            </th>
+                                                            <th>
+                                                                Action
+                                                            </th>
+                                                        </tr>
+                                                        @if (Model.summary.clinicalexams.Count() == 0)
+                                                        {
+                                                            <tr><td>No records available</td></tr>
+                                                        }
+                                                        else
+                                                        {
+                                                            foreach (var item in Model.summary.clinicalexams)
+                                                            {
+                                                                <tr>
+                                                                    <td>
+                                                                        @Html.DisplayFor(modelItem => item.effectiveDate)
+                                                                    </td>
+                                                                    <td>
+                                                                        @Html.DisplayFor(modelItem => item.height)
+                                                                    </td>
+                                                                    <td>
+                                                                        @Html.DisplayFor(modelItem => item.weight)
+                                                                    </td>
+                                                                    <td>
+                                                                        @Html.DisplayFor(modelItem => item.bmi)
+                                                                    </td>
+                                                                    <td>
+                                                                        @Html.DisplayFor(modelItem => item.bodyServiceArea)
+                                                                    </td>
+                                                                    <td>
+                                                                        @Html.DisplayFor(modelItem => item.createdBy)
+                                                                    </td>
+                                                                    <td>
+                                                                        @Html.DisplayFor(modelItem => item.createdDate)
+                                                                    </td>
+                                                                    <td class="linkNav statusCode">
+                                                                        @Html.ActionLink("Edit", "EditClinicalExam", new { id = item.id })
+                                                                    </td>
+                                                                </tr>
+                                                            }
+                                                        }
+
+                                                    </table>
+                                                </div>
+                                                <div class="detailsdrop">
+                                                    <input type="button" class="btn buttonRound_scriptAdd" style="width: 8%; margin-bottom: 0%; margin-left: 45%!important" value="Add" onclick="location.href='@Url.Action("AddClinical", "Member", new { DependentID = Model.DependentID }, null)'" />
+                                                </div>
+                                                <br />
+                                            </div>
+                                            <br />
+                                        </div>
+                                        <div class="row contentBlock_patientHistory">
+                                            <h4 style="color: #003366; margin-top: 0%; margin-left: 2%; margin-bottom: 0%!important; font-size: 18px; font-family: 'Century Gothic'; font-weight: 300; font-style: normal;">Medication History</h4>
+                                            <hr class="fancyruler">
+                                            <div class="col-md-12">
+                                                <div class="row">
+                                                    <table class="table patientHistory_Table">
+                                                        <tr>
+                                                            <th onclick="sortTable(12)">
+                                                                @Html.DisplayNameFor(model => model.summary.meds[0].createdDate)
+                                                            </th>
+                                                            <th onclick="sortTable(13)">
+                                                                @Html.DisplayNameFor(model => model.summary.meds[0].nappiCode)
+                                                            </th>
+                                                            <th onclick="sortTable(14)">
+                                                                @Html.DisplayNameFor(model => model.summary.meds[0].productName)
+                                                            </th>
+                                                            <th onclick="sortTable(19)">
+                                                                @Html.DisplayNameFor(model => model.summary.meds[0].comment)
+                                                            </th>
+                                                            <th onclick="sortTable(15)">
+                                                                @Html.DisplayNameFor(model => model.summary.meds[0].directions)
+                                                            </th>
+                                                            <th onclick="sortTable(16)">
+                                                                @Html.DisplayNameFor(model => model.summary.meds[0].startDate)
+                                                            </th>
+                                                            <th onclick="sortTable(17)">
+                                                                @Html.DisplayNameFor(model => model.summary.meds[0].endDate)
+                                                            </th>
+                                                            <th onclick="sortTable(18)">
+                                                                @Html.DisplayNameFor(model => model.summary.meds[0].createdBy)
+                                                            </th>
+                                                            <th>
+                                                                Action
+                                                            </th>
+                                                        </tr>
+                                                        @if (Model.summary.meds.Count() == 0)
+                                                        {
+                                                            <tr><td>No records available</td></tr>
+                                                        }
+                                                        else
+                                                        {
+                                                            foreach (var item in Model.summary.meds)
+                                                            {
+                                                            <tr>
+                                                                <td>
+                                                                    @Html.DisplayFor(modelItem => item.createdDate)
+                                                                </td>
+                                                                <td>
+                                                                    @Html.DisplayFor(modelItem => item.nappiCode)
+                                                                </td>
+                                                                <td>
+                                                                    @Html.DisplayFor(modelItem => item.productName)
+                                                                </td>
+                                                                <td>
+                                                                    @Html.DisplayFor(modelItem => item.comment)
+                                                                </td>
+                                                                <td>
+                                                                    @Html.DisplayFor(modelItem => item.directions)
+                                                                </td>
+                                                                <td>
+                                                                    @Html.DisplayFor(modelItem => item.startDate)
+                                                                </td>
+                                                                <td>
+                                                                    @Html.DisplayFor(modelItem => item.endDate)
+                                                                </td>
+                                                                <td>
+                                                                    @Html.DisplayFor(modelItem => item.createdBy)
+                                                                </td>
+                                                                <td class="linkNav statusCode">
+                                                                    @Html.ActionLink("Edit", "EditMedication", new { id = item.Id })
+                                                                </td>
+                                                            </tr>
+                                                            }
+                                                        }
+
+                                                    </table>
+                                                </div>
+
+                                                <div class="detailsdrop">
+                                                    <input type="button" class="btn buttonRound_scriptAdd" style="width: 8%; margin-bottom: 0%!important; margin-left: 45%!important" value="Add" onclick="location.href='@Url.Action("AddMeds", "Member", new { DependentID = Model.DependentID }, null)'" />
+                                                </div>
+                                                <br />
+                                            </div>
+                                            <br />
+                                        </div>
+                                        <div class="row contentBlock_patientHistory">
+                                            <h4 style="color: #003366; margin-top: 0%; margin-left: 2%; margin-bottom: 0%!important; font-size: 18px; font-family: 'Century Gothic'; font-weight: 300; font-style: normal;">Allergies</h4>
+                                            <hr class="fancyruler">
+                                            <div class="col-md-12">
+                                                <div class="row">
+                                                    <table class="table patientHistory_Table">
+                                                        <tr>
+                                                            <th onclick="sortTable(19)">
+                                                                @Html.DisplayNameFor(model => model.summary.allergies[0].createdDate)
+                                                            </th>
+                                                            <th onclick="sortTable(20)">
+                                                                @Html.DisplayNameFor(model => model.summary.allergies[0].Allergy)
+                                                            </th>
+                                                            <th onclick="sortTable(21)">
+                                                                @Html.DisplayNameFor(model => model.summary.allergies[0].createdBy)
+                                                            </th>
+                                                            <th>
+                                                                Action
+                                                            </th>
+                                                        </tr>
+                                                        @if (Model.summary.allergies.Count() == 0)
+                                                        {
+                                                            <tr><td>No records available</td></tr>
+                                                        }
+                                                        else
+                                                        {
+                                                            foreach (var item in Model.summary.allergies)
+                                                            {
+                                                                <tr>
+                                                                    <td>
+                                                                        @Html.DisplayFor(modelItem => item.createdDate)
+                                                                    </td>
+                                                                    <td>
+                                                                        @Html.DisplayFor(modelItem => item.Allergy)
+                                                                    </td>
+                                                                    <td>
+                                                                        @Html.DisplayFor(modelItem => item.createdBy)
+                                                                    </td>
+
+                                                                    <td class="linkNav statusCode">
+                                                                        @Html.ActionLink("Edit", "EditAllergies", new { id = item.id })
+                                                                    </td>
+                                                                </tr>
+                                                            }
+                                                        }
+
+                                                    </table>
+                                                </div>
+
+                                                <div class="detailsdrop">
+                                                    <input type="button" class="btn buttonRound_scriptAdd" style="width: 8%; margin-bottom: 0%!important; margin-left: 45%!important" value="Add" onclick="location.href='@Url.Action("AddAllergies", "Member", new { DependentID = Model.DependentID }, null)'" />
+                                                </div>
+                                                <br />
+                                            </div>
+                                            <br />
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                                <script>
+
+                                    $(function () { // will trigger when the document is ready
+                                        var $j = jQuery.noConflict();
+                                        $j('.datepicker').datepicker(); //Initialise any date pickers
+                                    });
+
+                                    var $rows = $('#table tr');
+                                    $('#search').keyup(function () {
+                                        var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+                                        $rows.show().filter(function () {
+                                            var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                                            return !~text.indexOf(val);
+                                        }).hide();
+                                    });
+
+
+                                    function sortTable(n) {
+                                        var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+                                        table = document.getElementById("table");
+                                        switching = true;
+                                        dir = "asc";
+
+                                        while (switching) {
+                                            switching = false;
+                                            rows = table.getElementsByTagName("TR");
+
+                                            for (i = 1; i < (rows.length - 1); i++) {
+
+                                                shouldSwitch = false;
+
+                                                x = rows[i].getElementsByTagName("TD")[n];
+                                                y = rows[i + 1].getElementsByTagName("TD")[n];
+
+                                                if (dir == "asc") {
+                                                    if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                                                        //if so, mark as a switch and break the loop:
+                                                        shouldSwitch = true;
+                                                        break;
+                                                    }
+                                                } else if (dir == "desc") {
+                                                    if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                                                        //if so, mark as a switch and break the loop:
+                                                        shouldSwitch = true;
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                            if (shouldSwitch) {
+                                                /*If a switch has been marked, make the switch
+                                                and mark that a switch has been done:*/
+                                                rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                                                switching = true;
+                                                //Each time a switch is done, increase this count by 1:
+                                                switchcount++;
+                                            } else {
+                                                /*If no switching has been done AND the direction is "asc",
+                                                set the direction to "desc" and run the while loop again.*/
+                                                if (switchcount == 0 && dir == "asc") {
+                                                    dir = "desc";
+                                                    switching = true;
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    $(function () {
+                                        $('.go_back').click(function (e) {
+                                            e.preventDefault();
+                                            history.go(-1);
+                                        });
+                                    });
+
+                                    $(document).ready(function () {
+                                        $('#table').DataTable({
+                                            columnDefs: [{
+                                                targets: [0],
+                                                orderData: [0, 1]
+                                            }, {
+                                                targets: [1],
+                                                orderData: [1, 0]
+                                            }, {
+                                                targets: [4],
+                                                orderData: [4, 0]
+                                            }]
+                                        });
+                                    });
+
+
+                                    $('#zoomBtn').click(function () {
+                                        $('.zoom-btn-sm').toggleClass('scale-out');
+                                        if (!$('.zoom-card').hasClass('scale-out')) {
+                                            $('.zoom-card').toggleClass('scale-out');
+                                        }
+                                    });
+
+                                    $('.zoom-btn-sm').click(function () {
+                                        var btn = $(this);
+                                        var card = $('.zoom-card');
+                                        if ($('.zoom-card').hasClass('scale-out')) {
+                                            $('.zoom-card').toggleClass('scale-out');
+                                        }
+                                        if (btn.hasClass('zoom-btn-person')) {
+                                            card.css('background-color', '#d32f2f');
+                                        } else if (btn.hasClass('zoom-btn-doc')) {
+                                            card.css('background-color', '#fbc02d');
+                                        } else if (btn.hasClass('zoom-btn-tangram')) {
+                                            card.css('background-color', '#388e3c');
+                                        } else if (btn.hasClass('zoom-btn-report')) {
+                                            card.css('background-color', '#1976d2');
+                                        } else {
+                                            card.css('background-color', '#7b1fa2');
+                                        }
+                                    });
+
+                                    // Javascript to enable link to tab
+                                    var url = document.location.toString();
+                                    if (url.match('#')) {
+                                        $('.nav-tabs a[href="#' + url.split('#')[1] + '"]').tab('show');
+                                    }
+
+                                    // Change hash for page-reload
+                                    $('.nav-tabs a').on('shown.bs.tab', function (e) {
+                                        window.location.hash = e.target.hash;
+                                    })
+
+                                    $(".nav-tabs a").click(function () { });
+
+  
+                                </script>
+
+                            </section>
+                            <section id="tab2">
+                                <div class="row tablinks">
+                                    <div class="form-horizontal">
+                                        <div class="contentBlock_patientHistory">
+                                            <div class="row blockbcksubsm">
+                                                <h4 style="color: #003366; margin-top: 0%; margin-left: 2%; margin-bottom: 0%!important; font-size: 18px; font-family: 'Century Gothic'; font-weight: 300; font-style: normal;">Hospitalisation Authorisation</h4>
+                                                <hr class="fancyruler">
+                                                <div class="row">
+                                                    <div class="col-md-12">
+                                                        <div class="row blockbcksubsm">
+                                                            <div class="col-md-12">
+                                                                <div class="row">
+                                                                    <table class="table">
+                                                                        <tr>
+                                                                            <th>
+                                                                                @Html.DisplayNameFor(model => model.HospitalAuths[0].authType)
+                                                                            </th>
+                                                                            <th>
+                                                                                @Html.DisplayNameFor(model => model.HospitalAuths[0].approvalNo)
+                                                                            </th>
+                                                                            <th>
+                                                                                @Html.DisplayNameFor(model => model.HospitalAuths[0].procedureDate)
+                                                                            </th>
+                                                                            <th>
+                                                                                @Html.DisplayNameFor(model => model.HospitalAuths[0].dischargeDate)
+                                                                            </th>
+                                                                            <th>
+                                                                                @Html.DisplayNameFor(model => model.HospitalAuths[0].plannedDate)
+                                                                            </th>
+                                                                            <th>
+                                                                                @Html.DisplayNameFor(model => model.HospitalAuths[0].requestingVendor)
+                                                                            </th>
+                                                                            <th>
+                                                                                @Html.DisplayNameFor(model => model.HospitalAuths[0].authAmount)
+                                                                            </th>
+                                                                            <th>
+                                                                                @Html.DisplayNameFor(model => model.HospitalAuths[0].epiAuth)
+                                                                            </th>
+                                                                        </tr>
+                                                                        @if (Model.HospitalAuths.Count() == 0)
+                                                                        {
+                                                                            <tr><td>No records available</td></tr>
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            foreach (var item in Model.HospitalAuths)
+                                                                            {
+                                                                                <tr>
+                                                                                    <td>
+                                                                                        @Html.DisplayFor(modelItem => item.authType)
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        @Html.DisplayFor(modelItem => item.approvalNo)
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        @Html.DisplayFor(modelItem => item.procedureDate)
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        @Html.DisplayFor(modelItem => item.plannedDate)
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        @Html.DisplayFor(modelItem => item.dischargeDate)
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        @Html.DisplayFor(modelItem => item.requestingVendor)
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        @Html.DisplayFor(modelItem => item.epiAuth)
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        @Html.DisplayFor(modelItem => item.procedureDate)
+                                                                                    </td>
+                                                                                </tr>
+                                                                            }
+                                                                        }
+
+                                                                    </table>
+                                                                </div>
+                                                            </div>
+                                                            <br />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <br />
+                                            </div>
+                                            <div class="row blockbcksubsm">
+                                                <h4 style="color: #003366; margin-top: 0%; margin-left: 2%; margin-bottom: 0%!important; font-size: 18px; font-family: 'Century Gothic'; font-weight: 300; font-style: normal;">Hospitalisation Claims</h4>
+                                                <hr class="fancyruler">
+                                                <div class="row">
+                                                    <div class="col-md-12">
+                                                        <div class="row blockbcksubsm">
+                                                            <div class="col-md-12">
+                                                                <div class="row">
+                                                                    <table class="table">
+                                                                        <tr>
+                                                                            <th>
+                                                                                @Html.DisplayNameFor(model => model.HospitalClaims[0].claimNo)
+                                                                            </th>
+                                                                            <th>
+                                                                                @Html.DisplayNameFor(model => model.HospitalClaims[0].authNo)
+                                                                            </th>
+                                                                            <th>
+                                                                                @Html.DisplayNameFor(model => model.HospitalClaims[0].requestingVendor)
+                                                                            </th>
+                                                                            <th>
+                                                                                @Html.DisplayNameFor(model => model.HospitalClaims[0].vendorReference)
+                                                                            </th>
+                                                                            <th>
+                                                                                @Html.DisplayNameFor(model => model.HospitalClaims[0].adminDate)
+                                                                            </th>
+                                                                            <th>
+                                                                                @Html.DisplayNameFor(model => model.HospitalClaims[0].dischargeDate)
+                                                                            </th>
+                                                                            <th>
+                                                                                @Html.DisplayNameFor(model => model.HospitalClaims[0].claimTotal)
+                                                                            </th>
+                                                                            <th>
+                                                                                @Html.DisplayNameFor(model => model.HospitalClaims[0].minBenefitCode)
+                                                                            </th>
+                                                                        </tr>
+                                                                        @if (Model.HospitalClaims.Count() == 0)
+                                                                        {
+                                                                            <tr><td>No records available</td></tr>
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            foreach (var item in Model.HospitalClaims)
+                                                                            {
+                                                                                <tr>
+                                                                                    <td>
+                                                                                        @Html.DisplayFor(modelItem => item.claimNo)
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        @Html.DisplayFor(modelItem => item.authNo)
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        @Html.DisplayFor(modelItem => item.requestingVendor)
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        @Html.DisplayFor(modelItem => item.vendorReference)
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        @Html.DisplayFor(modelItem => item.adminDate)
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        @Html.DisplayFor(modelItem => item.dischargeDate)
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        @Html.DisplayFor(modelItem => item.claimTotal)
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        @Html.DisplayFor(modelItem => item.minBenefitCode)
+                                                                                    </td>
+                                                                                </tr>
+                                                                            }
+                                                                        }
+
+                                                                    </table>
+                                                                </div>
+                                                            </div>
+                                                            <br />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <br />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                            <section id="tab4">
+                                <div class="row tablinks">
+                                    <div class="form-horizontal">
+                                        <div class="contentBlock_patientHistory">
+                                            <div class="row blockbcksubsm">
+                                                <h4 style="color: #003366; margin-top: 0%; margin-left: 2%; margin-bottom: 0%!important; font-size: 18px; font-family: 'Century Gothic'; font-weight: 300; font-style: normal;">Consultations</h4>
+                                                <hr class="fancyruler">
+                                                <div class="row">
+                                                    <div class="col-md-12">
+                                                        No Consultation Information available
+                                                    </div>
+                                                </div>
+                                                <br />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+
+                            <section id="tab5">
+                                <div class="row tablinks">
+                                    <div class="form-horizontal">
+                                        <div class="contentBlock_patientHistory">
+                                            <div class="row blockbcksubsm">
+                                                <h5>Allergies</h5>
+                                                <hr class="fancyruler">
+                                                <div class="row">
+
+                                                    <div class="col-md-12">
+                                                        test tab 5
+                                                    </div>
+                                                </div>
+                                                <br />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                            <section id="tab6">
+                                <div class="row tablinks">
+                                    <div class="form-horizontal">
+                                        <div class="contentBlock_patientHistory">
+                                            <div class="row blockbcksubsm">
+                                                <h5>Social Summary</h5>
+                                                <hr class="fancyruler">
+                                                <div class="row">
+
+                                                    <div class="col-md-12">
+                                                        test tab 6
+                                                    </div>
+                                                </div>
+                                                <br />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                            <section id="tab7">
+                                <div class="row tablinks">
+                                    <div class="form-horizontal">
+                                        <div class="contentBlock_patientHistory">
+                                            <div class="row blockbcksubsm">
+                                                <h5>Consultations</h5>
+                                                <hr class="fancyruler">
+                                                <div class="row">
+
+                                                    <div class="col-md-12">
+                                                        test tab 7
+                                                    </div>
+                                                </div>
+                                                <br />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+                </section>
+                <section id="tabs-5">
+                    <div class="row tablinks">
+                        <div class="form-horizontal">
+                            <div class="contentBlock">
+                                <h4 style="color: #003366; margin-top: 0%; margin-left: 2%; margin-bottom: 0%!important; font-size: 18px; font-family: 'Century Gothic'; font-weight: 300; font-style: normal;">Script Reference History</h4>
+                                <hr class="fancyruler">
+                                <div class="row">
+                                    <table class="table scriptTable">
+                                        <tr>
+                                            <th onclick="sortTable(0)">
+                                                @Html.DisplayName("Reference")
+                                                <img src="~/Content/Images/memberProfile/Page Icons/columnSort.png" style="width: 3%; margin-left: 2%; margin-top: -1%;" />
+                                            </th>
+                                            <th onclick="sortTable(1)">
+                                                @Html.DisplayName("Attachment")
+                                                <img src="~/Content/Images/memberProfile/Page Icons/columnSort.png" style="width: 2%; margin-left: 2%; margin-top: -1%;" />
+                                            </th>
+                                            <th onclick="sortTable(2)">
+                                                @Html.DisplayName("Effective Date")
+                                                <img src="~/Content/Images/memberProfile/Page Icons/columnSort.png" style="width: 3%; margin-left: 2%; margin-top: -1%;" />
+                                            </th>
+                                        </tr>
+                                        @if (Model.scriptReferences.Count() == 0)
+                                        {
+                                            <tr><td>No records available</td></tr>
+                                        }
+                                        else
+                                        {
+                                            foreach (var item in Model.scriptReferences)
+                                            {
+                                                <tr>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.reference)
+                                                    </td>
+                                                    <td style="color: #003366">
+                                                        <a href="@Url.Action("GetImage", "Member", new { image = item.attachment, @class = "attachmentLink" })"> @Html.DisplayFor(modelItem => item.attachment)</a>
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.effectiveDate)
+                                                    </td>
+                                                </tr>
+                                            }
+                                        }
+
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <br />
+                        <div class="form-horizontal">
+                            <div class="contentBlock">
+                                <h4 style="color: #003366; margin-top: 0%; margin-left: 2%; margin-bottom: 0%!important; font-size: 18px; font-family: 'Century Gothic'; font-weight: 300; font-style: normal;">Script History</h4>
+                                <hr class="fancyruler">
+                                <div class="row">
+                                    <table class="table scriptTable">
+                                        <tr>
+                                            <th onclick="sortTable(0)" style="width: 200px">
+                                                @Html.DisplayNameFor(model => model.Scripts[0].effectiveDate)
+                                                <img src="~/Content/Images/memberProfile/Page Icons/columnSort.png" style="width: 6%; margin-left: 2%; margin-top: -2%;" />
+                                            </th>
+                                            <th onclick="sortTable(1)" style="width: 200px">
+                                                @Html.DisplayName("Script ID")
+                                                <img src="~/Content/Images/memberProfile/Page Icons/columnSort.png" style="width: 6%; margin-left: 2%; margin-top: -2%;" />
+                                            </th>
+                                            <th onclick="sortTable(2)" style="width: 200px">
+                                                @Html.DisplayNameFor(model => model.Scripts[0].scriptType)
+                                                <img src="~/Content/Images/memberProfile/Page Icons/columnSort.png" style="width: 6%; margin-left: 2%; margin-top: -2%;" />
+                                            </th>
+                                            <th onclick="sortTable(3)" style="width: 200px">
+                                                @Html.DisplayNameFor(model => model.Scripts[0].repeats)
+                                                <img src="~/Content/Images/memberProfile/Page Icons/columnSort.png" style="width: 6%; margin-left: 2%; margin-top: -2%;" />
+                                            </th>
+                                            <th onclick="sortTable(4)" style="width: 200px">
+                                                @Html.DisplayNameFor(model => model.Scripts[0].Status)
+                                                <img src="~/Content/Images/memberProfile/Page Icons/columnSort.png" style="width: 6%; margin-left: 2%; margin-top: -2%;" />
+                                            </th>
+                                            <th>
+                                                Action
+                                            </th>
+                                        </tr>
+                                        @if (Model.Scripts.Count() == 0)
+                                        {
+                                            <tr><td>No records available</td></tr>
+                                        }
+                                        else
+                                        {
+                                            foreach (var item in Model.Scripts)
+                                            {
+                                                <tr>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.effectiveDate)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.scriptID)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.scriptType)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.repeats)
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.Status)
+                                                    </td>
+                                                    <td class="statusCode linkNav">
+                                                        @Html.ActionLink("Details", "Details", "Scripts", new { id = item.scriptID }, null)
+                                                    </td>
+                                                </tr>
+                                            }
+                                        }
+
+                                    </table>
+                                </div>
+                            </div>
+                            <br />
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+        <br />
+    </div>
+</div>
+
+
+<script src="~/bundles/jqueryval"></script>
+
+
+<script src="js/jquery.tablesorter.min.js"></script>
+
+<!-- Search -->
+@section scripts{
+    <script>
+
+
+        var $rows = $('#table tr');
+        $('#search').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $rows.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+
+
+        function sortTable(n) {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("table");
+            switching = true;
+            dir = "asc";
+
+            while (switching) {
+                switching = false;
+                rows = table.getElementsByTagName("TR");
+
+                for (i = 1; i < (rows.length - 1); i++) {
+
+                    shouldSwitch = false;
+
+                    x = rows[i].getElementsByTagName("TD")[n];
+                    y = rows[i + 1].getElementsByTagName("TD")[n];
+
+                    if (dir == "asc") {
+                        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                            //if so, mark as a switch and break the loop:
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (dir == "desc") {
+                        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                            //if so, mark as a switch and break the loop:
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+                if (shouldSwitch) {
+                    /*If a switch has been marked, make the switch
+                    and mark that a switch has been done:*/
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                    //Each time a switch is done, increase this count by 1:
+                    switchcount++;
+                } else {
+                    /*If no switching has been done AND the direction is "asc",
+                    set the direction to "desc" and run the while loop again.*/
+                    if (switchcount == 0 && dir == "asc") {
+                        dir = "desc";
+                        switching = true;
+                    }
+                }
+            }
+        }
+
+        $(function () {
+            $('.go_back').click(function (e) {
+                e.preventDefault();
+                history.go(-1);
+            });
+        });
+
+        $(document).ready(function () {
+            $('#table').DataTable({
+                columnDefs: [{
+                    targets: [0],
+                    orderData: [0, 1]
+                }, {
+                    targets: [1],
+                    orderData: [1, 0]
+                }, {
+                    targets: [4],
+                    orderData: [4, 0]
+                }]
+            });
+        });
+
+
+        $('#zoomBtn').click(function () {
+            $('.zoom-btn-sm').toggleClass('scale-out');
+            if (!$('.zoom-card').hasClass('scale-out')) {
+                $('.zoom-card').toggleClass('scale-out');
+            }
+        });
+
+        $('.zoom-btn-sm').click(function () {
+            var btn = $(this);
+            var card = $('.zoom-card');
+            if ($('.zoom-card').hasClass('scale-out')) {
+                $('.zoom-card').toggleClass('scale-out');
+            }
+            if (btn.hasClass('zoom-btn-person')) {
+                card.css('background-color', '#d32f2f');
+            } else if (btn.hasClass('zoom-btn-doc')) {
+                card.css('background-color', '#fbc02d');
+            } else if (btn.hasClass('zoom-btn-tangram')) {
+                card.css('background-color', '#388e3c');
+            } else if (btn.hasClass('zoom-btn-report')) {
+                card.css('background-color', '#1976d2');
+            } else {
+                card.css('background-color', '#7b1fa2');
+            }
+        });
+
+        // Javascript to enable link to tab
+        var url = document.location.toString();
+        if (url.match('#')) {
+            $('.nav-tabs a[href="#' + url.split('#')[1] + '"]').tab('show');
+        }
+
+        // Change hash for page-reload
+        $('.nav-tabs a').on('shown.bs.tab', function (e) {
+            window.location.hash = e.target.hash;
+        })
+
+        $(".nav-tabs a").click(function () { });
+
+    </script>
+}
+
+
+

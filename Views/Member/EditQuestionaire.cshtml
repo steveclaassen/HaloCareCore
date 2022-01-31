@@ -1,0 +1,166 @@
+﻿@model HaloCareCore.Models.Management.ClinicalHistoryQuestionaire
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "EditQuestionnaire";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .input-group-addon {
+        visibility: hidden;
+    }
+</style>
+
+<div class="fullPanel_Container">
+    <div class="profilePanel_pathology">
+        <!--breadCrumbs-->
+        <ul class="breadcrumbs" style="margin-top: -1%; margin-bottom: 2%; margin-left: -1%">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+            <li><a class="go_back">Patient</a></li>
+            <li><a href="#">Social history</a></li>
+        </ul>
+
+        <!--navCollection-->
+        <div class="navButtons">
+            @Html.Partial("_navCollection")
+        </div>
+
+        <!--profileInformation-->
+        <div>
+            @Html.Action("_profileBar_edit", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })
+        </div>
+    </div>
+    <!--pageHeader-->
+    <nav id="global-nav" class="nav">
+        <div class="pull-left title">
+            <h1 class="site-title_patientProfile">
+                <span><img src="~/Content/Images/memberProfile/topBar Icons/clincalHistory.png" /></span>&emsp; Social history
+            </h1>
+        </div>
+        <div class="pull-right title">
+            <h1 class="site-title_userID pull-right">
+                <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+            </h1>
+            <h1 class="site-title_userID pull-right">
+                @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                {
+                    <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                }
+            </h1>
+            <h1 class="site-waffleIcon pull-right">
+                <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+            </h1>
+        </div>
+    </nav>
+
+    <div class="row assignmentOverview_container">
+
+        <h4 class="summaryHeading">Edit questionnaire</h4>
+        <hr class="fancyruler">
+        <br />
+        <br />
+
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+
+            <div class="form-horizontal editForm">
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                @Html.HiddenFor(model => model.dependentID)
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.DiagnosisDate, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        <!-- Datepicker as text field -->
+                        <div class="input-group date pickerBox">
+                            @Html.TextBoxFor(model => model.DiagnosisDate, "{0:dd MMM yyyy}", new { @class = "contentBlock_Info" })
+                            <div class="input-group-addon">
+                                <span class="glyphicon glyphicon-th"></span>
+                            </div>
+                        </div>
+                        @Html.ValidationMessageFor(model => model.DiagnosisDate, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.smoker, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        <div class="checkbox questionnaireEdit">
+                            @Html.EditorFor(model => model.smoker)
+                            @Html.ValidationMessageFor(model => model.smoker, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.NoCigs, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.NoCigs, new { htmlAttributes = new { @class = "contentBlock_Info" } })
+                        @Html.ValidationMessageFor(model => model.NoCigs, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.drinker, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        <div class="checkbox questionnaireEdit">
+                            @Html.EditorFor(model => model.drinker)
+                            @Html.ValidationMessageFor(model => model.drinker, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.NrDrinks, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.NrDrinks, new { htmlAttributes = new { @class = "contentBlock_Info" } })
+                        @Html.ValidationMessageFor(model => model.NrDrinks, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.active, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        <div class="checkbox questionnaireEdit">
+                            @Html.EditorFor(model => model.active)
+                            @Html.ValidationMessageFor(model => model.active, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="fixedBack" style="margin-left: 40%">
+                    <a href="@Url.Action("patientClinical", "Member", new { DependentID = Context.Request.Query["DependentID"]})" class="btn buttonRound_formBack" style="width: 15%!important; position: relative; margin-left: 1%!important">Back</a>
+                    <input type="submit" value="Save" class="btn buttonRound_formCreate" style="width: 15%" />
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/bundles/jqueryui"></script>
+    <style src="~/Content/themes/base/css" )
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.7.1/js/bootstrap-datepicker.min.js"></script>
+
+    <script>
+
+        $(function () {
+
+            $('.input-group.date').datepicker({
+                format: "dd M yyyy",
+                showButtonPanel: true,
+                autoclose: true,
+            });
+        });
+    </script>
+
+
+}

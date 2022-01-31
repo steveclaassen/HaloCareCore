@@ -1,0 +1,101 @@
+﻿@model HaloCareCore.Models.Patient.PreferredMethodOfContact
+@{
+    Layout = "~/Views/Shared/_LayoutModal.cshtml";
+}
+<comment>
+    <!--
+        10 April 2019 -- HCare-669 (Management status: systematic end date (Deceased/Deactivated/Resigned))
+        Used IF statement to set the POST in both the profile Management setting and the Assignment Task. If status is set to Deceased, Deactivated or Resigned. The end date will systematically be set to the same as the effective date
+
+    -->
+</comment>
+
+<div class="row assignmentModal_Status">
+
+    @using (Ajax.BeginForm("pmocCreateNew", "Administration", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "", OnSuccess = "hideModal();" }))
+    {
+        @Html.AntiForgeryToken()
+        <div class="form-horizontal">
+            <div class="@*modal-header modal-header-secondary*@">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true" id="assignmentModalClose">×</button>
+            </div>
+            <br />
+            <br />
+
+            <div class="form-horizontal createForm">
+                <br />
+                <br />
+                <h3 style="text-align: center!important; color: #003366; font-size: 35px">Create a new:</h3>
+                <h3 style="text-align: center!important; color: #ccc; font-size: 30px; font-weight: 100">Preferred method of contact</h3>
+
+                <br />
+                <br />
+                <br />
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.pmocCode, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-8">
+                        @Html.EditorFor(model => model.pmocCode, new { htmlAttributes = new { @class = "modal-form-control", @placeholder = "example: E", autocomplete = "off" } })
+                        @Html.ValidationMessageFor(model => model.pmocCode, "", new { @class = "text-danger", @style = "font-size: 75%;margin-left: 2%" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.pmocDescription, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-8">
+                        @Html.EditorFor(model => model.pmocDescription, new { htmlAttributes = new { @class = "modal-form-control", @placeholder = "example: Email", autocomplete = "off" } })
+                        @Html.ValidationMessageFor(model => model.pmocDescription, "", new { @class = "text-danger", @style = "font-size: 75%;margin-left: 2%" })
+                    </div>
+                </div>
+
+                <br />
+                <br />
+                <br />
+                <br />
+                <br />
+
+                <div class="form-group" style="position: absolute; bottom: 8px; width: 100%">
+                    <div class="" style="text-align: center!important">
+                        <button class="btn-square color-5" type="submit" style="width: 25%" onclick="disDelay(this)">Submit</button><br />
+                    </div>
+                    <p type="button" class="createModal" data-dismiss="modal" aria-hidden="true">cancel</p>
+                </div>
+
+                <div class="modal-footer">
+                    <br />
+                    <br />
+                </div>
+
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script src="~/bundles/jqueryval"></script>
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+
+    <script src="~/Scripts/toastr.js"></script>
+
+    <script type="text/javascript">
+        //Disable submit on click - HCare-728
+        $('form').submit(function () {
+            var button = $('#msSubmit');
+            var oldValue = button.value;
+            var isDisabled = true;
+
+            $(this).find('#msSubmit').prop('disabled', true);
+
+            setTimeout(function () {
+                button.value = oldValue;
+                button.attr('disabled', !isDisabled);
+            }, 4000)
+
+        });
+    </script>
+
+
+
+}

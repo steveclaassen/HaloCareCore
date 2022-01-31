@@ -1,0 +1,530 @@
+﻿@model HaloCareCore.Models.Questionnaire.QuestionnaireOther
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Diabetes-Questionnaire-Other";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<comment>
+    <!--
+        12 June 2019 -- HCare-722 (Change "Follow up" to red on patient history drop-down menus)
+        I have added alert badges that draw the users attention to the fields that are either marked with a follow up or that are empty/null.
+
+        06 August 2019 -- HCare-758(Generel - Redirect to tab functionality)
+        Using jquery to add localStorage in order to redirect to the last tab that the user was on and a Submit/Save Button clicked. This will take you back to the origin tab.
+    -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .input-group-addon {
+        visibility: hidden;
+    }
+
+    textarea#generalComments {
+        display: block;
+        width: 460%;
+        max-width: 1500px !important;
+        height: 100px;
+        max-height: 250px;
+        padding: 6px 6px;
+        line-height: 1.428571429;
+        color: #003366;
+        vertical-align: middle;
+        border: 1px solid #f4f4f4;
+        background-color: transparent;
+        border-radius: 2px;
+        margin-left: -5%;
+        -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+        box-shadow: 1px 1px 1px 0px rgba(0,0,0,0.20);
+        -webkit-transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+        transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+        outline: none !important;
+        font-family: 'Century Gothic';
+        font-size: 100%;
+        font-weight: 200;
+        margin-top: -10%;
+    }
+
+    .field-validation-error:before {
+        font-family: FontAwesome;
+        content: "\f06a\00a0";
+        animation: pulse 2s ease infinite;
+    }
+</style>
+
+<!--pageHeader-->
+<nav id="global-nav" class="nav">
+    <div class="pull-left title">
+        <h1 class="site-title_patientProfile">
+            <span><img src="~/Content/Images/memberProfile/topBar Icons/clincalHistory.png" /></span>&emsp; Other
+        </h1>
+    </div>
+    <div class="pull-right title">
+        <h1 class="site-title_userID pull-right">
+            <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+        </h1>
+        <h1 class="site-title_userID pull-right">
+            @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+            {
+                <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+            }
+        </h1>
+        <h1 class="site-waffleIcon pull-right">
+            <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+        </h1>
+    </div>
+</nav>
+
+<div class="dashboardContainer zero-padding">
+    <div class="patientDashboard_View">
+        <!--breadCrumbs-->
+        <ul class="breadcrumbs_patientDashboard">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+            <li><a class="go_back">Patient</a></li>
+            <li><a href="#">Other</a></li>
+        </ul>
+        <!--Left navSlider -->
+        @Html.Partial("_navSlider_blank", new { })
+        <!--navCollection-->
+        <div class="navCollection_patientDashboard">
+            @Html.Partial("_navCollection")
+        </div>
+        <!--profileInformation-->
+        <div class="profileBar">
+            @Html.Action("_profileBar_edit", "Member", new { DependentID = Model.dependentID })
+        </div>
+    </div>
+
+    <div class="profilebar-spacer-assignment"></div>
+
+    <div class="patientDashboard_container">
+
+        <h4 class="summaryHeading">Edit record</h4>
+        <hr class="fancyruler">
+        <br />
+        <br />
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+
+            <div class="form-horizontal editForm" style="margin-left: -0.5%">
+                <div class="hidden-fields">
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                    @Html.HiddenFor(model => model.QuestionnaireOtherID)
+                    @Html.HiddenFor(model => model.dependentID)
+                    @Html.HiddenFor(model => model.questionnaireID)
+                    @Html.HiddenFor(model => model.createdDate)
+                    @Html.HiddenFor(model => model.createdBy)
+                    @Html.HiddenFor(model => model.occupation)
+                    @Html.HiddenFor(model => model.shiftWorker)
+                    @Html.HiddenFor(model => model.generalComments)
+                    @Html.HiddenFor(model => model.recDrugs)
+                    @Html.HiddenFor(model => model.recDrugsLastUsed)
+                    @Html.HiddenFor(model => model.TBScreen)
+                    @Html.HiddenFor(model => model.TBScreenResult)
+                    @Html.HiddenFor(model => model.TBScreenDate)
+                    @Html.HiddenFor(model => model.tbDiagnosed)
+                    @Html.HiddenFor(model => model.tbTreatmentStartDate)
+                    @Html.HiddenFor(model => model.tbTreatmentEndDate)
+                    @Html.HiddenFor(model => model.Pregnant)
+                    @Html.HiddenFor(model => model.EDD)
+                    @Html.HiddenFor(model => model.frailCareCheck)
+                    @Html.HiddenFor(model => model.frailCare)
+                    @Html.HiddenFor(model => model.frailCareComment)
+                    @Html.HiddenFor(model => model.bloodTestFrequency)
+                    @Html.HiddenFor(model => model.bloodTestEffectiveDate)
+                </div>
+
+                @if (Model.followUp == true)
+                {
+                    <div id="followUp_anchor">
+                        <a id="followUpLink" href="#anchor_followUp">
+                            <i class="fas fa-exclamation-triangle pulse anchor_warning" title="check box"></i>
+                        </a>
+                    </div>
+                }
+
+                <div class="form-group">
+                    @Html.Label(null,"Depressed", htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-8">
+                        <div class="questionRadio" style="color: black; margin-left: 2.5%">
+                            @Html.RadioButtonFor(model => model.depression, true, new { @id = "depression-true" }) Yes
+                            @Html.RadioButtonFor(model => model.depression, false, new { @id = "depression-false" }) No
+
+                            @Html.ValidationMessageFor(model => model.depression, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div id="">
+                    <div id="warning_depression" class="hidden">
+                        <a id="depression_link" href="#depression">
+                            <i class="fas fa-exclamation-triangle pulse followUp_alert" title="follow up"></i>
+                        </a>
+                    </div>
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.depressionComment, htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-10">
+                            @Html.EditorFor(model => model.depressionComment, new { htmlAttributes = new { @class = "contentBlock_Info", @placeholder = "example: How long have you been feeling ..." } })
+                            @Html.ValidationMessageFor(model => model.depressionComment, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div id="followUp_anchor">
+                    @if (Model.followUp == true)
+                    {
+                        <div id="warning_followUp">
+                            <i class="fas fa-exclamation-triangle pulse followUp_alert"></i>
+                        </div>
+
+                    }
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.followUp, htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-10">
+                            <div class="checkbox">
+                                @Html.EditorFor(model => model.followUp)
+                                @Html.ValidationMessageFor(model => model.followUp, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.active, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        <div class="checkbox">
+                            @Html.EditorFor(model => model.active)
+                            @Html.ValidationMessageFor(model => model.active, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="fixedBack" style="margin-left: 40%">
+                        <input value="Back" class="btn buttonRound_formBack go_back" onclick="backKey()" style="width: 15%!important" />
+                        <input type="submit" value="Save" class="btn buttonRound_formCreate patientClinical" onclick="storageKey()" style="width: 15%" />
+
+                    </div>
+                </div>
+
+            </div>
+        }
+
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/bundles/jqueryui"></script>
+    <style src="~/Content/themes/base/css" )
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.7.1/js/bootstrap-datepicker.min.js"></script>
+    <!--General-->
+    <script>
+        /*Date*/
+        $(function () {
+
+            $('.input-group.date').datepicker({
+                format: "dd M yyyy",
+                showButtonPanel: true,
+                autoclose: true,
+            });
+        });
+    </script>
+    <!--Alerts-->
+    <script>
+        //occupation Check
+        $(document).ready(function () {
+            setInterval(function () {
+                if ($("#occupation").val().toLowerCase() == "follow up") {
+                    $("#occupation").addClass('warningFont'),
+                        $('#warning_occupation').removeClass('hidden'),
+                        $('#occupation_anchor').removeClass('hidden');
+                }
+                else if ($("#occupation").val() == "") {
+                    $("#occupation").removeClass('warningFont'),
+                        $('#warning_occupation').removeClass('hidden'),
+                        $('#occupation_anchor').removeClass('hidden');
+                }
+                else if ($("#occupation").val() == null) {
+                    $("#occupation").removeClass('warningFont'),
+                        $('#warning_occupation').removeClass('hidden'),
+                        $('#occupation_anchor').removeClass('hidden');
+                }
+                else {
+                    $("#occupation").removeClass('warningFont'),
+                        $('#occupation').addClass('fontUpdate'),
+                        $('#warning_occupation').addClass('hidden'),
+                        $('#occupation_anchor').addClass('hidden');
+
+
+                }
+            }, 0);
+        });
+
+        //shiftWorker field YES
+        $(document).ready(function () {
+            setInterval(function () {
+                $('#shiftWorkCheck-true').change(function () {
+                    if (this.checked)
+                        $("[name='shiftWorker']").attr("required", true),
+                            $('#warning_shiftWorker').removeClass('hidden');
+
+                });
+            }, 0);
+        });
+
+        //shiftWorker field NO
+        $(document).ready(function () {
+            setInterval(function () {
+                $('#shiftWorkCheck-false').change(function () {
+                    if (this.checked)
+                        $("[name='shiftWorker']").attr("required", false),
+                            $('#warning_shiftWorker').addClass('hidden'),
+                            $("[name='shiftWorker']").val('');
+
+                });
+            }, 0);
+        });
+
+        $(document).ready(function () {
+            setInterval(function () {
+                if ($("#shiftWorker").val() == "") {
+                    $("#shiftWorker").removeClass('warningFont'),
+                        $('#dailyCig_anchor').removeClass('hidden');
+                }
+                else if ($("#shiftWorker").val() == null) {
+                    $("#shiftWorker").removeClass('warningFont'),
+                        $('#dailyCig_anchor').removeClass('hidden');
+                }
+                else {
+                    $("#shiftWorker").removeClass('warningFont'),
+                        $('#shiftWorker').addClass('fontUpdate'),
+                        $('#dailyCig_anchor').addClass('houdini');
+
+
+                }
+            }, 0);
+        });
+
+        //lypohypertrophy field YES
+        $(document).ready(function () {
+            setInterval(function () {
+                $('#lypohypertrophyCheck-true').change(function () {
+                    if (this.checked)
+                        $("[name='lypohypertrophy']").attr("required", true),
+                            $("[name='lypohypertrophyDate']").attr("required", true),
+                            $('#warning_lypohypertrophy').removeClass('hidden'),
+                            $('#warning_lypohypertrophyDate').removeClass('hidden');
+
+                });
+            }, 0);
+        });
+
+        //lypohypertrophy field NO
+        $(document).ready(function () {
+            setInterval(function () {
+                $('#lypohypertrophyCheck-false').change(function () {
+                    if (this.checked)
+                        $("[name='lypohypertrophy']").attr("required", false),
+                            $("[name='lypohypertrophyDate']").attr("required", false),
+                            $('#warning_lypohypertrophy').addClass('hidden'),
+                            $('#warning_lypohypertrophyDate').addClass('hidden'),
+                            $("[name='lypohypertrophyDate']").val(''),
+                            $("[name='lypohypertrophy']").val('');
+
+                });
+            }, 0);
+        });
+
+        //drug field YES
+        $(document).ready(function () {
+            setInterval(function () {
+                $('#recDrugs-true').change(function () {
+                    if (this.checked)
+                        $('#warning_drugs').removeClass('hidden');
+
+                });
+            }, 0);
+        });
+
+        //drug field NO
+        $(document).ready(function () {
+            setInterval(function () {
+                $('#recDrugs-false').change(function () {
+                    if (this.checked)
+                        $('#warning_drugs').addClass('hidden'),
+                            $("[name='recDrugsLastUsed']").val('');
+
+                });
+            }, 0);
+        });
+
+        //depression field YES
+        $(document).ready(function () {
+            setInterval(function () {
+                $('#depression-true').change(function () {
+                    if (this.checked)
+                        $('#warning_depression').removeClass('hidden');
+
+                });
+            }, 0);
+        });
+
+        //depression field NO
+        $(document).ready(function () {
+            setInterval(function () {
+                $('#depression-false').change(function () {
+                    if (this.checked)
+                        $('#warning_depression').addClass('hidden'),
+                            $("[name='depressionComment']").val('');
+
+                });
+            }, 0);
+        });
+
+        //tbDiagnosed field YES
+        $(document).ready(function () {
+            setInterval(function () {
+                $('#tbDiagnosed-true').change(function () {
+                    if (this.checked)
+                        $('#warning_tbStart').removeClass('hidden'),
+                            $('#warning_tbEnd').removeClass('hidden');
+
+                });
+            }, 0);
+        });
+
+        //tbDiagnosed field NO
+        $(document).ready(function () {
+            setInterval(function () {
+                $('#tbDiagnosed-false').change(function () {
+                    if (this.checked)
+                        $('#warning_tbStart').addClass('hidden'),
+                            $('#warning_tbEnd').addClass('hidden'),
+                            $("[name='tbTreatmentStartDate']").val(''),
+                            $("[name='tbTreatmentEndDate']").val('');
+
+                });
+            }, 0);
+        });
+
+        //pregnant field YES
+        $(document).ready(function () {
+            setInterval(function () {
+                $('#Pregnant-true').change(function () {
+                    if (this.checked)
+                        $('#warning_pregnant').removeClass('hidden');
+
+                });
+            }, 0);
+        });
+
+        //pregnant field NO
+        $(document).ready(function () {
+            setInterval(function () {
+                $('#Pregnant-false').change(function () {
+                    if (this.checked)
+                        $('#warning_pregnant').addClass('hidden'),
+                            $("[name='EDD']").val('');
+
+                });
+            }, 0);
+        });
+
+        //occupation Check
+        $(document).ready(function () {
+            setInterval(function () {
+                if ($("#generalComments").val().toLowerCase() == "follow up") {
+                    $("#generalComments").addClass('warningFont'),
+                        $('#warning_comment').removeClass('hidden'),
+                        $('#comment_anchor').removeClass('hidden');
+                }
+                else if ($("#generalComments").val() == "") {
+                    $("#generalComments").removeClass('warningFont'),
+                        $('#warning_comment').removeClass('hidden'),
+                        $('#comment_anchor').removeClass('hidden');
+                }
+                else if ($("#generalComments").val() == null) {
+                    $("#generalComments").removeClass('warningFont'),
+                        $('#warning_comment').removeClass('hidden'),
+                        $('#comment_anchor').removeClass('hidden');
+                }
+                else {
+                    $("#generalComments").removeClass('warningFont'),
+                        $('#generalComments').addClass('fontUpdate'),
+                        $('#warning_comment').addClass('hidden'),
+                        $('#comment_anchor').addClass('hidden');
+
+
+                }
+            }, 0);
+        });
+
+        //follow up Check
+        $('#followUp').change(function () {
+            if (this.checked)
+                $('#warning_followUp').removeClass('hidden'),
+                    $('#followUp_anchor').removeClass('hidden');
+
+            else
+                $('#warning_followUp').addClass('hidden'),
+                    $('#followUp_anchor').addClass('hidden');
+
+        });
+
+    </script>
+    <!--Links-->
+    <script>
+        //follow up
+        $("#followUpLink").click(function () {
+            $('html, body').animate({
+                scrollTop: $("#followUp_anchor").offset().top + 350
+            }, 500);
+
+        });
+        //commentLink
+        $("#commentLink").click(function () {
+            $('html, body').animate({
+                scrollTop: $("#comment_anchor").offset().top + 300
+            }, 500),
+
+                // toggle highlight for Allergy
+                $('#generalComments').toggleClass('textBox_highlight');
+            setTimeout(function () {
+                // toggle back after 1 second
+                $('#generalComments').toggleClass('textBox_highlight');
+            }, 300);
+        });
+
+        //occupation
+        $("#occupationLink").click(function () {
+            $('html, body').animate({
+                scrollTop: $("#occupation_anchor").offset().top - 350
+            }, 500),
+
+                // toggle highlight for Allergy
+                $('#occupation').toggleClass('textBox_highlight');
+            setTimeout(function () {
+                // toggle back after 1 second
+                $('#occupation').toggleClass('textBox_highlight');
+            }, 300);
+        });
+    </script>
+    <!-- local-storage-redirect -->
+    <script>
+        function backKey() {
+            localStorage.setItem("back_diabetesOther", Date.now());
+        }
+        function storageKey() {
+            localStorage.setItem("edit_diabetesOther", Date.now());
+        }
+    </script>
+
+}

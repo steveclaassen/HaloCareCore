@@ -1,0 +1,719 @@
+﻿@model HaloCareCore.Models.EnrolmentViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "patientRecord";
+    Layout = "~/Views/Shared/_LayoutMember.cshtml";
+}
+
+<!--outstandingDocuments PopUp -->
+@Html.HiddenFor(model => model.hasSteps)
+
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+</style>
+
+<!--pageHeader-->
+<nav id="global-nav" class="nav">
+    <div class="pull-left title">
+        <h1 class="site-title_patientProfile">
+            <span><i class="fas fa-user-circle"></i>&emsp; Patient record</span>
+        </h1>
+    </div>
+    <div class="pull-right title">
+        <h1 class="site-title_userID pull-right">
+            <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+        </h1>
+        <h1 class="site-title_userID pull-right">
+            @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+            {
+                <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+            }
+        </h1>
+        <h1 class="site-waffleIcon pull-right">
+            <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+        </h1>
+    </div>
+</nav>
+
+<div class="dashboardContainer zero-padding">
+    <div class="profilePanel_dashboard">
+
+        <!--breadCrumbs-->
+        <ul class="breadcrumbs">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+            <li><a href="@Url.Action("patientDashboard", "Member", new { DependentID = Context.Request.Query["DependentID"]})">Patient</a></li>
+            <li><a href="#">Record</a></li>
+        </ul>
+
+        <!--Left navSlider -->
+        @Html.Partial("_navSlider", new { DependentID = Context.Request.Query["DependentID"] })
+
+        <!--navCollection-->
+        <div style="margin-top: -2%; margin-bottom: 1.5%; margin-left: 1%">
+            @Html.Partial("_navCollection")
+        </div>
+
+        <!--profileInformation-->
+        <div>
+            @Html.Action("_profileBar_edit", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })
+        </div>
+    </div>
+
+    <div style="margin-bottom: 8.5%"></div>
+
+    <div class="patientRecord_container">
+
+        @*<h4 class="tableHeading">Patient summary</h4>*@
+
+        <div class="row" style="margin-top: 0%!important">
+            <div class="form-horizontal">
+                <div class="col-md-12 col-sm-12 ">
+                    <!--Pathology Details-->
+                    <div class="row tablinks">
+                        <div class="form-horizontal">
+                            <div class="row contentBlock">
+                                <br />
+                                <div class="form-horizontal dashBoardContent">
+
+                                    <!--diseaseManagement_Collapse-->
+                                    <div class="col-md-12">
+                                        <div class="panel panel-primary">
+                                            <div class="panel-heading clickable">
+                                                <h3 class="panel-title">Disease management</h3>
+                                                <span class="pull-right" style="margin-top: -1.3%"><i class="glyphicon glyphicon-chevron-up"></i></span>
+                                            </div>
+                                            <div class="panel-body">
+
+                                                <div class="panelContainer">
+                                                    <div class="panel-group">
+
+                                                        <!--program-->
+                                                        <div class="form-horizontal">
+                                                            <div class="col-md-6">
+                                                                <table class="table dashboardTable">
+                                                                    <tr>
+                                                                        <th>
+                                                                            @Html.DisplayName("Program type") <i class="fa fa-fw fa-sort"></i>
+                                                                        </th>
+                                                                        <th>
+                                                                            @Html.DisplayName("Start date")
+                                                                        </th>
+                                                                        <th>
+                                                                            @Html.DisplayName("End date")
+                                                                        </th>
+                                                                        <th style="text-align: center!important">
+                                                                            Action
+                                                                        </th>
+
+                                                                    </tr>
+                                                                    <tr>
+                                                                        @if (Model.statuss.Count != 0)
+                                                                        {
+                                                                            if (Model.programs.Count != 0)
+                                                                            {
+                                                                                <td>
+                                                                                    @Html.DisplayFor(model => model.programs[0].programCode)
+                                                                                </td>
+                                                                            }
+                                                                        }
+                                                                        <td>
+                                                                            @if (Model.statuss.Count != 0)
+                                                                            {
+                                                                                if (Model.programs.Count != 0)
+                                                                                {
+                                                                                    @Html.DisplayFor(model => model.programs[0].effectiveDate)
+                                                                                }
+                                                                            }
+                                                                        </td>
+                                                                        <td>
+                                                                            @if (Model.statuss.Count != 0)
+                                                                            {
+                                                                                if (Model.programs.Count != 0)
+                                                                                {
+                                                                                    @Html.DisplayFor(model => model.programs[0].endDate)
+                                                                                }
+                                                                            }
+                                                                        </td>
+                                                                        <td class="linkNav" style="text-align: center!important">
+                                                                            @Html.ActionLink("View", "ProgramHistory", new { DependentID = Model.dependent.DependantID }, null)
+                                                                        </td>
+                                                                    </tr>
+                                                                </table>
+                                                            </div>
+                                                            <!--managementStatus-->
+                                                            <div class="col-md-6">
+                                                                <table class="table dashboardTable">
+                                                                    <tr>
+                                                                        <th>
+                                                                            @Html.DisplayName("Management status") <i class="fa fa-fw fa-sort"></i>
+                                                                        </th>
+                                                                        <th>
+                                                                            @Html.DisplayName("Start date")
+                                                                        </th>
+                                                                        <th>
+                                                                            @Html.DisplayName("End date")
+                                                                        </th>
+                                                                        <th style="text-align: center!important">
+                                                                            Action
+                                                                        </th>
+
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td>
+                                                                            @if (Model.statuss.Count != 0)
+                                                                            {
+                                                                                if (Model.statuss.Count != 0)
+                                                                                {
+                                                                                    @Html.DisplayFor(model => model.statuss[0].managementStatusCode)
+                                                                                }
+
+                                                                            }
+                                                                        </td>
+                                                                        <td>
+                                                                            @if (Model.statuss.Count != 0)
+                                                                            {
+                                                                                if (Model.statuss.Count != 0)
+                                                                                {
+                                                                                    @Html.DisplayFor(model => model.statuss[0].effectiveDate)
+                                                                                }
+                                                                            }
+                                                                        </td>
+                                                                        <td>
+                                                                            @if (Model.statuss.Count != 0)
+                                                                            {
+                                                                                if (Model.statuss.Count != 0)
+                                                                                {
+                                                                                    @Html.DisplayFor(model => model.statuss[0].endDate)
+                                                                                }
+                                                                            }
+                                                                        </td>
+                                                                        <td class="linkNav" style="text-align: center!important">
+                                                                            @Html.ActionLink("View", "ManageStatus", "Member", new { DependentID = Model.dependent.DependantID }, null)
+                                                                        </td>
+                                                                    </tr>
+                                                                </table>
+                                                            </div>
+                                                            <!---->
+                                                        </div>
+
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!---->
+                                    <!--managementDetails_Collapse-->
+                                    <div class="col-md-12">
+                                        <div class="panel panel-primary">
+                                            <div class="panel-heading clickable">
+                                                <h3 class="panel-title">Management details</h3>
+                                                <span class="pull-right" style="margin-top: -1.3%"><i class="glyphicon glyphicon-chevron-up"></i></span>
+                                            </div>
+                                            <div class="panel-body">
+
+                                                <div class="panelContainer">
+                                                    <div class="panel-group">
+
+                                                        <div class="form-horizontal">
+                                                            <!--caseManager-->
+                                                            <div class="col-md-6">
+                                                                <table class="table dashboardTable">
+                                                                    <tr>
+                                                                        <th>
+                                                                            @Html.DisplayName("Case manager") <i class="fa fa-fw fa-sort"></i>
+                                                                        </th>
+                                                                        <th>
+                                                                            @Html.DisplayName("Effective")
+                                                                        </th>
+                                                                        <th style="text-align: center!important">
+                                                                            Action
+                                                                        </th>
+
+                                                                    </tr>
+                                                                    <tr>
+                                                                        @if (Model.CaseManagers != null)
+                                                                        {
+                                                                            <td>
+
+                                                                                @Html.DisplayFor(model => model.CaseManagers.caseManagerId)
+
+                                                                            </td>
+                                                                            <td>
+                                                                                @Html.DisplayFor(model => model.CaseManagers.createdDate)
+                                                                            </td>
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            <td>-</td>
+                                                                            <td>-</td>
+                                                                        }
+                                                                        <td class="linkNav" style="text-align: center!important">
+                                                                            @Html.ActionLink("Add", "AddFromList", "CaseManager", new { DependentID = Model.dependent.DependantID }, null)/@Html.ActionLink("View", "CaseManagerHistory", "Member", new { DependentID = Model.dependent.DependantID }, null)
+                                                                        </td>
+
+                                                                    </tr>
+                                                                </table>
+                                                            </div>
+                                                            <!--doctor-->
+                                                            <div class="col-md-6">
+                                                                <table class="table dashboardTable">
+                                                                    <tr>
+                                                                        <th>
+                                                                            @Html.DisplayName("Doctor ") <i class="fa fa-fw fa-sort"></i>
+                                                                        </th>
+                                                                        <th>
+                                                                            @Html.DisplayName("Practice #")
+                                                                        </th>
+                                                                        <th>
+                                                                            @Html.DisplayName("Contact #")
+                                                                        </th>
+                                                                        <th style="text-align: center!important">
+                                                                            Action
+                                                                        </th>
+
+                                                                    </tr>
+                                                                    <tr>
+                                                                        @if (Model.doctor.practiceNo != null)
+                                                                        {
+                                                                            <td>
+                                                                                @Html.DisplayFor(model => model.doctor.drName)
+                                                                            </td>
+                                                                            <td>
+                                                                                @Html.DisplayFor(model => model.doctor.practiceNo)
+                                                                            </td>
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            <td>
+                                                                                -
+                                                                            </td>
+                                                                            <td>
+                                                                                -
+                                                                            </td>
+                                                                        }
+                                                                        @if (Model.doctorContact != null)
+                                                                        {
+                                                                            <td>
+                                                                                @Html.DisplayFor(model => model.doctorContact.cell)
+                                                                            </td>
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            <td>
+                                                                                -
+                                                                            </td>
+                                                                        }
+
+                                                                        <td class="linkNav" style="text-align: center!important">
+                                                                            @Html.ActionLink("Add", "DoctorSearch", "PatientManagement", new { DependentID = Model.dependent.DependantID }, null)/@Html.ActionLink("View", "ViewDoctorHistory", "Member", new { DependentID = Model.dependent.DependantID }, null)
+                                                                        </td>
+
+                                                                    </tr>
+                                                                </table>
+                                                            </div>
+                                                            <!---->
+                                                        </div>
+
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!---->
+                                    <!--medicalAidDetails_Collapse-->
+                                    <div class="col-md-12">
+                                        <div class="panel panel-primary">
+                                            <div class="panel-heading clickable">
+                                                <h3 class="panel-title">Medical scheme details</h3>
+                                                <span class="pull-right" style="margin-top: -1.3%"><i class="glyphicon glyphicon-chevron-up"></i></span>
+                                            </div>
+                                            <div class="panel-body">
+
+                                                <div class="panelContainer">
+                                                    <div class="panel-group">
+
+                                                        <div class="form-horizontal">
+                                                            <!--medicalDetails-->
+                                                            <div class="col-md-12">
+                                                                <table class="table dashboardTable_full">
+                                                                    <tr>
+                                                                        <th>
+                                                                            @Html.DisplayName("Scheme") <i class="fa fa-fw fa-sort"></i>
+                                                                        </th>
+                                                                        <th>
+                                                                            @Html.DisplayName("Option")
+                                                                        </th>
+
+                                                                        <th>
+                                                                            @Html.DisplayName("Employer group")
+                                                                        </th>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td>
+
+                                                                            @Html.DisplayFor(model => model.MedicalAids[0].Name)
+                                                                        </td>
+                                                                        <td>
+                                                                            @Html.DisplayFor(model => model.plan)
+                                                                        </td>
+
+                                                                        @if (Model.paypoint != null)
+                                                                        {
+                                                                            <td>
+                                                                                @Html.DisplayFor(model => model.paypoint)
+                                                                            </td>
+                                                                        }
+
+                                                                        else
+                                                                        {
+                                                                            <td>
+                                                                                -
+                                                                            </td>
+                                                                        }
+                                                                    </tr>
+                                                                </table>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!---->
+                                    <!--medicalAidDetails_Collapse-->
+                                    <div class="col-md-12">
+                                        <div class="panel panel-primary">
+                                            <div class="panel-heading clickable">
+                                                <h3 class="panel-title">Patient assignments</h3>
+                                                <span class="pull-right" style="margin-top: -1.3%"><i class="glyphicon glyphicon-chevron-up"></i></span>
+                                            </div>
+                                            <div class="panel-body">
+
+                                                <div class="panelContainer">
+                                                    <div class="panel-group">
+
+                                                        <div class="form-horizontal">
+                                                            <!--medicalDetails-->
+                                                            <div class="col-md-12">
+                                                                <table class="table dashboardTable_full">
+                                                                    <tr>
+                                                                        <th>
+                                                                            @Html.DisplayName("Scheme") <i class="fa fa-fw fa-sort"></i>
+                                                                        </th>
+                                                                        <th>
+                                                                            @Html.DisplayName("Option")
+                                                                        </th>
+
+                                                                        <th>
+                                                                            @Html.DisplayName("Employer group")
+                                                                        </th>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td>
+
+                                                                            @Html.DisplayFor(model => model.MedicalAids[0].Name)
+                                                                        </td>
+                                                                        <td>
+                                                                            @Html.DisplayFor(model => model.plan)
+                                                                        </td>
+
+                                                                        @if (Model.paypoint != null)
+                                                                        {
+                                                                            <td>
+                                                                                @Html.DisplayFor(model => model.paypoint)
+                                                                            </td>
+                                                                        }
+
+                                                                        else
+                                                                        {
+                                                                            <td>
+                                                                                -
+                                                                            </td>
+                                                                        }
+                                                                    </tr>
+                                                                </table>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!---->
+                                </div>
+                                <br />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!--sideNavigation Bar-->
+<div id="tabs">
+
+
+    <div class="modal fade" id="statusModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document" style="left: 0%; right: 0%; padding-top: 40px; ">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel" style="font-size: 150%; text-align: center"><span style="font-family: 'Eras ITC'!important">Outstanding Documents</span></h4>
+                </div>
+                <div class="modal-body">
+                    @{Html.RenderAction("_StepsRequired", "Member", new { DependentID = Model.dependent.DependantID }); }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn buttonRound_cancel" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<script src="~/bundles/jqueryval"></script>
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="~/Scripts/select2.min.js"></script>
+
+    <script>
+
+        /*panelCollapse_Already collapsed*/
+        $(document).on('click', '.panel-heading span.clickable', function (e) {
+            var $this = $(this);
+            if (!$this.hasClass('panel-collapsed')) {
+                $this.parents('.panel').find('.panel-body').slideUp();
+                $this.addClass('panel-collapsed');
+                $this.find('i').removeClass('glyphicon-chevron-down').addClass('glyphicon-chevron-up');
+            } else {
+                $this.parents('.panel').find('.panel-body').slideDown();
+                $this.removeClass('panel-collapsed');
+                $this.find('i').removeClass('glyphicon-chevron-up').addClass('glyphicon-chevron-down');
+            }
+        });
+        $(document).on('click', '.panel div.clickable', function (e) {
+            var $this = $(this);
+            if (!$this.hasClass('panel-collapsed')) {
+                $this.parents('.panel').find('.panel-body').slideUp();
+                $this.addClass('panel-collapsed');
+                $this.find('i').removeClass('glyphicon-chevron-down').addClass('glyphicon-chevron-up');
+            } else {
+                $this.parents('.panel').find('.panel-body').slideDown();
+                $this.removeClass('panel-collapsed');
+                $this.find('i').removeClass('glyphicon-chevron-up').addClass('glyphicon-chevron-down');
+            }
+        });
+        $(document).ready(function () {
+            $('.panel-heading span.clickable').click();
+            $('.panel div.clickable').click();
+        });
+
+        /*panelCollapse_Already open*/
+        //$(document).on('click', '.panel-heading span.clickable', function (e) {
+        //    var $this = $(this);
+        //    if (!$this.hasClass('panel-collapsed')) {
+        //        $this.parents('.panel').find('.panel-body').slideUp();
+        //        $this.addClass('panel-collapsed');
+        //        $this.find('i').removeClass('glyphicon-chevron-up').addClass('glyphicon-chevron-down');
+        //    } else {
+        //        $this.parents('.panel').find('.panel-body').slideDown();
+        //        $this.removeClass('panel-collapsed');
+        //        $this.find('i').removeClass('glyphicon-chevron-down').addClass('glyphicon-chevron-up');
+        //    }
+        //})
+
+        /*WaffleNavigation_Script_open*/
+        $("#patientMenu-toggle").click(function (e) {
+            e.preventDefault();
+            $("#patientWrapper").toggleClass("active");
+        });
+        /*WaffleNavigation_Script_close*/
+        $("#exit-toggle").click(function (e) {
+            e.preventDefault();
+            $("#patientWrapper").toggleClass("active");
+        });
+
+        /*specialNote*/
+        $("#alert-toggle").click(function (e) {
+            e.preventDefault();
+            $("#alertWrapper").toggleClass("active");
+        });
+
+        /*Left navigationSlider*/
+        $("#menu-toggle").click(function (e) {
+            e.preventDefault();
+            $("#wrapper").toggleClass("active");
+        });
+
+        $(document).ready(function () {
+            $(".mySelect2").select2();
+        });
+
+        $(document).ready(function () {
+            $('.js-example-basic-multiple').select2();
+        });
+
+    </script>
+
+    <script type="text/javascript">
+
+
+
+        $(function () {
+            $("#datepicker").datepicker({
+                numberOfMonths: 3,
+                showButtonPanel: true
+            });
+        });
+        $(function () {
+            $("#tabs").tabs({
+                beforeLoad: function (event, ui) {
+                    ui.jqXHR.fail(function () {
+                        ui.panel.html(
+                            "Couldn't load this tab. We'll try to fix this as soon as possible. " +
+                            "tabs load fine");
+                    });
+                }
+            });
+        });
+        $(function () {
+            $("#tabs2").tabs({
+                beforeLoad: function (event, ui) {
+                    ui.jqXHR.fail(function () {
+                        ui.panel.html(
+                            "Couldn't load this tab. We'll try to fix this as soon as possible. " +
+                            "tabs load fine");
+                    });
+                }
+            });
+        });
+        $(function () {
+            $("#tabs3").tabs({
+                beforeLoad: function (event, ui) {
+                    ui.jqXHR.fail(function () {
+                        ui.panel.html(
+                            "Couldn't load this tab. We'll try to fix this as soon as possible. " +
+                            "tabs load fine");
+                    });
+                }
+            });
+        });
+        $(function () {
+            $("#tabs4").tabs({
+                beforeLoad: function (event, ui) {
+                    ui.jqXHR.fail(function () {
+                        ui.panel.html(
+                            "Couldn't load this tab. We'll try to fix this as soon as possible. " +
+                            "tabs load fine");
+                    });
+                }
+            });
+        });
+        $(function () {
+            $("#tab").tabs({
+                beforeLoad: function (event, ui) {
+                    ui.jqXHR.fail(function () {
+                        ui.panel.html(
+                            "Couldn't load this tab. We'll try to fix this as soon as possible. " +
+                            "tabs load fine");
+                    });
+                }
+            });
+        });
+        $(function () {
+            $("#tabs6").tabs({
+                beforeLoad: function (event, ui) {
+                    ui.jqXHR.fail(function () {
+                        ui.panel.html(
+                            "Couldn't load this tab. We'll try to fix this as soon as possible. " +
+                            "tabs load fine");
+                    });
+                }
+            });
+        });
+
+        $(document).ready(function () {
+            event.preventDefault();
+            jQuery.noConflict();
+            if ($('#hasSteps').val() == 'True') {
+                $('#statusModal').modal('show');
+            }
+            $('select[name="templates"]').change(function () {
+                $("#smsMessages_message").val($('select[name="templates"] option:selected').text());
+            }
+            );
+        });
+
+        function FillType() {
+            var stateId = $('#EnquiryType').val();
+            $.ajax({
+                url: '/Member/FillType',
+                type: "GET",
+                dataType: "JSON",
+                data: { queryType: stateId },
+                success: function (options) {
+                    $("#QueryT").html(""); // clear before appending new list
+                    $.each(options, function (i, option) {
+                        $("#QueryT").append(
+                            $('<option></option>').val(option.enquiryType).html(option.enquiryName));
+                    });
+                }
+            });
+        }
+
+        var $rows = $('#table tr');
+        $('#search').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $rows.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+
+        $(function () {
+            $('.go_back').click(function (e) {
+                e.preventDefault();
+                history.go(-1);
+            });
+        });
+
+        $('#zoomBtn').click(function () {
+            $('.zoom-btn-sm').toggleClass('scale-out');
+            if (!$('.zoom-card').hasClass('scale-out')) {
+                $('.zoom-card').toggleClass('scale-out');
+            }
+        });
+
+        $('.zoom-btn-sm').click(function () {
+            var btn = $(this);
+            var card = $('.zoom-card');
+            if ($('.zoom-card').hasClass('scale-out')) {
+                $('.zoom-card').toggleClass('scale-out');
+            }
+            if (btn.hasClass('zoom-btn-person')) {
+                card.css('background-color', '#d32f2f');
+            } else if (btn.hasClass('zoom-btn-doc')) {
+                card.css('background-color', '#fbc02d');
+            } else if (btn.hasClass('zoom-btn-tangram')) {
+                card.css('background-color', '#388e3c');
+            } else if (btn.hasClass('zoom-btn-report')) {
+                card.css('background-color', '#1976d2');
+            } else {
+                card.css('background-color', '#7b1fa2');
+            }
+        });
+
+    </script>
+}

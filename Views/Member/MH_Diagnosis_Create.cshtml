@@ -1,0 +1,326 @@
+﻿@model HaloCareCore.Models.Management.MentalHealthDiagnosis
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Mental health";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<comment>
+    <!--
+
+    -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .field-validation-error:before {
+        font-family: FontAwesome;
+        content: "\f06a\00a0";
+        animation: pulse 2s ease infinite;
+    }
+
+    .select2-container--default .select2-selection--single {
+        display: block !important;
+        max-width: 500px !important;
+        width: 100% !important;
+        max-height: 100px !important;
+        height: 30px !important;
+        margin-top: 5px !important;
+        margin-left: 10px !important;
+        padding: 6px 6px !important;
+        line-height: 1.428571429 !important;
+        color: #003366 !important;
+        border-radius: 0px !important;
+        border: none !important;
+        border-bottom: 1px solid #e8e6e6 !important;
+        background-color: transparent !important;
+        font-family: 'Century Gothic' !important;
+        -webkit-box-shadow: none !important;
+        box-shadow: none !important;
+    }
+
+        .select2-container--default .select2-selection--single:focus {
+            outline: none !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__placeholder {
+            color: white !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow b {
+            margin-top: -0px !important;
+        }
+
+    #datecheck:before,
+    #effdatecheck:before {
+        font-family: FontAwesome;
+        content: "\f06a\00a0";
+        animation: pulse 2s ease infinite;
+    }
+</style>
+<javascript>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet" />
+</javascript>
+
+<!----------------------------------------------------------------------------- html-top-navigation-panel  ---------------------------------------------------------------------------->
+<nav id="global-nav" class="nav">
+    <div class="pull-left title">
+        <h1 class="site-title_patientProfile">
+            <span><i class="fas fa-notes-medical"></i></span>&emsp; Mental health diagnosis
+        </h1>
+    </div>
+    <div class="pull-right title">
+        <h1 class="site-title_userID pull-right">
+            <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+        </h1>
+        <h1 class="site-title_userID pull-right">
+            @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+            {
+                <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+            }
+        </h1>
+        <h1 class="site-waffleIcon pull-right">
+            <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+        </h1>
+    </div>
+</nav>
+
+<!-------------------------------------------------------------------------------------- html-body ------------------------------------------------------------------------------------>
+<div class="dashboardContainer zero-padding">
+    <div class="patientDashboard_View">
+        <!--breadCrumbs-->
+        <ul class="breadcrumbs_patientDashboard">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+            <li><a class="go_back">Patient</a></li>
+            <li><a href="#">@ViewBag.Title</a></li>
+        </ul>
+
+        <!--Left navSlider -->
+        @Html.Partial("_navSlider_blank", new { })
+
+        <!--navCollection-->
+        <div class="navCollection_patientDashboard">
+            @Html.Partial("_navCollection")
+        </div>
+
+        <!--profileInformation-->
+        <div class="profileBar">
+            @Html.Action("_profileBar_edit", "Member", new { DependentID = Model.DependantID, pro = Context.Request.Query["pro"] })
+        </div>
+    </div>
+    <div class="profilebar-spacer-assignment"></div>
+    <!------------------------------------------------------------------------------------ form ----------------------------------------------------------------------------------->
+    <div class="row patientDashboard_container">
+        <h4 class="tableHeading">Add diagnosis</h4>
+        <hr class="fancyruler">
+        <br />
+        @using (Ajax.BeginForm("MH_Diagnosis_Create", "Member", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "divPath", OnSuccess = "hideModal(); alert('Saved');" }, new { id = "diagnosis-create" }))
+        {
+            @Html.AntiForgeryToken()
+
+            <div class="form-horizontal editForm">
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                @Html.Hidden("DependantID", (object)ViewBag.DependantID)
+                @Html.Hidden("pro", (object)ViewBag.Program)
+                <input type="hidden" name="conditionCode" id="conditionCode" value="@ViewBag.MappingCode" />
+
+                <div>
+                    <div id="warning_required_condition" class="hidden">
+                        <i class="fas fa-exclamation-circle pulser asterisk-warning-single"></i>
+                    </div>
+                    <div class="form-group">
+                        @Html.Label(null,"Condition", htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-9">
+                            @Html.DropDownList("Condition", null, "Select", htmlAttributes: new { @class = "", @required = "required", @onchange = "FillICD()" })
+                            <br />@Html.ValidationMessage("comorb", "", new { @class = "text-danger", @style = "font-size: 110%;margin-left: 1%" })
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <div id="warning_required_condition" class="hidden">
+                        <i class="fas fa-exclamation-circle pulser asterisk-warning-single"></i>
+                    </div>
+                    <div class="form-group">
+                        @Html.Label(null,"ICD-10", htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-9">
+                            @Html.DropDownList("icd10", new SelectList(Enumerable.Empty<SelectListItem>(), "icd10", "icd10"), "select", htmlAttributes: new { @class = "", @required = "required" })
+                            <i class="fas fa-question-circle information-icon icon-move" data-toggle="tooltip" data-original-title="This field is dependant on the condition selected"></i>
+                            <br />@Html.ValidationMessage("icd10", "", new { @class = "text-danger", @style = "font-size: 110%;margin-left: 1%" })
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.EffectiveDate, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-9">
+                        @*@Html.EditorFor(model => model.EffectiveDate, new { htmlAttributes = new { @class = "form-control-new dateLimit", type = "date", min = "1900-01-01" } })
+                            @Html.ValidationMessageFor(model => model.EffectiveDate, "", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 1%" })
+                            <div id="effdatecheck" class="text-danger hidden" style="font-size: 95%;margin-left: 1%; margin-top: -1%"></div>*@
+                        <input class="form-control-new startDate" data-val="true" id="EffectiveDate" name="EffectiveDate" type="date" min="1900-01-01" aria-required="true" aria-invalid="true" max="@DateTime.Now.ToString("yyyy-MM-dd")">
+                        @Html.ValidationMessageFor(model => model.EffectiveDate, "", new { @class = "text-danger", @style = "font-size: 95%;margin-left: 1%" })
+                        <div id="effdatecheck" class="text-danger hidden" style="font-size: 95%;margin-left: 1%; margin-top: -1%"></div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.EndDate, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-9">
+                        @*@Html.EditorFor(model => model.EndDate, new { htmlAttributes = new { @class = "form-control-new dateLimit", type = "date", min = "1900-01-01" } })
+                            @Html.ValidationMessageFor(model => model.EndDate, "", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 1%" })
+                            <div id="datecheck" class="text-danger hidden" style="font-size: 95%;margin-left: 1%; margin-top: -1%"></div>*@
+                        <input class="form-control-new startDate" data-val="true" id="EndDate" name="EndDate" type="date" min="1900-01-01" aria-required="true" aria-invalid="true" max="">
+                        @Html.ValidationMessageFor(model => model.EndDate, "", new { @class = "text-danger", @style = "font-size: 95%;margin-left: 1%" })
+                        <div id="enddatecheck" class="text-danger hidden" style="font-size: 95%;margin-left: 1%; margin-top: -1%"></div>
+                    </div>
+                </div>
+                <div id="anchor_clinComment">
+                    <div id="warning_required_comment" class="hidden">
+                        <i class="fas fa-exclamation-circle pulser asterisk-warning-single"></i>
+                    </div>
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.Comment, htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-9">
+                            <div class="">
+                                @Html.TextAreaFor(model => model.Comment, new { @placeholder = "comment", @class = "form-control-new" })
+                                @Html.ValidationMessageFor(model => model.Comment, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div style="text-align: center!important">
+                        <input id="submit" type="submit" value="Save" class="btn create-button" onclick="storageKey()" style="width: 15%" /><br />
+                        <input id="back" value="Back" class="btn reset-button go_back" onclick="backKey()" style="width: 15%!important" />
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+</div>
+
+@section scripts{
+    <script src="~/bundles/jqueryval"></script>
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+
+    @if (ViewBag.Message != null)
+    {
+        <script type="text/javascript">
+
+        window.onload = function () {
+            toastr.options.positionClass = 'toast-bottom-right';
+            toastr.options.timeOut = 10000;
+
+            toastr.error("@ViewBag.Message");
+
+        }
+        </script>
+    }
+
+    <!--Select dropdowns-->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function () { $("#Condition").select2({ multiple: false }); });
+        $(document).ready(function () { $("#icd10").select2({ multiple: false }); });
+    </script>
+    <script>
+        var dateControler = {
+            currentDate: null
+        }
+
+        $(document).on("change", ".dateLimit", function (event, ui) {
+            var now = new Date();
+            var selectedDate = new Date($(this).val());
+
+            if (selectedDate > now) {
+                $(this).val(dateControler.currentDate)
+            } else {
+                dateControler.currentDate = $(this).val();
+            }
+        });
+
+    </script>
+    <script>
+        //condition
+        $(document).ready(function () {
+            setInterval(function () {
+                if ($("#Condition").val() == "" || $("#Condition").val() == null || $("#Condition").val().toLowerCase() == "follow up") {
+                    $("#warning_required_condition").removeClass('hidden');
+                }
+                else {
+                    $("#warning_required_condition").addClass('hidden');
+                }
+            }, 0);
+        });
+    </script>
+    <script>
+        function backKey() {
+            localStorage.setItem("back_diagnosis", Date.now());
+        }
+        function storageKey() {
+            localStorage.setItem("create_diagnosis", Date.now());
+        }
+    </script>
+    <script>
+        function FillICD() {
+            var stateId = $('#Condition').val();
+            var depID = $('#DependantID').val();
+            var history = $('#history').val();
+            $.ajax({
+                url: '/Member/FillICD10_MH_Diagnosis',
+                type: "GET",
+                dataType: "JSON",
+                data: { condition: stateId, dependantID: depID, history: history },
+                success: function (options) {
+                    $("#icd10").html(""); // clear before appending new list
+                    $.each(options, function (i, option) {
+                        $("#icd10").append(
+                            $('<option></option>').val(option.icd10).html(option.icd10));
+                    });
+                }
+            });
+        }
+    </script>
+    <script>
+        $(document).ready(function () {
+            $('[data-toggle="tooltip"]').tooltip({
+                placement: 'top'
+            });
+        });
+    </script>
+    <script>
+        $(".startDate").blur(function () {
+            var start = $("#EffectiveDate").val();
+            var end = $("#EndDate").val();
+
+            if (end == "") { }
+            else {
+                if (end < start) {
+                    $('#enddatecheck').removeClass('hidden');
+                    $('span[data-valmsg-for="EndDate"]').html('<span style="font-size: 12px"><i class="fas fa-exclamation-circle"></i> </span>Treatment end date cannot precede Effective date.');
+                    return false;
+                }
+                else {
+                    $('#enddatecheck').addClass('hidden');
+                }
+            }
+        });
+    </script>
+    <script>
+        $(document).ready(function () {
+            $("#diagnosis-create").submit(function (e) {
+                if ($(this).valid()) {
+                    $("#submit").attr("disabled", true);
+                    return true;
+                }
+            });
+        });
+    </script>
+
+}

@@ -1,0 +1,319 @@
+﻿@model HaloCareCore.Models.Questionnaire.QuestionnaireOther
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "questionOther_Create";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<comment>
+    <!--
+        06 August 2019 -- HCare-758(Generel - Redirect to tab functionality)
+        Using jquery to add localStorage in order to redirect to the last tab that the user was on and a Submit/Save Button clicked. This will take you back to the origin tab.
+
+    -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .input-group-addon {
+        visibility: hidden;
+    }
+
+    textarea#generalComments {
+        display: block;
+        width: 460%;
+        max-width: 1500px !important;
+        height: 100px;
+        max-height: 250px;
+        padding: 6px 6px;
+        line-height: 1.428571429;
+        color: #003366;
+        vertical-align: middle;
+        border: 1px solid #f4f4f4;
+        background-color: transparent;
+        border-radius: 2px;
+        margin-left: -5%;
+        -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+        box-shadow: 1px 1px 1px 0px rgba(0,0,0,0.20);
+        -webkit-transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+        transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+        outline: none !important;
+        font-family: 'Century Gothic';
+        font-size: 100%;
+        font-weight: 200;
+        margin-top: -10%;
+    }
+</style>
+
+<div class="fullPanel_Container">
+    <div class="profilePanel_pathology">
+        <!--breadCrumbs-->
+        <ul class="breadcrumbs" style="margin-top: -1%; margin-bottom: 2%; margin-left: -1%">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+            <li><a class="go_back">Patient</a></li>
+            <li><a href="#">Hospitalisations</a></li>
+        </ul>
+
+        <!--navCollection-->
+        <div class="navButtons">
+            @Html.Partial("_navCollection")
+        </div>
+
+        <!--profileInformation-->
+        <div>
+            @Html.Action("_profileBar_edit", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })
+        </div>
+    </div>
+    <!--pageHeader-->
+    <nav id="global-nav" class="nav">
+        <div class="pull-left title">
+            <h1 class="site-title_patientProfile">
+                <span><img src="~/Content/Images/memberProfile/topBar Icons/clincalHistory.png" /></span>&emsp; Other
+            </h1>
+        </div>
+        <div class="pull-right title">
+            <h1 class="site-title_userID pull-right">
+                <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+            </h1>
+            <h1 class="site-title_userID pull-right">
+                @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                {
+                    <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                }
+            </h1>
+            <h1 class="site-waffleIcon pull-right">
+                <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+            </h1>
+        </div>
+    </nav>
+
+    <div class="row assignmentOverview_container">
+
+        <h4 class="summaryHeading">Create record</h4>
+        <hr class="fancyruler">
+        <br />
+        <br />
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+
+            <div class="form-horizontal createForm">
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                @Html.HiddenFor(model => model.dependentID)
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.occupation, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.occupation, new { htmlAttributes = new { @class = "contentBlock_Info" } })
+                        @Html.ValidationMessageFor(model => model.occupation, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.Label(null,"Shift worker", htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-8">
+                        <div class="questionRadio" style="color: black; margin-left: 2.5%">
+                            @Html.RadioButtonFor(model => model.shiftWorkCheck, true, new { @id = "shiftWorkCheck-true" }) Yes
+                            @Html.RadioButtonFor(model => model.shiftWorkCheck, false, new { @id = "shiftWorkCheck-false" }) No
+
+                            @Html.ValidationMessageFor(model => model.shiftWorkCheck, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.shiftWorker, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.shiftWorker, new { htmlAttributes = new { @class = "contentBlock_Info" } })
+                        @Html.ValidationMessageFor(model => model.shiftWorker, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.Label(null,"Lypohypertrophy", htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-8">
+                        <div class="questionRadio" style="color: black; margin-left: 2.5%">
+                            @Html.RadioButtonFor(model => model.lypohypertrophyCheck, true, new { @id = "lypohypertrophyCheck-true" }) Yes
+                            @Html.RadioButtonFor(model => model.lypohypertrophyCheck, false, new { @id = "lypohypertrophyCheck-false" }) No
+
+                            @Html.ValidationMessageFor(model => model.lypohypertrophyCheck, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.lypohypertrophy, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.lypohypertrophy, new { htmlAttributes = new { @class = "contentBlock_Info" } })
+                        @Html.ValidationMessageFor(model => model.lypohypertrophy, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.lypohypertrophyDate, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.lypohypertrophyDate, new { htmlAttributes = new { @class = "contentBlock_Info" } })
+                        @Html.ValidationMessageFor(model => model.lypohypertrophyDate, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.Label(null,"Drug user", htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-8">
+                        <div class="questionRadio" style="color: black; margin-left: 2.5%">
+                            @Html.RadioButtonFor(model => model.recDrugs, true, new { @id = "recDrugs-true" }) Yes
+                            @Html.RadioButtonFor(model => model.recDrugs, false, new { @id = "recDrugs-false" }) No
+
+                            @Html.ValidationMessageFor(model => model.recDrugs, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.recDrugsLastUsed, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.recDrugsLastUsed, new { htmlAttributes = new { @class = "contentBlock_Info" } })
+                        @Html.ValidationMessageFor(model => model.recDrugsLastUsed, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.Label(null,"Depressed", htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-8">
+                        <div class="questionRadio" style="color: black; margin-left: 2.5%">
+                            @Html.RadioButtonFor(model => model.depression, true, new { @id = "depression-true" }) Yes
+                            @Html.RadioButtonFor(model => model.depression, false, new { @id = "depression-false" }) No
+
+                            @Html.ValidationMessageFor(model => model.depression, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.depressionComment, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.depressionComment, new { htmlAttributes = new { @class = "contentBlock_Info" } })
+                        @Html.ValidationMessageFor(model => model.depressionComment, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.Label(null,"Diagnosed with TB", htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-8">
+                        <div class="questionRadio" style="color: black; margin-left: 2.5%">
+                            @Html.RadioButtonFor(model => model.tbDiagnosed, true, new { @id = "tbDiagnosed-true" }) Yes
+                            @Html.RadioButtonFor(model => model.tbDiagnosed, false, new { @id = "tbDiagnosed-false" }) No
+
+                            @Html.ValidationMessageFor(model => model.tbDiagnosed, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.tbTreatmentStartDate, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.tbTreatmentStartDate, new { htmlAttributes = new { @class = "contentBlock_Info" } })
+                        @Html.ValidationMessageFor(model => model.tbTreatmentStartDate, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.tbTreatmentEndDate, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.tbTreatmentEndDate, new { htmlAttributes = new { @class = "contentBlock_Info" } })
+                        @Html.ValidationMessageFor(model => model.tbTreatmentEndDate, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.Label(null,"Patient is pregnant", htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-8">
+                        <div class="questionRadio" style="color: black; margin-left: 2.5%">
+                            @Html.RadioButtonFor(model => model.Pregnant, true, new { @id = "Pregnant-true" }) Yes
+                            @Html.RadioButtonFor(model => model.Pregnant, false, new { @id = "Pregnant-false" }) No
+
+                            @Html.ValidationMessageFor(model => model.Pregnant, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.EDD, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.EDD, new { htmlAttributes = new { @class = "contentBlock_Info" } })
+                        @Html.ValidationMessageFor(model => model.EDD, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.programType, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        <div>
+                            @Html.DropDownListFor(model => model.programType, new List<SelectListItem>
+                            {
+                            new SelectListItem() { Text = "Diabetes", Value = "Diabetes"},
+                            new SelectListItem() { Text = "HIV", Value = "HIV"},
+                            new SelectListItem() { Text = "Oncology", Value = "Oncology"},
+                            new SelectListItem() { Text = "General Chronic", Value = "General Chronic"},
+
+                            }, " -- Select --", new { @class = "infoBox_editMember", @id = "programDescription", @style = "max-width: 800px!important; width: 490px; margin-left: 1%; overflow-x: scroll;" })
+
+                            @Html.ValidationMessageFor(model => model.programType, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.generalComments, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        <div class="checkbox">
+                            @Html.TextAreaFor(model => model.generalComments)
+                            @Html.ValidationMessageFor(model => model.generalComments, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="fixedBack" style="margin-left: 40%">
+                        <input value="Back" class="btn buttonRound_formBack go_back" style="width: 15%" />
+                        <input type="submit" value="Save" class="btn buttonRound_formCreate patientClinical" style="width: 15%" />
+
+                    </div>
+                </div>
+            </div>
+        }
+
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/bundles/jqueryui"></script>
+    <style src="~/Content/themes/base/css" )
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.7.1/js/bootstrap-datepicker.min.js"></script>
+    <!--Page redirect-->
+    <script>
+        $(document).ready(function () {
+            $(".patientClinical").on("click", function () {
+                localStorage.setItem("patientClinical", "clicked");
+            });
+        });
+    </script>
+    <script>
+        /*Date*/
+        $(function () {
+
+            $('.input-group.date').datepicker({
+                format: "dd M yyyy",
+                showButtonPanel: true,
+                autoclose: true,
+            });
+        });
+    </script>
+
+}

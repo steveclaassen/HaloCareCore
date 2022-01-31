@@ -1,0 +1,220 @@
+﻿@model HaloCareCore.Models.Communications.Queries
+
+@{
+    ViewBag.Title = "EditQuery";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+</style>
+
+<div class="administrationContentBlock zero-padding">
+
+    <!--pageHeader-->
+    <nav id="global-nav" class="nav">
+        <div class="pull-left title">
+            <h1 class="site-title_patientProfile">
+                <span><i class="fas fa-question-circle"></i></span>&emsp; Enquiries
+            </h1>
+        </div>
+        <div class="pull-right title">
+            <h1 class="site-title_userID pull-right">
+                <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+            </h1>
+            <h1 class="site-title_userID pull-right">
+                @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                {
+                    <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                }
+            </h1>
+            <h1 class="site-waffleIcon pull-right">
+                <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+            </h1>
+        </div>
+    </nav>
+
+    <!--breadCrumbs-->
+    <ul class="breadcrumbs">
+        <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+        <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+        <li><a href="#">Enquiries</a></li>
+    </ul>
+
+    <!--navCollection-->
+    <div style="margin-left: 0%!important; margin-top:-1.5%!important; margin-bottom: 1.5%!important">
+        @Html.Partial("_navCollection")
+    </div>
+
+    <!--Left navSlider -->
+    @Html.Partial("_navSliderX", new { DependentID = Context.Request.Query["DependentID"] })
+
+    <div style="margin-bottom: 3.5%"></div>
+
+
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="form-horizontal editForm">
+
+            <div class="row summaryContentBlock">
+                <h4 class="tableHeading">Enquiry search</h4>
+                <hr class="fancyruler">
+
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                @Html.HiddenFor(model => model.queryID)
+                @Html.HiddenFor(model => model.dependentID)
+                <br />
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.effectiveDate, htmlAttributes: new { @class = "control-label col-md-2 drop" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.effectiveDate, new { htmlAttributes = new { @class = "infoBox_Enrollment" } })
+                        @Html.ValidationMessageFor(model => model.effectiveDate, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.queryType, htmlAttributes: new { @class = "control-label col-md-2 drop" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.queryType, new { htmlAttributes = new { @class = "infoBox_Enrollment" } })
+                        @Html.ValidationMessageFor(model => model.queryType, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.querySubject, htmlAttributes: new { @class = "control-label col-md-2 drop" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.querySubject, new { htmlAttributes = new { @class = "infoBox_Enrollment" } })
+                        @Html.ValidationMessageFor(model => model.querySubject, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.query, htmlAttributes: new { @class = "control-label col-md-2 drop" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.query, new { htmlAttributes = new { @class = "infoBox_Enrollment" } })
+                        @Html.ValidationMessageFor(model => model.query, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.querySolution, htmlAttributes: new { @class = "control-label col-md-2 drop" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.querySolution, new { htmlAttributes = new { @class = "infoBox_Enrollment" } })
+                        @Html.ValidationMessageFor(model => model.querySolution, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.priority, htmlAttributes: new { @class = "control-label col-md-2 drop" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.priority, new { htmlAttributes = new { @class = "infoBox_Enrollment" } })
+                        @Html.ValidationMessageFor(model => model.priority, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.comment, htmlAttributes: new { @class = "control-label col-md-2 drop" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.comment, new { htmlAttributes = new { @class = "infoBox_Enrollment" } })
+                        @Html.ValidationMessageFor(model => model.comment, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Active, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        <div class="checkbox">
+                            @Html.EditorFor(model => model.Active)
+                            @Html.ValidationMessageFor(model => model.Active, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+                <br />
+                <div class="form-group">
+                    <div class="actionButton" style="margin-left: 48%">
+                        <input type="submit" value="Save" class="btn buttonRound_formCreate" style="width: 15%!important" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+    }
+</div>
+
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <script>
+        var $rows = $('#table tr');
+        $('#search').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $rows.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+
+
+        function sortTable(n) {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("table");
+            switching = true;
+            dir = "asc";
+
+            while (switching) {
+                switching = false;
+                rows = table.getElementsByTagName("TR");
+
+                for (i = 1; i < (rows.length - 1); i++) {
+
+                    shouldSwitch = false;
+
+                    x = rows[i].getElementsByTagName("TD")[n];
+                    y = rows[i + 1].getElementsByTagName("TD")[n];
+
+                    if (dir == "asc") {
+                        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                            //if so, mark as a switch and break the loop:
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (dir == "desc") {
+                        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                            //if so, mark as a switch and break the loop:
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+                if (shouldSwitch) {
+                    /*If a switch has been marked, make the switch
+                    and mark that a switch has been done:*/
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                    //Each time a switch is done, increase this count by 1:
+                    switchcount++;
+                } else {
+                    /*If no switching has been done AND the direction is "asc",
+                    set the direction to "desc" and run the while loop again.*/
+                    if (switchcount == 0 && dir == "asc") {
+                        dir = "desc";
+                        switching = true;
+                    }
+                }
+            }
+        }
+
+
+
+    </script>
+}
+
+

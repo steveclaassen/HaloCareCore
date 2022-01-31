@@ -1,0 +1,256 @@
+﻿@model HaloCareCore.Models.DoctorViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Details";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+</style>
+
+<div class="fullScreen_container zero-padding">
+
+    <!--pageHeader-->
+    <nav id="global-nav" class="nav">
+        <div class="pull-left title">
+            <h1 class="site-title_patientProfile">
+                <span><i class="fas fa-user-md"></i>&emsp; Doctors</span>
+            </h1>
+        </div>
+        <div class="pull-right title">
+            <h1 class="site-title_userID pull-right">
+                <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+            </h1>
+            <h1 class="site-title_userID pull-right">
+                @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                {
+                    <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                }
+            </h1>
+            <h1 class="site-waffleIcon pull-right">
+                <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+            </h1>
+        </div>
+    </nav>
+
+    <!--breadCrumbs-->
+    <ul class="breadcrumbs_fullScreens">
+        <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+        <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+        <li><a href="@Url.Action("Index", "Doctor", new {})">Doctors</a></li>
+        <li><a href="#">@ViewBag.Title</a></li>
+    </ul>
+
+    <!--navCollection-->
+    <div class="navCollection_fullScreens">
+        @Html.Partial("_navCollection")
+    </div>
+
+    <div style="margin-bottom: 1%"></div>
+
+    <div class="col-md-12 row">
+        <div class="heading-spacer"></div>
+        <div class="col-md-6"><div class="page-heading">Doctor details</div></div>
+        <hr class="heading-ruler">
+    </div>
+    <div class="col-md-12">
+        <div class="col-md-6">
+            <table class="table details-table table-hover" id="doctor-details">
+                <tbody>
+                    <tr>
+                        <td class="row-heading subject">@Html.DisplayNameFor(model => model.doctor.title)</td>
+                        <td class="row-information">@Html.DisplayFor(model => model.doctor.title)</td>
+                    </tr>
+                    <tr>
+                        <td class="row-heading subject">@Html.DisplayName("Full names")</td>
+                        <td class="row-information">@Html.DisplayFor(model => model.doctor.drLastName)</td>
+                    </tr>
+                    <tr>
+                        <td class="row-heading subject">@Html.DisplayNameFor(model => model.doctor.practiceNo)</td>
+                        <td class="row-information">@Html.DisplayFor(model => model.doctor.practiceNo)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="col-md-6">
+            <table class="table details-table table-hover" id="doctor-details">
+                <tbody>
+                    <tr>
+                        <td class="row-heading subject">@Html.DisplayNameFor(model => model.doctor.createdBy)</td>
+                        <td class="row-information">@Html.DisplayFor(model => model.doctor.createdBy)</td>
+                    </tr>
+                    <tr>
+                        <td class="row-heading subject">@Html.DisplayNameFor(model => model.doctor.createdDate)</td>
+                        <td class="row-information">@Html.DisplayFor(model => model.doctor.createdDate)</td>
+                    </tr>
+                    @if (Model.doctor.modifiedDate != null)
+                    {
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayNameFor(model => model.doctor.modifiedDate)</td>
+                            <td class="row-information">@Html.DisplayFor(model => model.doctor.modifiedDate)</td>
+                        </tr>
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayNameFor(model => model.doctor.modifiedBy)</td>
+                            <td class="row-information">@Html.DisplayFor(model => model.doctor.modifiedBy)</td>
+                        </tr>
+                    }
+
+                    <tr>
+                        <td class="row-heading subject">@Html.DisplayName("Status")</td>
+                        <td class="row-information"><span class="@(Model.doctor.active == true ? "chk-yes fas fa-circle" : "chk-no fas fa-circle")"></span>&emsp;@((Model.doctor.active == true) ? "Active" : "Inactive")</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <br />
+    <div class="col-md-12 row">
+        <div class="heading-spacer"></div>
+        <div class="col-md-6"><div class="page-heading">Address details</div></div>
+        <hr class="heading-ruler">
+    </div>
+    <div class="col-md-12">
+        <div class="col-md-6">
+            <table class="table details-table table-hover" id="address-details">
+                <tbody>
+
+                    <tr>
+                        <td class="row-heading subject">@Html.DisplayName("Street")</td>
+                        <td class="row-information">@Html.DisplayFor(model => model.doctorsInformation.Line1)</td>
+                    </tr>
+                    <tr>
+                        <td class="row-heading subject">@Html.DisplayName("Suburb")</td>
+                        <td class="row-information">@Html.DisplayFor(model => model.doctorsInformation.Line2)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="col-md-6">
+            <table class="table details-table table-hover" id="address-details">
+                <tbody>
+                    <tr>
+                        <td class="row-heading subject">@Html.DisplayNameFor(model => model.doctorsInformation.City)</td>
+                        <td class="row-information">@Html.DisplayFor(model => model.doctorsInformation.City)</td>
+                    </tr>
+                    <tr>
+                        <td class="row-heading subject">@Html.DisplayNameFor(model => model.doctorsInformation.Province)</td>
+                        <td class="row-information">@Html.DisplayFor(model => model.doctorsInformation.Province)</td>
+                    </tr>
+                    <tr>
+                        <td class="row-heading subject">@Html.DisplayNameFor(model => model.doctorsInformation.ZipCode)</td>
+                        <td class="row-information">@Html.DisplayFor(model => model.doctorsInformation.ZipCode)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <br />
+    <div class="col-md-12 row">
+        <div class="heading-spacer"></div>
+        <div class="col-md-6"><div class="page-heading">Contact details</div></div>
+        <hr class="heading-ruler">
+    </div>
+    <div class="col-md-12">
+        <div class="col-md-6">
+            <table class="table details-table table-hover" id="address-details">
+                <tbody>
+                    <tr>
+                        <td class="row-heading subject">@Html.DisplayNameFor(model => model.doctorsInformation.ContactName)</td>
+                        <td class="row-information">@Html.DisplayFor(model => model.doctorsInformation.ContactName)</td>
+                    </tr>
+                    <tr>
+                        <td class="row-heading subject">@Html.DisplayNameFor(model => model.doctorsInformation.MobileNumber)</td>
+                        <td class="row-information">@Html.DisplayFor(model => model.doctorsInformation.MobileNumber)</td>
+                    </tr>
+                    <tr>
+                        <td class="row-heading subject">@Html.DisplayNameFor(model => model.doctorsInformation.HomeNumber)</td>
+                        <td class="row-information">@Html.DisplayFor(model => model.doctorsInformation.HomeNumber)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="col-md-6">
+            <table class="table details-table table-hover" id="address-details">
+                <tbody>
+                    <tr>
+                        <td class="row-heading subject">@Html.DisplayNameFor(model => model.doctorsInformation.Email)</td>
+                        <td class="row-information">@Html.DisplayFor(model => model.doctorsInformation.Email)</td>
+                    </tr>
+                    <tr>
+                        <td class="row-heading subject">@Html.DisplayNameFor(model => model.doctorsInformation.WorkNumber)</td>
+                        <td class="row-information">@Html.DisplayFor(model => model.doctorsInformation.WorkNumber)</td>
+                    </tr>
+                    <tr>
+                        <td class="row-heading subject">@Html.DisplayNameFor(model => model.doctorsInformation.Fax)</td>
+                        <td class="row-information">@Html.DisplayFor(model => model.doctorsInformation.Fax)</td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+    @*<div class="col-md-12 row"> <!--hcare-1449: remove linked patients-->
+            <div class="heading-spacer"></div>
+            <div class="col-md-6"><div class="page-heading">Patient's linked</div></div>
+            <hr class="heading-ruler">
+        </div>
+        <div class="col-md-12">
+            <div id="linked-patients" class="form-group">
+                <div class="row">
+                    <table class="table mh-table table-hover" style="margin-left: 1.6%">
+                        <thead>
+                            <tr>
+                                <th style="width: 16%; text-align: center!important">@Html.DisplayNameFor(model => model.dependants[0].dependentCode)<i class="fa fa-fw fa-sort"></i></th>
+                                <th style="width: 50%; text-align: left!important">@Html.DisplayNameFor(model => model.dependants[0].fullName_ul)<i class="fa fa-fw fa-sort"></i></th>
+                                <th style="width: 10%; text-align: left!important">@Html.DisplayNameFor(model => model.dependants[0].idNumber)<i class="fa fa-fw fa-sort"></i></th>
+                                <th style="width: 10%; text-align: left!important">@Html.DisplayNameFor(model => model.dependants[0].birthDate)<i class="fa fa-fw fa-sort"></i></th>
+                                <th style="width: 10%; text-align: left!important">@Html.DisplayNameFor(model => model.dependants[0].isPrinciple)</th>
+                                <th style="width: 10%; text-align: center!important">@Html.DisplayName("Action")</th>
+                            </tr>
+                        </thead>
+                        @if (Model.dependants.Count() == 0)
+                        {
+                            <tr><td colspan="7" style="text-align: center!important; color: rgba(128, 128, 128, 0.50)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="color: rgba(128, 128, 128, 0.50)"></i></span> no records found</td></tr>
+                        }
+                        else
+                        {
+                            foreach (var item in Model.dependants)
+                            {
+                                <tbody>
+                                    <tr style="text-indent: 5px">
+                                        <td style="text-align: center!important">@Html.DisplayFor(Modelitem => item.dependentCode)</td>
+                                        <td style="text-align: left!important">@Html.DisplayFor(Modelitem => item.fullName_ul)</td>
+                                        <td style="text-align: left!important">@Html.DisplayFor(Modelitem => item.idNumber)</td>
+                                        <td style="text-align: left!important" data-dateformat="DD-MM-YYYY">@Html.DisplayFor(Modelitem => item.birthDate)</td>
+                                        <td style="text-align:center!important"><span class="@(item.isPrinciple == true ? "check-yes far fa-check-circle" : "check-no far fa-times-circle")"></span></td>
+                                        <td class="button-link" style="text-align:center!important">
+                                            <input type="submit" id="patient-profile-view" class="link-button" value="View" onclick="location.href='@Url.Action("MemberFileView", "Member", new { DependentID = item.DependantID }, null)'" />
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            }
+                        }
+                    </table>
+                </div>
+            </div>
+        </div>*@
+    <div class="form-group">
+        <div class="text-center">
+            <input id="edit" value="Edit" class="btn edit-button" onclick="location.href = '@Url.Action("Edit", "Doctor", new { id = Model.doctor.doctorID })'; editKey();" style="width: 15%!important; margin-top: 2%" /><br />
+            <input id="back" value="Back" class="btn reset-button go_back" onclick="backKey()" style="width: 15%!important" />
+        </div>
+    </div>
+
+</div>
+
+
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+
+}
+

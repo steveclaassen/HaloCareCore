@@ -1,0 +1,117 @@
+﻿@model HaloCareCore.Models.Script.ScriptItems
+
+@{
+    ViewBag.Title = "AddScript";
+    Layout = "~/Views/Shared/_LayoutModal.cshtml";
+}
+
+<style>
+
+    .assignmentModal_AddScript {
+        width: 85% !important;
+        background-color: #fff;
+        border: none;
+        box-shadow: 2px 2px 1px 0px rgba(0,0,0,0.38);
+        position: relative;
+        margin: auto;
+        display: block;
+        padding: 0px;
+        border-radius: 5px;
+        margin-top: 0% !important;
+        z-index: 100 !important;
+    }
+</style>
+<div class="assignmentModal_AddScript">
+
+    @using (Html.BeginForm("_AddScriptItem", "Member", FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(model => model.scriptID)
+        @Html.HiddenFor(model => model.modifiedBy)
+    <div class="form-horizontal editForm">
+        <div class="modal-header modal-header-primary">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true" id="assignmentModalClose">×</button>
+            <h2 class="modalHeading">Add script item</h2>
+        </div>
+        <br />
+        <div class="form-group" style="margin-top: 1%!important">
+            @Html.Label(null,"Product search", htmlAttributes: new { @class = "control-label col-md-3 dropxx" })
+            <div class="col-md-10">
+                @Html.TextBox("prdName", null, new { @class = "infoBox_scriptItem", @onchange = "FillProducts()" })
+                @Html.ValidationMessageFor(model => model.nappiCode, "", new { @class = "text-danger" })
+
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.Label(null,"Product name", htmlAttributes: new { @class = "control-label col-md-3 dropxx" })
+            <div class="col-md-10">
+                @Html.DropDownList("proName", new SelectList(Enumerable.Empty<SelectListItem>(), "nappiCode", "productName"), "**Select**", htmlAttributes: new { @class = "infoBox_scriptItem" })
+                @Html.ValidationMessageFor(model => model.nappiCode, "", new { @class = "text-danger" })
+
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.directions, htmlAttributes: new { @class = "control-label col-md-3 dropxx" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.directions, new { htmlAttributes = new { @class = "infoBox_scriptItem" } })
+                @Html.ValidationMessageFor(model => model.directions, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.quantity, htmlAttributes: new { @class = "control-label col-md-3 dropxx" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.quantity, new { htmlAttributes = new { @class = "infoBox_scriptItem", @type = "number", @min = "0" } })
+                @Html.ValidationMessageFor(model => model.quantity, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.icd10code, htmlAttributes: new { @class = "control-label col-md-3 dropxx" })
+            <div class="col-md-10">
+                @Html.DropDownList("icd10", null, "**Select**", htmlAttributes: new { @class = "infoBox_scriptItem" })
+            </div>
+        </div>
+        <br />
+        <hr class="fancyruler" />
+        <div class="modalFooter_popup">
+            <div class="col-md-offset-2 col-md-10" style="margin-bottom: -1%!important">
+                <input type="submit" value="Add" class="btn buttonRound_formCreate" style="width: 18%!important" />
+                <button type="button" class="btn buttonRound_formClose" data-dismiss="modal" style="width: 18%!important;">Cancel</button>
+            </div>
+        </div>
+        <br />
+    </div>
+}
+    </div>
+
+
+
+    @section Scripts {
+        <script src="~/bundles/jqueryval"></script>
+        <script src="http://code.jquery.com/jquery-latest.js"></script>
+        <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+        <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+        <script type="text/javascript">
+            function FillProducts() {
+                var stateId = $('#prdName').val();
+                if ($('#prdName').val().length >= 3) {
+                    $.ajax({
+                        url: '/Member/FillProduct',
+                        type: "GET",
+                        dataType: "JSON",
+                        data: { prodName: stateId },
+                        success: function (options) {
+                            $("#proName").html(""); // clear before appending new list
+                            $.each(options, function (i, option) {
+                                $("#proName").append(
+                                    $('<option></option>').val(option.nappiCode).html(option.productName));
+                            });
+                        }
+                    });
+                }
+            }
+        </script>
+    }

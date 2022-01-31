@@ -1,0 +1,236 @@
+﻿@model HaloCareCore.Models.Validation.PathologyTypes
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Create";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<comment>
+    <!--
+        08 Sepetember 2020 -- HCare-970(Pathology Type Master screen)
+    -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .field-validation-error:before {
+        font-family: FontAwesome;
+        content: "\f06a\00a0";
+        animation: pulse 2s ease infinite;
+    }
+
+    .error-alert {
+        width: 100%;
+        margin: 0 auto;
+        background-color: rgba(217, 83, 79, 0.1);
+        padding: 10px;
+        border-left-color: #d9534f !important;
+        border: 1px solid transparent;
+        border-left-width: 5px;
+        border-radius: 3px;
+        margin: 0 auto;
+        font-family: 'Open Sans', sans-serif;
+        font-size: 12px;
+        margin: 0 0 5px 0;
+        margin-top: -10px;
+        margin-bottom: 20px;
+    }
+
+        .error-alert span {
+            color: #d9534f;
+            text-align: center;
+        }
+</style>
+<javascript>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+</javascript>
+
+<div class="fullScreen_container">
+    <!----------------------------------------------------------------------------- html-top-navigation-panel  ---------------------------------------------------------------------------->
+    <navigation>
+        <nav id="global-nav" class="nav">
+            <div class="pull-left title">
+                <h1 class="site-title_patientProfile">
+                    <span><img src="~/Content/Images/_2020/icons/banner-icon/pathology-white.png" /></span>&emsp; Pathology type
+                </h1>
+            </div>
+            <div class="pull-right title">
+                <div class="site-title_userID pull-right">
+                    <div class="halocareLogoX"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+                </div>
+                <h1 class="site-title_userID pull-right">
+                    @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                    {
+                        <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                    }
+                </h1>
+                <h1 class="site-waffleIcon pull-right">
+                    <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+                </h1>
+            </div>
+        </nav>
+        <ul class="breadcrumbs_fullScreens">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+            <li><a href="@Url.Action("PathologyType_Index", "Member", new {})">Pathology types</a></li>
+            <li><a href="#">@ViewBag.Title</a></li>
+        </ul>
+        <div class="navCollection_fullScreens">
+            @Html.Partial("_navCollection")
+        </div>
+
+        <div style="margin-bottom: 3%"></div>
+    </navigation>
+    <!-------------------------------------------------------------------------------------- html-body ------------------------------------------------------------------------------------>
+    <div class="container-tab">
+        <div class="row">
+            <div class="span12">
+                <div class="col-md-12 row">
+                    <div class="col-md-6"><h4 class="subHeading">Create new</h4></div>
+                    <hr class="fancyruler">
+                    @using (Html.BeginForm())
+                    {
+                        @Html.AntiForgeryToken()
+                        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                        <div class="hidden-fields">
+                            <input type="hidden" name="code-validation" id="code-validation" />
+                            <input type="hidden" name="description-validation" id="description-validation" />
+                            <div class="col-md-12"><div id="duplicate-code-notice" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; Code already exists!</span></div></div></div>
+                            <div class="col-md-12"><div id="duplicate-description-notice" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; Description already exists!</span></div></div></div>
+                            <input type="hidden" name="error-code" id="error-code" value="@ViewBag.Code" />
+                            <input type="hidden" name="error-description" id="error-description" value="@ViewBag.Description" />
+                            <div class="col-md-12"><div id="error-duplicate-code" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; The ID with <b>Code:</b> @ViewBag.Code, already exists!</span></div></div></div>
+                            <div class="col-md-12"><div id="error-duplicate-description" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; The Type with <b>Description:</b> @ViewBag.Description, already exists!</span></div></div></div>
+                            <div class="col-md-12"><div id="error-duplicate" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; The combination, <b>Code:</b> @ViewBag.Code & <b>Description:</b> @ViewBag.Description, already exists!</span></div></div></div>
+                        </div>
+
+                        <div class="form-horizontal editForm">
+                            <div class="row">
+                                <br />
+                                <div class="form-group">
+                                    @Html.LabelFor(model => model.id, htmlAttributes: new { @class = "control-label col-md-2" })
+                                    <div class="col-md-10">
+                                        @Html.EditorFor(model => model.id, new { htmlAttributes = new { @class = "form-control-new", @onblur = "CheckCode();" } })
+                                        @Html.ValidationMessageFor(model => model.id, "", new { @class = "text-danger", @style = "font-size: 90%; margin-left: 1%" })
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    @Html.LabelFor(model => model.pathologyType, htmlAttributes: new { @class = "control-label col-md-2" })
+                                    <div class="col-md-10">
+                                        @Html.EditorFor(model => model.pathologyType, new { htmlAttributes = new { @class = "form-control-new", @onblur = "CheckName();" } })
+                                        @Html.ValidationMessageFor(model => model.pathologyType, "", new { @class = "text-danger", @style = "font-size: 90%; margin-left: 1%" })
+                                    </div>
+                                </div>
+
+                                <div class="fixed-btn">
+                                    <input id="submit" type="submit" value="Submit" class="btn create-button" onclick="storageKey()" style="width: 15%" /><br />
+                                    <input type="text" value="Back" class="btn reset-button go_back" onclick="backKey()" />
+                                </div>
+
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/bundles/jqueryval"></script>
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+    <script>
+        function CheckCode() {
+            var code = $('#id').val();
+            code = code.trim();
+            $("#code-validation").val("");
+
+            $.ajax({
+                url: '/Member/PathologyTypeCodeCheck',
+                type: "POST",
+                dataType: "JSON",
+                data: { code: code },
+                success: function (result) {
+                    var cod3 = result.id;
+                    if (cod3.toLowerCase() == code.toLowerCase()) {
+                        $("#duplicate-code-notice").removeClass("hidden");
+                        $('span[data-valmsg-for="id"]').html('<span style="font-size: 12px"><i class="fas fa-exclamation-circle"></i> </span>Code already exists!');
+                        $("#code-validation").val(cod3);
+                    }
+                },
+                error: function (result) {
+                    $("#duplicate-code-notice").addClass("hidden");
+                    $('span[data-valmsg-for="id"]').html('');
+                }
+            });
+        }
+
+        $("#submit").click(function () {
+            if ($("#code-validation").val().length > 0) {
+                $("#id").focus();
+                return false;
+            }
+        });
+
+    </script>
+    <script>
+        function CheckName() {
+            var name = $('#pathologyType').val();
+            name = name.trim();
+            $("#description-validation").val("");
+
+            $.ajax({
+                url: '/Member/PathologyTypeNameCheck',
+                type: "POST",
+                dataType: "JSON",
+                data: { name: name },
+                success: function (result) {
+                    var description = result.pathologyType;
+                    if (description.toLowerCase() == name.toLowerCase()) {
+                        $("#duplicate-description-notice").removeClass("hidden");
+                        $('span[data-valmsg-for="pathologyType"]').html('<span style="font-size: 12px"><i class="fas fa-exclamation-circle"></i> </span>Description already exists!');
+                        $("#description-validation").val(description);
+                    }
+                },
+                error: function (result) {
+                    $('span[data-valmsg-for="pathologyType"]').html('');
+                    $("#duplicate-description-notice").addClass("hidden");
+                }
+            });
+        }
+
+        $("#submit").click(function () {
+            if ($("#description-validation").val().length > 0) {
+                $("#pathologyType").focus();
+                return false;
+            }
+        });
+
+    </script>
+    <script>
+        function backKey() {
+            localStorage.setItem("back_pathologytype", Date.now());
+        }
+        function storageKey() {
+            localStorage.setItem("create_pathologytype", Date.now());
+        }
+    </script>
+    <script>
+        $(document).ready(function () {
+            var c = $('#error-code').val();
+            var d = $('#error-description').val();
+            if (c.length > 0 && d.length > 0) {
+                $("#error-duplicate").removeClass("hidden");
+            }
+            else if (c.length > 0) {
+                $("#error-duplicate-code").removeClass("hidden");
+            }
+            else if (d.length > 0) {
+                $("#error-duplicate-description").removeClass("hidden");
+            }
+        });
+    </script>
+}

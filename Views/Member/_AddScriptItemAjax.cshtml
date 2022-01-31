@@ -1,0 +1,48 @@
+﻿@model HaloCareCore.Models.ScriptViewModel
+
+
+
+
+    @using (Ajax.BeginForm("_AddScriptItemAjax", "Member", new AjaxOptions { OnSuccess = "OnSuccessItem", OnFailure = "OnFailure", }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.Hidden("scriptID")
+        <div class="form-horizontal editForm" style="margin-bottom: 3%!important">
+            <table class="col-md-12 table scriptProduct_Table">
+                <tr>
+                    <th>@Html.Label(null,"Product search", htmlAttributes: new { @class = "control-label" })</th>
+                    <th>@Html.Label(null,"Product name", htmlAttributes: new { @class = "control-label" })</th>
+                    <th>@Html.LabelFor(model => model.directions, htmlAttributes: new { @class = "control-label" })</th>
+                    <th>@Html.LabelFor(model => model.quantity, htmlAttributes: new { @class = "control-label" })</th>
+                    <th>@Html.LabelFor(model => model.icd10code, htmlAttributes: new { @class = "control-label" })</th>
+                </tr>
+
+                <tr style="background: none!important">
+                    <td style="margin-right:50%!important">@Html.TextBox("prodName", null, new { @class = "infoBox_scriptModal", @onchange = "FillProduct()" })</td>
+                    <td>
+                        @Html.DropDownList("productName", new SelectList(Enumerable.Empty<SelectListItem>(), "nappiCode", "productName"), "**Select**", htmlAttributes: new { @class = "infoBox_scriptModal" })
+                        @Html.ValidationMessageFor(model => model.directions, "", new { @class = "text-danger" })
+                    </td>
+                    <td>
+                        @Html.EditorFor(model => model.directions, new { htmlAttributes = new { @class = "infoBox_scriptModal" } })
+                        @Html.ValidationMessageFor(model => model.directions, "", new { @class = "text-danger" })
+                    </td>
+                    <td>
+                        @Html.EditorFor(model => model.quantity, new { htmlAttributes = new { @class = "infoBox_scriptModal" } })
+                        @Html.ValidationMessageFor(model => model.quantity, "", new { @class = "text-danger" })
+                    </td>
+                    <td>@Html.DropDownList("icd10", null, "**Select**", htmlAttributes: new { @class = "infoBox_scriptModal" })</td>
+                </tr>
+            </table>
+
+            <br />
+            <br />
+            <div class="modalFooter_popup">
+                <div class="col-md-12">
+                    <input type="submit" value="Add" class="btn buttonRound_scriptAdd" style="width: 15%!important; margin-left: 52%!important" />
+                    <button type="button" class="btn buttonRound_scriptCancel" data-dismiss="modal" style="width: 15%!important;">Cancel</button>
+                </div>
+            </div>
+        </div>
+    }
+

@@ -1,0 +1,493 @@
+﻿@model HaloCareCore.Models.ClinicalViewModel
+@using HaloCareCore.Extensions
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Pathology history";
+    Layout = "~/Views/Shared/_LayoutMember.cshtml";
+}
+
+<comment>
+    <!--
+        28 August 2019 -- HCare-772 (Pathology data - Mandatory dates)
+        If the pathology field is populated with a value, the date field associated with that field is changed to required. If for example the Haemoglobin field is populated with a value and the Effective date underneath it is removed by the user. The form will NOT submit and show the user
+        the required fields. This has been applied to the Create Pathology view when adding pathology from profile as well as in the InsertPathology Task
+
+        02 July 2020 -- HCare-1079(Pathology name changes)
+        Updated the headings to read from the pathology model
+
+    -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+</style>
+
+<!------------------------------------------------------------------------------------ jQ-dateSort  ----------------------------------------------------------------------------------->
+<javascript>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="http://code.jquery.com/jquery.unobtrusive-ajax.min.js"></script>
+    <script src="js/jquery.tablesorter.min.js"></script>
+</javascript>
+
+<!----------------------------------------------------------------------------- html-top-navigation-panel  ---------------------------------------------------------------------------->
+<nav id="global-nav" class="nav" style="z-index: 10000">
+    <div class="pull-left title">
+        <h1 class="site-title_patientProfile">
+            <span><img src="~/Content/Images/memberProfile/topBar Icons/bloods.png" style="width: 2.8%" /></span>&emsp; Pathology
+        </h1>
+    </div>
+    <div class="pull-right title">
+        <h1 class="site-title_userID pull-right">
+            <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+        </h1>
+        <h1 class="site-title_userID pull-right">
+            @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+            {
+                <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+            }
+        </h1>
+        <h1 class="site-waffleIcon pull-right">
+            <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+        </h1>
+    </div>
+</nav>
+
+<!-------------------------------------------------------------------------------------- html-body ------------------------------------------------------------------------------------>
+
+<div class="dashboardContainer zero-padding">
+
+    <div class="patientDashboard_View">
+        <!-- breadcrumbs -->
+        <ul class="breadcrumbs_patientDashboard">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+            <li><a href="@Url.Action("patientClinical", "Member", new {DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"]})">Patient</a></li>
+            <li><a href="#">Pathology</a></li>
+        </ul>
+        <!-- navigation-collection -->
+        <div class="navCollection_patientDashboard">
+            @Html.Partial("_navCollection")
+        </div>
+        <!-- left-navigation-panel -->
+        @Html.Partial("_navSlider", new { DependentID = Context.Request.Query["DependentID"] })
+        <!--profile-information-->
+        <div class="profileBar">
+            @Html.Action("_profileBar_edit", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })
+        </div>
+    </div>
+
+    <div class="profilebar-spacer"></div>
+
+    <div class="patientDashboard_container">
+
+        <h4 class="tableHeading">HIV pathology history</h4>
+        <hr class="fancyruler">
+
+        <table class="table patient-clinical-table sortable" id="pathologyTable">
+            <thead>
+                <tr>
+                    <th onclick="pathologyTable(0)">@Html.DisplayNameFor(model => model.hivPathology.hivEliza) <i class="fa fa-fw fa-sort"></i></th>
+                    <th onclick="pathologyTable(1)">@Html.DisplayNameFor(model => model.hivPathology.hivElizaeffectiveDate) <i class="fa fa-fw fa-sort"></i></th>
+                    <th onclick="pathologyTable(2)">@Html.DisplayNameFor(model => model.hivPathology.CD4Count) <i class="fa fa-fw fa-sort"></i></th>
+                    <th onclick="pathologyTable(3)">@Html.DisplayNameFor(model => model.hivPathology.CD4CounteffectiveDate) <i class="fa fa-fw fa-sort"></i></th>
+                    <th onclick="pathologyTable(4)">@Html.DisplayNameFor(model => model.hivPathology.CD4Percentage) <i class="fa fa-fw fa-sort"></i></th>
+                    <th onclick="pathologyTable(5)">@Html.DisplayNameFor(model => model.hivPathology.CD4PercentageeffectiveDate) <i class="fa fa-fw fa-sort"></i></th>
+                    <th onclick="pathologyTable(6)">@Html.DisplayNameFor(model => model.hivPathology.viralLoad) <i class="fa fa-fw fa-sort"></i></th>
+                    <th onclick="pathologyTable(7)">@Html.DisplayNameFor(model => model.hivPathology.viralLoadeffectiveDate) <i class="fa fa-fw fa-sort"></i></th>
+                    <th style="text-align: center!important; width: 8%">Action</th>
+                </tr>
+            </thead>
+
+            @foreach (var item in Model.hivPathologies)
+            {
+                <tbody>
+                    <tr>
+                        <!-- hiv-eliza -->
+                        <td class="rule-broken">@Html.DisplayFor(modelItem => item.hivEliza)</td>
+                        <td class="rule-broken">@Html.DisplayFor(modelItem => item.hivElizaeffectiveDate)</td>
+                        <!-- cd4count -->
+                        @if (Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "cd4count").Count() != 0)
+                        {
+                            foreach (var rule in Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "cd4count"))
+                            {
+                                if (item.CD4Count > rule.greater && rule.greater != 0)
+                                {
+                                    <td class="rule-broken">
+                                        @if (item.CD4Count == 0 || item.CD4Count.ToString() == "0.00")
+                                        {
+                                        }
+                                        else
+                                        {
+                                            @Html.DisplayFor(modelItem => item.CD4Count)
+                                        }
+                                    </td>
+                                    break;
+                                }
+                                else if (item.CD4Count < rule.less && rule.less != 0)
+                                {
+                                    <td class="rule-broken">
+                                        @if (item.CD4Count == 0 || item.CD4Count.ToString() == "0.00")
+                                        {
+                                        }
+                                        else
+                                        {
+                                            @Html.DisplayFor(modelItem => item.CD4Count)
+                                        }
+                                    </td>
+                                    break;
+                                }
+                                else
+                                {
+                                    <td>
+                                        @if (item.CD4Count == 0 || item.CD4Count.ToString() == "0.00")
+                                        {
+                                        }
+                                        else
+                                        {
+                                            @Html.DisplayFor(modelItem => item.CD4Count)
+                                        }
+                                    </td>
+                                    break;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            <td>
+                                @if (item.CD4Count == 0 || item.CD4Count.ToString() == "0.00")
+                                {
+                                }
+                                else
+                                {
+                                    @Html.DisplayFor(modelItem => item.CD4Count)
+                                }
+                            </td>
+                        }
+                        <!-- cd4count-effective-date -->
+                        @if (Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "cd4count").Count() != 0)
+                        {
+                            foreach (var rule in Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "cd4count"))
+                            {
+                                if (item.CD4Count > rule.greater && rule.greater != 0)
+                                {
+                                    <td class="rule-broken">
+                                        @if (item.CD4Count == 0 || item.CD4Count.ToString() == "0.00")
+                                        {
+                                        }
+                                        else
+                                        {
+                                            @Html.DisplayFor(modelItem => item.CD4CounteffectiveDate)
+                                        }
+                                    </td>
+                                    break;
+                                }
+                                else if (item.CD4Count < rule.less && rule.less != 0)
+                                {
+                                    <td class="rule-broken">
+                                        @if (item.CD4Count == 0 || item.CD4Count.ToString() == "0.00")
+                                        {
+                                        }
+                                        else
+                                        {
+                                            @Html.DisplayFor(modelItem => item.CD4CounteffectiveDate)
+                                        }
+                                    </td>
+                                    break;
+                                }
+                                else
+                                {
+                                    <td>
+                                        @if (item.CD4Count == 0 || item.CD4Count.ToString() == "0.00")
+                                        {
+                                        }
+                                        else
+                                        {
+                                            @Html.DisplayFor(modelItem => item.CD4CounteffectiveDate)
+                                        }
+                                    </td>
+                                    break;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            <td>
+                                @if (item.CD4Count == 0 || item.CD4Count.ToString() == "0.00")
+                                {
+                                }
+                                else
+                                {
+                                    @Html.DisplayFor(modelItem => item.CD4CounteffectiveDate)
+                                }
+                            </td>
+                        }
+                        <!-- cd4count-% -->
+                        @if (Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "cd4percentage").Count() != 0)
+                        {
+                            foreach (var rule in Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "cd4percentage"))
+                            {
+                                if (item.CD4Percentage > rule.greater && rule.greater != 0)
+                                {
+                                    <td class="rule-broken">
+                                        @if (item.CD4Percentage == 0 || item.CD4Percentage.ToString() == "0.00")
+                                        {
+                                        }
+                                        else
+                                        {
+                                            @Html.DisplayFor(modelItem => item.CD4Percentage)
+                                        }
+                                    </td>
+                                    break;
+                                }
+                                else if (item.CD4Percentage < rule.less && rule.less != 0)
+                                {
+                                    <td class="rule-broken">
+                                        @if (item.CD4Percentage == 0 || item.CD4Percentage.ToString() == "0.00")
+                                        {
+                                        }
+                                        else
+                                        {
+                                            @Html.DisplayFor(modelItem => item.CD4Percentage)
+                                        }
+                                    </td>
+                                    break;
+                                }
+                                else
+                                {
+                                    <td>
+                                        @if (item.CD4Percentage == 0 || item.CD4Percentage.ToString() == "0.00")
+                                        {
+                                        }
+                                        else
+                                        {
+                                            @Html.DisplayFor(modelItem => item.CD4Percentage)
+                                        }
+                                    </td>
+                                    break;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            <td>
+                                @if (item.CD4Percentage == 0 || item.CD4Percentage.ToString() == "0.00")
+                                {
+                                }
+                                else
+                                {
+                                    @Html.DisplayFor(modelItem => item.CD4Percentage)
+                                }
+                            </td>
+                        }
+                        <!-- cd4count-%-effective-data -->
+                        @if (Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "cd4percentage").Count() != 0)
+                        {
+                            foreach (var rule in Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "cd4percentage"))
+                            {
+                                if (item.CD4Percentage > rule.greater && rule.greater != 0)
+                                {
+                                    <td class="rule-broken">
+                                        @if (item.CD4Percentage == 0 || item.CD4Percentage.ToString() == "0.00")
+                                        {
+                                        }
+                                        else
+                                        {
+                                            @Html.DisplayFor(modelItem => item.CD4PercentageeffectiveDate)
+                                        }
+                                    </td>
+                                    break;
+                                }
+                                else if (item.CD4Percentage < rule.less && rule.less != 0)
+                                {
+                                    <td class="rule-broken">
+                                        @if (item.CD4Percentage == 0 || item.CD4Percentage.ToString() == "0.00")
+                                        {
+                                        }
+                                        else
+                                        {
+                                            @Html.DisplayFor(modelItem => item.CD4PercentageeffectiveDate)
+                                        }
+                                    </td>
+                                    break;
+                                }
+                                else
+                                {
+                                    <td>
+                                        @if (item.CD4Percentage == 0 || item.CD4Percentage.ToString() == "0.00")
+                                        {
+                                        }
+                                        else
+                                        {
+                                            @Html.DisplayFor(modelItem => item.CD4PercentageeffectiveDate)
+                                        }
+                                    </td>
+                                    break;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            <td>
+                                @if (item.CD4Percentage == 0 || item.CD4Percentage.ToString() == "0.00")
+                                {
+                                }
+                                else
+                                {
+                                    @Html.DisplayFor(modelItem => item.CD4PercentageeffectiveDate)
+                                }
+                            </td>
+                        }
+                        <!-- viral-load -->
+                        @if (Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "viralload").Count() != 0)
+                        {
+                            foreach (var rule in Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "viralload"))
+                            {
+                                if (item.viralLoad > rule.greater && rule.greater != 0)
+                                {
+                                    <td class="rule-broken">
+                                        @if (item.viralLoad == 0 || item.viralLoad.ToString() == "0.00")
+                                        {
+                                        }
+                                        else
+                                        {
+                                            @Html.DisplayFor(modelItem => item.viralLoad)
+                                        }
+                                    </td>
+                                    break;
+                                }
+                                else if (item.viralLoad < rule.less && rule.less != 0)
+                                {
+                                    <td class="rule-broken">
+                                        @if (item.viralLoad == 0 || item.viralLoad.ToString() == "0.00")
+                                        {
+                                        }
+                                        else
+                                        {
+                                            @Html.DisplayFor(modelItem => item.viralLoad)
+                                        }
+                                    </td>
+                                    break;
+                                }
+                                else
+                                {
+                                    <td>
+                                        @if (item.viralLoad == 0 || item.viralLoad.ToString() == "0.00")
+                                        {
+                                        }
+                                        else
+                                        {
+                                            @Html.DisplayFor(modelItem => item.viralLoad)
+                                        }
+                                    </td>
+                                    break;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            <td>
+                                @if (item.viralLoad == 0 || item.viralLoad.ToString() == "0.00")
+                                {
+                                }
+                                else
+                                {
+                                    @Html.DisplayFor(modelItem => item.viralLoad)
+                                }
+                            </td>
+                        }
+                        <!-- viral-load-effective-date -->
+                        @if (Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "viralload").Count() != 0)
+                        {
+                            foreach (var rule in Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "viralload"))
+                            {
+                                if (item.viralLoad > rule.greater && rule.greater != 0)
+                                {
+                                    <td class="rule-broken">
+                                        @if (item.viralLoad == 0 || item.viralLoad.ToString() == "0.00")
+                                        {
+                                        }
+                                        else
+                                        {
+                                            @Html.DisplayFor(modelItem => item.viralLoadeffectiveDate)
+                                        }
+                                    </td>
+                                    break;
+                                }
+                                else if (item.viralLoad < rule.less && rule.less != 0)
+                                {
+                                    <td class="rule-broken">
+                                        @if (item.viralLoad == 0 || item.viralLoad.ToString() == "0.00")
+                                        {
+                                        }
+                                        else
+                                        {
+                                            @Html.DisplayFor(modelItem => item.viralLoadeffectiveDate)
+                                        }
+                                    </td>
+                                    break;
+                                }
+                                else
+                                {
+                                    <td>
+                                        @if (item.viralLoad == 0 || item.viralLoad.ToString() == "0.00")
+                                        {
+                                        }
+                                        else
+                                        {
+                                            @Html.DisplayFor(modelItem => item.viralLoadeffectiveDate)
+                                        }
+                                    </td>
+                                    break;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            <td>
+                                @if (item.viralLoad == 0 || item.viralLoad.ToString() == "0.00")
+                                {
+                                }
+                                else
+                                {
+                                    @Html.DisplayFor(modelItem => item.viralLoadeffectiveDate)
+                                }
+                            </td>
+                        }
+
+                        <td class="linkNav" style="text-align: center !important">
+                            <div class="contactIcon fas fa-edit" onclick="location.href='@Url.Action("EditPathology", "Member", new { id = item.pathologyID, pro = Context.Request.Query["pro"] })'" title="Edit"> </div> &nbsp;
+                            <div class="contactIcon fas fa-info-circle" onclick="location.href='@Url.Action("PathologyDetails", "Member", new { id = item.pathologyID, pro = Context.Request.Query["pro"] })'" title="Details"> </div>
+                        </td>
+                    </tr>
+                </tbody>
+            }
+        </table>
+
+        <div class="fixedBack" style="margin-left: 42%; margin-bottom: 1%">
+            <input value="Back" class="btn buttonRound_formBack go_back" onclick="storageKey()" style="width: 15%" />
+        </div>
+    </div>
+</div>
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script src="http://code.jquery.com/jquery.unobtrusive-ajax.min.js"></script>
+<script src="js/jquery.tablesorter.min.js"></script>
+
+@section Scripts {
+    <script src="~/bundles/jqueryval"></script>
+    <script src="~/bundles/jqueryui"></script>
+    <style src="~/Content/themes/base/css" )
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <script src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.9/jquery.validate.js"></script>
+    <script src="http://ajax.aspnetcdn.com/ajax/mvc/3.0/jquery.validate.unobtrusive.min.js"></script>
+
+    <script>
+        function storageKey() {
+            localStorage.setItem("back_hiv", Date.now());
+        }
+    </script>
+}
+

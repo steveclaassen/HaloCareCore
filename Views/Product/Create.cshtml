@@ -1,0 +1,164 @@
+﻿@model HaloCareCore.Models.Script.Products
+@{
+    ViewBag.Title = "Create";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<comment>
+    <!--
+     14 September 2020 -- HCare-956(Master table maintenance screens - DUP checks on EDIT)
+    -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .error-alert {
+        width: 100%;
+        margin: 0 auto;
+        background-color: rgba(217, 83, 79, 0.1);
+        padding: 10px;
+        border-left-color: #d9534f !important;
+        border: 1px solid transparent;
+        border-left-width: 5px;
+        border-radius: 3px;
+        margin: 0 auto;
+        font-family: 'Open Sans', sans-serif;
+        font-size: 12px;
+        margin: 0 0 5px 0;
+        margin-top: -10px;
+        margin-bottom: 20px;
+    }
+
+        .error-alert span {
+            color: #d9534f;
+            text-align: center;
+        }
+
+    .field-validation-error:before {
+        font-family: FontAwesome;
+        content: "\f06a\00a0";
+        animation: pulse 2s ease infinite;
+    }
+</style>
+
+<div class="fullScreen_container zero-padding">
+
+    <!--pageHeader-->
+    <nav id="global-nav" class="nav">
+        <div class="pull-left title">
+            <h1 class="site-title_patientProfile">
+                <span><i class="fab fa-product-hunt"></i></span>&emsp; Products
+            </h1>
+        </div>
+        <div class="pull-right title">
+            <h1 class="site-title_userID pull-right">
+                <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+            </h1>
+            <h1 class="site-title_userID pull-right">
+                @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                {
+                    <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                }
+            </h1>
+            <h1 class="site-waffleIcon pull-right">
+                <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+            </h1>
+        </div>
+    </nav>
+    <!--breadCrumbs-->
+    <ul class="breadcrumbs_fullScreens">
+        <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+        <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+        <li><a href="@Url.Action("Index", "Product", new {})">Products</a></li>
+        <li><a href="#">Create</a></li>
+    </ul>
+    <!--navCollection-->
+    <div class="navCollection_fullScreens">
+        @Html.Partial("_navCollection")
+    </div>
+    <div style="margin-bottom: 1%"></div>
+
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="row">
+            <h4 class="tableHeading">Create a new product</h4>
+            <hr class="fancyruler">
+
+            <div class="form-horizontal createForm">
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                <input type="hidden" name="nappi-validation" id="nappi-validation" />
+                <div class="col-md-12"><div id="duplicate-notice" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; NAPPI code already exists!</span></div></div></div>
+                <br />
+                <br />
+                <div class="form-group">
+                    @Html.LabelFor(model => model.nappiCode, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.nappiCode, new { htmlAttributes = new { @class = "form-control-new", @onblur = "CheckInput();" } })
+                        @Html.ValidationMessageFor(model => model.nappiCode, "", new { @class = "text-danger", @style = "font-size: 90%; margin-left: 1%" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.productName, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.productName, new { htmlAttributes = new { @class = "form-control-new" } })
+                        @Html.ValidationMessageFor(model => model.productName, "", new { @class = "text-danger", @style = "font-size: 90%; margin-left: 1%" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.packSize, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.packSize, new { htmlAttributes = new { @class = "form-control-new" } })
+                        @Html.ValidationMessageFor(model => model.packSize, "", new { @class = "text-danger", @style = "font-size: 90%; margin-left: 1%" })
+                    </div>
+                </div>
+            </div>
+            <div class="fixed-btn">
+                <input id="submit" type="submit" value="Submit" class="btn create-button" style="width: 15%" /><br />
+                <input type="text" value="Back" class="btn reset-button go_back" />
+            </div>
+        </div>
+    }
+</div>
+
+
+@section scripts{
+    <script src="~/bundles/jqueryval"></script>
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+    <script>
+        //hcare-956
+        function CheckInput() {
+            var nappicode = $('#nappiCode').val();
+            nappicode = nappicode.trim();
+            $("#nappi-validation").val("");
+
+            $.ajax({
+                url: '/Product/ProductCheck',
+                type: "POST",
+                dataType: "JSON",
+                data: { NappiCode: nappicode },
+                success: function (result) {
+                    var nappi = result.nappiCode;
+                    if (nappi == nappicode) {
+                        $("#duplicate-notice").removeClass("hidden");
+                        $('span[data-valmsg-for="nappiCode"]').html('<span style="font-size: 12px"><i class="fas fa-exclamation-circle"></i> </span>NAPPI code already exists - ' + result.productName);
+                        $("#nappi-validation").val(nappi);
+                    }
+                },
+                error: function (result) {
+                    $("#duplicate-notice").addClass("hidden");
+                }
+            });
+        }
+        $("#submit").click(function () {
+            if ($("#nappi-validation").val().length > 0) {
+                $("#nappiCode").focus();
+                return false;
+            }
+        });
+    </script>
+
+}

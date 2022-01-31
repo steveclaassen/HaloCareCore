@@ -1,0 +1,160 @@
+﻿@model HaloCareCore.Models.Communications.SmsMessages
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+<div class="fullPanel_Container">
+    <div class="profilePanel_pathology">
+        <!--breadCrumbs-->
+        <ul class="breadcrumbs" style="margin-top: -1%; margin-bottom: 2%; margin-left: -1%">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+            <li><a class="go_back">Overview</a></li>
+            <li><a href="#">Detail</a></li>
+        </ul>
+
+        <!--navCollection-->
+        <div class="navButtons">
+            @Html.Partial("_navCollection")
+        </div>
+
+        <!--profileInformation-->
+        <div>
+            @Html.Action("_profileBar_edit", "Member", new { DependentID = Model.dependantID })
+        </div>
+    </div>
+
+    <!--pageHeader-->
+    <nav id="global-nav" class="nav">
+        <div class="pull-left title">
+            <h1 class="site-title_patientProfile">
+                <span><i class="fas fa-bell"></i></span>&emsp; Assignments
+            </h1>
+        </div>
+        <div class="pull-right title">
+            <h1 class="site-title_userID pull-right">
+                <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+            </h1>
+            <h1 class="site-title_userID pull-right">
+                @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                {
+                    <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                }
+            </h1>
+            <h1 class="site-waffleIcon pull-right">
+                <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+            </h1>
+        </div>
+    </nav>
+
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+        @Html.Hidden("taskId", (object)ViewBag.task)
+        @Html.Hidden("id", (object)ViewBag.id)
+        @Html.HiddenFor(model => model.dependantID)
+        <div class="form-horizontal">
+            <div class="modal-header modal-header-primary">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true" id="assignmentModalClose">×</button>
+                <h2 class="modalHeading">Text Message</h2>
+            </div>
+            <br />
+            <br />
+            <div class="form-horizontal textMessage">
+                <!---->
+                <div class="form-group">
+                    @Html.LabelFor(model => model.cell_no, htmlAttributes: new { @class = "control-label col-md-3" })
+                    <div class="col-md-9">
+                        @Html.EditorFor(model => model.cell_no, new { htmlAttributes = new { @class = "infoBox_insertEmail" } })
+                        @Html.ValidationMessageFor(model => model.cell_no, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.Label(null,"Template", htmlAttributes: new { @class = "control-label col-md-3" })
+                    <div class="col-md-9">
+                        @Html.DropDownList("titles", null, "**Select**", htmlAttributes: new { @class = "infoBox_insertEmail", @onchange = "FillTemplate()" })
+                        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.message, htmlAttributes: new { @class = "control-label col-md-3" })
+                    <div class="col-md-9">
+                        @Html.TextAreaFor(model => model.message, new { htmlAttributes = new { @class = "InsertText", id = "InsertText", @required = "required" } })
+                        @Html.ValidationMessageFor(model => model.message, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <!---->
+                <div class="form-group">
+                    @Html.Label(null,"Effective", htmlAttributes: new { @class = "control-label col-md-3" })
+                    <div class="col-md-9">
+                        @Html.EditorFor(model => model.effectiveDate, new { htmlAttributes = new { @class = "infoBox_insertEmail", @id = "createDate", @type = "date" } })
+                        @Html.ValidationMessageFor(model => model.effectiveDate, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <!---->
+            </div>
+            <br />
+            <div class="form-group">
+                <div class="actionButton" style="margin-top: 1%!important; margin-bottom: 3%">
+                    <input type="submit" value="Send" class="btn buttonRound_scriptAdd" style="width: 15%; margin-left: 40%!important" />
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<div>
+    @Html.ActionLink("Back to List", "Index")
+</div>
+
+@section Scripts {
+    <script src="~/bundles/jqueryval"></script>
+    <script>
+        $(document).ready(function () {
+            var dateNewFormat, onlyDate, today = new Date();
+
+            dateNewFormat = today.getFullYear() + '-';
+            if (today.getMonth().length == 2) {
+
+                dateNewFormat += (today.getMonth() + 1);
+            }
+            else {
+                dateNewFormat += '0' + (today.getMonth() + 1);
+            }
+
+            onlyDate = today.getDate();
+            if (onlyDate.toString().length == 2) {
+
+                dateNewFormat += "-" + onlyDate;
+            }
+            else {
+                dateNewFormat += '-0' + onlyDate;
+            }
+
+            $('#createDate').val(dateNewFormat);
+
+        });
+
+    </script>
+
+    <script type="text/javascript">
+        function FillTemplate() {
+            var stateId = $('#titles').val();
+            $.ajax({
+                url: '/Member/FillTemplate',
+                type: "GET",
+                dataType: "JSON",
+                data: { tempId: stateId },
+                success: function (options) {
+
+                    $("#message").val(""); // clear before appending new list
+
+                    $.each(options, function (i, option) {
+                        $("#message").val(option.title).val(option.template)
+                    });
+
+                }
+            });
+        }
+    </script>
+}

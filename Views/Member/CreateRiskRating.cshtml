@@ -1,0 +1,139 @@
+﻿@model HaloCareCore.Models.Management.PatientRiskRatingHistory
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Risk rating";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+<comment>
+    <!--
+        11 June 2020 -- HCare-1058(BUG error page when adding risk rating)
+        Corrected the method to create risk rating and also corrected the view which was not aligned as per the other views.
+    -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .input-group-addon {
+        visibility: hidden;
+    }
+
+    .field-validation-error:before {
+        font-family: FontAwesome;
+        content: "\f06a\00a0";
+    }
+
+    textarea#reason {
+        color: #003366;
+    }
+</style>
+
+<!---------------------------------------------------------------------- header ---------------------------------------------------------------------->
+<nav id="global-nav" class="nav">
+    <div class="pull-left title">
+        <h1 class="site-title_patientProfile">
+            <span><img src="~/Content/Images/memberProfile/topBar Icons/clincalHistory.png" /></span>&emsp; @ViewBag.Title
+        </h1>
+    </div>
+    <div class="pull-right title">
+        <h1 class="site-title_userID pull-right">
+            <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+        </h1>
+        <h1 class="site-title_userID pull-right">
+            @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+            {
+                <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+            }
+        </h1>
+        <h1 class="site-waffleIcon pull-right">
+            <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+        </h1>
+    </div>
+</nav>
+
+<div class="dashboardContainer zero-padding">
+    <div class="patientDashboard_View">
+        <!------------------------------------------------------------------------ bread-crumbs ------------------------------------------------------------------------>
+        <ul class="breadcrumbs_patientDashboard">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new { })">Home</a></li>
+            <li><a href="@Url.Action("patientClinical", "Member", new { DependentID = Context.Request.Query["DependentID"] })">Patient</a></li>
+            <li><a href="#">@ViewBag.Title</a></li>
+        </ul>
+
+        <!--------------------------------------------------------------------- left-navigation-bar --------------------------------------------------------------------->
+        @Html.Partial("_navSlider", new { DependentID = Context.Request.Query["DependentID"] })
+
+        <!----------------------------------------------------------------------- nav-collection ----------------------------------------------------------------------->
+        <div class="navCollection_patientDashboard">
+            @Html.Partial("_navCollection")
+        </div>
+
+        <!----------------------------------------------------------------------- patient-profile ----------------------------------------------------------------------->
+        <div class="profileBar">
+            @Html.Action("_profileBar_edit", "Member", new { DependentID = Model.dependantID })
+        </div>
+    </div>
+    <br />
+    <!----------------------------------------------------------------------- form ----------------------------------------------------------------------->
+    <div class="profilebar-spacer"></div>
+    <div id="general-newborn-panel" class="patientDashboard_container">
+        <div class="col-md-12 row">
+            <div class="heading-spacer"></div>
+            <div class="col-md-6"><div class="page-heading">Create</div></div>
+            <hr class="heading-ruler">
+        </div>
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+            @Html.Hidden("pro", (object)ViewBag.programId)
+
+            <div class="form-horizontal createForm">
+
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                <div class="form-group">
+                    @Html.LabelFor(model => model.effectiveDate, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        <input class="text-box single-line input-validation-error infoBox_doctorQuestionnaire_TB" data-val="true" data-val-date="The field must be a date." id="effectiveDate" name="effectiveDate" type="date" aria-required="true" aria-describedby="DOB-error" aria-invalid="true" min="" max="@DateTime.Now.ToString("yyyy-MM-dd")" required oninvalid="InvalidMsg(this);"><br />
+                        @Html.ValidationMessage("effectiveDate", "", new { @class = "text-danger", @style = "margin-left: 1%" })
+                    </div>
+                </div>
+
+                @Html.HiddenFor(model => model.dependantID, new { htmlAttributes = new { @class = "form-control" } })
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.RiskId, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.DropDownList("riskType", null, "* Select *", htmlAttributes: new { @class = "infoBox_editMember" })
+                    </div>
+                </div>
+                <br />
+                <div class="form-group">
+                    @Html.LabelFor(model => model.reason, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.TextAreaFor(model => model.reason, new { htmlAttributes = new { @class = "form-control" } })
+                        @Html.ValidationMessageFor(model => model.reason, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="fixed-btn">
+                        <input value="Back" class="btn bck-button go_back" style="width: 15%" />
+                        <input type="submit" value="Create" class="btn create-button" style="width: 15%" />
+                    </div>
+                </div>
+            </div>
+        }
+
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/bundles/jqueryui"></script>
+    <style src="~/Content/themes/base/css" )
+
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+}

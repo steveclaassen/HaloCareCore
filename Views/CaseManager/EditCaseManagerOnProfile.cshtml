@@ -1,0 +1,188 @@
+﻿@model HaloCareCore.Models.Management.UserMemberHistory
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Case manager";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<comment>
+    <!--
+        02 October 2020 -- HCare-1176
+    -->
+</comment>
+<style>
+    .field-validation-error:before {
+        font-family: FontAwesome;
+        content: "\f06a\00a0";
+    }
+
+    textarea#Comment {
+        display: block;
+        max-width: 1500px !important;
+        width: 90% !important;
+        max-height: 200px !important;
+        height: auto !important;
+        margin-top: 10px;
+        margin-left: 10px;
+        display: block;
+        padding: 6px 6px !important;
+        line-height: 1.428571429 !important;
+        color: #003366 !important;
+        border-radius: 0px !important;
+        border: none !important;
+        border-bottom: 1px solid #e8e6e6 !important;
+        background-color: transparent !important;
+        padding-left: 5px !important;
+        -webkit-box-shadow: none !important;
+        box-shadow: none !important;
+        -webkit-transition: none !important;
+        transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+        outline: none !important;
+    }
+</style>
+<javascript>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+    <script src="https://www.jqueryscript.net/demo/jQuery-Plugin-For-Sortable-Bootstrap-Tables-Bootstrap-Sortable/Scripts/bootstrap-sortable.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/js/standalone/selectize.js"></script>
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.default.css">
+</javascript>
+
+<!---------------------------------------------------------------------- header ---------------------------------------------------------------------->
+<nav id="global-nav" class="nav">
+    <div class="pull-left title">
+        <h1 class="site-title_patientProfile">
+            <span><i class="fas fa-medkit"></i>&emsp; Case managers</span>
+        </h1>
+    </div>
+    <div class="pull-right title">
+        <h1 class="site-title_userID pull-right">
+            <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+        </h1>
+        <h1 class="site-title_userID pull-right">
+            @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+            {
+                <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+            }
+        </h1>
+        <h1 class="site-waffleIcon pull-right">
+            <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+        </h1>
+    </div>
+</nav>
+
+<div class="dashboardContainer zero-padding">
+    <div id="myNav" class="overlay"></div>
+    <div class="patientDashboard_View">
+        <ul class="breadcrumbs_patientDashboard">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new { })">Home</a></li>
+            <li><a href="@Url.Action("patientDashboard", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"]})">Patient</a></li>
+            <li><a href="#">@ViewBag</a></li>
+        </ul>
+
+        @Html.Partial("_navSlider_blank", new { DependentID = Context.Request.Query["DependentID"] })
+
+        <div class="navCollection_patientDashboard">
+            @Html.Partial("_navCollection")
+        </div>
+
+        <div class="profileBar">
+            @Html.Action("_profileBar_edit", "Member", new { DependentID = Model.DependantID, pro = Context.Request.Query["pro"] })
+        </div>
+    </div>
+    <br />
+    <div class="profilebar-spacer"></div>
+
+    <div id="bipolar-panel" class="patientDashboard_container">
+        <h4 class="tableHeading">Select a new case manager</h4>
+        <hr class="fancyruler">
+
+        <div class="col-md-12 row"><div class="heading-spacer"></div></div>
+        @using (Ajax.BeginForm("EditCaseManagerOnProfile", "CaseManager", new AjaxOptions { HttpMethod = "POST" }, new { id = "edit-case-manager" }))
+        {
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+            @Html.Hidden("DependantID", (object)ViewBag.DependantID)
+            @Html.Hidden("pro", (object)ViewBag.pro)
+            @Html.HiddenFor(model => model.Id)
+            @Html.HiddenFor(model => model.CreatedBy)
+            @Html.HiddenFor(model => model.CreatedDate)
+            @Html.HiddenFor(model => model.AssignmentID)
+            @Html.HiddenFor(model => model.TaskID)
+            @Html.HiddenFor(model => model.Program)
+            @Html.AntiForgeryToken()
+
+            <div class="form-horizontal">
+                <div class="form-group editForm">
+                    @Html.Label(null, "Case manager", htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.DropDownList("Users", null, "Select", htmlAttributes: new { })
+                        @Html.ValidationMessage("Users", "", new { @class = "text-danger", @style = "font-size: 90%; margin-left: 1%" })
+                    </div>
+                </div>
+
+                <div class="form-group editForm">
+                    @Html.Label(null, "Comment", htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.TextAreaFor(model => model.Comment, new { placeholder = "Your comment here..." })
+                        @Html.ValidationMessageFor(model => model.Comment, "", new { @class = "text-danger", @style = "font-size: 90%; margin-left: 2%" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Active, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-3 check-box_Active">
+                        @Html.CheckBoxFor(model => model.Active, new { htmlAttributes = new { @class = "infoBox_editMember", data_val = "false" } })
+                        @Html.ValidationMessageFor(model => model.Active, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+
+            <div class="fixed-btn">
+                <input id="submit" type="submit" value="Submit" class="btn create-button-large" style="width: 12%" /><br />
+                <input type="text" value="Back" class="btn reset-button go_back" />
+            </div>
+        }
+    </div>
+</div>
+
+
+@section Scripts {
+    <script src="~/bundles/jqueryval"></script>
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/js/standalone/selectize.js"></script>
+    <script>
+        initSelectize();
+        function initSelectize() {
+            $('#Users').selectize({
+                persist: true,
+                preload: true,
+                maxItems: 1,
+                delimiter: ',',
+                valueField: 'id',
+                labelField: 'name',
+                searchField: ['name'],
+                hideSelected: true,
+                plugins: ['remove_button'],
+                render: {
+                    option: function (item, escape) {
+                        return '<span class="name">' + escape(item.name) + '</span>';
+
+                    }
+                }
+            })
+        }
+    </script>
+    <script>
+        $(document).ready(function () {
+            $('[data-toggle="tooltip"]').tooltip({
+                placement: 'top'
+            });
+        });
+    </script>
+
+}

@@ -14,11 +14,11 @@ namespace HaloCareCore.Models
         public bool BrowserRemembered { get; set; }
     }
 
-    public class ManageLoginsViewModel
-    {
-        public IList<UserLoginInfo> CurrentLogins { get; set; }
-        //public IList<AuthenticationDescription> OtherLogins { get; set; }
-    }
+    //public class ManageLoginsViewModel
+    //{
+    //    public IList<UserLoginInfo> CurrentLogins { get; set; }
+    //    //public IList<AuthenticationDescription> OtherLogins { get; set; }
+    //}
 
     public class FactorViewModel
     {

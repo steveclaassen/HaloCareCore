@@ -1,0 +1,59 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutModal.cshtml";
+}
+<comment>
+    <!--
+        10 April 2019 -- HCare-669 (Management status: systematic end date (Deceased/Deactivated/Resigned))
+        Used IF statement to set the POST in both the profile Management setting and the Assignment Task. If status is set to Deceased, Deactivated or Resigned. The end date will systematically be set to the same as the effective date
+
+    -->
+</comment>
+
+<div class="row assignmentModal_Status">
+
+    <div class="form-horizontal">
+        <div class="@*modal-header modal-header-secondary*@">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true" id="assignmentModalClose">×</button>
+        </div>
+        <br />
+        <br />
+
+        <div class="form-horizontal createForm">
+            <br />
+            <br />
+            <h3 style="text-align: center!important; color: #003366; font-size: 35px">Create a new:</h3>
+            <h3 style="text-align: center!important; color: #ccc; font-size: 30px; font-weight: 100">Preferred method of contact</h3>
+
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+
+            <div class="form-group" style="position: absolute; bottom: 8px; width: 100%">
+                <div class="" style="text-align: center!important">
+                    <button class="btn-square color-5" type="submit" style="width: 25%" onclick="disDelay(this)">Submit</button><br />
+                </div>
+                <p type="button" class="createModal" data-dismiss="modal" aria-hidden="true">cancel</p>
+            </div>
+
+            <div class="modal-footer">
+                <br />
+                <br />
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/bundles/jqueryval"></script>
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+
+
+}

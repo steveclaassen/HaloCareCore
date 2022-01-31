@@ -1,0 +1,511 @@
+﻿@model HaloCareCore.Models.PatientProfileViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Patient Profile";
+    Layout = "~/Views/Shared/_LayoutMember.cshtml";
+}
+<comment>
+    <!--
+     19 February 2019 -- HCARE-620 (Urgent: Document attachment - Application form type - Assignment)
+     Added setting to create a New Diabetes Registration Assignment when a user adds an attachment with attachment type, "Application form" - BM
+
+     15 March 2019 -- HCARE-690(Attachment assignment ~ Prescription (DOCUS))
+     Corrected the attachment insert process to systematically check for a prescription attachment before adding DOCUS as an assignment item type. This will avoid NAM from receiving these assignments
+
+     26 March 2019 -- HCare-675 (HaloCare Disclaimer Update)
+     Telephonic discussion with Mercia confirmed that we need to create a new table in the Db which I have called PatientDisclaimer. This will house the data pertaining to the disclaimer linked to the patient.
+     _PatientDisclaimer.cshtml is a NEW view that has been set up to display the disclaimer as a task in the assignments.
+
+     17 April 2019 -- HCare-708 (Submit button - duplicate post entries)
+     Duplicate entries do get entered if you click too quickly on the submit button. I have added JS to disable the submit button after the first click. (Attachments)
+
+     06 May 2019 -- HCare-728 (Questionnaire - Submit button freeze -- Related to HCare-708)
+     A secondary affect of the duplicate click check for HCare-708 resulted in the Submit button for the Questionnaire to freeze should a user neglect to complete a required field. This would push the user back to the section that has not been answered but freeze the button in the process.
+    I have relooked at the code linked to HCare-708 as well as the submit button in the questionnaire which has resolved the issue.
+
+     20 February 2020 -- HCare-952(Patient Profile – page tabs)
+     Updated code for tabs in the patient profile view - previous tab code had a bug and not easy to manipulate (add or remove) where the new code is.
+
+    18 June 2020 -- HCare-971(Patient Profile/Scheme Options - Change VIEW)
+    As per the request – this is a front-end adjustment to remove the option to add a new scheme option to the member’s plan history. I have removed InsertPlanHistory() form and the dropdown select that was initially available in the display and now only show the history of the members scheme option.
+
+    22 June 2020 -- HCare-1026(Change Medical Aid to Medical Scheme)
+    I ran a search on the system for “medical aid” and “benefit option” and replaced with “Medical scheme” and “Scheme option” as per the request.
+    There were 123 instances of “Medical Aid” which were listed throughout the system including notes made. And 7 instances of “Benefit option”. All have been replaced.
+
+     -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .select2-container--default .select2-selection--single {
+        width: 473px !important;
+        border: 1px solid #f4f4f4 !important;
+    }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow b {
+            top: 35% !important
+        }
+
+    .field-validation-error:before {
+        font-family: FontAwesome;
+        content: "\f06a\00a0";
+        animation: pulse 2s ease infinite;
+    }
+</style>
+
+<!------------------------------------------------------------------------------------ jQ-dateSort  ----------------------------------------------------------------------------------->
+<javascript>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js"></script>
+    <script src="https://www.jqueryscript.net/demo/jQuery-Plugin-For-Sortable-Bootstrap-Tables-Bootstrap-Sortable/Scripts/bootstrap-sortable.js"></script>
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+</javascript>
+
+<!----------------------------------------------------------------------------- html-top-navigation-panel  ---------------------------------------------------------------------------->
+<nav id="global-nav" class="nav" style="z-index: 10000">
+    <div class="pull-left title">
+        <h1 class="site-title_patientProfile">
+            <span><i class="fas fa-plus-square"></i>&emsp; Patient profile</span>
+        </h1>
+    </div>
+    <div class="pull-right title">
+        <h1 class="site-title_userID pull-right">
+            <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+        </h1>
+        <h1 class="site-title_userID pull-right">
+            @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+            {
+                <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+            }
+        </h1>
+        <h1 class="site-waffleIcon pull-right">
+            <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+        </h1>
+    </div>
+</nav>
+
+<!-------------------------------------------------------------------------------------- html-body ------------------------------------------------------------------------------------>
+<div class="dashboardContainer zero-padding">
+    <div class="patientDashboard_View">
+        <!-- breadcrumbs -->
+        <ul class="breadcrumbs_patientDashboard">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+            <li><a href="@Url.Action("patientDashboard", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"]})">Patient</a></li>
+            <li><a href="#">@ViewBag.Title</a></li>
+        </ul>
+        <!-- navigation-collection -->
+        <div class="navCollection_patientDashboard">
+            @Html.Partial("_navCollection")
+        </div>
+        <!-- left-navigation-panel -->
+        @Html.Partial("_navSlider", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })
+        <!--profile-information-->
+        <div class="profileBar">
+            @Html.Action("_profileBar_edit", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })
+        </div>
+    </div>
+
+    <div class="profilebar-spacer"></div>
+
+    <div class="patientDashboard_container">
+
+        <div class="col-md-12 row">
+            <div class="col-md-6">
+                <h4 class="summaryHeading">Patient profile</h4>
+            </div>
+            <div class="col-md-6"></div>
+        </div>
+
+        <hr class="patientProfile_Ruler" />
+
+        <div class="container-tab">
+            <div class="row">
+                <div class="span12">
+                    <div class="container-tab">
+                        <!------------------------------------------------------------------------------------ tab-navigation ----------------------------------------------------------------------------------->
+                        <ul class="nav nav-pills nav-justified" role="tablist">
+
+                            <li role="presentation" class="tab-clinical"><a href="#schememember" aria-controls="schememember" class="tab-label" role="tab" data-toggle="tab" id="schememember_tab">Scheme member</a></li>
+                            <li role="presentation" class="tab-clinical"><a href="#benefitplan" aria-controls="benefitplan" class="tab-label" role="tab" data-toggle="tab" id="benefitplan_tab">Scheme option</a></li>
+                            <li role="presentation" class="tab-clinical"><a href="#employergroup" aria-controls="employergroup" class="tab-label" role="tab" data-toggle="tab" id="employergroup_tab">Employer group</a></li>
+                        </ul>
+                        <!-------------------------------------------------------------------------------------- tab-panels ------------------------------------------------------------------------------------->
+                        <div class="tab-content">
+                            <!---------------------------------------------------------------------------------- tab-summary ------------------------------------------------------------------------------------>
+                            <!------------------------------------------------------------------------------- tab-scheme-member --------------------------------------------------------------------------------->
+                            <div role="tabpanel" class="tab-pane" id="schememember">
+                                <div class="row">
+                                    <br />
+                                    <div class="row communicationTab">
+
+                                        <div class="form-horizontal">
+                                            <div id="tabs-4">
+                                                <div class="row tablinks">
+                                                    <div class="form-horizontal">
+
+                                                        <h4 class="subHeading">Member information</h4>
+                                                        <hr class="patientProfile_Ruler" />
+                                                        <div class="row">
+                                                            <div class="col-md-3" style="margin: 10px auto; font-size: 10px!important">
+                                                                Information pulled from specific schemes
+                                                                <br />
+                                                                that contains patient data
+                                                                <br />
+                                                                Contact schemes in regard to this
+                                                                <br />
+                                                                <br />
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <!-------------------------------------------------------------------------------- tab-scheme-option -------------------------------------------------------------------------------->
+                            <div role="tabpanel" class="tab-pane" id="benefitplan">
+                                <!-- hcare-971 -->
+                                <div class="row">
+                                    <br />
+                                    <div class="row communicationTab">
+                                        <div class="form-horizontal">
+                                            <div class="col-md-12">
+                                                <h4 class="subHeading">Scheme option history</h4>
+                                                <hr class="patientProfile_Ruler" />
+                                                <div class="row">
+                                                    <table class="table patient-clinical-history-table sortable" id="optionTable">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>@Html.DisplayNameFor(model => model.patientPlanHistory.effectiveDate) <i class="fa fa-fw fa-sort"></i></th>
+                                                                <th onclick="optionTable(1)">@Html.DisplayNameFor(model => model.patientPlanHistory.planName) <i class="fa fa-fw fa-sort"></i></th>
+                                                                <th>@Html.DisplayNameFor(model => model.patientPlanHistory.createdDate) <i class="fa fa-fw fa-sort"></i></th>
+                                                                <th>@Html.DisplayNameFor(model => model.patientPlanHistory.createdBy) <i class="fa fa-fw fa-sort"></i></th>
+                                                                <th style="text-align: center!important">@Html.DisplayNameFor(model => model.patientPlanHistory.active)</th>
+                                                            </tr>
+                                                        </thead>
+                                                        @if (Model.patientPlanHistories.Count() == 0)
+                                                        {
+                                                            <tr><td colspan="5" style="text-align: center!important; color: rgba(128, 128, 128, 0.50)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="color: rgba(128, 128, 128, 0.50)"></i></span> no records found</td></tr>
+                                                        }
+                                                        else
+                                                        {
+                                                            foreach (var item in Model.patientPlanHistories)
+                                                            {
+                                                                <tbody>
+                                                                    <tr>
+                                                                        <td data-dateformat="DD-MM-YYYY">@Html.DisplayFor(modelItem => item.effectiveDate)</td>
+                                                                        <td>@Html.DisplayFor(modelItem => item.planName)</td>
+                                                                        <td data-dateformat="DD-MM-YYYY">@Html.DisplayFor(modelItem => item.createdDate)</td>
+                                                                        <td>@Html.DisplayFor(modelItem => item.createdBy)</td>
+                                                                        <td class="text-center"><span class="@(item.active == true ? "check-yes far fa-check-circle" : "check-no far fa-times-circle")"></span></td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            }
+                                                        }
+
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-------------------------------------------------------------------------------- tab-employer-group ------------------------------------------------------------------------------->
+                            <div role="tabpanel" class="tab-pane" id="employergroup">
+                                <div class="row">
+                                    <br />
+                                    <div class="row communicationTab">
+                                        <div class="form-horizontal">
+                                            <div class="col-md-12">
+                                                <div class="col-md-6 editForm">
+                                                    @using (Html.BeginForm("InsertPayPoint", "Member", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                                                    {
+                                                        @Html.AntiForgeryToken()
+                                                        @Html.HiddenFor(model => model.payPointHistory.dependantId)
+                                                        <h4 class="subHeading">Group</h4>
+                                                        <hr class="patientProfile_Ruler" />
+                                                        <br />
+
+                                                        <div class="form-group">
+                                                            @Html.Label(null,"Employer group", htmlAttributes: new { @class = "control-label col-md-3" })
+                                                            <div class="col-md-6">
+                                                                @Html.DropDownList("paypoints", null, "**Select**", htmlAttributes: new { @class = "infoBox_Enrollment" })
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            @Html.Label(null,"Effective date", htmlAttributes: new { @class = "control-label col-md-3" })
+                                                            <div class="col-md-6">
+                                                                @Html.EditorFor(model => model.payPointHistory.effectiveDate, new { htmlAttributes = new { @class = "infoBox_Enrollment" } })
+                                                            </div>
+                                                            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                                                        </div>
+                                                        <br />
+                                                        <div class="actionButton">
+                                                            <input type="submit" value="Save" class="btn buttonRound_formCreate" style="margin-left: 27%!important; width: 10%" />
+                                                        </div>
+                                                    }
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <h4 class="subHeading">Group history</h4>
+                                                    <hr class="patientProfile_Ruler" />
+                                                    <div class="row">
+                                                        <table class="table indexTable_option sortable" id="egTable">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>
+                                                                        @Html.DisplayNameFor(model => model.payPointHistories[0].effectiveDate) <i class="fa fa-fw fa-sort"></i>
+                                                                    </th>
+                                                                    <th onclick="egTable(1)">
+                                                                        @Html.DisplayNameFor(model => model.payPointHistories[0].planName) <i class="fa fa-fw fa-sort"></i>
+                                                                    </th>
+                                                                </tr>
+                                                            </thead>
+                                                            @if (Model.payPointHistories.Count() == 0)
+                                                            {
+                                                                <tr><td colspan="2" style="text-align: center!important; color: rgba(128, 128, 128, 0.50)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="color: rgba(128, 128, 128, 0.50)"></i></span> no records found</td></tr>
+                                                            }
+                                                            else
+                                                            {
+                                                                foreach (var item in Model.payPointHistories)
+                                                                {
+                                                                    <tbody>
+                                                                        <tr>
+                                                                            <td data-dateformat="DD-MM-YYYY">
+                                                                                @Html.DisplayFor(modelItem => item.effectiveDate)
+                                                                            </td>
+                                                                            <td>
+                                                                                @Html.DisplayFor(modelItem => item.planName)
+                                                                            </td>
+                                                                        </tr>
+                                                                    </tbody>
+                                                                }
+                                                            }
+
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script src="js/jquery.tablesorter.min.js"></script>
+<script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+
+
+
+<script src="~/bundles/jqueryval"></script>
+@section scripts{
+
+    <!-- general -->
+    <script>
+        // left-navigation-slider
+        $("#menu-toggle").click(function (e) {
+            e.preventDefault();
+            $("#wrapper").toggleClass("active");
+        });
+
+        // waffle-navigation-script-open
+        $("#patientMenu-toggle").click(function (e) {
+            e.preventDefault();
+            $("#patientWrapper").toggleClass("active");
+        });
+        // waffle-navigation-script-close
+        $("#exit-toggle").click(function (e) {
+            e.preventDefault();
+            $("#patientWrapper").toggleClass("active");
+        });
+
+        // special-note
+        $("#alert-toggle").click(function (e) {
+            e.preventDefault();
+            $("#alertWrapper").toggleClass("active");
+        });
+
+        // program-popup
+        $("#program-toggle").click(function (e) {
+            e.preventDefault();
+            $("#programWrapper").toggleClass("active");
+        });
+        // go-back
+        $(function () {
+            $('.go_back').click(function (e) {
+                e.preventDefault();
+                history.go(-1);
+            });
+        });
+
+    </script>
+    <!--option-table-search-->
+    <script>
+        //tableSearch
+        var $optionrows = $('#optionTable tr');
+        $('#search').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $optionrows.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+
+        //optionTable
+        function optionTable(n) {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("optionTable");
+            switching = true;
+            dir = "asc";
+
+            while (switching) {
+                switching = false;
+                rows = table.getElementsByTagName("TR");
+
+                for (i = 1; i < (rows.length - 1); i++) {
+
+                    shouldSwitch = false;
+
+                    x = rows[i].getElementsByTagName("TD")[n];
+                    y = rows[i + 1].getElementsByTagName("TD")[n];
+
+                    if (dir == "asc") {
+                        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (dir == "desc") {
+                        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+                if (shouldSwitch) {
+
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+
+                    switchcount++;
+                } else {
+
+                    if (switchcount == 0 && dir == "asc") {
+                        dir = "desc";
+                        switching = true;
+                    }
+                }
+            }
+        }
+
+
+    </script>
+    <!--employer-group-search-->
+    <script>
+        //tableSearch
+        var $egrows = $('#egTable tr');
+        $('#search').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $egrows.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+
+        //egTable
+        function egTable(n) {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("egTable");
+            switching = true;
+            dir = "asc";
+
+            while (switching) {
+                switching = false;
+                rows = table.getElementsByTagName("TR");
+
+                for (i = 1; i < (rows.length - 1); i++) {
+
+                    shouldSwitch = false;
+
+                    x = rows[i].getElementsByTagName("TD")[n];
+                    y = rows[i + 1].getElementsByTagName("TD")[n];
+
+                    if (dir == "asc") {
+                        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (dir == "desc") {
+                        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+                if (shouldSwitch) {
+
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+
+                    switchcount++;
+                } else {
+
+                    if (switchcount == 0 && dir == "asc") {
+                        dir = "desc";
+                        switching = true;
+                    }
+                }
+            }
+        }
+
+
+    </script>
+
+    <!--Page redirect-->
+    <script>
+        $(document).ready(function () {
+            $(".Attachment").on("click", function () {
+                localStorage.setItem("patientAttachment", "clicked");
+            });
+        });
+    </script>
+    <!--Redirect to Tab-->
+    <script>
+        $(document).ready(function () {
+            document.getElementsByTagName("html")[0].style.visibility = "visible";
+            if (localStorage.key(0) == "patientAttachment") {
+                $("#tab6-2").attr("checked", "checked");
+                localStorage.clear();
+                localStorage.removeItem("patientAttachment");
+            }
+        });
+    </script>
+}
+
+
+
+

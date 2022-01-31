@@ -1,0 +1,203 @@
+﻿@model HaloCareCore.Models.ViewModels.AccountSetupViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "System Account Setup";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<comment>
+    <!--
+    12 March 2019 -- HCARE-684 (Advanced Search: Please investigate the removal of the GUID on the Advance Search export to excel)
+    I have formatted the export in the PatientManagementController.cs to accommodate for the removal of the GUID and adjusted the columns accordingly for the remaining export. Tested on local.
+
+    -->
+</comment>
+
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .select2-container--default .select2-selection--single {
+        width: 480px !important
+    }
+
+        .select2-container--default .select2-selection--single .select2-selection__placeholder {
+            color: white !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow b {
+            margin-top: -5px !important;
+        }
+
+    .text-divider {
+        margin: 1em 0;
+        line-height: 0;
+        text-align: center;
+    }
+
+        .text-divider span {
+            background-color: rgba(254, 254, 254, 1);
+            padding-left: 2em;
+            padding-right: 2em;
+            margin-left: -0.8%
+        }
+
+        .text-divider:before {
+            content: " ";
+            display: block;
+            border-top: 1px solid rgba(204, 204, 204, 0.50);
+            border-bottom: 1px solid transparent;
+            width: 94%;
+            margin-left: 2.5%;
+        }
+</style>
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<div class="fullScreen_container">
+
+    <!--pageHeader-->
+    <nav id="global-nav" class="nav">
+        <div class="pull-left title">
+            <h1 class="site-title_patientProfile">
+                <span><i class="fas fa-layer-group"></i>&emsp; Accounts</span>
+            </h1>
+        </div>
+        <div class="pull-right title">
+            <h1 class="site-title_userID pull-right">
+                <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+            </h1>
+            <h1 class="site-title_userID pull-right">
+                @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                {
+                    <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                }
+            </h1>
+            <h1 class="site-waffleIcon pull-right">
+                <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+            </h1>
+        </div>
+    </nav>
+
+    <!--breadCrumbs-->
+    <ul class="breadcrumbs_fullScreens">
+        <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+        <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+        <li><a href="@Url.Action("Index", "Administration", new {})">Settings</a></li>
+        <li><a href="#">Accounts</a></li>
+    </ul>
+
+    <!--navCollection-->
+    <div class="navCollection_fullScreens">
+        @Html.Partial("_navCollectionX")
+    </div>
+
+    <div style="margin-bottom: 2%"></div>
+
+    <h4 class="tableHeading">Account setup</h4>
+
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="form-horizontal editForm">
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+            <br />
+            <h4 class="tableDivider-heading text-divider"><span>Account information</span></h4>
+            <br />
+            <br />
+
+            <div style="margin-left: 6%">
+                <div class="form-group">
+                    @Html.LabelFor(model => model.name, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-8">
+                        @Html.EditorFor(model => model.name, new { htmlAttributes = new { @class = "allergyTextbox", @placeholder = "example: HaloCare", autocomplete = "off" } })
+                        @Html.ValidationMessageFor(model => model.name, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.description, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-8">
+                        @Html.EditorFor(model => model.description, new { htmlAttributes = new { @class = "allergyTextbox", @placeholder = "example: Disease management service", autocomplete = "off" } })
+                        @Html.ValidationMessageFor(model => model.description, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+
+            <br />
+            <h4 class="tableDivider-heading text-divider"><span>• • •</span></h4>
+            <br />
+            <br />
+
+            <div class="form-group">
+                <div class="col-md-12">
+                    <div class="col-md-1"></div>
+                    <div class="col-md-10">
+                        <div class="col-md-4">
+                            @Html.HiddenFor(m => m.accountID)
+                            @Html.Label(null, "Scheme", htmlAttributes: new { @class = "control-label col-md-2" });
+                            @Html.DropDownListFor(m => m.selectedSchemes, new SelectList(Model.medicalAids, "MedicalAidID", "Name"), "Select", new { @class = "multiple", @onchange = "FillScheme()" })
+                        </div>
+                        <div class="col-md-4">
+                            @Html.Label(null, "Options", htmlAttributes: new { @class = "control-label col-md-2" })
+                            @Html.ListBoxFor(m => m.selectedSchemeOptions, new MultiSelectList(Model.schemePlans, "id", "Name"), new { multiple = "multiple", @class = "multiple" })
+                        </div>
+                        <div class="col-md-4">
+                            @Html.Label(null, "Programs", htmlAttributes: new { @class = "control-label col-md-2" });
+                            @Html.ListBoxFor(m => m.selectedPrograms, new MultiSelectList(Model.schemePrograms, "programID", "ProgramName"), new { multiple = "multiple", @class = "multiple" })
+                        </div>
+
+                    </div>
+                    <div class="col-md-1"></div>
+                </div>
+            </div>
+
+
+
+            <div class="fixedBack" style="margin-left: 42.4%">
+                <input value="Back" class="btn buttonRound_formBack go_back" style="width: 15%!important" />
+                <input type="submit" value="Next" class="btn buttonRound_formCreate" style="width: 15%!important" />
+            </div>
+
+
+        </div>
+    }
+
+</div>
+
+@section Scripts {
+    <script src="~/bundles/jqueryval"></script>
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <script type="text/javascript">
+        $(function () {
+            $(".multiselect").multiselect();
+        });
+
+        function FillScheme() {
+            var stateId = $('#selectedSchemes').val();
+            $.ajax({
+                url: '/Account/FillScheme',
+                type: "GET",
+                dataType: "JSON",
+                data: { medId: stateId },
+                success: function (options) {
+                    $("#selectedSchemeOptions").html(""); // clear before appending new list
+                    $.each(options, function (i, option) {
+                        $("#selectedSchemeOptions").append(
+                            $('<option></option>').val(option.Id).html(option.Name));
+                    });
+                }
+            });
+        }
+
+    </script>
+
+
+
+
+}

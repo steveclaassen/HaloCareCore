@@ -1,0 +1,145 @@
+﻿@model HaloCareCore.Models.ViewModels.SchemeOptionViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Details";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+<comment>
+    <!--
+        03 December 2019 -- HCare-905(LINKED TO HCARE-134: Module 2 - Create an Scheme Option master screen)
+        Created settings functionality for Scheme options allowing user to Create, Read, Update and Delete scheme options as well link these options to the schemes.
+        The validation will limit you from adding more than 10 characters to the code and will validate against previously used names as well as codes.
+        The user will access the Scheme Options/Plans via the Settings page / Medical scheme icon and the second tab is linked to the Scheme options.
+        Corrections/Additions: The edit function has been amended to freeze the Plan Code so that the user cannot edit this and create duplicated plans with the same code. A redirect has also been added which will
+        redirect to the correct tab once saved or returned.
+    -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+</style>
+
+<div class="fullScreen_container zero-padding">
+    <!--pageHeader-->
+    <nav id="global-nav" class="nav">
+        <div class="pull-left title">
+            <h1 class="site-title_patientProfile">
+                <span><i class="fas fa-plus-square"></i>&emsp; Medical scheme</span>
+            </h1>
+        </div>
+        <div class="pull-right title">
+            <h1 class="site-title_userID pull-right">
+                <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+            </h1>
+            <h1 class="site-title_userID pull-right">
+                @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                {
+                    <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                }
+            </h1>
+            <h1 class="site-waffleIcon pull-right">
+                <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+            </h1>
+        </div>
+    </nav>
+    <!--breadCrumbs-->
+    <ul class="breadcrumbs_fullScreens">
+        <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+        <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+        <li><a href="@Url.Action("Index", "MedicalAids", new {})">Medical scheme</a></li>
+        <li><a href="#">Detail</a></li>
+    </ul>
+    <!--navCollection-->
+    <div class="navCollection_fullScreens">
+        @Html.Partial("_navCollection")
+    </div>
+
+    <div style="margin-bottom: 1%"></div>
+
+    <div class="row">
+        <h4 class="tableHeading">Medical scheme details</h4>
+        <hr class="fancyruler">
+        <br />
+        <br />
+        <div style="margin-left: 5%">
+            <dl class="dl-horizontal editForm">
+                <dt>
+                    @Html.DisplayNameFor(model => model.medicalAidPlan.planCode)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.medicalAidPlan.planCode)
+                </dd>
+                <dt>
+                    @Html.DisplayNameFor(model => model.medicalAidPlan.Name)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.medicalAidPlan.Name)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.medicalAidVM.MedicalAidName)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.medicalAidVM.MedicalAidName)
+                </dd>
+                <dt>
+                    @Html.DisplayNameFor(model => model.medicalAidPlan.createdBy)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.medicalAidPlan.createdBy)
+                </dd>
+                <dt>
+                    @Html.DisplayNameFor(model => model.medicalAidPlan.createdDate)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.medicalAidPlan.createdDate)
+                </dd>
+                <dt>
+                    @Html.DisplayNameFor(model => model.medicalAidPlan.modifiedBy)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.medicalAidPlan.modifiedBy)
+                </dd>
+                <dt>
+                    @Html.DisplayNameFor(model => model.medicalAidPlan.modifieddate)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.medicalAidPlan.modifieddate)
+                </dd>
+                <dt>
+                    @Html.DisplayNameFor(model => model.medicalAidPlan.active)
+                </dt>
+
+                <dd class="detailsCheck">
+                    @Html.DisplayFor(model => model.medicalAidPlan.active)
+                </dd>
+            </dl>
+        </div>
+
+        <div class="fixedBack">
+            <input value="Back" class="btn buttonRound_formBack go_back" onclick="backKey()" style="width: 15%!important" />
+            <a href="@Url.Action("SchemeOption_Edit", "MedicalAids", new { id = Model.medicalAidPlan.Id })" value="Edit" class="btn buttonRound_formEdit" style="width: 15%!important">Edit</a>
+        </div>
+
+    </div>
+</div>
+
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <script>
+        function backKey() {
+            localStorage.setItem("back_medicalPlan", Date.now());
+        }
+    </script>
+
+}

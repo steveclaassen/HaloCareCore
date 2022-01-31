@@ -1,0 +1,294 @@
+﻿@model HaloCareCore.Models.ScriptCreationViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "AddScript";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+</style>
+
+<div class="fvAdmin_Container zero-padding">
+
+    <!--pageHeader-->
+    <nav id="global-nav" class="nav">
+        <div class="pull-left title">
+            <h1 class="site-title_patientProfile">
+                <span><img src="~/Content/Images/memberProfile/topBar Icons/Script.png" style="width: 2.6%" /></span>&emsp; Script
+            </h1>
+        </div>
+        <div class="pull-right title">
+            <h1 class="site-title_userID pull-right">
+                <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+            </h1>
+            <h1 class="site-title_userID pull-right">
+                @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                {
+                    <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                }
+            </h1>
+            <h1 class="site-waffleIcon pull-right">
+                <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+            </h1>
+        </div>
+    </nav>
+
+    <!--breadCrumbs-->
+    <ul class="breadcrumbs">
+        <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+        <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+        <li><a href="#">Member details</a></li>
+    </ul>
+
+    <!--navCollection-->
+    <div style="margin-left: 0%!important; margin-top:-1.5%!important; margin-bottom: 1.5%!important">
+        @Html.Partial("_navCollection")
+    </div>
+
+    <div style="margin-bottom: 1%"></div>
+
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+        <div class="form-horizontal editForm">
+            <div class="summaryContentBlock">
+
+                <h4 class="tableHeading">Add script</h4>
+                <hr class="fancyruler">
+                <br />
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                @Html.HiddenFor(model => model.script.dependentID)
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.script.effectiveDate, htmlAttributes: new { @class = "control-label col-md-2 drop10" })
+                    <div class="col-md-6" id="scriptSearch">
+                        @Html.EditorFor(model => model.script.effectiveDate, new { htmlAttributes = new { @class = "createForm_infoBox datepicker" } })
+                        @Html.ValidationMessageFor(model => model.script.effectiveDate, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.script.repeats, htmlAttributes: new { @class = "control-label col-md-2 drop10" })
+                    <div class="col-md-6" id="scriptSearch">
+                        @Html.EditorFor(model => model.script.repeats, new { htmlAttributes = new { @class = "createForm_infoBox" } })
+                        @Html.ValidationMessageFor(model => model.script.repeats, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.Label(null,"Doctor Last name", htmlAttributes: new { @class = "control-label col-md-2 drop10" })
+                    <div class="col-md-6" id="scriptSearch">
+                        @Html.EditorFor(model => model.doctor.doctor.drLastName, new { htmlAttributes = new { @class = "createForm_infoBox datepicker" } })
+                        @Html.ValidationMessageFor(model => model.doctor.doctor.drLastName, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.script.practiceNo, htmlAttributes: new { @class = "control-label col-md-2 drop10" })
+                    <div class="col-md-6" id="scriptSearch">
+                        @Html.EditorFor(model => model.script.practiceNo, new { htmlAttributes = new { @class = "createForm_infoBox datepicker" } })
+                        @Html.ValidationMessageFor(model => model.script.practiceNo, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group"></div>
+
+
+
+                <div class="col-md-12">
+
+                    <div style="margin-bottom: 5%"></div>
+
+
+                    @if (Model.items != null)
+                    {
+                        <div class="row">
+                            <table class="table indexTable">
+                                <tr>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.items[0].nappiCode)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.items[0].productName)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.items[0].strength)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.items[0].quantity)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.items[0].directions)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.items[0].itemStatus)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.items[0].fromDate)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.items[0].toDate)
+                                    </th>
+                                </tr>
+
+                                @foreach (var item in Model.items)
+                                {
+                                    <tr>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.nappiCode)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.productName)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.strength)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.quantity)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.directions)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.itemStatus)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.fromDate)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.toDate)
+                                        </td>
+                                    </tr>
+                                }
+
+                            </table>
+                        </div>
+                    }
+                    <br />
+
+
+                    <div class="row">
+                        @if (Model.script.scriptID != 0)
+                        {
+                            <a data-toggle="modal" href="#myModal" input type="button" class="btn buttonRound_formCreate" style="width: 8%; margin-left: 45%!important; margin-bottom: 0.5%;">
+                                Add item
+                            </a>
+                        }
+                    </div>
+
+
+                    @if (Model.script.scriptID == 0)
+                    {
+                        <div class="form-group">
+                            <div class="actionButton" style="margin-left: 39%">
+                                <input type="submit" value="Create Script" class="btn newEnquiry" style="width: 10%!important; font-size: 12px" />
+                            </div>
+                        </div>
+                    }
+
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document" style="width: 1000px; height: 200px; left: -7%; right: 0%; padding-top: 40px; ">
+
+            <div class="">
+                @{Html.RenderAction("_AddScriptItem", "Member", new { script = Model.script.scriptID }); }
+            </div>
+
+        </div>
+    </div>
+    <br />
+    <br />
+
+
+    <br />
+    <br />
+
+    <div class="form-group">
+        <div class="actionButton" style="margin-left: 39.5%">
+            <input value="Back" class="btn buttonRound_formBack go_back" style="width: 15%!important" />
+            <input type="button" class="btn buttonRound_formCreate" style="width: 15%" value="Complete" onclick="location.href='@Url.Action("patientDashboard", "Member", new { DependentID = Model.script.dependentID })'" />
+        </div>
+    </div>
+    <br />
+
+</div>
+
+
+
+
+<script src="js/jquery.tablesorter.min.js"></script>
+
+<!-- Search -->
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <script>
+        var $rows = $('#table tr');
+        $('#search').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $rows.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+
+
+        function sortTable(n) {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("table");
+            switching = true;
+            dir = "asc";
+
+            while (switching) {
+                switching = false;
+                rows = table.getElementsByTagName("TR");
+
+                for (i = 1; i < (rows.length - 1); i++) {
+
+                    shouldSwitch = false;
+
+                    x = rows[i].getElementsByTagName("TD")[n];
+                    y = rows[i + 1].getElementsByTagName("TD")[n];
+
+                    if (dir == "asc") {
+                        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                            //if so, mark as a switch and break the loop:
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (dir == "desc") {
+                        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                            //if so, mark as a switch and break the loop:
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+                if (shouldSwitch) {
+                    /*If a switch has been marked, make the switch
+                    and mark that a switch has been done:*/
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                    //Each time a switch is done, increase this count by 1:
+                    switchcount++;
+                } else {
+                    /*If no switching has been done AND the direction is "asc",
+                    set the direction to "desc" and run the while loop again.*/
+                    if (switchcount == 0 && dir == "asc") {
+                        dir = "desc";
+                        switching = true;
+                    }
+                }
+            }
+        }
+
+    </script>
+}
+

@@ -1,0 +1,334 @@
+﻿@model HaloCareCore.Models.reportHIV
+
+@{
+    ViewBag.Title = "HIVReports";
+    Layout = "~/Views/Shared/_LayoutReport.cshtml";
+}
+
+
+<div class="topBar_viewMember">
+    <h2>HIV / AIDs Reports</h2>
+    <img src="~/Content/Images/memberProfile/topBar Icons/Reports.png" />
+</div>
+
+
+
+<!--sideNavigation Bar-->
+<div id="tabs">
+    <div class="nav-side-menu_Reports memberNav pull-left" style="display: block">
+        <div class="blank">&nbsp;</div>
+        <div class="blank">&nbsp;</div>
+        <div class="blank">&nbsp;</div>
+        <div class="blank">&nbsp;</div>
+
+        <div class="menu-list">
+
+            <ul id="menu-content" class="menu-content collapse out active">
+
+                <!--dashBoard-->
+                <li>
+                    <a href="@Url.Action("reportDashboard", "ReportManagement", null)"><i><img src="~/Content/Images/Icons/Reports/dashboardNav.png" style="width: 8%; margin-left: 2%; margin-right: 3%" /></i>&nbsp; Dashboard &nbsp;</a>
+                </li>
+
+                <!--reportOverview-->
+
+                <li data-toggle="collapse" data-target="#overview" class="collapsed">
+                    <a href="#"><i><img src="~/Content/Images/Icons/Reports/oncologyNav.png" style="width: 8%; margin-left: 3%; margin-right: 2%" /></i>&nbsp; Overview &nbsp;&nbsp;<span class="caret" style="margin-left:10%"></span></a>
+                </li>
+                <ul class="sub-menu collapse" id="overview">
+
+                    <li><a href="#">Dashboard</a></li>
+                    <li data-toggle="collapse" data-target="#overviewPatient" class="collapsed">
+                        <a href="#">General<span class="caret"></span></a>
+                    </li>
+                    <ul class="sub-sub-menu collapse" id="overviewPatient">
+                        <li><a href="#">&nbsp;PEP</a></li>
+                        <li><a href="#">&nbsp;Production</a></li>
+                        <li><a href="#">&nbsp;Authorisation Letters</a></li>
+                        <li><a href="#">&nbsp;Enquiries</a></li>
+                        <li><a href="#">&nbsp;Documents</a></li>
+                    </ul>
+                    <li data-toggle="collapse" data-target="#overviewPatient" class="collapsed">
+                        <a href="#">Patient<span class="caret"></span></a>
+                    </li>
+                    <ul class="sub-sub-menu collapse" id="overviewPatient">
+                        <li><a href="#">&nbsp;All</a></li>
+                        <li><a href="#">&nbsp;Prescriptions</a></li>
+                        <li><a href="#">&nbsp;Pathology</a></li>
+                        <li><a href="#">&nbsp;Assignments</a></li>
+                        <li><a href="#">&nbsp;Enquiries</a></li>
+                        <li><a href="#">&nbsp;Documents</a></li>
+                    </ul>
+                    <li data-toggle="collapse" data-target="#overviewProduction" class="collapsed">
+                        <a href="#">Production<span class="caret"></span></a>
+                    </li>
+                    <ul class="sub-sub-menu collapse" id="overviewProduction">
+                        <li><a href="#">&nbsp;All</a></li>
+                        <li><a href="#">&nbsp;Assignments</a></li>
+                        <li><a href="#">&nbsp;Enquiries</a></li>
+                        <li><a href="#">&nbsp;SMS</a></li>
+                        <li><a href="#">&nbsp;Documents</a></li>
+                        <li><a href="#">&nbsp;Patient Profiles</a></li>
+                        <li><a href="#">&nbsp;Authorisations</a></li>
+                    </ul>
+                    <li data-toggle="collapse" data-target="#overviewScheme" class="collapsed">
+                        <a href="#">Scheme<span class="caret"></span></a>
+                    </li>
+                    <ul class="sub-sub-menu collapse" id="overviewScheme">
+                        <li><a href="#">&nbsp;All</a></li>
+                        <li><a href="#">&nbsp;Active Patients</a></li>
+                        <li><a href="#">&nbsp;Active by Gender</a></li>
+                        <li><a href="#">&nbsp;New Registrations</a></li>
+                        <li><a href="#">&nbsp;Status</a></li>
+                        <li><a href="#">&nbsp;Pathology</a></li>
+                    </ul>
+                </ul>
+
+                <!--hiv/aidsDrop-->
+
+                <li data-toggle="collapse" data-target="#hivaids" class="collapsed">
+                    <a href="#"><i><img src="~/Content/Images/Icons/Reports/hivNav.png" style="width: 8%; margin-left: 3%; margin-right: 2%" /></i>&nbsp; HIV/AIDS &nbsp;&nbsp;<span class="caret" style="margin-left:10%"></span></a>
+                </li>
+                <ul class="sub-menu collapse" id="hivaids">
+
+                    <li>@Html.ActionLink("Dashboard", "dashboardHIV", "ReportManagement")</li>
+                    <li data-toggle="collapse" data-target="#hivPatient" class="collapsed">
+                        <a href="#">Patient<span class="caret"></span></a>
+                    </li>
+                    <ul class="sub-sub-menu collapse" id="hivPatient">
+                        <li><a href="#">&nbsp;All</a></li>
+                        <li><a href="#">&nbsp;Prescriptions</a></li>
+                        <li><a href="#">&nbsp;Pathology</a></li>
+                        <li><a href="#">&nbsp;Assignments</a></li>
+                        <li><a href="#">&nbsp;Enquiries</a></li>
+                        <li><a href="#">&nbsp;Documents</a></li>
+                    </ul>
+                    <li data-toggle="collapse" data-target="#hivProduction" class="collapsed">
+                        <a href="#">Production<span class="caret"></span></a>
+                    </li>
+                    <ul class="sub-sub-menu collapse" id="hivProduction">
+                        <li><a href="#">&nbsp;All</a></li>
+                        <li><a href="#">&nbsp;Assignments</a></li>
+                        <li><a href="#">&nbsp;Enquiries</a></li>
+                        <li><a href="#">&nbsp;SMS</a></li>
+                        <li><a href="#">&nbsp;Documents</a></li>
+                        <li><a href="#">&nbsp;Patient Profiles</a></li>
+                        <li><a href="#">&nbsp;Authorisations</a></li>
+                    </ul>
+                    <li data-toggle="collapse" data-target="#hivScheme" class="collapsed">
+                        <a href="#">Scheme<span class="caret"></span></a>
+                    </li>
+                    <ul class="sub-sub-menu collapse" id="hivScheme">
+                        <li><a href="#">&nbsp;All</a></li>
+                        <li><a href="#">&nbsp;Active Patients</a></li>
+                        <li><a href="#">&nbsp;Active by Gender</a></li>
+                        <li><a href="#">&nbsp;New Registrations</a></li>
+                        <li><a href="#">&nbsp;Status</a></li>
+                        <li><a href="#">&nbsp;Pathology</a></li>
+                    </ul>
+                </ul>
+
+
+                <!--diabetesDrop-->
+
+                <li data-toggle="collapse" data-target="#diabetes" class="collapsed">
+                    <a href="#"><i><img src="~/Content/Images/Icons/Reports/diabetesNav.png" style="width: 15%" /></i>&nbsp; Diabetes &nbsp;&nbsp;<span class="caret" style="margin-left:10%"></span></a>
+                </li>
+                <ul class="sub-menu collapse" id="diabetes">
+
+                    <li><a href="#">Dashboard</a></li>
+                    <li data-toggle="collapse" data-target="#diabetesPatient" class="collapsed">
+                        <a href="#">Patient<span class="caret"></span></a>
+                    </li>
+                    <ul class="sub-sub-menu collapse" id="diabetesPatient">
+                        <li><a href="#">&nbsp;All</a></li>
+                        <li><a href="#">&nbsp;Prescriptions</a></li>
+                        <li><a href="#">&nbsp;Pathology</a></li>
+                        <li><a href="#">&nbsp;Assignments</a></li>
+                        <li><a href="#">&nbsp;Enquiries</a></li>
+                        <li><a href="#">&nbsp;Documents</a></li>
+                    </ul>
+                    <li data-toggle="collapse" data-target="#diabetesProduction" class="collapsed">
+                        <a href="#">Production<span class="caret"></span></a>
+                    </li>
+                    <ul class="sub-sub-menu collapse" id="diabetesProduction">
+                        <li><a href="#">&nbsp;All</a></li>
+                        <li><a href="#">&nbsp;Assignments</a></li>
+                        <li><a href="#">&nbsp;Enquiries</a></li>
+                        <li><a href="#">&nbsp;SMS</a></li>
+                        <li><a href="#">&nbsp;Documents</a></li>
+                        <li><a href="#">&nbsp;Patient Profiles</a></li>
+                        <li><a href="#">&nbsp;Authorisations</a></li>
+                    </ul>
+                    <li data-toggle="collapse" data-target="#diabetesScheme" class="collapsed">
+                        <a href="#">Scheme<span class="caret"></span></a>
+                    </li>
+                    <ul class="sub-sub-menu collapse" id="diabetesScheme">
+                        <li><a href="#">&nbsp;All</a></li>
+                        <li><a href="#">&nbsp;Active Patients</a></li>
+                        <li><a href="#">&nbsp;Active by Gender</a></li>
+                        <li><a href="#">&nbsp;New Registrations</a></li>
+                        <li><a href="#">&nbsp;Status</a></li>
+                        <li><a href="#">&nbsp;Pathology</a></li>
+                    </ul>
+                </ul>
+
+                <!--oncologyDrop-->
+                <!--
+                                <li data-toggle="collapse" data-target="#oncology" class="collapsed">
+                                    <a href="#"><i><img src="~/Content/Images/Icons/Reports/oncologyNav.png" style="width: 15%" /></i>&nbsp; Oncology &nbsp;&nbsp;<span class="caret" style="margin-left:10%"></span></a>
+                                </li>
+                                <ul class="sub-menu collapse" id="oncology">
+
+                                    <li><a href="#">Dashboard</a></li>
+                                    <li data-toggle="collapse" data-target="#oncologyPatient" class="collapsed">
+                                        <a href="#">Patient<span class="caret"></span></a>
+                                    </li>
+                                    <ul class="sub-sub-menu collapse" id="oncologyPatient">
+                                        <li><a href="#">&nbsp;All</a></li>
+                                        <li><a href="#">&nbsp;Prescriptions</a></li>
+                                        <li><a href="#">&nbsp;Pathology</a></li>
+                                        <li><a href="#">&nbsp;Assignments</a></li>
+                                        <li><a href="#">&nbsp;Enquiries</a></li>
+                                        <li><a href="#">&nbsp;Documents</a></li>
+                                    </ul>
+                                    <li data-toggle="collapse" data-target="#oncologyProduction" class="collapsed">
+                                        <a href="#">Production<span class="caret"></span></a>
+                                    </li>
+                                    <ul class="sub-sub-menu collapse" id="oncologyProduction">
+                                        <li><a href="#">&nbsp;All</a></li>
+                                        <li><a href="#">&nbsp;Assignments</a></li>
+                                        <li><a href="#">&nbsp;Enquiries</a></li>
+                                        <li><a href="#">&nbsp;SMS</a></li>
+                                        <li><a href="#">&nbsp;Documents</a></li>
+                                        <li><a href="#">&nbsp;Patient Profiles</a></li>
+                                        <li><a href="#">&nbsp;Authorisations</a></li>
+                                    </ul>
+                                    <li data-toggle="collapse" data-target="#oncologyScheme" class="collapsed">
+                                        <a href="#">Scheme<span class="caret"></span></a>
+                                    </li>
+                                    <ul class="sub-sub-menu collapse" id="oncologyScheme">
+                                        <li><a href="#">&nbsp;All</a></li>
+                                        <li><a href="#">&nbsp;Active Patients</a></li>
+                                        <li><a href="#">&nbsp;Active by Gender</a></li>
+                                        <li><a href="#">&nbsp;New Registrations</a></li>
+                                        <li><a href="#">&nbsp;Status</a></li>
+                                        <li><a href="#">&nbsp;Pathology</a></li>
+                                    </ul>
+                                </ul>
+                -->
+                <!--Search-->
+
+                <li>
+                    <a href="@Url.Action("Index", "Projects", null)"><i><img src="~/Content/Images/Icons/Reports/searchNav.png" style="width: 15%" /></i>&nbsp; Search &nbsp;</a>
+                </li>
+
+
+
+            </ul>
+        </div>
+
+    </div>
+    <br />
+    <br />
+    <br />
+    <br />
+    <br />
+    <br />
+    <br />
+    <br />
+    <div class="sideNav-Container" style="margin-top: 0%">
+
+
+        <div class="row contentBlock_Reports" style="">
+            <br />
+            <br />
+            <div class="advancedSearchIcon">
+                <img src="~/Content/Images/Icons/Reports/hivReports.png" style="width:10%; margin: auto; display: block" />
+                <h2 style="color: #003366; font-size: 150%; text-align: center"><i>HIV/AIDs Report<br /><span style="color: #0081b3">Search</span></i></h2>
+            </div>
+            <br />
+            <br />
+            @using (Html.BeginForm())
+            {
+                @Html.AntiForgeryToken()
+
+                <div class="form-group">
+                    <div class="form-horizontal" style="margin-left: -7%">
+
+                        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                        <div class="form-group">
+                            @Html.Label(null,"Date From", htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-4">
+                                @Html.EditorFor(model => model.dependant.createdDate, new { htmlAttributes = new { @class = "infoBox_Enrollment" } })
+                            </div>
+                            @Html.Label(null,"Status", htmlAttributes: new { @class = "control-label col-md-2 pull" })
+                            <div class="col-md-4">
+                                @Html.EditorFor(model => model.doctorName, new { htmlAttributes = new { @class = "infoBox_Enrollment" } })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.Label(null,"Date To", htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-4">
+                                @Html.EditorFor(model => model.dependant.createdDate, new { htmlAttributes = new { @class = "infoBox_Enrollment" } })
+                            </div>
+                            @Html.Label(null,"Program Search", htmlAttributes: new { @class = "control-label col-md-2 pull" })
+                            <div class="col-md-4">
+                                @Html.EditorFor(model => model.doctorName, new { htmlAttributes = new { @class = "infoBox_Enrollment" } })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.Label(null,"Disease", htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-4">
+                                @Html.EditorFor(model => model.doctorName, new { htmlAttributes = new { @class = "infoBox_Enrollment" } })
+                            </div>
+                            @Html.Label(null,"Doctor Search", htmlAttributes: new { @class = "control-label col-md-2 pull" })
+                            <div class="col-md-4">
+                                @Html.EditorFor(model => model.doctorName, new { htmlAttributes = new { @class = "infoBox_Enrollment" } })
+                            </div>
+                        </div>
+
+
+                        <div class="form-group">
+                            @Html.Label(null,"Type", htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-4">
+                                @Html.EditorFor(model => model.dependant.firstName, new { htmlAttributes = new { @class = "infoBox_Enrollment" } })
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <br />
+                <br />
+
+                <div class="form-group">
+                    <div class="actionButton" style="margin-left: 89%; margin-bottom: 1%; width: 70%">
+                        <input type="submit" value="Search" class="btn buttonRound_collapse" />
+                    </div>
+                </div>
+                <br />
+                <br />
+                <br />
+                <br />
+                <br />
+                <br />
+                <br />
+                <br />
+            }
+        </div>
+
+
+        <br />
+        <br />
+        <div class="backButton_Navigation">
+            @Html.ActionLink("Back", "Index")
+        </div>
+    </div>
+
+    @section Scripts {
+        <script src="~/bundles/jqueryval"></script>
+    }
+

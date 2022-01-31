@@ -1,0 +1,387 @@
+﻿@model HaloCareCore.Models.Communications.AttachmentTemplate
+@using HaloCareCore.Extensions
+@{
+    ViewBag.Title = "Attachments";
+    Layout = "~/Views/Shared/_layout-view-x.cshtml";
+}
+
+<javascript>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+    <script src="https://www.jqueryscript.net/demo/jQuery-Plugin-For-Sortable-Bootstrap-Tables-Bootstrap-Sortable/Scripts/bootstrap-sortable.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/js/standalone/selectize.js"></script>
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.default.css">
+</javascript>
+<style>
+    .default-badge {
+        display: inline-block;
+        background-color: rgb(204 204 204 / 0.40);
+        border-radius: 10px;
+        padding: 6px;
+        min-width: 10px;
+        font: 100 10px 'Century Gothic';
+        color: darkgray;
+        line-height: 1;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: baseline;
+    }
+</style>
+<div class="collapse in">
+    <div class="card card-body">
+        <div class="collapse-body">
+            <div class="account-setting-panel">
+                <div class="col-md-12 row">
+                    <div class="account-heading">Details</div>
+                    <p class="account-sub-header-new">Attachment details listed below.</p>
+                </div>
+                <hr class="fancyruler">
+                <table class="table details-table table-hover" id="bipolar-details">
+                    <tbody>
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayNameFor(model => model.AttachmentName)</td>
+                            <td class="row-information">@Html.DisplayFor(model => model.AttachmentName)</td>
+                        </tr>
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayNameFor(model => model.AttachmentType)</td>
+                            <td class="row-information">@Html.DisplayFor(model => model.AttachmentType)</td>
+                        </tr>
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayNameFor(model => model.Root)</td>
+                            <td class="row-information">@Html.DisplayFor(model => model.Root)</td>
+                        </tr>
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayNameFor(model => model.FileName)</td>
+                            <td class="row-information">
+                                @Html.DisplayFor(model => model.FileName) <span>&emsp;<input type="button" id="attachment-download" value="Download" class="modal-button-download" onclick="location.href = '@Url.Action("GetAttachment", "Template", new { attachment = Model.FileName})'" /></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayNameFor(model => model.CreatedDate)</td>
+                            <td class="row-information">@Html.DisplayFor(model => model.CreatedDate)</td>
+                        </tr>
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayNameFor(model => model.CreatedBy)</td>
+                            <td class="row-information">@Html.DisplayFor(model => model.CreatedBy)</td>
+                        </tr>
+                        @if (Model.ModifiedDate != null)
+                        {
+                            <tr>
+                                <td class="row-heading subject">@Html.DisplayNameFor(model => model.ModifiedDate)</td>
+                                <td class="row-information">@Html.DisplayFor(model => model.ModifiedDate)</td>
+                            </tr>
+                            <tr>
+                                <td class="row-heading subject">@Html.DisplayNameFor(model => model.ModifiedBy)</td>
+                                <td class="row-information">@Html.DisplayFor(model => model.ModifiedBy)</td>
+                            </tr>
+                        }
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayNameFor(model => model.Program)</td>
+                            <td class="row-information">
+                                @if (Model.Program != null)
+                                {
+                                    @Html.DisplayFor(model => model.Program)
+                                }
+                                else
+                                {
+                                <span ><span class="default-badge">Default &nbsp;</span>&nbsp; All programs are linked to this attachment.</span>
+                                }
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayNameFor(model => model.Active)</td>
+                            <td class="row-information"><span class="@(Model.Active == true ? "chk-yes fas fa-circle" : "chk-no fas fa-circle")"></span>&emsp;@((Model.Active == true) ? "Yes" : "No")</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="sf-footer">
+                    <input type="button" id="attachment-back" value="Back" class="btn modal-button-previous" onclick="location.href = '@Url.Action("Index", "Template", null)'; backKey();" />
+                    <input type="button" id="attachment-edit" value="Edit" class="btn modal-button-next" onclick="location.href = '@Url.Action("Attachment_Edit", "Template", new { id = Model.Id })'; editKey();" />
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+@section scripts{
+    <script src="~/bundles/jqueryval"></script>
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/js/standalone/selectize.js"></script>
+    <script>
+        initSelectize();
+        function initSelectize() {
+            $('#attachment-type').selectize({
+                persist: true,
+                preload: true,
+                maxItems: 1,
+                delimiter: ',',
+                valueField: 'id',
+                labelField: 'name',
+                searchField: ['name'],
+                hideSelected: true,
+                plugins: ['remove_button'],
+                render: {
+                    option: function (item, escape) {
+                        return '<span class="name">' + escape(item.name) + '</span>';
+                    }
+                },
+            }),
+                $('#Program').selectize({
+                    persist: true,
+                    preload: true,
+                    maxItems: 1,
+                    delimiter: ',',
+                    valueField: 'id',
+                    labelField: 'name',
+                    searchField: ['name'],
+                    hideSelected: true,
+                    plugins: ['remove_button'],
+                    render: {
+                        option: function (item, escape) {
+                            return '<span class="name">' + escape(item.name) + '</span>';
+                        }
+                    },
+                })
+        }
+    </script>
+    <script>
+        $(function () {
+            $('li.asl-1').click(function () {
+                $("#AttachmentName").focus();
+                $('li.asl-1').addClass("active-step");
+                $('li span.circle-1').addClass("active-circle");
+                $('li.asl-2').removeClass("active-step");
+                $('li span.circle-2').removeClass("active-circle");
+                $('li.asl-3').removeClass("active-step");
+                $('li span.circle-3').removeClass("active-circle");
+                $('li.asl-4').removeClass("active-step");
+                $('li span.circle-4').removeClass("active-circle");
+            });
+            $(document).on('click', '.selectize-1 div.selectize-input.focus', function (e) {
+                $('li.asl-1').removeClass("active-step");
+                $('li span.circle-1').removeClass("active-circle");
+                $('li.asl-2').addClass("active-step");
+                $('li span.circle-2').addClass("active-circle");
+                $('li.asl-3').removeClass("active-step");
+                $('li span.circle-3').removeClass("active-circle");
+                $('li.asl-4').removeClass("active-step");
+                $('li span.circle-4').removeClass("active-circle");
+            });
+            $(document).on('click', '.selectize-2 div.selectize-input.focus', function (e) {
+                $('li.asl-1').removeClass("active-step");
+                $('li span.circle-1').removeClass("active-circle");
+                $('li.asl-2').removeClass("active-step");
+                $('li span.circle-2').removeClass("active-circle");
+                $('li.asl-3').removeClass("active-step");
+                $('li span.circle-3').removeClass("active-circle");
+                $('li.asl-4').addClass("active-step");
+                $('li span.circle-4').addClass("active-circle");
+            });
+            $('#AttachmentName').focus(function () {
+                $('li.asl-1').addClass("active-step");
+                $('li span.circle-1').addClass("active-circle");
+                $('li.asl-2').removeClass("active-step");
+                $('li span.circle-2').removeClass("active-circle");
+                $('li.asl-3').removeClass("active-step");
+                $('li span.circle-3').removeClass("active-circle");
+                $('li.asl-4').removeClass("active-step");
+                $('li span.circle-4').removeClass("active-circle");
+            });
+        });
+    </script>
+    <script>
+        function Validation1() {
+            var name = $("#AttachmentName").val();
+            $('#name-validation').html('');
+            if (name.length > 0) {
+                $("#required-name").addClass("required-color");
+                $('li').find('span.circle-1').text("✓");
+                $('li').find('span.circle-1').addClass("complete-circle");
+            }
+            else {
+                $("#required-name").removeClass("required-color");
+                $('li').find('span.circle-1').text("1");
+                $('li').find('span.circle-1').removeClass("complete-circle");
+            }
+        }
+        function Validation2() {
+            var attachment = $("#attachment").val();
+            var type = $("#attachment-type").val();
+            $("#attachment-type-text").val($("#attachment-type").text());
+            $('#type-validation').html('');
+            $("#attachment-submit").prop('disabled', false);
+            $("#attachment-validation").hide().html('');
+            $('#animated-check-circle').hide();
+            $('#check-animation').prop('disabled', false);
+            $('#check-animation').prop('checked', false);
+            $(".file-check-no").hide();
+
+            if (attachment.length > 0 && type.length > 0) {
+                if (~attachment.indexOf(type)) {
+                    if (attachment.length > 0) {
+                        $("#required-attachment").addClass("required-color");
+                        $("#required-type").addClass("required-color");
+                        $('li').find('span.circle-2').text("✓");
+                        $('li').find('span.circle-2').addClass("complete-circle");
+
+                        setTimeout(function () { $('#animated-check-circle').toggle(); }, 100);
+                        setTimeout(function () { $('#check-animation').prop('checked', true); $('#check-animation').prop('disabled', true); }, 600);
+                    }
+                    else {
+                        $("#required-type").removeClass("required-color");
+                        $('li').find('span.circle-2').text("2");
+                        $('li').find('span.circle-2').removeClass("complete-circle");
+                    }
+                }
+                else {
+                    $("#attachment-validation").fadeIn(200).html('&emsp;&nbsp;Warning: attachment type does not match file extension.');
+                    $("#attachment-submit").prop('disabled', true);
+                    $(".file-check-no").fadeIn(200);
+                    event.preventDefault();
+                }
+            }
+            else if (type.length > 0) {
+                $("#required-type").addClass("required-color");
+                $('li').find('span.circle-2').text("✓");
+                $('li').find('span.circle-2').addClass("complete-circle");
+            }
+            else {
+                $("#required-type").removeClass("required-color");
+                $('li').find('span.circle-2').text("2");
+                $('li').find('span.circle-2').removeClass("complete-circle");
+            }
+
+        }
+        function Validation3() {
+            var attachment = $("#file").val();
+            var type = $("#attachment-type").val();
+            $('#file-validation').html('');
+
+            $("#attachment-submit").prop('disabled', false);
+            $("#attachment-validation").hide().html('');
+            $('#animated-check-circle').hide();
+            $('#check-animation').prop('disabled', false);
+            $('#check-animation').prop('checked', false);
+
+            if (attachment.length > 0 && type.length > 0) {
+                if (~attachment.indexOf(type)) {
+                    if (attachment.length > 0) {
+                        $("#required-attachment").addClass("required-color");
+                        $("#required-type").addClass("required-color");
+                        $('li').find('span.circle-3').text("✓");
+                        $('li').find('span.circle-3').addClass("complete-circle");
+
+                        setTimeout(function () { $('#animated-check-circle').toggle(); }, 100);
+                        setTimeout(function () { $('#check-animation').prop('checked', true); $('#check-animation').prop('disabled', true); }, 600);
+                    }
+                    else {
+                        $("#required-attachment").removeClass("required-color");
+                        $('li').find('span.circle-3').text("3");
+                        $('li').find('span.circle-3').removeClass("complete-circle");
+                    }
+                }
+                else {
+                    $("#attachment-validation").fadeIn(200).html('&emsp;&nbsp;Warning: attachment type does not match file extension.');
+                    $("#attachment-submit").prop('disabled', true);
+                    $(".file-check-no").fadeIn(200);
+                    event.preventDefault();
+                }
+            }
+            else if (attachment.length > 0) {
+                $("#required-attachment").addClass("required-color");
+                $('li').find('span.circle-3').text("✓");
+                $('li').find('span.circle-3').addClass("complete-circle");
+            }
+            else {
+                $("#required-attachment").removeClass("required-color");
+                $('li').find('span.circle-3').text("3");
+                $('li').find('span.circle-3').removeClass("complete-circle");
+            }
+        }
+        function Validation4() {
+            var program = $("#Program").val();
+            $('#program-validation').html('');
+
+            if (program.length > 0) {
+                $("#required-program").addClass("required-color");
+                $('li').find('span.circle-4').text("✓");
+                $('li').find('span.circle-4').addClass("complete-circle");
+                $('#program-validation').addClass("hidden");
+            }
+            else {
+                $("#required-program").removeClass("required-color");
+                $('li').find('span.circle-4').text("4");
+                $('li').find('span.circle-4').removeClass("complete-circle");
+                $('#program-validation').removeClass("hidden");
+            }
+        }
+    </script>
+    <script>
+        function NameCheck() {
+            var value = $("#AttachmentName").val();
+            if (value == null || value == '') {
+                $('#name-validation').html('<span style="font-size: 10px"><i class="fas fa-exclamation-circle"></i> </span>Attachment name is required!');
+                event.preventDefault();
+            }
+        }
+        function TypeCheck() {
+            var value = $("#attachment-type :selected").val();
+            if (value == "") {
+                $('#type-validation').html('<span style="font-size: 10px"><i class="fas fa-exclamation-circle"></i> </span>Attachment type is required!');
+                event.preventDefault();
+            }
+        }
+        //function AttachmentCheck() {
+        //    var attachment = $("#file").val();
+        //    if (attachment == null || attachment == "") {
+        //        $('#file-validation').html('<span style="font-size: 10px"><i class="fas fa-exclamation-circle"></i> </span>Attachment is required!');
+        //        event.preventDefault();
+        //    }
+        //}
+        function ProgramCheck() {
+            var value = $("#Program :selected").val();
+            if (value == null || value == '') {
+                $('#program-validation').html('<span style="font-size: 10px"><i class="fas fa-exclamation-circle"></i> </span>Program is required!');
+                event.preventDefault();
+            }
+        }
+    </script>
+    <script>
+        $(function () {
+            var validation = $("#validation").val();
+            if (validation == "duplicate") {
+                $("#popup-validation").removeClass("hidden").html('&emsp;Popup template already exists!');
+
+                $("#Title").val('');
+                $("#selectedSchemes")[0].selectize.clear();
+                $("#selectedPrograms")[0].selectize.clear();
+            }
+        });
+    </script>
+    <script>
+        const attachmentbtn = document.getElementById('file');
+
+        const fileChosen = document.getElementById('file-chosen');
+
+        attachmentbtn.addEventListener('change', function () {
+            fileChosen.textContent = this.files[0].name
+        })
+    </script>
+    <script>
+        function backKey() {
+            localStorage.setItem("back_attachment", Date.now());
+        }
+        function editKey() {
+            localStorage.setItem("edit_attachment", Date.now());
+        }
+    </script>
+}

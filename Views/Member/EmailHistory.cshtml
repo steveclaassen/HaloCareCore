@@ -1,0 +1,273 @@
+﻿@model IEnumerable<HaloCareCore.Models.Communications.Emails>
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "EmailHistory";
+    Layout = "~/Views/Shared/_LayoutMember.cshtml";
+}
+
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+</style>
+
+<!--dateSort_JQ-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js"></script>
+<script src="https://www.jqueryscript.net/demo/jQuery-Plugin-For-Sortable-Bootstrap-Tables-Bootstrap-Sortable/Scripts/bootstrap-sortable.js"></script>
+
+<!--pageHeader-->
+<nav id="global-nav" class="nav">
+    <div class="pull-left title">
+        <h1 class="site-title_patientProfile">
+            <span><i class="fas fa-envelope"></i>&emsp; Email</span>
+        </h1>
+    </div>
+    <div class="pull-right title">
+        <h1 class="site-title_userID pull-right">
+            <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+        </h1>
+        <h1 class="site-title_userID pull-right">
+            @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+            {
+                <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+            }
+        </h1>
+        <h1 class="site-waffleIcon pull-right">
+            <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+        </h1>
+    </div>
+</nav>
+
+<div class="dashboardContainer zero-padding">
+    <div class="patientDashboard_View">
+
+        <!--breadCrumbs-->
+        <ul class="breadcrumbs_patientDashboard">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+            <li><a href="@Url.Action("patientCommunication", "Member", new { DependentID = Context.Request.Query["DependentID"] })">Patient</a></li>
+            <li><a href="#">Email history</a></li>
+        </ul>
+
+        <!--Left navSlider -->
+        @Html.Partial("_navSlider", new { DependentID = Context.Request.Query["DependentID"] })
+
+        <!--navCollection-->
+        <div class="navCollection_patientDashboard">
+            @Html.Partial("_navCollection")
+        </div>
+
+        <!--profileInformation-->
+        <div class="profileBar">
+            @Html.Action("_profileBar_edit", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })
+        </div>
+    </div>
+
+    <div class="profilebar-spacer"></div>
+
+    <div class="patientDashboard_container">
+        <h4 class="tableHeadingX">Email history</h4>
+        <br />
+        <!--jQ_Search-->
+        <div class="row" style="margin-left: 18%!important">
+            <div class="col-md-6 pull-right">
+                <ul class="input-group" id="adv-search">
+
+                    <ul class="nav navbar-nav navbar-right">
+                        <li class="focus">
+                            <input type="text" class="form-control-patientSearch" id="search" onkeyup="myFunction()" placeholder="Search..." />
+                        </li>
+                        <div class="btn-group" role="group">
+                            <button type="submit" class="btn btn-search" style="height: 29px"><span class="glyphicon glyphicon-search" aria-hidden="true" title="Search"></span></button>
+                        </div>
+                    </ul>
+                </ul>
+            </div>
+        </div>
+
+        <table class="table statusHistory_Table sortable" id="table">
+            <thead>
+                <tr>
+                    <th>
+                        @Html.DisplayNameFor(model => model.createdDate) <i class="fa fa-fw fa-sort"></i>
+                    </th>
+                    <th onclick="eHistory(1)">
+                        @Html.DisplayNameFor(model => model.emailTo) <i class="fa fa-fw fa-sort"></i>
+                    </th>
+                    <th onclick="eHistory(2)">
+                        @Html.DisplayNameFor(model => model.cc) <i class="fa fa-fw fa-sort"></i>
+                    </th>
+                    <th onclick="eHistory(3)">
+                        @Html.DisplayNameFor(model => model.subject) <i class="fa fa-fw fa-sort"></i>
+                    </th>
+                    <th onclick="eHistory(4)">
+                        @Html.DisplayNameFor(model => model.emailMassage) <i class="fa fa-fw fa-sort"></i>
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.effectivedate) <i class="fa fa-fw fa-sort"></i>
+                    </th>
+                    <th onclick="eHistory(5)">
+                        @Html.DisplayNameFor(model => model.createdBy) <i class="fa fa-fw fa-sort"></i>
+                    </th>
+                    <th onclick="eHistory(7)" style="text-align: center!important">
+                        @Html.DisplayNameFor(model => model.status) <i class="fa fa-fw fa-sort"></i>
+                    </th>
+                </tr>
+            </thead>
+            @if (Model.Count() == 0)
+            {
+                <tr><td colspan="8" style="text-align: center!important; color: rgba(128, 128, 128, 0.50)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="color: rgba(128, 128, 128, 0.50)"></i></span> no records found</td></tr>
+            }
+            else
+            {
+                foreach (var item in Model)
+                {
+                    <tbody>
+                        <tr>
+                            <td data-dateformat="DD-MM-YYYY">
+                                @{
+                                    string time = item.createdDate.ToShortTimeString();
+                                }
+                                @Html.DisplayFor(modelItem => item.createdDate)  @Html.DisplayFor(modelItem => time)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.emailTo)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.cc)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.subject)
+                            </td>
+                            @*<td>
+                                    @Html.DisplayFor(modelItem => item.emailMassage)
+                                </td>*@
+                            <td>
+                                @System.Text.RegularExpressions.Regex.Replace(item.emailMassage, @"<[^>]+>|&nbsp;", "").Trim();
+                            </td>
+                            <td data-dateformat="DD-MM-YYYY">
+                                @{
+                                    string timed = item.effectivedate.ToShortTimeString();
+                                }
+                                @Html.DisplayFor(modelItem => item.effectivedate)  @Html.DisplayFor(modelItem => timed)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.createdBy)
+                            </td>
+                            <td style="text-align: center!important">
+                                @Html.DisplayFor(modelItem => item.status)
+                            </td>
+                        </tr>
+                    </tbody>
+                }
+            }
+
+        </table>
+        <div class="fixedBack" style="margin-left: 42%; margin-bottom: 1%">
+            <input value="Back" class="btn buttonRound_formBack go_back" style="width: 15%" />
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script src="~/bundles/jqueryval"></script>
+
+@section scripts{
+    <script>
+        /*Left navigationSlider*/
+        $("#menu-toggle").click(function (e) {
+            e.preventDefault();
+            $("#wrapper").toggleClass("active");
+        });
+
+        var $rows = $('#table tr');
+        $('#search').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $rows.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+
+
+        /*specialNote*/
+        $("#alert-toggle").click(function (e) {
+            e.preventDefault();
+            $("#alertWrapper").toggleClass("active");
+        });
+
+        /*goBack*/
+        $(function () {
+            $('.go_back').click(function (e) {
+                e.preventDefault();
+                history.go(-1);
+            });
+        });
+
+        /*tableSorting*/
+        function eHistory(n) {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("table");
+            switching = true;
+            dir = "asc";
+
+            while (switching) {
+                switching = false;
+                rows = table.getElementsByTagName("TR");
+
+                for (i = 1; i < (rows.length - 1); i++) {
+
+                    shouldSwitch = false;
+
+                    x = rows[i].getElementsByTagName("TD")[n];
+                    y = rows[i + 1].getElementsByTagName("TD")[n];
+
+                    if (dir == "asc") {
+                        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (dir == "desc") {
+                        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+                if (shouldSwitch) {
+
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+
+                    switchcount++;
+                } else {
+
+                    if (switchcount == 0 && dir == "asc") {
+                        dir = "desc";
+                        switching = true;
+                    }
+                }
+            }
+        }
+
+
+        // Javascript to enable link to tab
+        var url = document.location.toString();
+        if (url.match('#')) {
+            $('.nav-tabs a[href="#' + url.split('#')[1] + '"]').tab('show');
+        }
+
+        // Change hash for page-reload
+        $('.nav-tabs a').on('shown.bs.tab', function (e) {
+            window.location.hash = e.target.hash;
+        })
+
+        $(".nav-tabs a").click(function () { });
+
+    </script>
+}

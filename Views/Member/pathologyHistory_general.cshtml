@@ -1,0 +1,986 @@
+﻿@model HaloCareCore.Models.ClinicalViewModel
+@using HaloCareCore.Extensions
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Pathology";
+    Layout = "~/Views/Shared/_LayoutMember.cshtml";
+}
+
+<comment>
+    <!--
+        02 July 2020 -- HCare-1079(Pathology name changes)
+        Updated the headings to read from the pathology model
+    -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .contactIcon:hover {
+        line-height: 1.4;
+    }
+
+    .detail-information:hover {
+        background-color: rgba(255, 255, 255, 0.87);
+        z-index: 1000
+    }
+</style>
+
+<!------------------------------------------------------------------------------------ jQ-dateSort  ----------------------------------------------------------------------------------->
+@*<javascript>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+        <script src="http://code.jquery.com/jquery.unobtrusive-ajax.min.js"></script>
+        <script src="js/jquery.tablesorter.min.js"></script>
+    </javascript>*@
+
+<javascript>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="https://www.jqueryscript.net/demo/jQuery-Plugin-For-Sortable-Bootstrap-Tables-Bootstrap-Sortable/Scripts/bootstrap-sortable.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/js/standalone/selectize.js"></script>
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.default.css">
+
+    <script src="js/jquery.tablesorter.min.js"></script>
+</javascript>
+
+<!----------------------------------------------------------------------------- html-top-navigation-panel  ---------------------------------------------------------------------------->
+<nav id="global-nav" class="nav" style="z-index: 10000">
+    <div class="pull-left title">
+        <h1 class="site-title_patientProfile">
+            <span><img src="~/Content/Images/memberProfile/topBar Icons/bloods.png" style="width: 2.8%" /></span>&emsp; Pathology
+        </h1>
+    </div>
+    <div class="pull-right title">
+        <h1 class="site-title_userID pull-right">
+            <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+        </h1>
+        <h1 class="site-title_userID pull-right">
+            @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+            {
+                <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+            }
+        </h1>
+        <h1 class="site-waffleIcon pull-right">
+            <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+        </h1>
+    </div>
+</nav>
+
+<!-------------------------------------------------------------------------------------- html-body ------------------------------------------------------------------------------------>
+
+<div class="dashboardContainer zero-padding">
+
+    <div class="patientDashboard_View">
+        <!-- breadcrumbs -->
+        <ul class="breadcrumbs_patientDashboard">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+            <li><a href="@Url.Action("patientClinical", "Member", new {DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })">Patient</a></li>
+            <li><a href="#">@ViewBag.Title</a></li>
+        </ul>
+        <!-- navigation-collection -->
+        <div class="navCollection_patientDashboard">
+            @Html.Partial("_navCollection")
+        </div>
+        <!-- left-navigation-panel -->
+        @Html.Partial("_navSlider", new { DependentID = Context.Request.Query["DependentID"] })
+        <!--profile-information-->
+        <div class="profileBar">
+            @Html.Action("_profileBar_edit", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })
+        </div>
+    </div>
+
+    <div class="profilebar-spacer"></div>
+
+    <div class="patientDashboard_container">
+
+        <h4 class="tableHeading">General pathology history</h4>
+        <hr class="fancyruler">
+
+        <table class="table table-information-detail sortable" id="general_pathology_table">
+            <thead>
+                <tr>
+                    <th onclick="pathologyTable(1)">@Html.DisplayName("Load date") <i class="fa fa-fw fa-sort"></i></th> @*hcare-1247*@
+                    <th onclick="pathologyTable(1)">@Html.DisplayName("Blood pressure") <i class="fa fa-fw fa-sort"></i></th>
+                    <th onclick="pathologyTable(2)">@Html.DisplayNameFor(model => model.generalPathology.ucreatinine) <i class="fa fa-fw fa-sort"></i></th>
+                    <th onclick="pathologyTable(3)">@Html.DisplayNameFor(model => model.generalPathology.ualbuminuria) <i class="fa fa-fw fa-sort"></i></th>
+                    <th onclick="pathologyTable(4)">@Html.DisplayNameFor(model => model.generalPathology.bilirubin) <i class="fa fa-fw fa-sort"></i></th>
+                    <th onclick="pathologyTable(5)">@Html.DisplayNameFor(model => model.generalPathology.ast) <i class="fa fa-fw fa-sort"></i></th>
+                    <th onclick="pathologyTable(6)">@Html.DisplayNameFor(model => model.generalPathology.alt) <i class="fa fa-fw fa-sort"></i></th>
+                    <th onclick="pathologyTable(7)">@Html.DisplayNameFor(model => model.generalPathology.urea) <i class="fa fa-fw fa-sort"></i></th>
+                    <th onclick="pathologyTable(8)">@Html.DisplayNameFor(model => model.generalPathology.creatinine) <i class="fa fa-fw fa-sort"></i></th>
+                    <th onclick="pathologyTable(9)">@Html.DisplayNameFor(model => model.generalPathology.eGfr) <i class="fa fa-fw fa-sort"></i></th>
+                    <th onclick="pathologyTable(10)">@Html.DisplayNameFor(model => model.generalPathology.mauCreatRatio) <i class="fa fa-fw fa-sort"></i></th>
+                    <th onclick="pathologyTable(11)">@Html.DisplayNameFor(model => model.generalPathology.FEV1) <i class="fa fa-fw fa-sort"></i></th>
+                    <th onclick="pathologyTable(12)">@Html.DisplayNameFor(model => model.generalPathology.Eosinophylia) <i class="fa fa-fw fa-sort"></i></th>
+                    <th onclick="pathologyTable(13)">@Html.DisplayNameFor(model => model.generalPathology.haemoglobin) <i class="fa fa-fw fa-sort"></i></th>
+                    <th style="text-align: center!important; width: 7%">Action</th>
+                </tr>
+            </thead>
+
+            @foreach (var item in Model.generalPathologies)
+            {
+                <tbody>
+                    <tr class="header">
+                        <!-- effective date -->
+                        <td>
+                            @Html.DisplayFor(modelItem => item.createdDate) @*hcare-1247*@
+                        </td>
+                        <!-- blood pressure -->
+                        @if ((item.systolicBP == 0 || item.systolicBP.ToString() == "0.00" || item.systolicBP == null) && (item.diastolicBP == 0 || item.diastolicBP.ToString() == "0.00" || item.diastolicBP == null))
+                        {
+                            <td></td>
+                        }
+                        else
+                        {
+                            <td>
+                                <!-- sistalic bp -->
+                                @if (Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "systolicBP").Count() != 0)
+                                {
+                                    foreach (var rule in Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "systolicBP"))
+                                    {
+                                        if (item.systolicBP > rule.greater && rule.greater != 0)
+                                        {
+                                            if (item.systolicBP == 0 || item.systolicBP.ToString() == "0.00")
+                                            {
+                                            }
+                                            else
+                                            {
+                                                <span class="rule-broken">@Html.DisplayFor(modelItem => item.systolicBP)</span>
+                                            }
+                                            break;
+                                        }
+                                        else if (item.systolicBP < rule.less && rule.less != 0)
+                                        {
+                                            if (item.systolicBP == 0 || item.systolicBP.ToString() == "0.00")
+                                            {
+                                            }
+                                            else
+                                            {
+                                                <span class="rule-broken">@Html.DisplayFor(modelItem => item.systolicBP)</span>
+                                            }
+                                            break;
+                                        }
+                                        else
+                                        {
+                                            if (item.systolicBP == 0 || item.systolicBP.ToString() == "0.00")
+                                            {
+                                            }
+                                            else
+                                            {
+                                                @Html.DisplayFor(modelItem => item.systolicBP)
+                                            }
+                                            break;
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    if (item.systolicBP == 0 || item.systolicBP.ToString() == "0.00")
+                                    {
+                                    }
+                                    else
+                                    {
+                                        @Html.DisplayFor(modelItem => item.systolicBP)
+                                    }
+                                }
+
+                                /
+
+                                <!-- diastalic bp -->
+                                @if (Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "diastolicBP").Count() != 0)
+                                {
+                                    foreach (var rule in Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "diastolicBP"))
+                                    {
+                                        if (item.diastolicBP > rule.greater && rule.greater != 0)
+                                        {
+                                            if (item.diastolicBP == 0 || item.diastolicBP.ToString() == "0.00")
+                                            {
+                                            }
+                                            else
+                                            {
+                                                <span class="rule-broken">@Html.DisplayFor(modelItem => item.diastolicBP)</span>
+                                            }
+                                            break;
+                                        }
+                                        else if (item.diastolicBP < rule.less && rule.less != 0)
+                                        {
+                                            if (item.diastolicBP == 0 || item.diastolicBP.ToString() == "0.00")
+                                            {
+                                            }
+                                            else
+                                            {
+                                                <span class="rule-broken">@Html.DisplayFor(modelItem => item.diastolicBP)</span>
+                                            }
+                                            break;
+                                        }
+                                        else
+                                        {
+                                            if (item.diastolicBP == 0 || item.diastolicBP.ToString() == "0.00")
+                                            {
+                                            }
+                                            else
+                                            {
+                                                @Html.DisplayFor(modelItem => item.diastolicBP)
+                                            }
+                                            break;
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    if (item.diastolicBP == 0 || item.diastolicBP.ToString() == "0.00")
+                                    {
+                                    }
+                                    else
+                                    {
+                                        @Html.DisplayFor(modelItem => item.diastolicBP)
+                                    }
+                                }
+                            </td>
+                        }
+                        <!-- ucreatinine -->
+                        @if (Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "ucreatinine").Count() != 0)
+                        {
+                            foreach (var rule in Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "ucreatinine"))
+                            {
+                                if (item.ucreatinine > rule.greater && rule.greater != 0)
+                                {
+                                    <td class="rule-broken">
+                                        @if (item.ucreatinine == 0 || item.ucreatinine.ToString() == "0.00")
+                                        {
+                                        }
+                                        else
+                                        {
+                                            @Html.DisplayFor(modelItem => item.ucreatinine)
+                                        }
+                                    </td>
+                                    break;
+                                }
+                                else if (item.ucreatinine < rule.less && rule.less != 0)
+                                {
+                                    <td class="rule-broken">
+                                        @if (item.ucreatinine == 0 || item.ucreatinine.ToString() == "0.00")
+                                        {
+                                        }
+                                        else
+                                        {
+                                            @Html.DisplayFor(modelItem => item.ucreatinine)
+                                        }
+                                    </td>
+                                    break;
+                                }
+                                else
+                                {
+                                    <td>
+                                        @if (item.ucreatinine == 0 || item.ucreatinine.ToString() == "0.00")
+                                        {
+                                        }
+                                        else
+                                        {
+                                            @Html.DisplayFor(modelItem => item.ucreatinine)
+                                        }
+                                    </td>
+                                    break;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            <td>
+                                @if (item.ucreatinine == 0 || item.ucreatinine.ToString() == "0.00")
+                                {
+                                }
+                                else
+                                {
+                                    @Html.DisplayFor(modelItem => item.ucreatinine)
+                                }
+                            </td>
+                        }
+                        <!-- ualbuminuria -->
+                        @if (Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "ualbuminuria").Count() != 0)
+                        {
+                            foreach (var rule in Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "ualbuminuria"))
+                            {
+                                if (item.ualbuminuria > rule.greater && rule.greater != 0)
+                                {
+                                    <td class="rule-broken">
+                                        @if (item.ualbuminuria == 0 || item.ualbuminuria.ToString() == "0.00")
+                                        {
+                                        }
+                                        else
+                                        {
+                                            @Html.DisplayFor(modelItem => item.ualbuminuria)
+                                        }
+                                    </td>
+                                    break;
+                                }
+                                else if (item.ualbuminuria < rule.less && rule.less != 0)
+                                {
+                                    <td class="rule-broken">
+                                        @if (item.ualbuminuria == 0 || item.ualbuminuria.ToString() == "0.00")
+                                        {
+                                        }
+                                        else
+                                        {
+                                            @Html.DisplayFor(modelItem => item.ualbuminuria)
+                                        }
+                                    </td>
+                                    break;
+                                }
+                                else
+                                {
+                                    <td>
+                                        @if (item.ualbuminuria == 0 || item.ualbuminuria.ToString() == "0.00")
+                                        {
+                                        }
+                                        else
+                                        {
+                                            @Html.DisplayFor(modelItem => item.ualbuminuria)
+                                        }
+                                    </td>
+                                    break;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            <td>
+                                @if (item.ualbuminuria == 0 || item.ualbuminuria.ToString() == "0.00")
+                                {
+                                }
+                                else
+                                {
+                                    @Html.DisplayFor(modelItem => item.ualbuminuria)
+                                }
+                            </td>
+                        }
+                        <!-- bilirubin -->
+                        @if (Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "bilirubin").Count() != 0)
+                        {
+                            foreach (var rule in Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "bilirubin"))
+                            {
+                                if (item.bilirubin > rule.greater && rule.greater != 0)
+                                {
+                                    <td class="rule-broken">
+                                        @if (item.bilirubin == 0 || item.bilirubin.ToString() == "0.00")
+                                        {
+                                        }
+                                        else
+                                        {
+                                            @Html.DisplayFor(modelItem => item.bilirubin)
+                                        }
+                                    </td>
+                                    break;
+                                }
+                                else if (item.bilirubin < rule.less && rule.less != 0)
+                                {
+                                    <td class="rule-broken">
+                                        @if (item.bilirubin == 0 || item.bilirubin.ToString() == "0.00")
+                                        {
+                                        }
+                                        else
+                                        {
+                                            @Html.DisplayFor(modelItem => item.bilirubin)
+                                        }
+                                    </td>
+                                    break;
+                                }
+                                else
+                                {
+                                    <td>
+                                        @if (item.bilirubin == 0 || item.bilirubin.ToString() == "0.00")
+                                        {
+                                        }
+                                        else
+                                        {
+                                            @Html.DisplayFor(modelItem => item.bilirubin)
+                                        }
+                                    </td>
+                                    break;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            <td>
+                                @if (item.bilirubin == 0 || item.bilirubin.ToString() == "0.00")
+                                {
+                                }
+                                else
+                                {
+                                    @Html.DisplayFor(modelItem => item.bilirubin)
+                                }
+                            </td>
+                        }
+                        <!-- ast -->
+                        @if (Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "ast").Count() != 0)
+                        {
+                            foreach (var rule in Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "ast"))
+                            {
+                                if (item.ast > rule.greater && rule.greater != 0)
+                                {
+                                    <td class="rule-broken">
+                                        @if (item.ast == 0 || item.ast.ToString() == "0.00")
+                                        {
+                                        }
+                                        else
+                                        {
+                                            @Html.DisplayFor(modelItem => item.ast)
+                                        }
+                                    </td>
+                                    break;
+                                }
+                                else if (item.ast < rule.less && rule.less != 0)
+                                {
+                                    <td class="rule-broken">
+                                        @if (item.ast == 0 || item.ast.ToString() == "0.00")
+                                        {
+                                        }
+                                        else
+                                        {
+                                            @Html.DisplayFor(modelItem => item.ast)
+                                        }
+                                    </td>
+                                    break;
+                                }
+                                else
+                                {
+                                    <td>
+                                        @if (item.ast == 0 || item.ast.ToString() == "0.00")
+                                        {
+                                        }
+                                        else
+                                        {
+                                            @Html.DisplayFor(modelItem => item.ast)
+                                        }
+                                    </td>
+                                    break;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            <td>
+                                @if (item.ast == 0 || item.ast.ToString() == "0.00")
+                                {
+                                }
+                                else
+                                {
+                                    @Html.DisplayFor(modelItem => item.ast)
+                                }
+                            </td>
+                        }
+                        <!-- alt -->
+                        @if (Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "alt").Count() != 0)
+                        {
+                            foreach (var rule in Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "alt"))
+                            {
+                                if (item.alt > rule.greater && rule.greater != 0)
+                                {
+                                    <td class="rule-broken">
+                                        @if (item.alt == 0 || item.ast.ToString() == "0.00")
+                                        {
+                                        }
+                                        else
+                                        {
+                                            @Html.DisplayFor(modelItem => item.alt)
+                                        }
+                                    </td>
+                                    break;
+                                }
+                                else if (item.alt < rule.less && rule.less != 0)
+                                {
+                                    <td class="rule-broken">
+                                        @if (item.alt == 0 || item.alt.ToString() == "0.00")
+                                        {
+                                        }
+                                        else
+                                        {
+                                            @Html.DisplayFor(modelItem => item.alt)
+                                        }
+                                    </td>
+                                    break;
+                                }
+                                else
+                                {
+                                    <td>
+                                        @if (item.alt == 0 || item.alt.ToString() == "0.00")
+                                        {
+                                        }
+                                        else
+                                        {
+                                            @Html.DisplayFor(modelItem => item.alt)
+                                        }
+                                    </td>
+                                    break;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            <td>
+                                @if (item.alt == 0 || item.alt.ToString() == "0.00")
+                                {
+                                }
+                                else
+                                {
+                                    @Html.DisplayFor(modelItem => item.alt)
+                                }
+                            </td>
+                        }
+                        <!-- urea -->
+                        @if (Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "urea").Count() != 0)
+                        {
+                            foreach (var rule in Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "urea"))
+                            {
+                                if (item.urea > rule.greater && rule.greater != 0)
+                                {
+                                    <td class="rule-broken">
+                                        @if (item.urea == 0 || item.urea.ToString() == "0.00")
+                                        {
+                                        }
+                                        else
+                                        {
+                                            @Html.DisplayFor(modelItem => item.urea)
+                                        }
+                                    </td>
+                                    break;
+                                }
+                                else if (item.urea < rule.less && rule.less != 0)
+                                {
+                                    <td class="rule-broken">
+                                        @if (item.urea == 0 || item.urea.ToString() == "0.00")
+                                        {
+                                        }
+                                        else
+                                        {
+                                            @Html.DisplayFor(modelItem => item.urea)
+                                        }
+                                    </td>
+                                    break;
+                                }
+                                else
+                                {
+                                    <td>
+                                        @if (item.urea == 0 || item.urea.ToString() == "0.00")
+                                        {
+                                        }
+                                        else
+                                        {
+                                            @Html.DisplayFor(modelItem => item.urea)
+                                        }
+                                    </td>
+                                    break;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            <td>
+                                @if (item.urea == 0 || item.urea.ToString() == "0.00")
+                                {
+                                }
+                                else
+                                {
+                                    @Html.DisplayFor(modelItem => item.urea)
+                                }
+                            </td>
+                        }
+                        <!-- creatinine -->
+                        @if (Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "creatinine").Count() != 0)
+                        {
+                            foreach (var rule in Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "creatinine"))
+                            {
+                                if (item.creatinine > rule.greater && rule.greater != 0)
+                                {
+                                    <td class="rule-broken">
+                                        @if (item.creatinine == 0 || item.creatinine.ToString() == "0.00")
+                                        {
+                                        }
+                                        else
+                                        {
+                                            @Html.DisplayFor(modelItem => item.creatinine)
+                                        }
+                                    </td>
+                                    break;
+                                }
+                                else if (item.creatinine < rule.less && rule.less != 0)
+                                {
+                                    <td class="rule-broken">
+                                        @if (item.creatinine == 0 || item.creatinine.ToString() == "0.00")
+                                        {
+                                        }
+                                        else
+                                        {
+                                            @Html.DisplayFor(modelItem => item.creatinine)
+                                        }
+                                    </td>
+                                    break;
+                                }
+                                else
+                                {
+                                    <td>
+                                        @if (item.creatinine == 0 || item.creatinine.ToString() == "0.00")
+                                        {
+                                        }
+                                        else
+                                        {
+                                            @Html.DisplayFor(modelItem => item.creatinine)
+                                        }
+                                    </td>
+                                    break;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            <td>
+                                @if (item.creatinine == 0 || item.creatinine.ToString() == "0.00")
+                                {
+                                }
+                                else
+                                {
+                                    @Html.DisplayFor(modelItem => item.creatinine)
+                                }
+                            </td>
+                        }
+                        <!-- eGfr -->
+                        @if (Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "egfr").Count() != 0)
+                        {
+                            foreach (var rule in Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "egfr"))
+                            {
+                                if (item.eGfr > rule.greater && rule.greater != 0)
+                                {
+                                    <td class="rule-broken">
+                                        @if (item.eGfr == 0 || item.eGfr.ToString() == "0.00")
+                                        {
+                                        }
+                                        else
+                                        {
+                                            @Html.DisplayFor(modelItem => item.eGfr)
+                                        }
+                                    </td>
+                                    break;
+                                }
+                                else if (item.eGfr < rule.less && rule.less != 0)
+                                {
+                                    <td class="rule-broken">
+                                        @if (item.eGfr == 0 || item.eGfr.ToString() == "0.00")
+                                        {
+                                        }
+                                        else
+                                        {
+                                            @Html.DisplayFor(modelItem => item.eGfr)
+                                        }
+                                    </td>
+                                    break;
+                                }
+                                else
+                                {
+                                    <td>
+                                        @if (item.eGfr == 0 || item.eGfr.ToString() == "0.00")
+                                        {
+                                        }
+                                        else
+                                        {
+                                            @Html.DisplayFor(modelItem => item.eGfr)
+                                        }
+                                    </td>
+                                    break;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            <td>
+                                @if (item.eGfr == 0 || item.eGfr.ToString() == "0.00")
+                                {
+                                }
+                                else
+                                {
+                                    @Html.DisplayFor(modelItem => item.eGfr)
+                                }
+                            </td>
+                        }
+                        <!-- maucreatratio -->
+                        @if (Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "maucreatratio").Count() != 0)
+                        {
+                            foreach (var rule in Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "maucreatratio"))
+                            {
+                                if (item.mauCreatRatio > rule.greater && rule.greater != 0)
+                                {
+                                    <td class="rule-broken">
+                                        @if (item.mauCreatRatio == 0 || item.mauCreatRatio.ToString() == "0.00")
+                                        {
+                                        }
+                                        else
+                                        {
+                                            @Html.DisplayFor(modelItem => item.mauCreatRatio)
+                                        }
+                                    </td>
+                                    break;
+                                }
+                                else if (item.mauCreatRatio < rule.less && rule.less != 0)
+                                {
+                                    <td class="rule-broken">
+                                        @if (item.mauCreatRatio == 0 || item.mauCreatRatio.ToString() == "0.00")
+                                        {
+                                        }
+                                        else
+                                        {
+                                            @Html.DisplayFor(modelItem => item.mauCreatRatio)
+                                        }
+                                    </td>
+                                    break;
+                                }
+                                else
+                                {
+                                    <td>
+                                        @if (item.mauCreatRatio == 0 || item.mauCreatRatio.ToString() == "0.00")
+                                        {
+                                        }
+                                        else
+                                        {
+                                            @Html.DisplayFor(modelItem => item.mauCreatRatio)
+                                        }
+                                    </td>
+                                    break;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            <td>
+                                @if (item.mauCreatRatio == 0 || item.mauCreatRatio.ToString() == "0.00")
+                                {
+                                }
+                                else
+                                {
+                                    @Html.DisplayFor(modelItem => item.mauCreatRatio)
+                                }
+                            </td>
+                        }
+                        <!-- fev1 -->
+                        @if (Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "fev1").Count() != 0)
+                        {
+                            foreach (var rule in Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "fev1"))
+                            {
+                                if (item.FEV1 > rule.greater && rule.greater != 0)
+                                {
+                                    <td class="rule-broken">
+                                        @if (item.FEV1 == 0 || item.FEV1.ToString() == "0.00")
+                                        {
+                                        }
+                                        else
+                                        {
+                                            @Html.DisplayFor(modelItem => item.FEV1)
+                                        }
+                                    </td>
+                                    break;
+                                }
+                                else if (item.FEV1 < rule.less && rule.less != 0)
+                                {
+                                    <td class="rule-broken">
+                                        @if (item.FEV1 == 0 || item.FEV1.ToString() == "0.00")
+                                        {
+                                        }
+                                        else
+                                        {
+                                            @Html.DisplayFor(modelItem => item.FEV1)
+                                        }
+                                    </td>
+                                    break;
+                                }
+                                else
+                                {
+                                    <td>
+                                        @if (item.FEV1 == 0 || item.FEV1.ToString() == "0.00")
+                                        {
+                                        }
+                                        else
+                                        {
+                                            @Html.DisplayFor(modelItem => item.FEV1)
+                                        }
+                                    </td>
+                                    break;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            <td>
+                                @if (item.FEV1 == 0 || item.FEV1.ToString() == "0.00")
+                                {
+                                }
+                                else
+                                {
+                                    @Html.DisplayFor(modelItem => item.FEV1)
+                                }
+                            </td>
+                        }
+                        <!-- eosinophylia -->
+                        @if (Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "eosinophylia").Count() != 0)
+                        {
+                            foreach (var rule in Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "eosinophylia"))
+                            {
+                                if (item.Eosinophylia > rule.greater && rule.greater != 0)
+                                {
+                                    <td class="rule-broken">
+                                        @if (item.Eosinophylia == 0 || item.Eosinophylia.ToString() == "0.00")
+                                        {
+                                        }
+                                        else
+                                        {
+                                            @Html.DisplayFor(modelItem => item.Eosinophylia)
+                                        }
+                                    </td>
+                                    break;
+                                }
+                                else if (item.Eosinophylia < rule.less && rule.less != 0)
+                                {
+                                    <td class="rule-broken">
+                                        @if (item.Eosinophylia == 0 || item.Eosinophylia.ToString() == "0.00")
+                                        {
+                                        }
+                                        else
+                                        {
+                                            @Html.DisplayFor(modelItem => item.Eosinophylia)
+                                        }
+                                    </td>
+                                    break;
+                                }
+                                else
+                                {
+                                    <td>
+                                        @if (item.Eosinophylia == 0 || item.Eosinophylia.ToString() == "0.00")
+                                        {
+                                        }
+                                        else
+                                        {
+                                            @Html.DisplayFor(modelItem => item.Eosinophylia)
+                                        }
+                                    </td>
+                                    break;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            <td>
+                                @if (item.Eosinophylia == 0 || item.FEV1.ToString() == "0.00")
+                                {
+                                }
+                                else
+                                {
+                                    @Html.DisplayFor(modelItem => item.Eosinophylia)
+                                }
+                            </td>
+                        }
+                        <!-- haemoglobin -->
+                        @if (Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "haemoglobin").Count() != 0)
+                        {
+                            foreach (var rule in Model.clinicalRules.Where(x => x.pathologyField.ToLower() == "haemoglobin"))
+                            {
+                                if (item.haemoglobin > rule.greater && rule.greater != 0)
+                                {
+                                    <td class="rule-broken">
+                                        @if (item.haemoglobin == 0 || item.haemoglobin.ToString() == "0.00")
+                                        {
+                                        }
+                                        else
+                                        {
+                                            @Html.DisplayFor(modelItem => item.haemoglobin)
+                                        }
+                                    </td>
+                                    break;
+                                }
+                                else if (item.haemoglobin < rule.less && rule.less != 0)
+                                {
+                                    <td class="rule-broken">
+                                        @if (item.haemoglobin == 0 || item.haemoglobin.ToString() == "0.00")
+                                        {
+                                        }
+                                        else
+                                        {
+                                            @Html.DisplayFor(modelItem => item.haemoglobin)
+                                        }
+                                    </td>
+                                    break;
+                                }
+                                else
+                                {
+                                    <td>
+                                        @if (item.haemoglobin == 0 || item.haemoglobin.ToString() == "0.00")
+                                        {
+                                        }
+                                        else
+                                        {
+                                            @Html.DisplayFor(modelItem => item.haemoglobin)
+                                        }
+                                    </td>
+                                    break;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            <td>
+                                @if (item.haemoglobin == 0 || item.FEV1.ToString() == "0.00")
+                                {
+                                }
+                                else
+                                {
+                                    @Html.DisplayFor(modelItem => item.haemoglobin)
+                                }
+                            </td>
+                        }
+
+                        <td class="linkNav" style="text-align: center!important">
+                            <div class="contactIcon fas fa-edit" onclick="location.href='@Url.Action("EditPathology", "Member", new { id = item.pathologyID, pro = Context.Request.Query["pro"] })'" title="edit"></div> &nbsp;
+                            <div class="contactIcon fas fa-info-circle" onclick="location.href='@Url.Action("PathologyDetails", "Member", new { id = item.pathologyID, pro = Context.Request.Query["pro"] })'" title="details"></div>
+                        </td>
+                    </tr>
+                </tbody>
+            }
+        </table>
+
+        <div class="fixedBack" style="margin-left: 42%; margin-bottom: 1%">
+            <input value="Back" class="btn buttonRound_formBack go_back" onclick="storageKey()" style="width: 15%" />
+        </div>
+    </div>
+</div>
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script src="http://code.jquery.com/jquery.unobtrusive-ajax.min.js"></script>
+<script src="js/jquery.tablesorter.min.js"></script>
+
+@section Scripts {
+    <script src="~/bundles/jqueryval"></script>
+    <script src="~/bundles/jqueryui"></script>
+    <style src="~/Content/themes/base/css" )
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <script src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.9/jquery.validate.js"></script>
+    <script src="http://ajax.aspnetcdn.com/ajax/mvc/3.0/jquery.validate.unobtrusive.min.js"></script>
+
+    <script>
+        function storageKey() {
+            localStorage.setItem("back_general", Date.now());
+        }
+    </script>
+    <script>
+        $('tr.header').click(function () {
+            $(this).nextUntil('tr.header').css('display', function (i, v) {
+                return this.style.display === 'none' ? 'table-row' : 'none';
+            });
+        });
+    </script>
+}
+

@@ -1,0 +1,140 @@
+﻿@model HaloCareCore.Models.ViewModels.ClinicalStatusSetup
+@using HaloCareCore.Extensions
+@{
+    ViewBag.Title = "Accounts";
+    Layout = "~/Views/Shared/_layout-view-x.cshtml";
+}
+
+<comment>
+    <!-- 4 June 2021 -- HCare-1338 -->
+</comment>
+<javascript>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+    <script src="https://www.jqueryscript.net/demo/jQuery-Plugin-For-Sortable-Bootstrap-Tables-Bootstrap-Sortable/Scripts/bootstrap-sortable.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/js/standalone/selectize.js"></script>
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.default.css">
+</javascript>
+
+<div id="instruction-wrapper">
+    <div class="instruction-panel">
+        <h class="account-step">Step 3</h>
+        <p class="account-step-instruction">Select clinical rules.</p>
+        <ul style="padding: 0">
+            <li class="account-step-list acc-1"><span class="number-circle a-circle-1 complete-circle">✓</span>Account setup</li>
+            <li class="account-step-list acc-2"><span class="number-circle a-circle-2 complete-circle">✓</span>Program setup</li>
+            <li class="account-step-list acc-3 active-step"><span class="number-circle a-circle-3 active-circle">3</span>Clinical rules</li>
+            <li class="account-step-list acc-4"><span class="number-circle a-circle-4">4</span>Management status</li>
+            <li class="account-step-list acc-5"><span class="number-circle a-circle-5">5</span>Text messages</li>
+        </ul>
+    </div>
+</div>
+
+<div class="collapse in">
+    <div class="card card-body">
+        <div class="collapse-body">
+            <div class="new-account-panel">
+                @using (Html.BeginForm("Step3", "Account", FormMethod.Post))
+                {
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="accountID" name="accountID" value="@Model.AccountID" />
+                    <input type="hidden" id="programID" name="programID" value="@Model.ProgramID" />
+                    <input type="hidden" id="medicalaidID" name="medicalaidID" value="@Model.MedicalAidID" />
+
+                    <div class="col-md-12 row">
+                        <div class="account-heading">Clinical rules setup</div>
+                        <p class="account-sub-header-new">Select clinical rules linked to program - @Model.ProgramName.</p>
+                    </div>
+                    <hr class="fancyruler">
+                    <div style="margin-bottom: 20px"></div>
+                    if (Model.clinicalRules.Count > 0)
+                    {
+                        <table class="table mh-table table-hover" style="margin-left: 1.6%">
+                            <thead>
+                                <tr>
+                                    <th style="text-align: center!important">@Html.DisplayNameFor(model => model.clinicalRules[0].Added)</th>
+                                    <th>@Html.DisplayNameFor(model => model.clinicalRules[0].ruleName)</th>
+                                    <th>@Html.DisplayNameFor(model => model.clinicalRules[0].greater)</th>
+                                    <th>@Html.DisplayNameFor(model => model.clinicalRules[0].gtMessage)</th>
+                                    <th>@Html.DisplayNameFor(model => model.clinicalRules[0].less)</th>
+                                    <th>@Html.DisplayNameFor(model => model.clinicalRules[0].ltMessage)</th>
+                                    <th>@Html.DisplayNameFor(model => model.clinicalRules[0].ruleType)</th>
+                                    <th style="text-align: center!important">@Html.DisplayNameFor(model => model.clinicalRules[0].male)</th>
+                                    <th style="text-align: center!important">@Html.DisplayNameFor(model => model.clinicalRules[0].female)</th>
+                                    <th>@Html.DisplayNameFor(model => model.clinicalRules[0].pathologyField)</th>
+                                </tr>
+                            </thead>
+
+                            @for (int i = 0; i < Model.clinicalRules.Count; i++)
+                            {
+                                <tbody>
+                                    <tr>
+                                        @Html.HiddenFor(model => model.clinicalRules[i].accountId)
+                                        @Html.HiddenFor(model => model.clinicalRules[i].id)
+                                        @Html.HiddenFor(model => model.clinicalRules[i].programId)
+                                        @Html.HiddenFor(model => model.clinicalRules[i].mediaidId)
+                                        <td class="accountCheck">@Html.EditorFor(model => model.clinicalRules[i].Added)</td>
+                                        <td>@Html.DisplayFor(model => model.clinicalRules[i].ruleName)</td>
+                                        <td>@Html.DisplayFor(model => model.clinicalRules[i].greater)</td>
+                                        <td>@Html.DisplayFor(model => model.clinicalRules[i].gtMessage)</td>
+                                        <td>@Html.DisplayFor(model => model.clinicalRules[i].less)</td>
+                                        <td>@Html.DisplayFor(model => model.clinicalRules[i].ltMessage)</td>
+                                        <td>@Html.DisplayFor(model => model.clinicalRules[i].ruleType)</td>
+                                        <td style="text-align:center!important">
+                                            @if (Model.clinicalRules[i].male)
+                                            {
+                                                <i class="fas fa-check-square ruleCheck" style="font-size: 12px"></i>
+                                            }
+                                            else
+                                            {
+                                                <i class="fas fa-square" style="color: rgba(204, 204, 204, 0.25)!important; font-size: 12px"></i>
+                                            }
+                                        </td>
+                                        <td style="text-align:center!important">
+                                            @if (Model.clinicalRules[i].female)
+                                            {
+                                                <i class="fas fa-check-square ruleCheck" style="font-size: 12px"></i>
+                                            }
+                                            else
+                                            {
+                                                <i class="fas fa-square" style="color: rgba(204, 204, 204, 0.25)!important; font-size: 12px"></i>
+                                            }
+                                        </td>
+                                        <td>@Html.DisplayFor(model => model.clinicalRules[i].pathologyField)</td>
+                                    </tr>
+                                </tbody>
+                            }
+
+                        </table>
+                        <div>
+                            <span class="@(Model.clinicalRules.Count <= 12 ? "sf-footer" : "account-footer pull-right")">
+                                <input type="button" id="account-skip-step-3" value="Skip" class="btn modal-button-previous" onclick="location.href='@Url.Action("Details", "Account", new { Id = Model.AccountID })'" />
+                                <input type="submit" id="account-next-step-3" value="Next" class="btn modal-button-next" />
+                            </span>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="no-results-1">
+                            <img src="~/Content/Images/_2020/tables/no-results-1.png" />
+                        </div>
+                        <h4 class="no-results">No clinical rules found for program</h4>
+
+                        <div class="sf-footer">
+                            <input type="button" id="account-skip-step-3" value="Skip" class="btn modal-button-previous" onclick="location.href='@Url.Action("Details", "Account", new { Id = Model.AccountID })'" />
+                            <input type="submit" id="account-next-step-3" value="Next" class="btn modal-button-next" />
+                        </div>
+                    }
+
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script src="~/bundles/jqueryval"></script>
+
+}

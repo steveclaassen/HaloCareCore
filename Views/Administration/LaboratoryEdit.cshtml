@@ -1,0 +1,215 @@
+﻿@model HaloCareCore.Models.Validation.Laboratory
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "LaboratoryEdit";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<comment>
+    <!--
+            01 July 2019 -- HCare-747 (Laboratory Table - Master)
+            Added CSS to the views as well as a duplicate check on the laboratory name. Allow user to add the email and telephone if they need that information.
+            The index view allows a user to view the active and inactive entries in order to control the labs from a settings perspective.
+            I have added a search bar as well as a sort function that will allow the user to sort the columns.
+            The duplication check is applied to the create view and will not allow a user to enter an entry that has the same name.
+            The list of laboratories are also linked to the pathology laboratory dropdown list when creating pathology entries.
+    -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .field-validation-error:before {
+        font-family: FontAwesome;
+        content: "\f06a\00a0";
+        animation: pulse 2s ease infinite;
+    }
+
+    .error-alert {
+        width: 100%;
+        margin: 0 auto;
+        background-color: rgba(217, 83, 79, 0.1);
+        padding: 10px;
+        border-left-color: #d9534f !important;
+        border: 1px solid transparent;
+        border-left-width: 5px;
+        border-radius: 3px;
+        margin: 0 auto;
+        font-family: 'Open Sans', sans-serif;
+        font-size: 12px;
+        margin: 0 0 5px 0;
+        margin-top: -10px;
+        margin-bottom: 20px;
+    }
+
+        .error-alert span {
+            color: #d9534f;
+            text-align: center;
+        }
+</style>
+<javascript>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet" />
+    <link href='http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.min.css' rel='stylesheet' type='text/css'>
+</javascript>
+
+<div class="fullScreen_container zero-padding">
+
+    <!--pageHeader-->
+    <nav id="global-nav" class="nav">
+        <div class="pull-left title">
+            <h1 class="site-title_patientProfile">
+                <span><i class="fas fa-flask"></i>&emsp; Laboratories</span>
+            </h1>
+        </div>
+        <div class="pull-right title">
+            <h1 class="site-title_userID pull-right">
+                <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+            </h1>
+            <h1 class="site-title_userID pull-right">
+                @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                {
+                    <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                }
+            </h1>
+            <h1 class="site-waffleIcon pull-right">
+                <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+            </h1>
+        </div>
+    </nav>
+    <!--breadCrumbs-->
+    <ul class="breadcrumbs_fullScreens">
+        <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+        <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+        <li><a href="@Url.Action("LaboratoryIndex", "Administration", new {})">Laboratories</a></li>
+        <li><a href="#">Edit</a></li>
+    </ul>
+    <!--navCollection-->
+    <div class="navCollection_fullScreens">
+        @Html.Partial("_navCollection")
+    </div>
+    <div style="margin-bottom: 1%"></div>
+
+    <div class="row">
+        <h4 class="tableHeading">Edit laboratory</h4>
+        <hr class="fancyruler">
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+            <div class="hidden-fields">
+                @Html.HiddenFor(model => model.id)
+                <input type="hidden" name="code-validation" id="code-validation" />
+                <input type="hidden" name="description-validation" id="description-validation" />
+                <div class="col-md-12"><div id="duplicate-code-notice" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; Code already exists!</span></div></div></div>
+                <div class="col-md-12"><div id="duplicate-description-notice" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; Description already exists!</span></div></div></div>
+                <input type="hidden" name="error-rule" id="error-description" value="@ViewBag.Description" />
+                <div class="col-md-12"><div id="error-duplicate" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; The laboratory with <b>Description:</b> @ViewBag.Description, already exists!</span></div></div></div>
+            </div>
+            <br />
+            <br />
+            <div class="form-horizontal editForm">
+                <div class="form-group">
+                    @Html.LabelFor(model => model.name, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.name, new { htmlAttributes = new { @class = "form-control-new", @onblur = "CheckName();" } })
+                        @Html.ValidationMessageFor(model => model.name, "", new { @class = "text-danger", @style = "font-size: 90%; margin-left: 1%" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.telephoneNo, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.telephoneNo, new { htmlAttributes = new { @class = "form-control-new" } })
+                        @Html.ValidationMessageFor(model => model.telephoneNo, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.email, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.email, new { htmlAttributes = new { @class = "form-control-new" } })
+                        @Html.ValidationMessageFor(model => model.email, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.active, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        <div class="checkbox">
+                            @Html.EditorFor(model => model.active)
+                            @Html.ValidationMessageFor(model => model.active, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="fixed-btn">
+                    <input id="submit" type="submit" value="Submit" class="btn create-button" onclick="storageKey()" style="width: 15%" /><br />
+                    <input type="text" value="Back" class="btn reset-button go_back" onclick="backKey()" />
+                </div>
+
+            </div>
+        }
+    </div>
+</div>
+
+
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+    <script>
+        function CheckName() {
+            var code = $('#id').val();
+            var name = $('#name').val();
+            name = name.trim();
+            $("#description-validation").val("");
+            $("#duplicate-description-notice").addClass("hidden");
+            $('span[data-valmsg-for="name"]').html('');
+
+            $.ajax({
+                url: '/Administration/LaboratoryNameCheck',
+                type: "POST",
+                dataType: "JSON",
+                data: { name: name },
+                success: function (result) {
+                    var cod3 = result.id;
+                    var description = result.name;
+                    if (cod3 + '-' + description.toLowerCase() == code + '-' + name.toLowerCase()) { }
+                    if (description.toLowerCase() == name.toLowerCase() && cod3 != code) {
+                        $("#duplicate-description-notice").removeClass("hidden");
+                        $('span[data-valmsg-for="name"]').html('<span style="font-size: 12px"><i class="fas fa-exclamation-circle"></i> </span>Description already exists!');
+                        $("#description-validation").val(description);
+                    }
+                },
+                error: function (result) {
+                    $('span[data-valmsg-for="name"]').html('');
+                    $("#duplicate-description-notice").addClass("hidden");
+                }
+            });
+        }
+        $("#submit").click(function () {
+            if ($("#description-validation").val().length > 0) {
+                $("#name").focus();
+                return false;
+            }
+        });
+
+    </script>
+    <script>
+        function backKey() {
+            localStorage.setItem("back_labs", Date.now());
+        }
+        function storageKey() {
+            localStorage.setItem("edit_labs", Date.now());
+        }
+    </script>
+    <script>
+        $(document).ready(function () {
+            var d = $('#error-description').val();
+            if (d.length > 0) {
+                $("#error-duplicate").removeClass("hidden");
+            }
+        });
+    </script>
+}

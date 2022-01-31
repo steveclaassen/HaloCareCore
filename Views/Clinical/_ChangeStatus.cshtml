@@ -1,0 +1,543 @@
+﻿@model HaloCareCore.Models.ViewModels.ManagementStatusVM
+@{
+    ViewBag.Title = "Management status";
+    Layout = "~/Views/Shared/_LayoutModal.cshtml";
+}
+<comment>
+    <!--
+        10 April 2019 -- HCare-669 (Management status: systematic end date (Deceased/Deactivated/Resigned))
+        Used IF statement to set the POST in both the profile Management setting and the Assignment Task. If status is set to Deceased, Deactivated or Resigned. The end date will systematically be set to the same as the effective date
+
+        06 May 2019 -- HCare-728 (Questionnaire - Submit button freeze -- Related to HCare-708)
+        A secondary affect of the duplicate click check for HCare-708 resulted in the Submit button for the Questionnaire to freeze should a user neglect to complete a required field. This would push the user back to the section that has not been answered but freeze the button in the process.
+        I have relooked at the code linked to HCare-708 as well as the submit button in the questionnaire which has resolved the issue.
+
+        04 July 2019 -- HCare-755 (Validation check for Management Status create)
+        Added validation to avoid duplication in the Management status create in the profile as well as in the assignment task
+
+        06 July 2020 -- HCare-1067(Dependant created date vs First Management status date)
+        Management status create / edit and assignment has been amended to use ajax which will pull the dependant’s created date into a variable and compare it to the date inserted into the Effective date input tag. This will render an error message should the effective date be less than the members created date and will also disable the submit button until the date is corrected.
+
+        09 June 2021 -- HCare-1259
+    -->
+</comment>
+<style>
+    .field-validation-error:before {
+        font-family: FontAwesome;
+        content: "\f06a\00a0";
+    }
+
+    .selectize-control.single .selectize-input > div {
+        /*padding: 15px 5px 15px 5px !important;*/
+        padding-left: 10px !important;
+        background: #1da7ee;
+        color: #ffffff;
+        border: 1px solid transparent !important;
+    }
+
+    .textbox-control-date {
+        display: block !important;
+        max-width: 600px !important;
+        width: 350px;
+        max-height: 100px;
+        height: 30px;
+        margin-top: 10px;
+        margin-left: 10px;
+        padding: 6px 6px;
+        line-height: 1.428571429;
+        color: #003366;
+        border-radius: 0px !important;
+        border: none !important;
+        border-bottom: 1px solid #e8e6e6 !important;
+        background-color: transparent !important;
+        -webkit-box-shadow: none !important;
+        box-shadow: none !important;
+    }
+
+    .warning {
+        display: none;
+        background: #fff;
+        color: #FFFFFF;
+        border: none;
+        border-radius: 10px;
+        position: absolute;
+        width: 500px;
+        left: 50%;
+        top: 10%;
+        margin-left: -258px;
+        padding: 0px;
+        box-sizing: border-box;
+        z-index: 50;
+    }
+
+    .warning-pop-up {
+        display: none;
+        background: #fff;
+        color: #FFFFFF;
+        border: none;
+        border-radius: 10px;
+        position: fixed;
+        width: 500px;
+        left: 50%;
+        top: 10%;
+        margin-left: -258px;
+        padding: 0px;
+        box-sizing: border-box;
+        z-index: 50;
+    }
+
+    .assignment-header {
+        background: #E74D4F;
+        text-align: center;
+        padding: 10px 20px 10px 10px;
+        margin-top: 0px;
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;
+        border: 5px solid #E74D4F;
+    }
+
+    .assignment-logo {
+        color: white;
+        text-align: center;
+        font-size: 50px;
+    }
+
+    .assignment-heading {
+        padding: 10px;
+        font-family: Comfortaa;
+        color: rgb(0,0,0);
+        text-align: center;
+        font-size: 25px;
+        font-weight: bold;
+    }
+
+    .assignment-message {
+        color: rgb(0,0,0);
+        text-align: center;
+        padding: 10px 10px 10px 10px;
+    }
+
+    .error-alert {
+        background-color: rgba(217, 48, 78, 0.2);
+        padding: 10px 12px 10px 12px;
+        border: 1px solid transparent;
+        border-radius: 0px;
+        font: 100 12px 'Open Sans', sans-serif;
+        color: rgb(217, 48, 78);
+        margin: 0 0 0 0;
+        margin-top: -10px;
+        margin-bottom: 10px;
+        margin-left: -15px;
+        width: 102%;
+        vertical-align: middle;
+    }
+
+        .error-alert span a {
+            color: rgb(217, 48, 78);
+            margin-top: -5px;
+        }
+
+    .history-collapse {
+        color: #ccc;
+        margin-left: 10px;
+        margin-top: 5px;
+    }
+</style>
+<javascript>
+    <script src=https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js></script>
+
+    <script src=https://www.jqueryscript.net/demo/jQuery-Plugin-For-Sortable-Bootstrap-Tables-Bootstrap-Sortable/Scripts/bootstrap-sortable.js></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/js/standalone/selectize.js"></script>
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.default.css">
+</javascript>
+
+<div class="modal-content-mental-health" style="margin-top: 0%;">
+    @using (Ajax.BeginForm("_ChangeStatus", "Clinical", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "divPath" }, new { id = "ManagementStatus" }))
+    {
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        @Html.Hidden("taskId", (object)ViewBag.task)
+        @Html.Hidden("DependantID", (object)ViewBag.DependantID)
+        @Html.HiddenFor(model => model.dependantId, new { htmlAttributes = new { @class = "form-control" } })
+        @Html.Hidden("id", (object)ViewBag.id)
+        @Html.Hidden("template", (object)ViewBag.templateID)
+        @Html.Hidden("pro", (object)ViewBag.pro)
+        <input type="hidden" name="program-id" id="program-id" value="@ViewBag.pro" />
+        <input type="hidden" name="ms-validation" id="ms-validation" />
+        <input type="hidden" name="date-validation-created" id="date-validation-created" />
+        <input type="hidden" name="date-validation-effective" id="date-validation-effective" />
+        <input type="hidden" name="date-validation-range" id="date-validation-range" />
+
+        @Html.AntiForgeryToken()
+        <div id="overlay" class="overlay"></div>
+        <div class="modal-dialog-mental-health">
+            <div class="modal-header-mental-health">
+                <div class="mental-health-checkbox pull-right">
+                    @Html.CheckBox("close") <label for="follow-up" title="Close" data-dismiss="modal"><span><i class="fas fa-circle close-button"></i></span></label>
+                </div>
+                <div class="col-md-4"><h5 class="modal-title" id="modal-email"><img src="~/Content/Images/_2020/icons/modal-icons/mental-health-assignment.png" class="logo-modal" /></h5></div>
+                <div class="col-md-4 div-center"><p class="div-header">Management status</p></div>
+            </div>
+            <div class="modal-body-mental-health" style="margin-left: 0px; margin-top: 10px;">
+                <div class="form-horizontal">
+                    <div class="col-md-12">
+                        <div id="created-date-notice" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; Dependant was not yet created!</span></div></div>
+                        <div id="effective-date-error" class="error-alert hidden" style="margin-bottom: 12px"></div>
+
+                        <div id="management-status-notice" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; Management status is required!</span></div></div>
+                        <div id="effective-date-notice" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; Effective date is required!</span></div></div>
+                        <div id="date-range-notice" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; Date range not allowed, please review the patient's managment status history!</span></div></div>
+                    </div>
+
+                    @if (Model.ManagementStatusVMs.Count() != 0)
+                    {
+                        <div class="management-status-history">
+                            <div>
+                                <p class="history-collapse" style=" font-weight: 100; ">History &nbsp;<i class="fas fa-sort-down" style="font-size: 15px; margin-left: 0px; margin-top: -5px"></i></p>
+                            </div>
+
+                            <div id="mshistory" class="form-group hidden">
+                                <div class="row">
+                                    <table class="table mh-table table-hover" style="margin-left: 1.6%">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 15%; text-align: center!important">@Html.DisplayNameFor(model => model.ManagementStatusVMs[0].createdDate)</th>
+                                                <th style="width: 50%; text-align: left!important">@Html.DisplayNameFor(model => model.ManagementStatusVMs[0].managementStatusName)</th>
+                                                <th style="width: 10%; text-align: center!important">@Html.DisplayNameFor(model => model.ManagementStatusVMs[0].effectiveDate)</th>
+                                                <th style="width: 10%; text-align: center!important">@Html.DisplayNameFor(model => model.ManagementStatusVMs[0].endDate)</th>
+                                                <th style="width: 10%; text-align: center!important">@Html.DisplayNameFor(model => model.ManagementStatusVMs[0].active)</th>
+                                            </tr>
+                                        </thead>
+
+                                        @foreach (var item in Model.ManagementStatusVMs)
+                                        {
+                                            <tbody>
+                                                <tr style="text-indent: 5px">
+                                                    <td style="text-align: center!important" data-dateformat="DD-MM-YYYY">@Html.DisplayFor(Modelitem => item.createdDate)</td>
+                                                    <td style="text-align: left!important" data-dateformat="DD-MM-YYYY">@Html.DisplayFor(Modelitem => item.managementStatusName)</td>
+                                                    <td style="text-align: center!important" data-dateformat="DD-MM-YYYY">@Html.DisplayFor(Modelitem => item.effectiveDate)</td>
+                                                    <td style="text-align: center!important" data-dateformat="DD-MM-YYYY">@Html.DisplayFor(Modelitem => item.endDate)</td>
+                                                    <td style="text-align:center!important"><span class="@(item.active == true ? "check-yes far fa-check-circle" : "check-no far fa-times-circle")"></span></td>
+                                                </tr>
+                                            </tbody>
+                                        }
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    <table id="dr-referral-table" class="table mental-health-table">
+                        <tr>
+                            <td style="width: 5%"></td>
+                            <td style="width: 20%; padding-top: 25px!important; text-align: right!important;font-weight: bolder">
+                                Managed care status
+                            </td>
+                            <td>
+                                @Html.DropDownList("managementStatus", null, "Select", htmlAttributes: new { })
+                                <div id="managementstatuscheck" class="text-danger hidden" style="font-size: 75%; margin-left: 1%"></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 5%"></td>
+                            <td style="width: 10%; padding-top: 25px!important; text-align: right!important;font-weight: bolder">
+                                Effective date
+                            </td>
+                            <td style="width: 85%">
+                                <input class="text-box single-line input-validation-error textbox-control-date" data-val="true" data-val-date="The field must be a date." id="effectiveDate" name="effectiveDate" type="date" aria-required="true" aria-describedby="DOB-error" aria-invalid="true" value="@DateTime.Now.AddDays(1).ToString("yyyy-MM-dd")" max="@DateTime.Now.AddDays(1).ToString("yyyy-MM-dd")" oninvalid="InvalidMsg(this);" onblur="xCreatedDateCheck();">
+                                <div id="effdatecheck" class="text-danger hidden" style="font-size: 75%; margin-left: 1%"></div>
+                                <div id="effective-date-val" class="text-danger hidden" style="font-size: 75%; margin-left: 1%"></div>
+                                <div id="effective-date-required" class="text-danger hidden" style="font-size: 75%; margin-left: 1%"></div>
+                                <div id="effective-date-check" class="text-danger hidden" style="font-size: 75%; margin-left: 1%"></div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer-mental-health">
+                <input id="cancel" type="button" value="Cancel" class="modal-button" style="width: 10%" data-dismiss="modal" aria-label="Close" />
+                <input id="form-submit" type="submit" value="Submit" class="modal-button" style="width: 10%" onmouseover="Disable();" onClick="ValidationCheck();" />
+            </div>
+        </div>
+
+    }
+
+</div>
+
+@section Scripts {
+    <script src="~/bundles/jqueryval"></script>
+    <script src="~/bundles/jqueryui"></script>
+    <style src="~/Content/themes/base/css")
+
+    <script>
+        function ValidationCheck() {
+            var date = $("#effectiveDate").val();
+            if (date == null || date == '') {
+                $("#effective-date-notice").removeClass("hidden");
+                $('#effective-date-required').removeClass("hidden").html('<span style="font-size: 12px"><i class="fas fa-exclamation-circle"></i> </span>This field is required.');
+
+                event.preventDefault();
+            }
+            var value = $("#managementStatus :selected").val();
+            if (value == null || value == '') {
+                $("#management-status-notice").removeClass("hidden");
+                $('#managementstatuscheck').removeClass("hidden").html('<span style="font-size: 12px"><i class="fas fa-exclamation-circle"></i> </span>This field is required.');
+
+                event.preventDefault();
+            }
+
+            $("form").on("submit", function (event) {
+                var dcvalidation = $('#date-validation-created').val();
+                var drvalidation = $('#date-validation-range').val();
+                if (dcvalidation.length > 0 || drvalidation.length > 0) {
+                    event.preventDefault();
+                }
+            })
+        }
+    </script>
+    <script>
+        $(document).ready(function () {
+            $(".history-collapse").on("click", function () {
+                $("#mshistory").fadeIn("slow").toggleClass("hidden");
+            });
+        });
+    </script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/js/standalone/selectize.js"></script>
+    <script>
+        initSelectize();
+        function initSelectize() {
+            $('#managementStatus').selectize({
+                persist: true,
+                preload: true,
+                maxItems: 1,
+                delimiter: ',',
+                valueField: 'id',
+                labelField: 'name',
+                searchField: ['name'],
+                hideSelected: true,
+                plugins: ['remove_button'],
+                render: {
+                    option: function (item, escape) {
+                        return '<span class="name">' + escape(item.name) + '</span>';
+                    }
+                },
+                onChange: function (value) {
+                    $("#management-status-notice").addClass("hidden");
+                    $("#managementstatuscheck").addClass("hidden");
+
+                    //if ($('#managementStatus').text().toLowerCase().includes("enrolment") ) {
+                    //    alert("yes, its the name");
+                    //}
+                    if ($('#managementStatus').val() == "ERD" || $('#managementStatus').val() == "ERH" || $('#managementStatus').val() == "ERM") {
+
+                        var ms = @Html.Raw(Json.Encode(Model.ManagementStatusVMs))
+                        $.each(ms, function (index, item) {
+                            var name = item.managementStatusName;
+                            var code = item.managementStatusCode;
+                            var status = item.active;
+
+                            if (status == true) {
+                                if (name.toLowerCase().includes("enrolment")) {
+                                    $('#effdatecheck').removeClass("hidden").html('<span style="font-size: 12px"><i class="fas fa-exclamation-circle"></i> </span> ');
+                                }
+                                else {
+
+                                }
+                            }
+                        });
+                    }
+                }
+            })
+        }
+    </script>
+    <script>
+        //effective-date-validation - HCare-1067
+        function convertToJavaScriptDate(value) {
+            var pattern = /Date\(([^)]+)\)/;
+            var results = pattern.exec(value);
+            var dt = new Date(parseFloat(results[1]));
+            return dt.getFullYear() + "-" + ("0" + (dt.getMonth() + 1)).slice(-2) + "-" + ("0" + (dt.getDate())).slice(-2);
+        }
+
+        function xCreatedDateCheck() {
+            var DependantID = $('#dependantId').val();
+            var EffectiveDate = $('#effectiveDate').val();
+            var ProgramID = $('#program-id').val();
+
+            var date = new Date();
+            date.setDate(date.getDate() + 1);
+            var newDate = date.getFullYear() + "-" + ("0" + (date.getMonth() + 1)).slice(-2) + "-" + ("0" + (date.getDate())).slice(-2);
+
+            $('#effdatecheck').addClass("hidden");
+            $('#effective-date-check').addClass("hidden");
+            $("#date-range-notice").addClass("hidden");
+            $('#effective-date-required').html('');
+
+            //date-range-per-status-per-program HCare-1259
+            $.ajax({
+                url: '/Member/ManagementStatusDateRangeValidation',
+                type: "POST",
+                dataType: "JSON",
+                data: { dependantID: DependantID, effectiveDate: EffectiveDate, programID: ProgramID },
+                success: function (result) {
+                    if (result == false) {
+                        $("#date-range-notice").removeClass("hidden");
+                        $('#effective-date-check').removeClass("hidden").html('<span style="font-size: 12px"><i class="fas fa-exclamation-circle"></i> </span>Date range not allowed, please review patient status history.');
+                        $('#date-validation-created').val('');
+                        $('#date-validation-range').val('Not Allowed');
+
+                        $('#form-submit').prop('disabled', true);
+                    }
+                    else {
+                        $("#date-range-notice").addClass("hidden");
+                        $("#created-date-notice").addClass("hidden");
+                        $("#effective-date-notice").addClass("hidden");
+                        $('span[data-valmsg-for="effectiveDate"]').html('');
+                        $('#effective-date-check').html('');
+                        $('#date-validation-range').val('');
+
+                        $('#form-submit').prop('disabled', false);
+                    }
+                }
+            });
+            //created-date-check HCare-1259
+            $.ajax({
+                url: '/Member/DependantCreatedDateCheck',
+                type: "POST",
+                dataType: "JSON",
+                data: { dependantID: DependantID },
+                success: function (result) {
+                    var CreatedDate = convertToJavaScriptDate(result.createdDate);
+                    if (!Date.parse(EffectiveDate)) { }
+                    else {
+                        if (EffectiveDate < CreatedDate) {
+                            $('span[data-valmsg-for="effectiveDate"]').html('');
+                            $('#effdatecheck').html('');
+                            $("#date-range-notice").addClass("hidden");
+                            $("#effective-date-notice").addClass("hidden");
+                            $('#effdatecheck').removeClass("hidden").html('<span style="font-size: 12px"><i class="fas fa-exclamation-circle"></i> </span>Dependant was not yet created - Created date ' + CreatedDate);
+                            $("#created-date-notice").removeClass("hidden");
+                            $('#date-validation-range').val('');
+                            $('#date-validation-created').val('Now Allowed');
+
+                            $('#form-submit').prop('disabled', true);
+                        }
+                        else {
+                            $('span[data-valmsg-for="managementStatusCode"]').text('');
+                            $("#created-date-notice").addClass("hidden");
+                            $("#effective-date-notice").addClass("hidden");
+                            $('#date-validation-created').val('');
+
+                            $('#form-submit').prop('disabled', false);
+                        }
+                    }
+                }
+            });
+            //effective-date hcare-1346
+            if (EffectiveDate > newDate) {
+                $('#effective-date-val').html('<span style="font-size: 10px"><i class="fas fa-exclamation-circle"></i></span>&nbsp;Date cannot be future dated!');
+                $('#effective-date-val').removeClass("hidden");
+                $('#effective-date-error').html('&emsp; <span style="font-size: 12px"><i class="fas fa-exclamation-triangle"></i> </span>&nbsp;Effective date cannot be future dated!');
+                $('#effective-date-error').removeClass("hidden");
+
+                $('#form-submit').prop('disabled', true);
+            }
+            else {
+                $('#effective-date-val').html('');
+                $('#effective-date-val').addClass("hidden");
+                $('#effective-date-error').html('');
+                $('#effective-date-error').addClass("hidden");
+
+                $('#form-submit').prop('disabled', false);
+            }
+        }
+
+        function Disable() {
+            var DependantID = $('#dependantId').val();
+            var EffectiveDate = $('#effectiveDate').val();
+            var ProgramID = $('#program-id').val();
+
+            $('#effective-date-val').html('');
+            $("#date-range-notice").addClass("hidden");
+
+            $.ajax({
+                url: '/Member/ManagementStatusDateRangeValidation',
+                type: "POST",
+                dataType: "JSON",
+                data: { dependantID: DependantID, effectiveDate: EffectiveDate, programID: ProgramID },
+                success: function (result) {
+                    if (result == false) {
+                        $("#date-range-notice").removeClass("hidden");
+                        $('#effective-date-check').removeClass("hidden").html('<span style="font-size: 12px"><i class="fas fa-exclamation-circle"></i> </span>Date range not allowed, please review patient status history.');
+                        $('#date-validation-created').val('');
+                        $('#date-validation-range').val('Not Allowed');
+                    }
+                    else {
+                        $("#date-range-notice").addClass("hidden");
+                        $("#created-date-notice").addClass("hidden");
+                        $("#effective-date-notice").addClass("hidden");
+                        $('span[data-valmsg-for="effectiveDate"]').html('');
+                        $('#effective-date-check').html('');
+                        $('#date-validation-range').val('');
+                    }
+                }
+            });
+            $.ajax({
+                url: '/Member/DependantCreatedDateCheck',
+                type: "POST",
+                dataType: "JSON",
+                data: { dependantID: DependantID },
+                success: function (result) {
+                    var CreatedDate = convertToJavaScriptDate(result.createdDate);
+                    if (!Date.parse(EffectiveDate)) { }
+                    else {
+                        if (EffectiveDate < CreatedDate) {
+                            $('span[data-valmsg-for="effectiveDate"]').html('');
+                            $('#effdatecheck').html('');
+                            $("#date-range-notice").addClass("hidden");
+                            $("#effective-date-notice").addClass("hidden");
+                            $('#effdatecheck').removeClass("hidden").html('<span style="font-size: 12px"><i class="fas fa-exclamation-circle"></i> </span>Dependant was not yet created - Created date ' + CreatedDate);
+                            $("#created-date-notice").removeClass("hidden");
+                            $('#date-validation-range').val('');
+                            $('#date-validation-created').val('Now Allowed');
+                        }
+                        else {
+                            $('span[data-valmsg-for="managementStatusCode"]').text('');
+                            $("#created-date-notice").addClass("hidden");
+                            $("#effective-date-notice").addClass("hidden");
+                            $('#date-validation-created').val('');
+                        }
+                    }
+                }
+            });
+            //effective-date hcare-1346
+            var date = new Date();
+            date.setDate(date.getDate() + 1);
+            var newDate = date.getFullYear() + "-" + ("0" + (date.getMonth() + 1)).slice(-2) + "-" + ("0" + (date.getDate())).slice(-2);
+
+            if (EffectiveDate > newDate) {
+                $('#effective-date-val').html('<span style="font-size: 10px"><i class="fas fa-exclamation-circle"></i></span>&nbsp;Date cannot be future dated!');
+                $('#effective-date-val').removeClass("hidden");
+                $('#effective-date-error').html('&emsp; <span style="font-size: 12px"><i class="fas fa-exclamation-triangle"></i> </span>&nbsp;Effective date cannot be future dated!');
+                $('#effective-date-error').removeClass("hidden");
+                $('#date-validation-effective').val('Now Allowed');
+            }
+            else {
+                $('#effective-date-val').html('');
+                $('#effective-date-val').addClass("hidden");
+                $('#effective-date-error').html('');
+                $('#effective-date-error').addClass("hidden");
+                $('#date-validation-effective').val('');
+            }
+
+            var dcvalidation = $('#date-validation-created').val();
+            var devalidation = $('#date-validation-effective').val();
+            var drvalidation = $('#date-validation-range').val();
+            if (dcvalidation.length > 0 || drvalidation.length > 0 || devalidation.length > 0) {
+                event.preventDefault();
+            }
+        }
+
+    </script>
+}

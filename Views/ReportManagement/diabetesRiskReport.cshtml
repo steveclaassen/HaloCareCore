@@ -1,0 +1,300 @@
+﻿
+@{
+    ViewBag.Title = "diabetesRiskReport";
+    Layout = "~/Views/Shared/_LayoutReport.cshtml";
+}
+
+<style>
+    .indexnav {
+        margin-top: 100px;
+    }
+
+    body {
+        background-image: url('../../Content/Images/Backgrounds/homePage/homePage_one.png');
+        background-size: 160%;
+        background-repeat: no-repeat;
+    }
+</style>
+
+<div class="topBar_reports">
+    <h2>Risk Report</h2>
+    <img src="~/Content/Images/memberProfile/topBar Icons/riskReportX.png" style="width: 3%; margin-top: 0.4%; margin-left: 4px"/>
+</div>
+
+<!--sideNavigation Bar-->
+<div id=" container tabs">
+    <div class="nav-side-menu_Reports memberNav pull-left">
+        <div class="blank">&nbsp;</div>
+        <div class="blank">&nbsp;</div>
+        <div class="blank">&nbsp;</div>
+
+        <div class="menu-list">
+
+            <ul id="menu-content" class="menu-content collapse out active">
+
+                <!--dashBoard-->
+                <li>
+                    <a href="@Url.Action("reportDashboard", "ReportManagement", null)"><i><img src="~/Content/Images/memberProfile/topBar Icons/Reports.png" style="width: 12%; margin-left: 6%; margin-right: 0%" /></i>&nbsp; Reports &nbsp;</a>
+                </li>
+
+                <!--operationsReports-->
+
+                <li data-toggle="collapse" data-target="#overview" class="collapsed">
+                    <a href="#"><i><img src="~/Content/Images/Icons/Reports/oncologyNav.png" style="width: 15%; margin-left: 4%; margin-right: 2%" /></i>Operations &nbsp;&nbsp;<span class="caret" style="margin-left:10%; margin-top: 10%"></span></a>
+                </li>
+                <ul class="sub-menu collapse" id="overview">
+                    <li data-toggle="collapse" data-target="#diabetesOps" class="collapsed">
+                        <a href="#">Diabetes<span class="caret"></span></a>
+                    </li>
+                    <ul class="sub-sub-menu collapse" id="diabetesOps">
+                        <li><a href="@Url.Action("diabetesRiskReport", "ReportManagement", null)">Dashboard</a></li>
+                        <li data-toggle="collapse" data-target="#diabetesRiskReports" class="collapsed">
+                            <a href="#">Risk Reports<span class="caret"></span></a>
+                        </li>
+                        <ul class="sub-sub-menu collapse" id="diabetesRiskReports">
+                            <li><a href="@Url.Action("diabetesRiskReport", "ReportManagement", null)">Home</a></li>
+                            <li><a href="@Url.Action("diabetesEnrolments", "ReportManagement", null)">Enrolments</a></li>
+                            <li><a href="@Url.Action("diabetesActiveOnProgram", "ReportManagement", null)">Active on Program</a></li>
+                            <li><a href="@Url.Action("diabetesActiveOnMedication", "ReportManagement", null)">Active on Medication</a></li>
+                            <li><a href="@Url.Action("diabetesNotTxReady", "ReportManagement", null)">Not Tx Ready</a></li>
+                            <li><a href="@Url.Action("diabetesGenderAndAge", "ReportManagement", null)">Gender & Age</a></li>
+                            <li><a href="@Url.Action("diabetesRegime", "ReportManagement", null)">Script</a></li>
+                            <li><a href="@Url.Action("diabetesAveHbA1c", "ReportManagement", null)">Average HbA1c</a></li>
+                            <li><a href="@Url.Action("diabetesRiskEvaluation", "ReportManagement", null)">Risk Evaluation</a></li>
+                            <li><a href="@Url.Action("diabetesDeactivatedPatients", "ReportManagement", null)">Deactivated</a></li>
+                        </ul>
+                        <li data-toggle="collapse" data-target="#diabetesPatientList" class="collapsed">
+                            <a href="#">Patient List<span class="caret"></span></a>
+                        </li>
+                        <ul class="sub-sub-menu collapse" id="diabetesPatientList">
+                            <li><a href="@Url.Action("diabetesPatientList", "ReportManagement", null)">Overview</a></li>
+
+                        </ul>
+                    </ul>
+                    <li data-toggle="collapse" data-target="#hivOps" class="collapsed">
+                        <a href="#">HIV<span class="caret"></span></a>
+                    </li>
+                    <ul class="sub-sub-menu collapse" id="hivOps">
+                        <li><a href="@Url.Action("hivRiskReport", "ReportManagement", null)">Dashboard</a></li>
+                        <li data-toggle="collapse" data-target="#hivRiskReports" class="collapsed">
+                            <a href="#">Risk Reports<span class="caret"></span></a>
+                        </li>
+                        <ul class="sub-sub-menu collapse" id="hivRiskReports">
+                            <li><a href="@Url.Action("hivRiskReport", "ReportManagement", null)">Home</a></li>
+                            <li><a href="@Url.Action("hivEnrolments", "ReportManagement", null)">Enrolments</a></li>
+                            <li><a href="@Url.Action("hivActiveOnProgram", "ReportManagement", null)">Active on Program</a></li>
+                            <li><a href="@Url.Action("hivActiveOnMedication", "ReportManagement", null)">Active on Medication</a></li>
+                            <li><a href="@Url.Action("hivNotTxReady", "ReportManagement", null)">Not Tx Ready</a></li>
+                            <li><a href="@Url.Action("hivGenderAndAge", "ReportManagement", null)">Gender & Age</a></li>
+                            <li><a href="@Url.Action("hivPepAndPrep", "ReportManagement", null)">PEP/PrEP</a></li>
+                            <li><a href="@Url.Action("hivCd4", "ReportManagement", null)">CD4/CD4%</a></li>
+                            <li><a href="@Url.Action("hivViralLoad", "ReportManagement", null)">Viral Load</a></li>
+                            <li><a href="@Url.Action("hivViralLoadMigration", "ReportManagement", null)">VL Migration</a></li>
+                            <li><a href="@Url.Action("hivDeactivatedPatients", "ReportManagement", null)">Deactivated</a></li>
+                            <li><a href="@Url.Action("hivRegime", "ReportManagement", null)">Script</a></li>
+                        </ul>
+                        <li data-toggle="collapse" data-target="#hivPatientList" class="collapsed">
+                            <a href="#">Patient List<span class="caret"></span></a>
+                        </li>
+                        <ul class="sub-sub-menu collapse" id="hivPatientList">
+                            <li><a href="@Url.Action("hivPatientList", "ReportManagement", null)">Overview</a></li>
+
+                        </ul>
+                    </ul>
+
+                </ul>
+
+                <!--executiveReports-->
+
+                <li data-toggle="collapse" data-target="#hivaids" class="collapsed">
+                    <a href="#"><i><img src="~/Content/Images/memberProfile/topBar Icons/executiveDashboard.png" style="width: 12%; margin-left: 6%; margin-right: 2.5%" /></i>Executive &nbsp;&nbsp;<span class="caret" style="margin-left:10%; margin-top: 10%"></span></a>
+                </li>
+                <ul class="sub-menu collapse" id="hivaids">
+                    <li><a href="@Url.Action("boardReport", "ReportManagement", null)">New</a></li>
+                </ul>
+
+
+                <!--performanceReports-->
+
+                <li data-toggle="collapse" data-target="#diabetes" class="collapsed">
+                    <a href="#"><i><img src="~/Content/Images/memberProfile/topBar Icons/performanceWhite_Two.png" style="width: 14%; margin-left: 5%; margin-right: -1%" /></i>&nbsp; Performance &nbsp;<span class="caret" style="margin-left:5%; margin-top: 10%"></span></a>
+                </li>
+                <ul class="sub-menu collapse" id="diabetes">
+                    <li><a href="@Url.Action("caseManagerProduction", "ReportManagement", null)">Production</a></li>
+                    <li><a href="@Url.Action("serviceLevelAgreement", "ReportManagement", null)">SLA</a></li>
+
+                </ul>
+
+
+                <!--analyticalReports-->
+
+                <li data-toggle="collapse" data-target="#Analytics" class="collapsed">
+                    <a href="#"><i><img src="~/Content/Images/memberProfile/topBar Icons/Analytics.png" style="width: 15%; margin-left: 4%; margin-right: 0%" /></i>&nbsp; Analytics &nbsp;<span class="caret" style="margin-left:12%; margin-top: 10%"></span></a>
+                </li>
+                <ul class="sub-menu collapse" id="Analytics">
+                    <li><a href="@Url.Action("diabetesReportAnalytics", "ReportManagement", null)">Diabetes</a></li>
+                    <li><a href="@Url.Action("hivReportAnalytics", "ReportManagement", null)">HIV</a></li>
+
+                </ul>
+
+            </ul>
+        </div>
+
+    </div>
+</div>
+<br />
+<br />
+<br />
+<br />
+<h2 style="color: #003366; font-size: 250%; text-align: center; margin-bottom: 10%"><i><span style="color: #0081b3">Risk Reports</span></i><br /> <span style="font-family: 'Antro Vectra'; font-size: 80%; padding-left: 8em">Diabetes</span></h2>
+
+
+<!--Navigation Icons-->
+
+
+<div class="container indexnav" style="margin-bottom: 5%">
+    <div class="row">
+
+
+
+        <!--Enrolments-->
+        <div class="col-md-3">
+            <a href="@Url.Action("diabetesEnrolments", "ReportManagement", null)">
+                <img src="~/Content/Images/Navigation/1. homePage/profileImage_male.png" style="width: 25%; margin-top: 10%; margin-bottom: 5%" />
+                <div class="col-xs-12 homenavbtns">
+                    <h8>Enrolments</h8>
+                </div>
+            </a>
+        </div>
+        <!--activeOnProgram-->
+        <div class="col-md-3">
+            <a href="@Url.Action("diabetesActiveOnProgram", "ReportManagement", null)">
+                <img src="~/Content/Images/Navigation/5. Reports/AoP.png" style="width: 25%; margin-top: 10%; margin-bottom: 5%" />
+                <div class="col-xs-12 homenavbtns">
+                    <h8>Active on Program</h8>
+                </div>
+            </a>
+        </div>
+        <!--activeOnMedication-->
+        <div class="col-md-3">
+            <a href="@Url.Action("diabetesActiveOnMedication", "ReportManagement", null)">
+                <img src="~/Content/Images/Navigation/5. Reports/AoM.png" style="width: 25%; margin-top: 10%; margin-bottom: 5%" />
+                <div class="col-xs-12 homenavbtns">
+                    <h8>Active on Medication</h8>
+                </div>
+            </a>
+        </div>
+        <!--notTreatmentReady-->
+        <div class="col-md-3">
+            <a href="@Url.Action("diabetesNotTxReady", "ReportManagement", null)">
+                <img src="~/Content/Images/Navigation/5. Reports/notTxReady.png" style="width: 25%; margin-top: 10%; margin-bottom: 5%" />
+                <div class="col-xs-12 homenavbtns">
+                    <h8>Not Treatment <span>Ready</span></h8>
+                </div>
+            </a>
+        </div>
+
+    </div>
+</div>
+
+<div class="container indexnav" style="margin-bottom: 5%">
+    <div class="row">
+
+
+
+        <!--gender&Age-->
+        <div class="col-md-3">
+            <a href="@Url.Action("diabetesGenderAndAge", "ReportManagement", null)">
+                <img src="~/Content/Images/Navigation/5. Reports/gender.png" style="width: 25.8%; margin-top: 10%; margin-bottom: 5%" />
+                <div class="col-xs-12 homenavbtns">
+                    <h8>Gender & Age</h8>
+                </div>
+            </a>
+        </div>
+        <!--Script-->
+        <div class="col-md-3">
+            <a href="@Url.Action("diabetesRegime", "ReportManagement", null)">
+                <img src="~/Content/Images/Navigation/5. Reports/OperationsSummary.png" style="width: 18%; margin-top: 12%; margin-bottom: 7%" />
+                <div class="col-xs-12 homenavbtns">
+                    <h8>Script</h8>
+                </div>
+            </a>
+        </div>
+        <!--Ave HbA1c-->
+        <div class="col-md-3">
+            <a href="@Url.Action("diabetesAveHbA1c", "ReportManagement", null)">
+                <img src="~/Content/Images/Navigation/5. Reports/cd4.png" style="width: 25%; margin-top: 15%; margin-bottom: 5%" />
+                <div class="col-xs-12 homenavbtns">
+                    <h8>Average HbA1c</h8>
+                </div>
+            </a>
+        </div>
+        <!--Risk Eval-->
+        <div class="col-md-3">
+            <a href="@Url.Action("diabetesRiskEvaluation", "ReportManagement", null)">
+                <img src="~/Content/Images/Navigation/5. Reports/RiskEvaluation.png" style="width: 22%; margin-top: 16%; margin-bottom: 4%" />
+                <div class="col-xs-12 homenavbtns">
+                    <h8>Risk Evaluation</h8>
+                </div>
+            </a>
+        </div>
+
+    </div>
+</div>
+
+<div class="container indexnav" style="margin-bottom: 2%">
+    <div class="row">
+
+
+
+        <div class="col-md-4"></div>
+
+
+        <!--deactivatedPatients-->
+        <div class="col-md-4">
+            <a href="@Url.Action("diabetesDeactivatedPatients", "ReportManagement", null)">
+                <img src="~/Content/Images/Navigation/5. Reports/Deactivated.png" style="width: 20%; margin-top: 10%; margin-bottom: 3%" />
+                <div class="col-xs-12 homenavbtns">
+                    <h8>Deactivated Patients</h8>
+                </div>
+            </a>
+        </div>
+
+
+        <div class="col-md-4"></div>
+
+    </div>
+</div>
+
+
+
+
+
+
+
+<br />
+<br />
+<br />
+<br />
+
+
+
+
+
+
+
+
+
+
+<footer class="backButton_Navigation" style="position: fixed; bottom: 1.5%;">
+    @Html.ActionLink("Back", "diabetesClientDashboard", "ReportManagement")
+</footer>
+
+<footer>
+    <img src="~/Content/Images/Navigation/5. Reports/diabetesReport.png" style="position:fixed; bottom:3.5%; right: 0; left: 0; margin-left: 95.5%; width: 2%">
+</footer>
+
+
+
+
+

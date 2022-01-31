@@ -1,0 +1,136 @@
+﻿@model HaloCareCore.Models.Management.RiskRatingMonitor
+@using HaloCareCore.Extensions
+@{
+    ViewBag.Title = "Risk rating";
+    Layout = "~/Views/Shared/_layout-view-x.cshtml";
+}
+<javascript>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+    <script src="https://www.jqueryscript.net/demo/jQuery-Plugin-For-Sortable-Bootstrap-Tables-Bootstrap-Sortable/Scripts/bootstrap-sortable.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/js/standalone/selectize.js"></script>
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.default.css">
+</javascript>
+<style>
+    .default-badge {
+        display: inline-block;
+        background-color: rgb(204 204 204 / 0.40);
+        border-radius: 10px;
+        padding: 6px;
+        min-width: 10px;
+        font: 100 10px 'Century Gothic';
+        color: darkgray;
+        line-height: 1;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: baseline;
+    }
+
+    .layout-image {
+        position: relative;
+        width: 800px;
+    }
+
+    .row-image {
+    }
+</style>
+<div class="collapse in">
+    <div class="card card-body">
+        <div class="collapse-body">
+            <div class="account-setting-panel">
+                <div class="col-md-12 row">
+                    <div class="account-heading">Details</div>
+                    <p class="account-sub-header-new">Layout details listed below.</p>
+                </div>
+                <hr class="fancyruler">
+                <table class="table details-table table-hover" id="bipolar-details">
+                    <tbody>
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayNameFor(model => model.Description)</td>
+                            <td class="row-information">@Html.DisplayFor(model => model.Description)</td>
+                        </tr>
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayNameFor(model => model.From)</td>
+                            <td class="row-information" style="text-transform: capitalize">
+                                <span class="@(Model.From.ToLower() == "red" ? "si-rejected fas fa-circle" : Model.From.ToLower() == "yellow" ? "si-pending fas fa-circle" : Model.From.ToLower() == "green" ? "si-approved fas fa-circle" : "si-default fas fa-circle")"></span>
+                                &emsp;@Html.DisplayFor(model => model.From)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayNameFor(model => model.To)</td>
+                            <td class="row-information" style="text-transform: capitalize">
+                                <span class="@(Model.To.ToLower() == "red" ? "si-rejected fas fa-circle" : Model.To.ToLower() == "yellow" ? "si-pending fas fa-circle" : Model.To.ToLower() == "green" ? "si-approved fas fa-circle" : "si-default fas fa-circle")"></span>
+                                &emsp;@Html.DisplayFor(model => model.To)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayNameFor(model => model.Percentage)</td>
+                            <td class="row-information">@Html.DisplayFor(model => model.Percentage)%</td>
+                        </tr>
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayNameFor(model => model.CreatedDate)</td>
+                            <td class="row-information">@Html.DisplayFor(model => model.CreatedDate)</td>
+                        </tr>
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayNameFor(model => model.CreatedBy)</td>
+                            <td class="row-information">@Html.DisplayFor(model => model.CreatedBy)</td>
+                        </tr>
+                        @if (Model.ModifiedDate != null)
+                        {
+                            <tr>
+                                <td class="row-heading subject">@Html.DisplayNameFor(model => model.ModifiedDate)</td>
+                                <td class="row-information">@Html.DisplayFor(model => model.ModifiedDate)</td>
+                            </tr>
+                            <tr>
+                                <td class="row-heading subject">@Html.DisplayNameFor(model => model.ModifiedBy)</td>
+                                <td class="row-information">@Html.DisplayFor(model => model.ModifiedBy)</td>
+                            </tr>
+                        }
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayNameFor(model => model.Program)</td>
+                            <td class="row-information">
+                                @if (Model.Program != null)
+                                {
+                                    @Html.DisplayFor(model => model.Program)
+                                }
+                                else
+                                {
+                                    <span><span class="default-badge">Default &nbsp;</span>&nbsp; All programs are linked to this entry.</span>
+                                }
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayNameFor(model => model.Active)</td>
+                            <td class="row-information"><span class="@(Model.Active == true ? "si-approved fas fa-circle" : "si-rejected fas fa-circle")"></span>&emsp;@((Model.Active == true) ? "Yes" : "No")</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="sf-footer">
+                    <input type="button" id="layout-back" value="Back" class="btn modal-button-previous" onclick="location.href = '@Url.Action("Index", "Rules", null)'; backKey();" />
+                    <input type="button" id="layout-edit" value="Edit" class="btn modal-button-next" onclick="location.href = '@Url.Action("Risk_Rating_Monitor_Edit", "Administration", new { id = Model.Id })'; editKey();" />
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+@section scripts{
+    <script src="~/bundles/jqueryval"></script>
+
+    <script>
+        function backKey() {
+            localStorage.setItem("rrm-back", Date.now());
+        }
+        function editKey() {
+            localStorage.setItem("rrm-edit", Date.now());
+        }
+    </script>
+}

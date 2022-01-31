@@ -1,4 +1,5 @@
 ﻿@model HaloCareCore.Models.DoctorQuestionnaireViewModel
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @{
     ViewBag.Title = "HIV Questionnaire";
     Layout = "~/Views/Shared/_LayoutModal.cshtml";
@@ -2296,8 +2297,8 @@
         $(document).ready(function () {
             $("[name='clinicalexam.height']").val(0),
                 $("[name='clinicalexam.weight']").val(0),
-                $("[name='pathology.diastalicBP']").val(0),
-                $("[name='pathology.sistalicBP']").val(0);
+                $("[name='pathology.diastolicBP']").val(0),
+                $("[name='pathology.systolicBP']").val(0);
 
         });
 

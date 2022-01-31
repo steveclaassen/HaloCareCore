@@ -1,0 +1,176 @@
+﻿@model HaloCareCore.Models.Validation.Programs
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Program_Details";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<comment>
+    <!--
+        18 September 2019 -- HCare-795 (HaloCare Program Management Maintenance Screen)
+        Created views for user to manage Programs. Set the Administration controller up with the CRUD functionality. Added CSS to the views as well as a duplicate check on the code and description in the Create Program view.
+        The index view allows a user to view the active and inactive entries in order to control the Programs from a settings perspective. I have added a search bar as well as a sort function that will allow the user to sort the columns.
+    -->
+</comment>
+
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+</style>
+
+<div class="fullScreen_container zero-padding">
+
+    <!--pageHeader-->
+    <nav id="global-nav" class="nav">
+        <div class="pull-left title">
+            <h1 class="site-title_patientProfile">
+                <span><i class="fab fa-digital-ocean fa-rotate-90"></i>&emsp; Program</span>
+            </h1>
+        </div>
+        <div class="pull-right title">
+            <h1 class="site-title_userID pull-right">
+                <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+            </h1>
+            <h1 class="site-title_userID pull-right">
+                @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                {
+                    <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                }
+            </h1>
+            <h1 class="site-waffleIcon pull-right">
+                <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+            </h1>
+        </div>
+    </nav>
+
+    <!--breadCrumbs-->
+    <ul class="breadcrumbs_fullScreens">
+        <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+        <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+        <li><a href="@Url.Action("Program_Index", "Administration", new {})">Program</a></li>
+        <li><a href="#">Detail</a></li>
+    </ul>
+
+    <!--navCollection-->
+    <div class="navCollection_fullScreens">
+        @Html.Partial("_navCollection")
+    </div>
+
+    <div style="margin-bottom: 1%"></div>
+
+    <div class="row">
+        <h4 class="tableHeading">Preferred method of contact detail</h4>
+        <hr class="fancyruler">
+        <br />
+        <div style="margin-left: 0%">
+            <dl class="dl-horizontal editForm">
+
+                <dt>
+                    @Html.DisplayName("Program code")
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.code)
+                </dd>
+
+                <dt>
+                    @Html.DisplayName("Program name")
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.ProgramName)
+                </dd>
+
+                <br />
+                <hr class="fancyruler" />
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.createdBy)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.createdBy)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.createdDate)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.createdDate)
+                </dd>
+
+
+
+                @if (Model.modifiedDate != null)
+                {
+                    <br />
+                    <hr class="fancyruler" />
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.modifiedBy)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.modifiedBy)
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.modifiedDate)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.modifiedDate)
+                    </dd>
+
+
+                }
+
+                <br />
+                <hr class="fancyruler" />
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.icd10code)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.icd10code)
+                </dd>
+
+                <br />
+                <hr class="fancyruler" />
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.Active)
+                </dt>
+
+                <dd class="activeCheck">
+                    @if (Model.Active)
+                    {
+                        <img src="~/Content/Images/Icons/Administration/AssignmentTrue.png" style="width: 20%; margin-left: -1%!important" />
+                    }
+                    else
+                    {
+                        <img src="~/Content/Images/Icons/Administration/AssignmentFalse.png" style="width: 20%; margin-left: -1%!important" />
+                    }
+                </dd>
+
+            </dl>
+
+            <div class="fixedBack" style="margin-left: 42.4%">
+                <input value="Back" class="btn buttonRound_formBack go_back" style="width: 15%!important" />
+                <a href="@Url.Action("Program_Edit", "Administration", new { id = Model.programID })" value="Edit" class="btn buttonRound_formEdit" style="width: 15%!important">Edit</a>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+
+}

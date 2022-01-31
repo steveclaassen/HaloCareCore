@@ -1,0 +1,418 @@
+﻿@*@model HaloCareCore.Models.Communications.SmsMessages*@
+@model HaloCareCore.Models.ComsViewModel
+
+@{
+    ViewBag.Title = "AddScript";
+    Layout = "~/Views/Shared/_LayoutModal.cshtml";
+}
+<comment>
+    <!-- 02 May 2019 -- HCare-621 -->
+    <!-- 30 August 2021 -- HCare-1378 -->
+</comment>
+<style>
+    .select2-container--default .select2-selection--single .select2-selection__placeholder {
+        color: #ffffff !important;
+    }
+
+    .select2-container {
+        width: 975px !important;
+        margin-left: 0px;
+    }
+
+    .select2-container--default .select2-selection--single {
+        display: block !important;
+        max-width: 1000px !important;
+        width: 90% !important;
+        max-height: 100px;
+        height: auto;
+        margin-left: 0px;
+        padding: 4px 10px !important;
+        line-height: 1.428571429;
+        color: #003366;
+        border-radius: 0px !important;
+        border: none !important;
+        border-bottom: 1px solid #e8e6e6 !important;
+        background-color: transparent !important;
+        -webkit-box-shadow: none !important;
+        box-shadow: none !important;
+    }
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            border-radius: 0px !important;
+            padding: 2px 8px !important;
+            margin-bottom: 1px !important;
+            margin-top: -5px !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow b {
+            margin-left: -104px !important;
+            margin-top: -6px !important;
+        }
+
+    .error-alert {
+        background-color: rgba(217, 48, 78, 0.2);
+        padding: 10px 12px 10px 12px;
+        border: 1px solid transparent !important;
+        border-radius: 0px;
+        font: 100 12px 'Open Sans', sans-serif;
+        color: rgb(217, 48, 78);
+        margin: 0 0 0 0;
+        margin-top: 0px;
+        margin-bottom: 0px;
+        margin-left: -10px;
+        width: 102%;
+        vertical-align: middle;
+        opacity: 1;
+    }
+
+        .error-alert span a {
+            color: rgb(217, 48, 78);
+            margin-top: -5px;
+        }
+
+    .textbox-control-date {
+        display: block !important;
+        max-width: 600px !important;
+        width: 450px;
+        max-height: 100px;
+        height: 30px;
+        margin-top: 16px;
+        margin-left: 10px;
+        padding: 6px 6px;
+        line-height: 1.428571429;
+        color: #003366;
+        border-radius: 0px !important;
+        border: none !important;
+        border-bottom: 1px solid #e8e6e6 !important;
+        background-color: transparent !important;
+        -webkit-box-shadow: none !important;
+        box-shadow: none !important;
+    }
+
+    .disabled-field {
+        width: 140px;
+        background: rgba(0,0,0,0.70);
+        color: #fff;
+        font-size: 10px;
+        font-weight: 100;
+        text-align: center;
+        border-radius: 2px;
+        padding: 5px 5px;
+        position: absolute;
+        margin-top: -45px;
+        margin-left: -78px;
+        z-index: 100;
+        -webkit-transition: opacity 0.5s;
+        opacity: 0;
+        transition: opacity 1.2s;
+    }
+
+    #df-icon {
+        margin-top: 25%;
+        margin-left: 70%;
+    }
+
+        #df-icon:hover ~ .disabled-field {
+            opacity: 1;
+        }
+
+    .sms-tempalte:focus,
+    .sms-tempalte:active {
+        outline: none !important;
+    }
+</style>
+
+<div id="sms-assignment-overlay" class="pop-up-overlay-sms"></div>
+<div class="sms-assignment-modal">
+
+    @using (Ajax.BeginForm("_InsertText", "Clinical", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "divPath", OnSuccess = "hideModal(); alert('Saved');" }, new { id = "patient-text-assignment" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(model => model.smsMessages.dependantID)
+
+        <div class="col-md-12">
+            <button type="button" class="email-close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <div class="new-email-panel">
+                <div class="hidden-fields">
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                    @Html.HiddenFor(model => model.emailMessages.dependantID, new { htmlAttributes = new { @class = "form-control" } })
+                    <input id="referenceid" name="referenceid" value="@ViewBag.ReferenceID" hidden />
+                    <input id="taskid" name="taskid" value="@ViewBag.TaskID" hidden />
+                    <input id="programid" name="programid" value="@ViewBag.ProgramID" hidden />
+                    <input id="hidden-mobile" name="hidden-mobile" hidden />
+                </div>
+
+                <div class="form-horizontal">
+
+                    <div class="form-group" style="margin-bottom: 0">
+                        <div class="col-md-12">
+                            <table class="table ne-table">
+                                <tr>
+                                    <td style="width: 8%; text-align: right!important">To</td>
+                                    <td style="width: 2%"><span id="sms-validation-error"></span></td>
+                                    <td style="width: 85%">
+                                        @Html.TextBoxFor(model => model.smsMessages.cell_no, htmlAttributes: new { @class = "sms-control-new sms-mobile-no", @autocomplete = "off", @required = "required", @onkeyup = "validation1()", @onchange = "validatePhoneNumber(this);", @onblur = "ValidationSMS()" })
+                                    </td>
+                                    <td style="width: 2%"></td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 8%; text-align: right!important">Template</td>
+                                    <td style="width: 2%"><span id="sms-template-validation-error"></span></td>
+                                    <td>
+                                        <select id="sms-template" name="sms-template" class="form-control select2" style="width: 100%;" onchange="FillTemplate()" required>
+                                            <option subtext="" selected="selected" disabled>Select</option>
+                                            @foreach (var item in ViewBag.smsTemplate)
+                                            {
+                                                <option value="@item.Value" subtext=" ">@item.Text</option>
+                                            }
+                                        </select>
+                                    </td>
+                                    <td style="width: 2%"></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div id="sms-message" class="form-group">
+                        <div class="col-md-12" style="width: 100%!important">
+
+                            <div class="col-md-11">
+                                @Html.TextAreaFor(model => model.smsMessages.message, htmlAttributes: new { @class = "sms-text-control", @disabled = "disabled" })
+                            </div>
+                            <div class="col-md-1">
+                                <i class="fas fa-question-circle information-icon icon-move" id="df-icon"></i>
+                                <span class="disabled-field">This field has been disabled. Please select a template from the dropdown.</span>
+                            </div>
+                            <input type="hidden" name="sms-text-message" id="sms-text-message" />
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0">
+                            <div class="col-md-12">
+                                <table class="table ne-table">
+                                    <tr>
+                                        <td style="width: 8%; text-align: right!important">Effective</td>
+                                        <td style="width: 2%"><span id="ef-date-validation-error"></span></td>
+                                        <td style="width: 85%">
+                                            <input class="text-box single-line input-validation-error textbox-control-date" data-val="true" data-val-date="The field must be a date." id="smsMessages.effectiveDate" name="smsMessages.effectiveDate" type="date" aria-required="true" aria-describedby="DOB-error" aria-invalid="true" value="@DateTime.Now.ToString("yyyy-MM-dd")" min="@DateTime.Now.ToString("yyyy-MM-dd")" oninvalid="InvalidMsg(this);">
+                                            @Html.ValidationMessageFor(model => model.smsMessages.effectiveDate, "", new { @class = "text-danger", @style = "font-size: 80%; margin-left: 1%" })
+                                        </td>
+                                        <td style="width: 2%"></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="validation-sms-error" class="error-alert hidden" style="margin-top: 5px"></div>
+            <div id="sms-template-error" class="error-alert hidden" style="margin-top: 5px"></div>
+            <div id="sms-number-error" class="error-alert hidden" style="margin-top: 5px"></div>
+        </div>
+
+        <div class="col-md-12 email-info-panel">@ViewBag.MedicalAid • @ViewBag.Program</div>
+
+        <div class="col-md-12 new-email-pop-footer">
+            <button type="submit" class="popup-button hidden" id="sms-send">Send</button>
+            <button type="button" class="popup-button" id="sms-button">Send</button>
+        </div>
+    }
+
+</div>
+@section Scripts {
+    <script src="~/bundles/jqueryval"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script>
+        $(document).ready(function () { $("#sms-template").select2({ multiple: false, placeholder: "Select", allowClear: false }); });
+    </script>
+    <script>
+        $(function () {
+            $(".select2").select2({ matcher: matchCustom, templateResult: formatCustom });
+        })
+
+        function stringMatch(term, candidate) {
+            return candidate && candidate.toLowerCase().indexOf(term.toLowerCase()) >= 0;
+        }
+
+        function matchCustom(params, data) {
+            if ($.trim(params.term) === '') {
+                return data;
+            }
+            if (typeof data.text === 'undefined') {
+                return null;
+            }
+            if (stringMatch(params.term, data.text)) {
+                return data;
+            }
+            if (stringMatch(params.term, $(data.element).attr('subtext'))) {
+                return data;
+            }
+            return null;
+        }
+
+        function formatCustom(state) {
+            return $(
+                '<div><div>' + state.text + '</div><div class="subtext">'
+                + $(state.element).attr('subtext')
+                + '</div></div>'
+            );
+        }
+    </script>
+    <script>
+        function FillTemplate() {
+            var stateId = $('#sms-template').val();
+            $.ajax({
+                url: '/Member/FillTemplate',
+                type: "GET",
+                dataType: "JSON",
+                data: { tempId: stateId },
+                success: function (options) {
+
+                    $("#smsMessages_message").val(""); // clear before appending new list
+
+                    $.each(options, function (i, option) {
+                        $("#smsMessages_message").val(option.title).val(option.template)
+                        $("#sms-text-message").val(option.template)
+                    });
+
+                }
+            });
+        }
+    </script>
+    <script>
+        //function ValidationSMS() {
+        //    if ($('.sms-mobile-no').val() == "" || $('.sms-mobile-no').val() == null) {
+        //        $('#sms-validation-error').html('<span style="font-size: 8px; color: darkred;vertical-align: middle"><i class="fas fa-exclamation-triangle"></i></span>');
+        //        $('#validation-sms-error').removeClass("hidden").html('&emsp;<span style="font-size: 8px;vertical-align: middle"> <i class="fas fa-exclamation-triangle"></i></span> <b>Invalid:</b> Mobile number is required.');
+        //    }
+        //    else {
+        //        $('#sms-validation-error').html('');
+        //        $('#validation-sms-error').html('').addClass("hidden");
+        //    }
+        //};
+
+        function validation1(input) {
+            $('#mobile-number').html('');
+            $("#error-invalid").addClass("hidden");
+            $('#sms-validation-error').html('');
+            $('#sms-number-error').addClass("hidden").html('');
+            $('#sms-send').prop('disabled', false);
+            $("#hidden-mobile").val('');
+        }
+        function validatePhoneNumber(input) {
+            $('#mobile-number').html('');
+            $("#error-invalid").addClass("hidden");
+            $('#sms-validation-error').html('');
+            $('#sms-number-error').addClass("hidden").html('');
+            $('#sms-send').prop('disabled', false);
+            $("#hidden-mobile").val('');
+
+            var mobile = $('.sms-mobile-no').val();
+            if (/^[0-9\ - ]*$/.test(mobile) == false || mobile.indexOf(' ') >= 0 || $('.sms-mobile-no').val().length > 12 || ($('.sms-mobile-no').val().length < 10 && $('.sms-mobile-no').val().length != 0) || $('.sms-mobile-no').val().length == 11) {
+                $('#sms-validation-error').html('<span style="font-size: 8px; color: darkred;vertical-align: middle"><i class="fas fa-exclamation-triangle"></i></span>');
+                $('#sms-number-error').removeClass("hidden").html('&emsp;<span style="font-size: 8px;vertical-align: middle"> <i class="fas fa-exclamation-triangle"></i></span> <b>Invalid:</b> Invalid contact number.');
+                $('#sms-send').prop('disabled', true);
+                $("#hidden-mobile").val(mobile);
+            }
+            else if ($('.sms-mobile-no').val() == "" || $('.sms-mobile-no').val() == null) {
+                $('#sms-validation-error').html('<span style="font-size: 8px; color: darkred;vertical-align: middle"><i class="fas fa-exclamation-triangle"></i></span>');
+                $('#validation-sms-error').removeClass("hidden").html('&emsp;<span style="font-size: 8px;vertical-align: middle"> <i class="fas fa-exclamation-triangle"></i></span> <b>Invalid:</b> Mobile number is required.');
+            }
+            else {
+                $('#sms-validation-error').html('');
+                $('#validation-sms-error').html('').addClass("hidden");
+            }
+        }
+
+        $(function () {
+            $(document).mousemove(function () {
+                $('#mobile-number').html('');
+                $("#error-invalid").addClass("hidden");
+                $('#sms-validation-error').html('');
+                $('#sms-send').prop('disabled', false);
+                $("#hidden-mobile").val('');
+
+                var mobile = $('.sms-mobile-no').val();
+                if (/^[0-9\ - ]*$/.test(mobile) == false || mobile.indexOf(' ') >= 0 || $('.sms-mobile-no').val().length > 12 || ($('.sms-mobile-no').val().length < 10 && $('.sms-mobile-no').val().length != 0) || $('.sms-mobile-no').val().length == 11) {
+                    $('#sms-validation-error').html('<span style="font-size: 8px; color: darkred;vertical-align: middle"><i class="fas fa-exclamation-triangle"></i></span>');
+                    $('#sms-number-error').removeClass("hidden").html('&emsp;<span style="font-size: 8px;vertical-align: middle"> <i class="fas fa-exclamation-triangle"></i></span> <b>Invalid:</b> Invalid contact number.');
+                    $('#sms-send').prop('disabled', true);
+                    $("#hidden-mobile").val(mobile);
+                }
+                else if ($('.sms-mobile-no').val() == "" || $('.sms-mobile-no').val() == null) {
+                    $('#sms-validation-error').html('<span style="font-size: 8px; color: darkred;vertical-align: middle"><i class="fas fa-exclamation-triangle"></i></span>');
+                    $('#validation-sms-error').removeClass("hidden").html('&emsp;<span style="font-size: 8px;vertical-align: middle"> <i class="fas fa-exclamation-triangle"></i></span> <b>Invalid:</b> Mobile number is required.');
+                }
+                else {
+                    $('#sms-validation-error').html('');
+                    $('#validation-sms-error').html('').addClass("hidden");
+                }
+
+                if ($('.sms-mobile-no').val().length == 0) {
+                    $('#mobile-number').html('');
+                    $("#error-invalid").addClass("hidden");
+                    $('#sms-send').prop('disabled', true);
+                    $("#hidden-mobile").val(mobile);
+                }
+            });
+        })
+
+        $(document).ready(function () {
+            $('#sms-send').click(function () {
+                if ($('.sms-mobile-no').length() == 0) {
+                    $('#sms-validation-error').html('<span style="font-size: 8px; color: darkred;vertical-align: middle"><i class="fas fa-exclamation-triangle"></i></span>');
+                    $('#validation-sms-error').removeClass("hidden").html('&emsp;<span style="font-size: 8px;vertical-align: middle"> <i class="fas fa-exclamation-triangle"></i></span> <b>Invalid:</b> Mobile number is required.');
+                    $('.sms-mobile-no').focus();
+                }
+                else {
+                    $("#email-overlay").fadeOut(150);
+                    $("#new-sms-popup").fadeOut(250);
+                }
+            });
+
+            $(".sms-close").click(function () {
+                $("#email-overlay").fadeOut(150);
+                $("#new-sms-popup").fadeOut(250);
+            });
+
+            $('#sms-button').click(function () {
+                if ($('#sms-template').val() == null) {
+                    $('#sms-template-validation-error').html('<span style="font-size: 8px; color: darkred;vertical-align: middle"><i class="fas fa-exclamation-triangle"></i></span>');
+                    $('#sms-template-error').removeClass("hidden").html('&emsp;<span style="font-size: 8px;vertical-align: middle"> <i class="fas fa-exclamation-triangle"></i></span> <b>Invalid:</b> Please select a template from the dropdown menu.');
+                }
+                else if ($('#hidden-mobile').val().length > 0) {
+                    $('#sms-validation-error').html('<span style="font-size: 8px; color: darkred;vertical-align: middle"><i class="fas fa-exclamation-triangle"></i></span>');
+                    $('#sms-template-error').removeClass("hidden").html('&emsp;<span style="font-size: 8px;vertical-align: middle"> <i class="fas fa-exclamation-triangle"></i></span> <b>Invalid:</b> Please review the contact number assigned.');
+                }
+            });
+        });
+    </script>
+    <script>
+        $(document).ready(function () {
+            $('#sms-send').prop('disabled', true);
+            $('#sms-template').on("select2:select", function (e) {
+                var number = $('#hidden-mobile').val();
+                if ($(this).val() > 0 && (number == null || number == "")) {
+                    $('#sms-message').show();
+                    $('#sms-send').prop('disabled', false);
+                    $('#sms-button').addClass('hidden');
+                    $('#sms-send').removeClass('hidden');
+                    $('#sms-template-error').html('').addClass("hidden");
+                    $('#sms-template-validation-error').html('');
+                }
+                else if ($(this).val() > 0 && (number != null || number != "")) {
+                    if ($(this).val() > 0) {
+                        $('#sms-message').show();
+                        $('#sms-button').addClass('hidden');
+                        $('#sms-send').removeClass('hidden');
+                        $('#sms-template-error').html('').addClass("hidden");
+                        $('#sms-template-validation-error').html('');
+                    }
+                }
+            });
+        });
+    </script>
+
+
+}

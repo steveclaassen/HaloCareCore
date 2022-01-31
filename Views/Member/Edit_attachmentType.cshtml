@@ -1,0 +1,202 @@
+﻿@model HaloCareCore.Models.Patient.Attachments
+@using HaloCareCore.Extensions
+
+@{
+    ViewBag.Title = "Attachments";
+    Layout = "~/Views/Shared/_layout-view-x.cshtml";
+}
+
+<comment>
+    <!--
+        08 May 2020 -- HCare-1029(Error page - Edit document on Halocare)
+        Error was as a result of not passing the program guid back to the controller when submitting a change to the entry. I've corrected this and updated the view.
+    -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    textarea#attachmentName {
+        display: block;
+        max-width: 2000px !important;
+        width: 1000px !important;
+        max-height: 100px !important;
+        height: 34px !important;
+        margin-top: 5px !important;
+        margin-left: 10px !important;
+        padding: 6px 6px !important;
+        line-height: 1.428571429 !important;
+        color: #003366 !important;
+        border-radius: 0px !important;
+        border: none !important;
+        border-bottom: 1px solid #e8e6e6 !important;
+        background-color: transparent !important;
+        padding-left: 5px !important;
+        -webkit-box-shadow: none !important;
+        box-shadow: none !important;
+        -webkit-transition: none !important;
+        transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+        outline: none !important;
+        transition: 1s !important;
+    }
+
+        textarea#attachmentName:hover {
+            border-bottom: 1px solid #b0afaf !important;
+            height: 100px !important;
+        }
+
+        textarea#attachmentName:focus {
+            border-bottom: 1px solid #b0afaf !important;
+            height: 100px !important;
+        }
+
+    ::-webkit-input-placeholder { /* Chrome */
+        font-family: Comfortaa;
+    }
+
+    .select2-container {
+        border: none !important;
+    }
+
+        .select2-container:focus {
+            outline: none !important
+        }
+
+    .select2-container--default .select2-selection--single {
+        display: block !important;
+        max-width: 2000px !important;
+        width: 1000px !important;
+        max-height: 100px;
+        height: 34px !important;
+        margin-left: 10px;
+        padding: 6px 6px;
+        line-height: 1.428571429;
+        color: #003366;
+        border-radius: 0px !important;
+        border: none !important;
+        border-bottom: 1px solid #e8e6e6 !important;
+        background-color: transparent !important;
+        -webkit-box-shadow: none !important;
+        box-shadow: none !important;
+        outline: none !important
+    }
+
+        .select2-container--default .select2-selection--single .select2-selection__placeholder {
+            color: white !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            margin-top: -5px !important;
+            left: 247% !important
+        }
+
+    .field-validation-error:before {
+        font-family: FontAwesome;
+        content: "\f06a\00a0";
+        animation: pulse 2s ease infinite;
+    }
+</style>
+
+<div class="collapse in">
+    <div class="card card-body">
+        <div class="collapse-body">
+            <div class="search-information-data-panel">
+                <!---------------------------------------------------------------------------------- html-navigation ---------------------------------------------------------------------------------->
+                <navigation>
+                    <!-------------------------------------------------------------------------- bread-crumbs ------------------------------------------------------------------------->
+                    <ul class="bread-crumbs-full-screen" style="        color: #808080 !important;">
+                        <li style="font-size: 10px; font-weight: 600">You are here:</li>
+                        <li><a href="@Url.Action("Index", "Home" , new { })">Home</a></li>
+                        <li><a href="@Url.Action("patientCommunication", "Member", new { DependentID = Model.dependentID, pro=Context.Request.Query["pro"] })">Patient</a></li>
+                        <li><a href="#">@ViewBag.Title</a></li>
+                    </ul>
+
+                    <!------------------------------------------------------------------------- nav-collection ------------------------------------------------------------------------>
+                    <div>
+                        @Html.Partial("_navCollection")
+                    </div>
+                </navigation>
+                <!-------------------------------------------------------------------------------------- html-body ------------------------------------------------------------------------------------>
+                <div class="container-tab">
+                    <div class="row">
+                        <br />
+                        @using (Html.BeginForm("Edit_attachmentType", "Member"))
+                        {
+                            <div class="hidden-fields">
+                                @Html.AntiForgeryToken()
+                                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                                @Html.HiddenFor(model => model.attachmentID)
+                                @Html.HiddenFor(model => model.dependentID)
+                                @Html.Hidden("pro", Context.Request.Query["pro"])
+                            </div>
+                            <div class="col-md-12 row">
+                                <div class="col-md-6">
+                                    <h4 class="table-heading">Edit attachment type</h4>
+                                </div>
+                                <div class="col-md-6 "></div>
+                                <hr class="fancyruler">
+                            </div>
+                            <div class="col-md-12 row">
+                                <br />
+                                <div class="form-horizontal editForm">
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.attachmentType, htmlAttributes: new { @class = "control-label col-md-2" })
+                                        <div class="col-md-8">
+                                            @Html.DropDownListFor(model => model.attachmentType, null, "Select", new { @class = "" })
+                                            @Html.ValidationMessageFor(model => model.attachmentType, "", new { @class = "text-danger", @style = "font-size: 75%;margin-left: 2%" })
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.attachmentName, htmlAttributes: new { @class = "control-label col-md-2" })
+                                        <div class="col-md-8">
+                                            @Html.TextAreaFor(model => model.attachmentName, new { htmlAttributes = new { @class = "allergyTextbox", @placeholder = "example: Document 01", autocomplete = "off" } })
+                                            @Html.ValidationMessageFor(model => model.attachmentName, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.Active, htmlAttributes: new { @class = "control-label col-md-2" })
+                                        <div class="col-md-10" style="margin-top:-0.8%">
+                                            @Html.CheckBoxFor(model => model.Active, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                                            @Html.ValidationMessageFor(model => model.Active, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="fixed-button" style="text-align: center">
+                                            <input value="Back" class="btn back-button go_back" style="width: 15%!important" onclick="backKey()" />
+                                            <input id="submit" type="submit" value="Submit" class="btn submit-button" style="width: 15%!important" onclick="storageKey()" /><br />
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script src="~/bundles/jqueryval"></script>
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+
+    <!-- select-dropdowns-->
+    <script>
+        $(document).ready(function () { $("#attachmentType").select2({ selectOnClose: true, multiple: false, placeholder: "Select" }); });
+    </script>
+    <!-- local-storage-redirect -->
+    <script>
+        function backKey() {
+            localStorage.setItem("back_attachment_type", Date.now());
+        }
+        function storageKey() {
+            localStorage.setItem("edit_attachment_type", Date.now());
+        }
+    </script>
+}

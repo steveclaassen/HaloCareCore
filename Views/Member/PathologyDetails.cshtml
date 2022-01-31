@@ -1,0 +1,733 @@
+﻿@model HaloCareCore.Models.Patient.Pathology
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "PathologyDetails";
+    Layout = "~/Views/Shared/_LayoutMember.cshtml";
+}
+
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .text-divider {
+        margin: 1em 0;
+        line-height: 0;
+        text-align: center;
+    }
+
+        .text-divider span {
+            background-color: rgba(254, 254, 254, 1);
+            padding-left: 1em;
+            padding-right: 1em;
+        }
+
+        .text-divider:before {
+            content: " ";
+            display: block;
+            border-top: 1px solid rgba(204, 204, 204, 0.50);
+            border-bottom: 1px solid transparent;
+            width: 96%;
+            margin-left: 0%;
+        }
+</style>
+
+<!--pageHeader-->
+<nav id="global-nav" class="nav">
+    <div class="pull-left title">
+        <h1 class="site-title_patientProfile">
+            <span><img src="~/Content/Images/memberProfile/topBar Icons/bloods.png" style="width: 2.8%" /></span>&emsp; Pathology
+        </h1>
+    </div>
+    <div class="pull-right title">
+        <h1 class="site-title_userID pull-right">
+            <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+        </h1>
+        <h1 class="site-title_userID pull-right">
+            @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+            {
+                <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+            }
+        </h1>
+        <h1 class="site-waffleIcon pull-right">
+            <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+        </h1>
+    </div>
+</nav>
+
+<div class="dashboardContainer zero-padding">
+    <div class="patientDashboard_View">
+        <!--breadCrumbs-->
+        <ul class="breadcrumbs_patientDashboard">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+            <li><a href="@Url.Action("patientClinical", "Member", new {DependentID = Context.Request.Query["DependentID"] })">Patient</a></li>
+            <li><a href="#">Pathology</a></li>
+        </ul>
+        <!--Left navSlider -->
+        @Html.Partial("_navSlider_blank", new { })
+        <!--navCollection-->
+        <div class="navCollection_patientDashboard">
+            @Html.Partial("_navCollection")
+        </div>
+        <!--profileInformation-->
+        <div class="profileBar">
+            @Html.Action("_profileBar_edit", "Member", new { DependentID = Model.dependentID })
+        </div>
+    </div>
+
+    <div class="profilebar-spacer"></div>
+
+    <div class="patientDashboard_container">
+        <h4 class="tableHeading">Pathology details</h4>
+        <hr class="fancyruler">
+        <br />
+        <div style="margin-left: 5%">
+            <h4 class="tableDivider-heading text-divider"><span>administration</span></h4>
+            <div class="detailsPanel">
+                <dl class="dl-horizontal editForm">
+                    <!--=========================================================================================================================================================================-->
+                    <!--                                                                               Administration                                                                            -->
+                    <!--=========================================================================================================================================================================-->
+                    <br />
+                    <dt>
+                        @Html.DisplayName("Pathology type")
+                    </dt>
+
+                    <dd>
+                        @if (Model.pathologyType == "DIA")
+                        {
+                            <p>Diabetes</p>
+                        }
+                        else if (Model.pathologyType == "GEN")
+                        {
+                            <p>General Chronic</p>
+                        }
+                        else if (Model.pathologyType == "HIV")
+                        {
+                            <p>HIV</p>
+                        }
+                    </dd>
+
+                    <h4 class="tableDivider-heading text-divider"><span>• • •</span></h4>
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.labName)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.labName)
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.labReferenceNo)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.labReferenceNo)
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.labTelNo)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.labTelNo)
+                    </dd>
+
+                    <h4 class="tableDivider-heading text-divider"><span>• • •</span></h4>
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.createdBy)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.createdBy)
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayName("Load date") @*hcare-1247*@
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.createdDate)
+                    </dd>
+
+                    <h4 class="tableDivider-heading text-divider"><span>• • •</span></h4>
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.modifiedBy)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.modifiedBy)
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.modifiedDate)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.modifiedDate)
+                    </dd>
+
+                    <h4 class="tableDivider-heading text-divider"><span>• • •</span></h4>
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.active)
+                    </dt>
+
+                    <dd class="detailsCheck">
+                        @Html.DisplayFor(model => model.active)
+                    </dd>
+
+                </dl>
+            </div>
+
+            <!--=========================================================================================================================================================================-->
+            <!--                                                                                 Catagories                                                                              -->
+            <!--=========================================================================================================================================================================-->
+
+            <br />
+            <h4 class="tableDivider-heading text-divider"><span>catagories</span></h4>
+            <div class="detailsPanel">
+                <dl class="dl-horizontal editForm">
+
+                    <br />
+                    <br />
+                    <dt>
+                        @Html.DisplayNameFor(model => model.CD4Count)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.CD4Count)
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.CD4CounteffectiveDate)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.CD4CounteffectiveDate)
+                    </dd>
+
+                    <br />
+                    <h4 class="tableDivider-heading text-divider"><span>• • •</span></h4>
+                    <br />
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.CD4Percentage)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.CD4Percentage)
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.CD4PercentageeffectiveDate)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.CD4PercentageeffectiveDate)
+                    </dd>
+
+                    <br />
+                    <h4 class="tableDivider-heading text-divider"><span>• • •</span></h4>
+                    <br />
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.viralLoad)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.viralLoad)
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.viralLoadeffectiveDate)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.viralLoadeffectiveDate)
+                    </dd>
+
+                    <br />
+                    <h4 class="tableDivider-heading text-divider"><span>• • •</span></h4>
+                    <br />
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.haemoglobin)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.haemoglobin)
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.haemoglobineffectiveDate)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.haemoglobineffectiveDate)
+                    </dd>
+
+                    <br />
+                    <h4 class="tableDivider-heading text-divider"><span>• • •</span></h4>
+                    <br />
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.bilirubin)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.bilirubin)
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.bilirubineffectiveDate)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.bilirubineffectiveDate)
+                    </dd>
+
+                    <br />
+                    <h4 class="tableDivider-heading text-divider"><span>• • •</span></h4>
+                    <br />
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.totalCholestrol)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.totalCholestrol)
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.totalCholestroleffectiveDate)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.totalCholestroleffectiveDate)
+                    </dd>
+
+                    <br />
+                    <h4 class="tableDivider-heading text-divider"><span>• • •</span></h4>
+                    <br />
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.hdl)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.hdl)
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.hdleffectiveDate)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.hdleffectiveDate)
+                    </dd>
+
+                    <br />
+                    <h4 class="tableDivider-heading text-divider"><span>• • •</span></h4>
+                    <br />
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.ldl)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.ldl)
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.ldleffectiveDate)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.ldleffectiveDate)
+                    </dd>
+
+                    <br />
+                    <h4 class="tableDivider-heading text-divider"><span>• • •</span></h4>
+                    <br />
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.triglycerides)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.triglycerides)
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.triglycerideseffectiveDate)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.triglycerideseffectiveDate)
+                    </dd>
+
+                    <br />
+                    <h4 class="tableDivider-heading text-divider"><span>• • •</span></h4>
+                    <br />
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.glucose)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.glucose)
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.glucoseeffectiveDate)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.glucoseeffectiveDate)
+                    </dd>
+
+                    <br />
+                    <h4 class="tableDivider-heading text-divider"><span>• • •</span></h4>
+                    <br />
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.hba1c)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.hba1c)
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.hba1ceffectiveDate)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.hba1ceffectiveDate)
+                    </dd>
+
+                    <br />
+                    <h4 class="tableDivider-heading text-divider"><span>• • •</span></h4>
+                    <br />
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.alt)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.alt)
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.alteffectiveDate)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.alteffectiveDate)
+                    </dd>
+
+                    <br />
+                    <h4 class="tableDivider-heading text-divider"><span>• • •</span></h4>
+                    <br />
+
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.ast)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.ast)
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.asteffectiveDate)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.asteffectiveDate)
+                    </dd>
+
+                    <br />
+                    <h4 class="tableDivider-heading text-divider"><span>• • •</span></h4>
+                    <br />
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.urea)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.urea)
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.ureaeffectiveDate)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.ureaeffectiveDate)
+                    </dd>
+
+                    <br />
+                    <h4 class="tableDivider-heading text-divider"><span>• • •</span></h4>
+                    <br />
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.creatinine)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.creatinine)
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.creatinineeffectiveDate)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.creatinineeffectiveDate)
+                    </dd>
+
+                    <br />
+                    <h4 class="tableDivider-heading text-divider"><span>• • •</span></h4>
+                    <br />
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.eGfr)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.eGfr)
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.eGfreffectiveDate)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.eGfreffectiveDate)
+                    </dd>
+
+                    <br />
+                    <h4 class="tableDivider-heading text-divider"><span>• • •</span></h4>
+                    <br />
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.mauCreatRatio)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.mauCreatRatio)
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.mauCreatRatioeffectiveDate)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.mauCreatRatioeffectiveDate)
+                    </dd>
+
+                    <br />
+                    <h4 class="tableDivider-heading text-divider"><span>• • •</span></h4>
+                    <br />
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.FEV1)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.FEV1)
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.FEV1effectiveDate)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.FEV1effectiveDate)
+                    </dd>
+
+                    <br />
+                    <h4 class="tableDivider-heading text-divider"><span>• • •</span></h4>
+                    <br />
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.Eosinophylia)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.Eosinophylia)
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.EosinophyliaeffectiveDate)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.EosinophyliaeffectiveDate)
+                    </dd>
+
+                    <br />
+                    <h4 class="tableDivider-heading text-divider"><span>• • •</span></h4>
+                    <br />
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.hivEliza)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.hivEliza)
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.hivElizaeffectiveDate)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.hivElizaeffectiveDate)
+                    </dd>
+
+                    <br />
+                    <h4 class="tableDivider-heading text-divider"><span>• • •</span></h4>
+                    <br />
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.normGtt)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.normGtt)
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.normGtteffectiveDate)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.normGtteffectiveDate)
+                    </dd>
+
+                    <br />
+                    <h4 class="tableDivider-heading text-divider"><span>• • •</span></h4>
+                    <br />
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.abnGtt)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.abnGtt)
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.abnGtteffectiveDate)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.abnGtteffectiveDate)
+                    </dd>
+
+                    <br />
+                    <h4 class="tableDivider-heading text-divider"><span>• • •</span></h4>
+                    <br />
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.ualbuminuria)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.ualbuminuria)
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.ualbuminuriaeffectiveDate)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.ualbuminuriaeffectiveDate)
+                    </dd>
+                </dl>
+            </div>
+            <!--=========================================================================================================================================================================-->
+            <!--                                                                                Blood pressure                                                                           -->
+            <!--=========================================================================================================================================================================-->
+            <br />
+            <h4 class="tableDivider-heading text-divider"><span>blood pressure</span></h4>
+            <div class="detailsPanel">
+                <dl class="dl-horizontal editForm">
+
+                    <br />
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.systolicBP)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.systolicBP)
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.diastolicBP)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.diastolicBP)
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.BPeffectiveDate)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.BPeffectiveDate)
+                    </dd>
+                </dl>
+            </div>
+            <!--=========================================================================================================================================================================-->
+            <!--                                                                                     Other                                                                               -->
+            <!--=========================================================================================================================================================================-->
+
+            <br />
+            <h4 class="tableDivider-heading text-divider"><span>comments</span></h4>
+            <div class="detailsPanel">
+                <dl class="dl-horizontal editForm">
+                    <br />
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.comment)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.comment)
+                    </dd>
+
+                </dl>
+            </div>
+            <br />
+
+            <div class="form-group" style="text-align: center!important">
+                <div class="actionButton" style="margin-bottom: 0.5%; margin-top: 6.5%">
+                    <a href="@Url.Action("EditPathology", "Member", new { id = Model.pathologyID, pro=Context.Request.Query["pro"]})" value="Edit" class="btn enquiryPostpone-button" style="width: 15%!important">Edit</a>
+                    <br />
+                    <input value="Back" class="btn buttonRound_formBack go_back" style="width: 8%!important" />
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script src="js/jquery.tablesorter.min.js"></script>
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+}

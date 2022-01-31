@@ -1,0 +1,106 @@
+﻿@model List<HaloCareCore.Models.ViewModels.TextTemplateViewModel>
+@using HaloCareCore.Extensions
+@{
+    ViewBag.Title = "Accounts";
+    Layout = "~/Views/Shared/_layout-view-x.cshtml";
+}
+
+<comment>
+    <!-- 4 June 2021 -- HCare-1338 -->
+</comment>
+<javascript>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+    <script src="https://www.jqueryscript.net/demo/jQuery-Plugin-For-Sortable-Bootstrap-Tables-Bootstrap-Sortable/Scripts/bootstrap-sortable.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/js/standalone/selectize.js"></script>
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.default.css">
+</javascript>
+
+<div id="instruction-wrapper">
+    <div class="instruction-panel">
+        <h class="account-step">Step 5</h>
+        <p class="account-step-instruction">Select text message templates.</p>
+        <ul style="padding: 0">
+            <li class="account-step-list acc-1"><span class="number-circle a-circle-1 complete-circle">✓</span>Account setup</li>
+            <li class="account-step-list acc-2"><span class="number-circle a-circle-2 complete-circle">✓</span>Program setup</li>
+            <li class="account-step-list acc-3"><span class="number-circle a-circle-3 complete-circle">✓</span>Clinical rules</li>
+            <li class="account-step-list acc-4"><span class="number-circle a-circle-4 complete-circle">✓</span>Management status</li>
+            <li class="account-step-list acc-5 active-step"><span class="number-circle a-circle-5 active-circle">5</span>Text messages</li>
+        </ul>
+    </div>
+</div>
+
+<div class="collapse in">
+    <div class="card card-body">
+        <div class="collapse-body">
+            <div class="new-account-panel">
+                @using (Html.BeginForm("Step5", "Account", FormMethod.Post))
+                {
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="accountID" name="accountID" value="@ViewBag.AccountID" />
+                    <input type="hidden" id="programID" name="programID" value="@ViewBag.ProgramID" />
+                    <input type="hidden" id="medicalaidID" name="medicalaidID" value="@ViewBag.MedicalAidID" />
+
+                    <div class="col-md-12 row">
+                        <div class="account-heading">Text message setup</div>
+                        <p class="account-sub-header-new">Select the required text message templates for program - @ViewBag.ProgramName.</p>
+                    </div>
+                    <hr class="fancyruler">
+                    <div style="margin-bottom: 20px"></div>
+                    if (Model.Count > 0)
+                    {
+                        <table class="table mh-table table-hover" style="margin-left: 1.6%">
+                            <thead>
+                                <tr>
+                                    <th style="text-align: center!important; width: 8%">@Html.DisplayNameFor(model => model[0].Added)</th>
+                                    <th>@Html.DisplayNameFor(model => model[0].templateName)</th>
+                                    <th>@Html.DisplayNameFor(model => model[0].textMessage)</th>
+                                </tr>
+                            </thead>
+
+                            @for (int i = 0; i < Model.Count(); i++)
+                            {
+                                <tbody>
+                                    <tr>
+                                        @Html.HiddenFor(model => model[i].accountId)
+                                        @Html.HiddenFor(model => model[i].programId)
+                                        @Html.HiddenFor(model => model[i].medicalAidId)
+                                        @Html.HiddenFor(model => model[i].planId)
+                                        @Html.HiddenFor(model => model[i].templateId)
+
+                                        <td>@Html.EditorFor(model => model[i].Added)</td>
+                                        <td>@Html.DisplayFor(model => model[i].templateName)</td>
+                                        <td>@Html.DisplayFor(model => model[i].textMessage)</td>
+                                    </tr>
+                                </tbody>
+                            }
+
+                        </table>
+
+                        <div class="account-footer pull-right">
+                            <input type="submit" id="account-next-step-4" value="Finish" class="btn modal-button-next" />
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="no-results-1">
+                            <img src="~/Content/Images/_2020/tables/no-results-3.png" />
+                        </div>
+                        <h4 class="no-results">No text message templates found for program</h4>
+
+                        <div class="sf-footer">
+                            <input type="submit" id="account-next-step-4" value="Finish" class="btn modal-button-next" />
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script src="~/bundles/jqueryval"></script>
+
+}

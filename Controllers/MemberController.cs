@@ -5251,7 +5251,7 @@ namespace HaloCareCore.Controllers
 
                 Paragraph nam = new Paragraph("Renewal or change of medication authorisation.", new Font(Font.FontFamily.HELVETICA, 10f, Font.BOLD));
                 doc1.Add(nam);
-                Paragraph det = new Paragraph("Prescriptions and relevant pathology results to be forwarded to documents@halocare.co.za or faxed to 086 570 2523.", new Font(Font.FontFamily.HELVETICA, 8f));
+                Paragraph det = new Paragraph("Prescriptions and relevant pathology results to be forwarded to documents@HaloCareCore.co.za or faxed to 086 570 2523.", new Font(Font.FontFamily.HELVETICA, 8f));
 
                 doc1.Add(det);
 
@@ -5283,7 +5283,7 @@ namespace HaloCareCore.Controllers
                 doc1.Add(s);
                 Paragraph sig2 = new Paragraph("Tel: 086 570 2523", new Font(Font.FontFamily.HELVETICA, 7f));
                 doc1.Add(sig2);
-                Paragraph sig3 = new Paragraph("Email: info@halocare.co.za", new Font(Font.FontFamily.HELVETICA, 7f));
+                Paragraph sig3 = new Paragraph("Email: info@HaloCareCore.co.za", new Font(Font.FontFamily.HELVETICA, 7f));
                 sig3.SpacingAfter = 10f;
                 doc1.Add(sig3);
 
@@ -5346,7 +5346,7 @@ namespace HaloCareCore.Controllers
             < br /><br />
             Managed Care contact details:<br />
             Tel: 0860 143 258<br />
-            Email: info @halocare.co.za<br />
+            Email: info @HaloCareCore.co.za<br />
             <br />
             Kind regards<br />
             HaloCare Team<br />
@@ -16189,7 +16189,7 @@ namespace HaloCareCore.Controllers
 
                 var from = "";
                 var maSettings = _admin.GetMedicalAidSettings(new Guid(medicalaidID));
-                if (maSettings != null) { if (!String.IsNullOrEmpty(maSettings.email)) { from = maSettings.email; } else { from = "support@halocare.co.za"; } } else { from = "support@halocare.co.za"; } //hcare-1380: correction
+                if (maSettings != null) { if (!String.IsNullOrEmpty(maSettings.email)) { from = maSettings.email; } else { from = "support@HaloCareCore.co.za"; } } else { from = "support@HaloCareCore.co.za"; } //hcare-1380: correction
 
                 using (MailMessage mm = new MailMessage(from, to))
                 {

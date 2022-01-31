@@ -1,0 +1,196 @@
+﻿@model HaloCareCore.Models.OutstandingsMultiView
+
+@{
+    ViewBag.Title = "Outstanding";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<div class="topBar_reports">
+    <h2>Outstanding Scripts</h2>
+    <img src="~/Content/Images/memberProfile/topBar Icons/Script.png" style="width: 2.2%; margin-top: -0.1%" />
+</div>
+<br />
+<br />
+<br />
+<br />
+
+@using (Html.BeginForm())
+{
+    <div class="row contentBlock_advancedSearch">
+        <h4 style="color: #003366">Outstanding Scripts <span style="font-size: 100%; color: #0081b3; font-style: italic; vertical-align: middle">Search</span></h4>
+        <hr class="fancyruler">
+        <br />
+        <br />
+        <div class="form-group">
+            <div class="form-horizontal">
+
+                <div class="form-group">
+                    @Html.Label(null,"Medical schem", htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-4">
+                        @Html.DropDownList("medicalAidID", null, "**Select**", htmlAttributes: new { @class = "form-control" })
+                    </div>
+                    @Html.Label(null,"Status", htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-4">
+                        @Html.DropDownList("statusCode", null, "**Select**", htmlAttributes: new { @class = "form-control" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.Label(null,"Expiry Date", htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-4">
+                        @Html.TextBoxFor(Model => Model.search.expiryDate, DateTime.Now.ToShortDateString(), htmlAttributes: new { @class = "form-control", type = "date" })
+                    </div>
+                    @Html.Label(null,"Months Overdue", htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-4">
+                        @Html.TextBoxFor(Model => Model.search.nrMonths, new { @class = "form-control" })
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="actionButton" style="margin-left: 47%; margin-bottom: -1.5%">
+                    <input type="submit" value="Search" class="btn buttonRound_approve" style="width: 15%!important" />
+                </div>
+            </div>
+            <br />
+        </div>
+    </div>
+}
+<br />
+<br />
+
+<div class="row contentBlock_pathology" style="width: 125%; margin-left: -12%">
+    <div class="indexSearch" style="margin-top:-4%!important">
+        <label for="tableSearch" class="control-label"></label> <input type="text" class="form-control-search" id="search" onkeyup="myFunction()" placeholder="Search..." style="margin-top: 3.4%; margin-left: 88%; position: absolute" />
+        <div class="searchIcon">
+            <img src="~/Content/Images/memberProfile/Search_gray.png" style="width: 0.8%!important; margin-left: 96.5%; margin-top: 4%; position: absolute" />
+        </div>
+    </div>
+
+    <h4 style="color: #003366; margin-top: -2%">Outstanding Scripts <span style="color: #0081b3">Table</span></h4>
+
+
+    <hr class="fancyruler">
+    @using (Html.BeginForm("ExportOutstandingScriptsToExcel", "Scripts", FormMethod.Post))
+    {
+        if (Request.Form["statusCode"] != null)
+        {
+            if (Request.Form["statusCode"].ToString() != null)
+            {
+                @Html.Hidden("sts", Request.Form["statusCode"].ToString())
+            }
+            if (Request.Form["medicalAidID"].ToString() != null)
+            {
+                @Html.Hidden("med", Request.Form["medicalAidID"].ToString())
+            }
+            if (Model.search.nrMonths != 0)
+            {
+                @Html.Hidden("nr", Model.search.nrMonths)
+            }
+            if (Model.search.expiryDate != null)
+            {
+                @Html.Hidden("expiry", Model.search.expiryDate)
+            }
+        }
+        <div class="form-group">
+            <div class="actionButton" style="margin-left: 47%; margin-bottom: -1.5%">
+                <input type="submit" value="Export To Excel" class="btn buttonRound_approve" style="width: 15%!important" />
+            </div>
+        </div>
+    }
+    <br /><br />
+    <table class="table scriptTable" id="table">
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.outstandings[0].membershipNo)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.outstandings[0].dependantCode)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.outstandings[0].firstName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.outstandings[0].lastName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.outstandings[0].idNumber)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.outstandings[0].schemeName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.outstandings[0].status)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.outstandings[0].overdue)
+            </th>
+            <th>
+                Action
+            </th>
+        </tr>
+
+        @foreach (var item in Model.outstandings)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.membershipNo)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.dependantCode)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.firstName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.lastName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.idNumber)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.schemeName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.status)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.overdue)
+                </td>
+                <td class="statusCode linkNav">
+                    @Html.ActionLink("Go to Profile", "ViewMember", "Member", new { DependentID = item.dependantID }, null)
+                </td>
+            </tr>
+        }
+
+    </table>
+</div>
+<br />
+<br />
+<br />
+
+<div class="backButton_image">
+    <span id="surround" class="go_back">
+        <span id="initial"><img src="~/Content/Images/memberProfile/Page Icons/back_gray.png" /></span>
+        <span id="onhover"><img src="~/Content/Images/memberProfile/Page Icons/back_blue.png" /></span>
+    </span>
+</div>
+
+<!-- Search -->
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <script>
+
+        var $rows = $('#table tr');
+        $('#search').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $rows.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+
+    </script>
+}

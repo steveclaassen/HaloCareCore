@@ -1,0 +1,467 @@
+﻿@model HaloCareCore.Models.Management.Clinical
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "EditClinicalExam";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<comment>
+    <!--
+            14 February 2019 -- HCare-607 (Halocare Bestmed Diabetes enrollment questionnaire)
+
+            12 June 2019 -- HCare-722 (Change "Follow up" to red on patient history drop-down menus)
+            I have added alert badges that draw the users attention to the fields that are either marked with a follow up or that are empty/null.
+
+            21 June 2019 -- HCare-746(Patient Clinical / Patient History / Patient Information Effective date Set and Edit)
+            Effective date was not set correctly in the POST for CreateNew and Edit. I have corrected this and tested
+
+            06 August 2019 -- HCare-758(Generel - Redirect to tab functionality)
+            Using jquery to add localStorage in order to redirect to the last tab that the user was on and a Submit/Save Button clicked. This will take you back to the origin tab.
+
+            01 June 2020 -- HCare-1050(Error: Region settings)
+            The region settings have been reset which has affected all decimal separators. I have updated the controllers where this the error has appeared namely the Questionnaires(height+weight) and the Pathology(insert+update), by adding an invariant culture decimal parse to the decimal inputs in the controllers affected.
+            Also added a Culture thread to the Home controller which has corrected the views where a decimal has been placed. The culture is using the decimal point instead of the comma as a decimal separator.    -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .input-group-addon {
+        visibility: hidden;
+    }
+
+    ::-webkit-input-placeholder { /* Chrome */
+        font-family: Comfortaa;
+    }
+
+    .field-validation-error:before {
+        font-family: FontAwesome;
+        content: "\f06a\00a0";
+        animation: pulse 2s ease infinite;
+    }
+</style>
+
+<link href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet" />
+<!--pageHeader-->
+<nav id="global-nav" class="nav">
+    <div class="pull-left title">
+        <h1 class="site-title_patientProfile">
+            <span><img src="~/Content/Images/memberProfile/topBar Icons/clinicalExams.png" /></span>&emsp; Clinical history
+        </h1>
+    </div>
+    <div class="pull-right title">
+        <h1 class="site-title_userID pull-right">
+            <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+        </h1>
+        <h1 class="site-title_userID pull-right">
+            @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+            {
+                <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+            }
+        </h1>
+        <h1 class="site-waffleIcon pull-right">
+            <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+        </h1>
+    </div>
+</nav>
+
+<div class="dashboardContainer zero-padding">
+    <div class="patientDashboard_View">
+
+        <!--breadCrumbs-->
+        <ul class="breadcrumbs_patientDashboard">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+            <li><a class="go_back">Patient</a></li>
+            <li><a href="#">Clinical history</a></li>
+        </ul>
+
+        <!--Left navSlider -->
+        @Html.Partial("_navSlider_blank", new { })
+
+        <!--navCollection-->
+        <div class="navCollection_patientDashboard">
+            @Html.Partial("_navCollection")
+        </div>
+
+        <!--profileInformation-->
+        <div class="profileBar">
+            @Html.Action("_profileBar_edit", "Member", new { DependentID = Model.dependantID })
+        </div>
+    </div>
+
+    <div class="profilebar-spacer-assignment"></div>
+
+    <div class="patientDashboard_container">
+        <h4 class="summaryHeading">Edit clinical information</h4>
+        <hr class="fancyruler">
+        <br />
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+
+            <div class="form-horizontal editForm">
+
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                @Html.HiddenFor(model => model.id)
+                @Html.HiddenFor(model => model.dependantID)
+                @Html.HiddenFor(model => model.programType)
+
+                @if (Model.clinicalComment == "" || Model.clinicalComment == null || Model.clinicalComment == "Follow up" || Model.clinicalComment == "Follow Up")
+                {
+                    <div id="clinComment_anchor">
+                        <a id="clinCommentLink" href="#anchor_clinComment">
+                            <i class="fas fa-exclamation-triangle pulse anchor_warning" title="Comment"></i>
+                        </a>
+                    </div>
+                }
+                @if (Model.height == 0)
+                {
+                    <div id="height_anchor">
+                        <a id="heightLink" href="#anchor_height">
+                            <i class="fas fa-exclamation-triangle pulse anchor_warning" title="Height"></i>
+                        </a>
+                    </div>
+                }
+                @if (Model.weight == 0)
+                {
+                    <div id="weight_anchor">
+                        <a id="weightLink" href="#anchor_weight">
+                            <i class="fas fa-exclamation-triangle pulse anchor_warning" title="Weight"></i>
+                        </a>
+                    </div>
+                }
+
+                <!-- effective-date -->
+                @if (Model.effectiveDate != null)
+                {
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.effectiveDate, htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-9">
+                            <input class="text-box single-line input-validation-error form-control-new" data-val="true" data-val-date="The field must be a date." id="effectiveDate" name="effectiveDate" type="date" aria-required="true" aria-describedby="DOB-error" aria-invalid="true" value="@string.Format("{0:yyyy-MM-dd}", Model.effectiveDate)" min="@DateTime.Now.ToString("1900-01-01")" max="@DateTime.Now.ToString("yyyy-MM-dd")" oninvalid="InvalidMsg(this);">
+                            @Html.ValidationMessageFor(model => model.effectiveDate, "", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 1%" })
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.effectiveDate, htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-9">
+                            <input class="text-box single-line input-validation-error form-control-new" data-val="true" data-val-date="The field must be a date." id="effectiveDate" name="effectiveDate" type="date" aria-required="true" aria-describedby="DOB-error" aria-invalid="true" value="@string.Format("{0:yyyy-MM-dd}", "yyyy-MM-dd")" min="@DateTime.Now.ToString("1900-01-01")" max="@DateTime.Now.ToString("yyyy-MM-dd")" oninvalid="InvalidMsg(this);">
+                            @Html.ValidationMessageFor(model => model.effectiveDate, "", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 1%" })
+                        </div>
+                    </div>
+                }
+
+                <!-- weight -->
+                <div>
+                    <div id="warning_required_weight" class="hidden">
+                        <i class="fas fa-exclamation-circle pulser asterisk-warning-single"></i>
+                    </div>
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.weight, htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-9">
+                            @Html.EditorFor(model => model.weight, new { htmlAttributes = new { @class = "form-control-new", placeholder = "0.00" } })
+                            @Html.ValidationMessageFor(model => model.weight, "", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 1%" })
+                        </div>
+                    </div>
+                </div>
+                <!-- height -->
+                <div>
+                    <div id="warning_required_height" class="hidden">
+                        <i class="fas fa-exclamation-circle pulser asterisk-warning-single"></i>
+                    </div>
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.height, htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-9">
+                            @Html.EditorFor(model => model.height, new { htmlAttributes = new { @class = "form-control-new", placeholder = "0.00" } })
+                            @Html.ValidationMessageFor(model => model.height, "", new { @class = "text-danger", @style = "font-size: 75%;margin-left: 2%" })
+                        </div>
+                    </div>
+                </div>
+                <!-- comment -->
+                <div id="anchor_clinComment">
+                    <div id="warning_required_comment" class="hidden">
+                        <i class="fas fa-exclamation-circle pulser asterisk-warning-single"></i>
+                    </div>
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.clinicalComment, htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-10">
+                            @Html.TextAreaFor(model => model.clinicalComment, new { @placeholder = "comment", @class = "form-control-new" })
+                            @Html.ValidationMessageFor(model => model.clinicalComment, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+                <!-- follow-up -->
+                @if (Model.followUp == true)
+                {
+                    <div id="warning_required_followUp">
+                        <i class="fas fa-exclamation-circle pulser asterisk-warning-single"></i>
+                    </div>
+                }
+                <div class="form-group">
+                    @Html.LabelFor(model => model.followUp, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-9">
+                        <div class="checkbox">
+                            @Html.EditorFor(model => model.followUp)
+                            @Html.ValidationMessageFor(model => model.followUp, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+                <!-- active -->
+                <div class="form-group">
+                    @Html.LabelFor(model => model.active, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-9">
+                        <div class="checkbox">
+                            @Html.EditorFor(model => model.active)
+                            @Html.ValidationMessageFor(model => model.active, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="fixedBack" style="margin-left: 40%">
+                    <input value="Back" class="btn buttonRound_formBack go_back" onclick="backKey()" style="width: 15% !important" />
+                    <input type="submit" value="Save" class="btn buttonRound_formCreate" onclick="storageKey()" style="width: 15%" />
+                </div>
+            </div>
+        }
+        <br />
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="date-information" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="">
+            <div class="">
+                <div class="modal-body">
+                    @Html.Action("DateInformationPopUp", "Member", new { })
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@section Scripts {
+    <script src="~/bundles/jqueryui"></script>
+    <style src="~/Content/themes/base/css" )
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <!--Alerts-->
+    <script>
+        //alert_Weight
+        $(document).ready(function () {
+            setInterval(function () {
+                if ($("#weight").val() == "0.00") {
+                    $("#weight").addClass('warningFont'),
+                        $('#warning_weight').removeClass('houdini'),
+                        $('#weight_anchor').removeClass('houdini');
+
+                }
+                else if ($("#weight").val() == "0") {
+                    $("#weight").addClass('warningFont'),
+                        $('#warning_weight').removeClass('houdini'),
+                        $('#weight_anchor').removeClass('houdini');
+
+                }
+                else {
+                    $("#weight").removeClass('warningFont'),
+                        $('#weight').addClass('fontUpdate'),
+                        $('#warning_weight').addClass('houdini'),
+                        $('#weight_anchor').addClass('houdini');
+
+                }
+            }, 0);
+        });
+
+        //alert_Height
+        $(document).ready(function () {
+            setInterval(function () {
+                if ($("#height").val() == "0.00") {
+                    $("#height").addClass('warningFont'),
+                        $('#warning_height').removeClass('houdini'),
+                        $('#height_anchor').removeClass('houdini');
+
+                }
+                else if ($("#height").val() == "0") {
+                    $("#height").addClass('warningFont'),
+                        $('#warning_height').removeClass('houdini'),
+                        $('#height_anchor').removeClass('houdini');
+
+                }
+                else {
+                    $("#height").removeClass('warningFont'),
+                        $('#height').addClass('fontUpdate'),
+                        $('#warning_height').addClass('houdini'),
+                        $('#height_anchor').addClass('houdini');
+
+
+                }
+            }, 0);
+        });
+
+        ////alert_Comment
+        //$(document).ready(function () {
+        //    setInterval(function () {
+        //        if ($("#clinicalComment").val() == "") {
+        //            $('#warning_comment').removeClass('houdini'),
+        //                $('#clinComment_anchor').removeClass('houdini');
+
+        //        }
+        //        else if ($("#clinicalComment").val() == null) {
+        //            $('#warning_comment').removeClass('houdini'),
+        //                $('#clinComment_anchor').removeClass('houdini');
+
+        //        }
+        //        else if ($("#clinicalComment").val().toLowerCase() == "follow up") {
+        //            $("#clinicalComment").addClass('warningFont'),
+        //                $('#warning_comment').removeClass('houdini'),
+        //                $('#clinComment_anchor').removeClass('houdini');
+
+        //        }
+        //        else {
+        //            $("#clinicalComment").removeClass('warningFont'),
+        //                $('#warning_comment').addClass('houdini'),
+        //                $('#clinComment_anchor').addClass('houdini');
+
+
+        //        }
+        //    }, 0);
+        //});
+
+        //followUp checkBox
+        $('#followUp').change(function () {
+            if (this.checked)
+                $('#warning').removeClass('houdini');
+            else
+                $('#warning').addClass('houdini');
+
+        });
+
+    </script>
+    <!--Anchors-->
+    <script>
+        //anchor_weight
+        $("#weightLink").click(function () {
+
+            $('#weight').toggleClass('highlight');
+            setTimeout(function () {
+                // toggle back after 1 second
+                $('#weight').toggleClass('highlight');
+            }, 300);
+        });
+
+        //anchor_height
+        $("#heightLink").click(function () {
+
+            $('#height').toggleClass('highlight');
+            setTimeout(function () {
+                // toggle back after 1 second
+                $('#height').toggleClass('highlight');
+            }, 300);
+        });
+
+        //anchor_comment
+        $("#clinCommentLink").click(function () {
+            $('html, body').animate({
+                scrollTop: $("#anchor_clinComment").offset().top
+            }, 250),
+
+                $('#clinicalComment').toggleClass('textBox_highlight');
+            setTimeout(function () {
+                // toggle back after 1 second
+                $('#clinicalComment').toggleClass('textBox_highlight');
+            }, 300);
+        });
+
+    </script>
+    <!--Validation-->
+    <script>
+        $(document).ready(function () {
+            setInterval(function () {
+                if ($("#clinicalComment").val() == "" || $("#clinicalComment").val() == null || $("#clinicalComment").val().toLowerCase() == "follow up") {
+                    $("#warning_required_comment").removeClass('hidden');
+                }
+                else {
+                    $("#warning_required_comment").addClass('hidden');
+                }
+            }, 0);
+        });
+
+    </script>
+    <script>
+        $(document).ready(function () {
+            setInterval(function () {
+                if ($("#weight").val() == "" || $("#weight").val() == null || $("#weight").val() == "0.00") {
+                    $("#warning_required_weight").removeClass('hidden');
+                }
+                else {
+                    $("#warning_required_weight").addClass('hidden');
+                }
+            }, 0);
+        });
+    </script>
+    <script>
+        $(document).ready(function () {
+            setInterval(function () {
+                if ($("#height").val() == "" || $("#height").val() == null || $("#height").val() == "0.00") {
+                    $("#warning_required_height").removeClass('hidden');
+                }
+                else {
+                    $("#warning_required_height").addClass('hidden');
+                }
+            }, 0);
+        });
+    </script>
+    <!-- local-storage-redirect -->
+    <script>
+        function backKey() {
+            localStorage.setItem("back_clinicalExam", Date.now());
+        }
+        function storageKey() {
+            localStorage.setItem("edit_clinicalExam", Date.now());
+        }
+
+
+
+        @* Hcare - 904 *@
+        function dateValidation() {
+            var fit_start_time = $("#effectiveDate").val();
+            if (Date.parse(fit_start_time) <= Date.parse(1900 - 01 - 01)) {
+
+                toastr.options.positionClass = 'toast-bottom-right';
+                toastr.options.timeOut = 4000;
+                toastr.error("Minimum date is 01 Jan 1900 ", "Please note:");
+                document.getElementById('effectiveDate').value = "dd MM yyyy";
+
+            }
+        }
+    </script>
+
+    <!--DateLimit-->  @*HCare-904*@
+    <script>
+        var dateControler = {
+            currentDate: null
+        }
+
+        $(document).on("change", ".dateLimit", function (event, ui) {
+            var now = new Date();
+            var selectedDate = new Date($(this).val());
+
+            if (selectedDate > now) {
+                $(this).val(dateControler.currentDate)
+            } else {
+                dateControler.currentDate = $(this).val();
+            }
+        });
+
+    </script>
+
+}
+
+
+

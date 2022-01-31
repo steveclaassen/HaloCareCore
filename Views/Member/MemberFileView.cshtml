@@ -1,0 +1,136 @@
+﻿@model HaloCareCore.Models.ViewModels.MemberBasicViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "MemberFileView";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+<comment>
+    <!--
+        03 December 2019 -- HCare-914(LINKED TO HCARE-134: Module 3 - HC Patient profile spec - Design (Related to HCare-881 SC))
+        Fixed view and added new icons for program selection in view
+
+        11 December 2019 -- HCare-926(LINKED TO HCARE-134: Centre the Disease management images based on Program)
+        Alignments of images in the event of one program only. This caters for HIV and Diabetes together and individually.
+    -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+</style>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<!--pageHeader-->
+<nav id="global-nav" class="nav">
+    <div class="pull-left title">
+        <h1 class="site-title_patientProfile">
+            <span><i class="fas fa-user-circle"></i>&emsp; Member profile</span>
+        </h1>
+    </div>
+    <div class="pull-right title">
+        <h1 class="site-title_userID pull-right">
+            <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+        </h1>
+        <h1 class="site-title_userID pull-right">
+            @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+            {
+                <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+            }
+        </h1>
+        <h1 class="site-waffleIcon pull-right">
+            <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+        </h1>
+    </div>
+</nav>
+
+<div class="dashboardContainer zero-padding">
+    <div class="patientDashboard_View">
+
+        <!--breadCrumbs-->
+        <ul class="breadcrumbs_patientDashboard">
+            <li style="font-size: 10px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+            <li><a href="#">Member profile</a></li>
+        </ul>
+
+        <!--Left navSlider -->
+        @Html.Partial("_navSlider_blank", new { })
+
+        <!--navCollection-->
+        <div class="navCollection_patientDashboard">
+            @Html.Partial("_navCollection")
+        </div>
+
+        <!--profileInformation-->
+        <div class="profileBar">
+            @Html.Action("_profileBar_MemberFile", "Member", new { DependentID = Context.Request.Query["DependentID"] })
+        </div>
+    </div>
+    <div class="profilebar-spacer-program"></div>
+
+    <div class="patientDashboard_container" style="margin-left: 7.5%!important">
+
+        <div class="menuIcons row">
+            <h4 class="programHeading">Select a program</h4>
+            <hr class="fancyruler">
+            <div class="col-md-12" style="margin-top: 8%; margin-bottom: 5%">
+                <div class="col-md-4"></div>
+
+                <!-- diabetes + hiv -->
+                @if (Model.diab && Model.hiv)
+                {
+                    if (Model.diab)
+                    {
+                        <div class="col-md-2 icon-container">
+                            <a href="@Url.Action("patientDashboard", "Member", new { DependentID = Model.dependantId, pro = Model.diabK })">
+                                <div id="diabetes-card">Diabetes</div>
+                            </a>
+                        </div>
+                    }
+                    if (Model.hiv)
+                    {
+                        <div class="col-md-2 icon-container">
+                            <a href="@Url.Action("patientDashboard", "Member", new { DependentID = Model.dependantId, pro = Model.hivK })">
+                                <div id="hiv-card">HIV</div>
+                            </a>
+                        </div>
+                    }
+                }
+                else if (Model.diab)
+                {
+                    <div class="col-md-1"></div>
+                    <div class="col-md-2 icon-container">
+                        <a href="@Url.Action("patientDashboard", "Member", new { DependentID = Model.dependantId, pro = Model.diabK })">
+                            <div id="diabetes-card">Diabetes</div>
+                        </a>
+                    </div>
+                    <div class="col-md-1"></div>
+                }
+                else if (Model.hiv)
+                {
+                    <div class="col-md-1"></div>
+                    <div class="col-md-2 icon-container">
+                        <a href="@Url.Action("patientDashboard", "Member", new { DependentID = Model.dependantId, pro = Model.hivK })">
+                            <div id="hiv-card">HIV</div>
+                        </a>
+                    </div>
+                    <div class="col-md-1"></div>
+                }
+                <div class="col-md-4"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="~/bundles/jqueryval"></script>
+    <script src="~/Scripts/select2.min.js"></script>
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+
+}
+

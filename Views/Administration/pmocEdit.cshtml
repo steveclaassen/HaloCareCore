@@ -1,0 +1,225 @@
+﻿@model HaloCareCore.Models.Patient.PreferredMethodOfContact
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Edit";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<comment>
+    <!--
+            01 August 2019 -- HCare-778 (Administration ~ Preferred method of contact (PMOC) - Master)'
+            Created new table for PMOC. Set the Administration controller up with the CRUD functionality. Added CSS to the views as well as a duplicate check on the code and description in the Create PMOC view.
+            The index view allows a user to view the active and inactive entries in order to control the PMOC from a settings perspective. I have added a search bar as well as a sort function that will allow the user to sort the columns.
+            The list of PMOC will also linked to the ContactInformation Add + Edit view as a dropdown list when creating and editing Contact + Address information.
+    -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .field-validation-error:before {
+        font-family: FontAwesome;
+        content: "\f06a\00a0";
+        animation: pulse 2s ease infinite;
+    }
+
+    .error-alert {
+        width: 100%;
+        margin: 0 auto;
+        background-color: rgba(217, 83, 79, 0.1);
+        padding: 10px;
+        border-left-color: #d9534f !important;
+        border: 1px solid transparent;
+        border-left-width: 5px;
+        border-radius: 3px;
+        margin: 0 auto;
+        font-family: 'Open Sans', sans-serif;
+        font-size: 12px;
+        margin: 0 0 5px 0;
+        margin-top: -10px;
+        margin-bottom: 20px;
+    }
+
+        .error-alert span {
+            color: #d9534f;
+            text-align: center;
+        }
+</style>
+<javascript>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+</javascript>
+
+<div class="fullScreen_container zero-padding">
+
+    <!--pageHeader-->
+    <nav id="global-nav" class="nav">
+        <div class="pull-left title">
+            <h1 class="site-title_patientProfile">
+                <span><i class="fab fa-jira"></i>&emsp; PMOC</span>
+            </h1>
+        </div>
+        <div class="pull-right title">
+            <h1 class="site-title_userID pull-right">
+                <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+            </h1>
+            <h1 class="site-title_userID pull-right">
+                @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                {
+                    <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                }
+            </h1>
+            <h1 class="site-waffleIcon pull-right">
+                <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+            </h1>
+        </div>
+    </nav>
+    <!--breadCrumbs-->
+    <ul class="breadcrumbs_fullScreens">
+        <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+        <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+        <li><a href="@Url.Action("pmocIndex", "Administration", new {})">PMOC</a></li>
+        <li><a href="#">@ViewBag.Title</a></li>
+    </ul>
+    <!--navCollection-->
+    <div class="navCollection_fullScreens">
+        @Html.Partial("_navCollection")
+    </div>
+    <div style="margin-bottom: 1%"></div>
+
+    <div class="row">
+        <h4 class="tableHeading">Edit</h4>
+        <hr class="fancyruler">
+
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+            <div class="hidden-fields">
+                @Html.HiddenFor(model => model.id)
+                @Html.HiddenFor(model => model.pmocCode)
+                <input type="hidden" name="code-validation" id="code-validation" />
+                <input type="hidden" name="description-validation" id="description-validation" />
+                <div class="col-md-12"><div id="duplicate-code-notice" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; Code already exists!</span></div></div></div>
+                <div class="col-md-12"><div id="duplicate-description-notice" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; Description already exists!</span></div></div></div>
+                <input type="hidden" name="error-code" id="error-code" value="@ViewBag.Code" />
+                <input type="hidden" name="error-description" id="error-description" value="@ViewBag.Description" />
+                <div class="col-md-12"><div id="error-duplicate-code" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; The ID with <b>Code:</b> @ViewBag.Code, already exists!</span></div></div></div>
+                <div class="col-md-12"><div id="error-duplicate-description" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; The Type with <b>Description:</b> @ViewBag.Description, already exists!</span></div></div></div>
+                <div class="col-md-12"><div id="error-duplicate" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; The combination, <b>Code:</b> @ViewBag.Code & <b>Description:</b> @ViewBag.Description, already exists!</span></div></div></div>
+            </div>
+            <br />
+            <br />
+            <div class="form-horizontal editForm">
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.pmocCode, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-8">
+                        @Html.EditorFor(model => model.pmocCode, new { htmlAttributes = new { @class = "form-control-new active-false", @disabled = "disabled" } })
+                        @Html.ValidationMessageFor(model => model.pmocCode, "", new { @class = "text-danger" })
+                    </div>
+                    <div class="col-md-2">
+                        <i class="fas fa-question-circle information-icon" data-toggle="tooltip" data-original-title="This field is has been disabled"></i>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.pmocDescription, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-8">
+                        @Html.EditorFor(model => model.pmocDescription, new { htmlAttributes = new { @class = "form-control-new", @placeholder = "example: Email", autocomplete = "off", @onblur = "CheckName();" } })
+                        @Html.ValidationMessageFor(model => model.pmocDescription, "", new { @class = "text-danger", @style = "font-size: 75%;margin-left: 2%" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.active, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        <div class="checkbox">
+                            @Html.EditorFor(model => model.active)
+                            @Html.ValidationMessageFor(model => model.active, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="fixed-btn">
+                    <input id="submit" type="submit" value="Submit" class="btn create-button" onclick="storageKey()" style="width: 15%" /><br />
+                    <input type="text" value="Back" class="btn reset-button go_back" onclick="backKey()" />
+                </div>
+
+            </div>
+        }
+    </div>
+</div>
+
+
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('[data-toggle="tooltip"]').tooltip({
+                placement: 'top'
+            });
+        });
+    </script>
+    <script>
+        function CheckName() {
+            var code = $('#pmocCode').val();
+            var name = $('#pmocDescription').val();
+            name = name.trim();
+            $("#description-validation").val("");
+            $("#duplicate-description-notice").addClass("hidden");
+            $('span[data-valmsg-for="pmocDescription"]').html('');
+
+            $.ajax({
+                url: '/Administration/PMOCNameCheck',
+                type: "POST",
+                dataType: "JSON",
+                data: { pmocDescription: name },
+                success: function (result) {
+                    var cod3 = result.pmocCode;
+                    var description = result.pmocDescription;
+                    if (cod3.toLowerCase() + '-' + description.toLowerCase() == code.toLowerCase() + '-' + name.toLowerCase()) { }
+                    if (description.toLowerCase() == name.toLowerCase() && cod3.toLowerCase() != code.toLowerCase()) {
+                        $("#duplicate-description-notice").removeClass("hidden");
+                        $('span[data-valmsg-for="pmocDescription"]').html('<span style="font-size: 12px"><i class="fas fa-exclamation-circle"></i> </span>Description already exists!');
+                        $("#description-validation").val(description);
+                    }
+                },
+                error: function (result) {
+                    $('span[data-valmsg-for="pmocDescription"]').html('');
+                    $("#duplicate-description-notice").addClass("hidden");
+                }
+            });
+        }
+        $("#submit").click(function () {
+            if ($("#description-validation").val().length > 0) {
+                $("#pmocDescription").focus();
+                return false;
+            }
+        });
+    </script>
+    <script>
+        function backKey() {
+            localStorage.setItem("back_pmoc", Date.now());
+        }
+        function storageKey() {
+            localStorage.setItem("edit_pmoc", Date.now());
+        }
+    </script>
+    <script>
+        $(document).ready(function () {
+            var c = $('#error-code').val();
+            var d = $('#error-description').val();
+            if (c.length > 0 && d.length > 0) {
+                $("#error-duplicate").removeClass("hidden");
+            }
+            else if (c.length > 0) {
+                $("#error-duplicate-code").removeClass("hidden");
+            }
+            else if (d.length > 0) {
+                $("#error-duplicate-description").removeClass("hidden");
+            }
+        });
+    </script>
+}

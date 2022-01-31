@@ -1,0 +1,273 @@
+﻿@model HaloCareCore.Models.coMorbidViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "DetailsComorbid";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<comment>
+    <!--
+        14 February 2019 -- HCare-607 (Halocare Bestmed Diabetes enrollment questionnaire)
+        Created to allow user to view details related to Questionnaire Medication history entry - BM
+
+        15 February 2019 -- HCare-607
+
+    -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .infoBox_coMorbidCondition {
+        max-width: 500px !important;
+        width: 400px;
+        max-height: 100px;
+        height: 30px;
+        margin-top: -0.5% !important;
+        margin-left: -0.5% !important;
+        /*padding: 6px 6px;*/
+        line-height: 1.428571429;
+        color: #003366;
+        border: 1px solid transparent !important;
+        -webkit-box-shadow: inset 0 1px 1px transparent !important;
+        box-shadow: 1px 1px 1px 0px transparent !important;
+    }
+
+    .customDropDown {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+    }
+
+    .pulse {
+        animation: pulse 2s ease infinite;
+    }
+</style>
+
+<!--pageHeader-->
+<nav id="global-nav" class="nav">
+    <div class="pull-left title">
+        <h1 class="site-title_patientProfile">
+            <span><i class="fa fa-notes-medical"></i></span>&emsp; CoMorbid conditions
+        </h1>
+    </div>
+    <div class="pull-right title">
+        <h1 class="site-title_userID pull-right">
+            <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+        </h1>
+        <h1 class="site-title_userID pull-right">
+            @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+            {
+                <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+            }
+        </h1>
+        <h1 class="site-waffleIcon pull-right">
+            <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+        </h1>
+    </div>
+</nav>
+
+<div class="dashboardContainer zero-padding">
+    <div class="patientDashboard_View">
+
+        <!--breadCrumbs-->
+        <ul class="breadcrumbs_patientDashboard">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+            <li><a class="go_back">Patient</a></li>
+            <li><a href="#">Co-Morbid</a></li>
+        </ul>
+
+        <!--Left navSlider -->
+        @Html.Partial("_navSlider_blank", new { })
+
+        <!--navCollection-->
+        <div class="navCollection_patientDashboard">
+            @Html.Partial("_navCollection")
+        </div>
+
+        <!--profileInformation-->
+        <div class="profileBar">
+            @Html.Action("_profileBar_edit", "Member", new { DependentID = Model.coMormidCondition.dependantID })
+        </div>
+    </div>
+
+    <div class="profilebar-spacer-assignment"></div>
+
+    <div class="patientDashboard_container">
+
+        <h4 class="summaryHeading">CoMorbid detail</h4>
+        <hr class="fancyruler">
+        <br />
+        <br />
+        <div style="margin-left: 2%">
+            <dl class="dl-horizontal editForm">
+                <dt>
+                    @Html.DisplayNameFor(model => model.coMormidCondition.effectiveDate)
+                </dt>
+
+                <dd>
+                    @if (Model.coMormidCondition.effectiveDate == null)
+                    {
+                        <p> - </p>
+                    }
+                    else
+                    {
+                        @Html.DisplayFor(model => model.coMormidCondition.effectiveDate)
+                    }
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.coMormidCondition.treatementEndDate)
+                </dt>
+
+                <dd>
+                    @if (Model.coMormidCondition.treatementEndDate == null)
+                    {
+                        <p> - </p>
+                    }
+                    else
+                    {
+                        @Html.DisplayFor(model => model.coMormidCondition.treatementEndDate)
+                    }
+                </dd>
+
+                <br />
+                <hr class="fancyruler" />
+
+                <dt>
+                    @Html.DisplayName("Condition")
+                </dt>
+
+                <dd>
+                    @if (Model.coMormidCondition.coMorbidId.ToString() == "99998")
+                    {
+                        <span class="pulse" style="color: rgba(204, 0, 0, 0.70)!important; font-size: 14px!important"><i class="fas fa-info-circle pulse" style="color: rgba(204, 0, 0, 0.70)!important"></i> Follow up required!</span>
+                    }
+                    else
+                    {
+                        @Html.DropDownList("coMorbids", null, Model.coMormidCondition.coMorbidId.ToString(), htmlAttributes: new { @class = "infoBox_coMorbidCondition customDropDown", @disabled = "disabled" })
+                    }
+                </dd>
+
+                <br />
+                <hr class="fancyruler" />
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.coMormidCondition.createdBy)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.coMormidCondition.createdBy)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.coMormidCondition.createdDate)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.coMormidCondition.createdDate)
+                </dd>
+
+                <br />
+                <hr class="fancyruler" />
+
+                @if (Model.coMormidCondition.modifiedBy != null)
+                {
+                    <dt>
+                        @Html.DisplayNameFor(model => model.coMormidCondition.modifiedBy)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.coMormidCondition.modifiedBy)
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.coMormidCondition.modifiedDate)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.coMormidCondition.modifiedDate)
+                    </dd>
+
+                    <br />
+                    <hr class="fancyruler" />
+
+                }
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.coMormidCondition.programType)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.coMormidCondition.programType)
+                </dd>
+
+                <br />
+                <hr class="fancyruler" />
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.coMormidCondition.generalComments)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.coMormidCondition.generalComments)
+                </dd>
+
+                <br />
+                <hr class="fancyruler" />
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.coMormidCondition.followUp)
+                </dt>
+
+                <dd class="detailsCheck">
+                    @if (Model.coMormidCondition.followUp == true)
+                    {
+                        <span style="font-size: 16px; color: forestgreen; text-align: center!important"><i class="far fa-check-circle"></i></span>
+                    }
+                    else
+                    {
+                        <span style="font-size: 16px; color: darkred; text-align: center!important"><i class="far fa-times-circle"></i></span>
+
+                    }
+                </dd>
+
+                <br />
+                <hr class="fancyruler" />
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.coMormidCondition.active)
+                </dt>
+
+                <dd class="detailsCheck">
+                    @if (Model.coMormidCondition.active == true)
+                    {
+                        <span style="font-size: 16px; color: forestgreen; text-align: center!important"><i class="far fa-check-circle"></i></span>
+                    }
+                    else
+                    {
+                        <span style="font-size: 16px; color: darkred; text-align: center!important"><i class="far fa-times-circle"></i></span>
+
+                    }
+                </dd>
+
+            </dl>
+            <div class="fixedBack" style="margin-left: 40%">
+                <input value="Back" class="btn buttonRound_formBack go_back" onclick="backKey()" style="width: 15%!important" />
+                <a href="@Url.Action("EditComorbid", "Member", new { id = Model.coMormidCondition.id, pro=Context.Request.Query["pro"]})" value="Edit" class="btn buttonRound_formEdit" style="width: 15%!important">Edit</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <script>
+        function backKey() {
+            localStorage.setItem("back_comorbid", Date.now());
+        }
+    </script>
+}

@@ -1,0 +1,934 @@
+﻿@model HaloCareCore.Models.ClinicalViewModel
+@using HaloCareCore.Extensions
+@using System.Globalization
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Patient clinical";
+    Layout = "~/Views/Shared/_LayoutMember.cshtml";
+}
+
+<comment>
+    <!--
+        14 February 2019 -- HCare-607 (Halocare Bestmed Diabetes enrollment questionnaire)
+        Added Diagnosis collapseable in order to Create, Edit and View diagnosis entries - BM
+
+        15 February 2109 -- HCare-607
+        * Added View function to ALL collapseables in the Patient Clinical/Patient History tab to allow the user to view the full details of the entry - BM
+        * Tested NEW Diabetes Questionnaire functions (Yes / No /Follow up / validations)
+
+        18 February 2109 -- HCare-607
+        * Tested Diabetes Questionnaire functions (Yes / No /Follow up / validations) on BOTH new and old Diabetes Questionnaire
+        * Updating frontend for comments fields to show X when 'None' is inserted as well as matching text alignment and changing NULL dates to "-" etc.
+
+        06 March 2019 -- HCare-607
+        Additions to the SR have been made, removing Disclaimer, spelling in the questionnaire and Patient History update. I have corrected and tested the patient history containers that poplulate
+        an attachment and follow up icon based on the questionnaire submit.
+
+        29 April 2019 -- HCare-711 (Patient Clinical (Patient pathology front end))
+        Arranged  and matched the columns for the patient pathology as per the SR HCare-711
+
+        02 May 2019 -- HCare-25 (Patient Clinical - Hospitalisation collapsable)
+        Frontend update made in order to not show follow up if Date is Null.
+
+        12 July 2019 -- HCare-753(Add amputation checkbox to front view)
+        Added Amputation check to the table on patient clinical/patient history/Amputation tab
+
+        26 September 2019 -- HCare-820(UI ~ Pathology table)
+        Corrected the display for eGFR as well as remove the zeros from the table in the patient clinical view.
+
+        25 November 2019 -- HCare-892(Inactivate medication entry from Patient history)
+        Added edit button to Medication entry which allows the user to update the Note, Comment and active status.
+
+        20 January 2020 -- HCare-851(LINKED TO HCARE-134: Module 3 - Pathology Display (Related to HCare-837 & HCare-834))
+        Pathology tab split based on program selection. This SR needed to include a different code for the tab layout as the previous code was preventing tabs within tabs as well as the redirect to the last tab. This has now been sorted.
+
+        03 February 2020 -- HCare-851(LINKED TO HCARE-134: Module 3 - Pathology Display (Related to HCare-837 & HCare-834))
+        Request to change the tables for the initial view of the pathology BACK to the vertical view in order to view the pathology field and effective date.
+
+        01 April 2020 -- HCare-896(General tab - Patient Clinical / patient history)
+        As per the SR - I have removed the program type from all the panels in the patient history section. This includes the general and program specific panels except Medication where it is required. 
+
+        01 April 2020 -- HCare-1009(Clinical rules - Patient Clinical > Summary)
+        Amended the Patient clinical Summary view to pull the clinical rules based on the table join. Needed to include the gtMessage and ltMessage as reference in the join as well as the programcode.
+        The user will test by trying to break the clinical rules which were created in the settings > clinical rules view and thereafter being able to view broken rules in the Patient Clinical > Summary view under the Clinical rules panel
+
+        01 April 2020 -- HCare-816(Pathology abnormal values display)
+        I am using the clinical rules table as well as the logic that has been setup for security and the clinical rules to compare the pathology data in each section, ie. General, Diabetes, HIV etc. to the rules table. If the value in the pathology result is greater or less than the
+        rule, the value will be highlighted in bold red in the pathology results tables.
+
+        02 April 2020 -- HCare-1007(Display dates in HaloCare (Hospitalisation)
+        Updated Model to add the column headings and the format the date in the hospitalisation view as per the SR logged.
+
+        25 April 2020 -- HCare-1025(Pathology history view error)
+        The error was being caused by the hivEliza field which is a string. The Pathology abnormal values display code was looking for a decimal value and because the word POSITIVE was placed into the hivEliza field, the view broke. I have removed the code for that field as well as abnGtt and normGtt which are also string fields.
+
+        08 May 2020 -- HCare-1022(Pathology history view error)
+        Updated the queries in repository to display the latest active value which is not NULL or empty or 0.00 and then to show all the active entries in the history.
+
+        14 May 2020 -- HCare-966(General Questionnaire: TB Screening question)
+        TB screening question has been added to the General Questionnaire. As per the discussion, this question needed to replace the older question of TB diagnosed leading into the date of screening and outcome with diagnosis date range.
+        The data is then pulled through to the Patient Clinical General tab as well as a column 'TB Screened' being exported to excel from advanced search.
+
+        27 May 2020 -- HCare-828(Patient Clinical Summary)
+        Remove spaces between headings on the summary page as per request.
+
+        01 June 2020 -- HCare-930 (Frail Care General Questionnaire)
+        Addition of Frail care questions added to the General questionnaire under the General/Other section. This information has also been added to the Patient Clinical / Patient History section under the "Other" panel.
+        The user will also have access to Add, Edit, View the additional information linked to the Frail care question via the Patient Clinical / Patient History section under the "Other" panel.
+
+        03 June 2020 -- HCare-1023(Clinical > Patient History > Clinical / Diabetes - HIV > Medicine)
+        As per the specification and SR - I have refactored the viewing requirements for the Medication panels in the Patient Clinical / Patient History section. In addition, the NEW History view has been added which follows the
+        requirement in the spec as well.
+
+        02 July 2020 -- HCare-1079(Pathology name changes)
+        Updated the headings in the pathology section as per requirement
+
+        16 July 2020 -- HCare-961(Check screen displays of these fields i.e. HDL/LDL etc.)
+        Changed patientClinical pathology section to read from the Model in order to control the display name from there.
+        Ran a search for each of the properties in the list to check the casing.
+
+        20 July 2020 -- HCare-897(Medication table / Script / Script History)
+        Removed item status from the tables as per the SR
+
+        14 August 2020 -- HCare-1136(PRJ-36 - Mental Health Disease: DOCTOR REFERRAL TAB)
+
+    -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    #plusSubmit {
+        position: relative;
+        z-index: 1;
+        left: -25px;
+        top: 1px;
+        color: #7B7B7B;
+        cursor: pointer;
+        width: 0;
+    }
+
+    .filterable {
+        margin-top: 15px;
+    }
+
+        .filterable .panel-heading .pull-right {
+            margin-top: -20px;
+        }
+
+        .filterable .filters input[disabled] {
+            background-color: transparent;
+            border: none;
+            cursor: auto;
+            box-shadow: none;
+            padding: 0;
+            height: auto;
+        }
+
+        .filterable .filters::-webkit-input-placeholder {
+            color: #ccc !important;
+        }
+
+        .filterable .filters::-moz-placeholder {
+            color: #ccc !important;
+        }
+
+        .filterable .filters:-ms-input-placeholder {
+            color: #ccc !important;
+        }
+
+    .reset:hover {
+        cursor: pointer;
+        background: -webkit-linear-gradient(#e80a89, #f15b2a);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        line-height: 25px;
+    }
+
+    .isDisabled {
+        color: currentColor;
+        cursor: no-drop !important;
+        opacity: 0.5;
+        text-decoration: none;
+    }
+</style>
+<javascript>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js"></script>
+    <script src="https://www.jqueryscript.net/demo/jQuery-Plugin-For-Sortable-Bootstrap-Tables-Bootstrap-Sortable/Scripts/bootstrap-sortable.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+</javascript>
+@*<div id="loadingscreen" class="">
+        <div class="container-loader">
+            <div></div><div></div><div></div><div></div>
+            <span class="loading-text">LOADING...</span>
+        </div>
+        <div id="loading" class="loading"></div>
+    </div>*@
+
+<!----------------------------------------------------------------------------- html-top-navigation-panel  ---------------------------------------------------------------------------->
+<nav id="global-nav" class="nav" style="z-index: 10000">
+    <div class="pull-left title">
+        <h1 class="site-title_patientProfile">
+            <span><i class="fas fa-file-medical-alt"></i>&emsp; Patient clinical</span>
+        </h1>
+    </div>
+    <div class="pull-right title">
+        <h1 class="site-title_userID pull-right">
+            <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+        </h1>
+        <h1 class="site-title_userID pull-right">
+            @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+            {
+                <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+            }
+        </h1>
+        <h1 class="site-waffleIcon pull-right">
+            <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+        </h1>
+    </div>
+</nav>
+
+<!-------------------------------------------------------------------------------------- html-body ------------------------------------------------------------------------------------>
+<div class="dashboardContainer zero-padding">
+    <div class="patientDashboard_View">
+        <!-- breadcrumbs -->
+        <ul class="breadcrumbs_patientDashboard">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+            <li><a href="@Url.Action("patientDashboard", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"]})">Patient</a></li>
+            <li><a href="#">@ViewBag.Title</a></li>
+        </ul>
+        <!-- navigation-collection -->
+        <div class="navCollection_patientDashboard">
+            @Html.Partial("_navCollection")
+        </div>
+        <!-- left-navigation-panel -->
+        @Html.Partial("_navSlider", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })
+        <!--profile-information-->
+        <div class="profileBar">
+            @Html.Action("_profileBar_edit", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })
+        </div>
+    </div>
+
+    <div class="profilebar-spacer"></div>
+
+    <div class="patientDashboard_container">
+        <h4 class="summaryHeading">Patient clinical</h4>
+        <hr class="patientProfile_Ruler" />
+        <div class="container-tab">
+            <div class="row">
+                <div class="hidden-fields">
+                    <input type="hidden" name="dependantID" id="dependantID" value="@TempData["dependantID"].ToString()" />
+                    <input type="hidden" name="program" id="program" value="@TempData["program"].ToString()" />
+                </div>
+                <div class="span12">
+                    <div class="container-tab">
+                        <!------------------------------------------------------------------------------------ tab-navigation ----------------------------------------------------------------------------------->
+                        <ul class="nav nav-pills nav-justified" role="tablist">
+                            <li role="presentation" class="tab-clinical active"><a class="subtab-label" href="@Url.Action("PatientClinical_Summary", "Member", new { DependentID = Model.DependentID, pro = Context.Request.Query["pro"] })">Summary</a></li>
+                            <li role="presentation" class="tab-clinical"><a class="subtab-label" href="@Url.Action("PatientClinical_Pathology", "Member", new { DependentID = Model.DependentID, pro = Context.Request.Query["pro"] })">Pathology</a></li>
+                            @*<li role="presentation" class="tab-clinical"><a class="subtab-label" href="@Url.Action("PatientClinical_Script", "Member", new { DependentID = Model.DependentID, pro = Context.Request.Query["pro"] })">Script</a></li>*@
+                            <li role="presentation" class="tab-clinical"><a class="subtab-label" href="@Url.Action("PatientClinical_PatientHistory", "Member", new { DependentID = Model.DependentID, pro = Context.Request.Query["pro"] })">Patient history</a></li>
+                            @*<li role="presentation" class="tab-clinical"><a class="subtab-label" href="@Url.Action("PatientClinical_ScriptHistory", "Member", new { DependentID = Model.DependentID, pro = Context.Request.Query["pro"] })">Script history</a></li>*@
+                        </ul>
+                        <!-------------------------------------------------------------------------------------- tab-panels ------------------------------------------------------------------------------------->
+                        <div class="tab-content">
+                            <!---------------------------------------------------------------------------------- tab-summary ------------------------------------------------------------------------------------>
+                            <div role="tabpanel" class="tab-pane active" id="summary">
+                                <div class="row">
+                                    <br />
+                                    <!------ pathology details ------>
+                                    <div class="clinical-summary">
+                                        <h4 class="subHeading">Pathology details</h4>
+                                        <hr class="patientProfile_Ruler" />
+                                        <div class="row">
+                                            <table class="table patient-clinical-table" id="pathology_details" style="margin-bottom: 1.5%!important">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 25%">
+                                                            @Html.DisplayName("Next pathology due")
+                                                        </th>
+                                                        <th style="width: 25%">
+                                                            @Html.DisplayName("Last pathology")
+                                                        </th>
+                                                        <th onclick="sortTable(0)" style="width: 25%">
+                                                            @Html.DisplayName("Outstanding") <i class="fa fa-fw fa-sort"></i>
+                                                        </th>
+                                                        <th onclick="sortTable(0)" style="width: 25%; text-align: center!important">
+                                                            @Html.DisplayName("Pathology due")
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td class="patient-clinical-pathology-details">
+                                                            @Html.DisplayFor(model => model.nextPathologyDate)
+                                                        </td>
+                                                        <td class="patient-clinical-pathology-details">
+                                                            @Html.DisplayFor(model => model.lastPathologyDate)
+                                                        </td>
+                                                        <td class="patient-clinical-pathology-details">
+                                                            @Html.DisplayFor(model => model.pathologyBehind) days
+                                                        </td>
+                                                        <td class="patient-clinical-check">
+                                                            @if (Model.isPathologyDue)
+                                                            {
+                                                                <img src="~/Content/Images/Navigation/5. Reports/reportCheck.png" />
+                                                            }
+                                                            else
+                                                            {
+                                                                <img src="~/Content/Images/Navigation/5. Reports/reportCheck_x.png" />
+                                                            }
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <!------ doctor-referral ------>
+                                    <div class="clinical-summary">
+                                        <h4 class="subHeading">
+                                            Referrals
+                                            <a class="create-new" href="@Url.Action("DoctorReferral_Create", "Member", new { DependentID = Model.DependentID, pro=Context.Request.Query["pro"] })" style="font-size: 14px">Create new <span><i class="fa fa-plus-circle" style="font-size: 12px"></i></span></a>
+                                        </h4>
+                                        <hr class="patientProfile_Ruler" />
+                                        <div class="row">
+                                            <table class="table patient-clinical-table sortable" id="doctor-referral" style="margin-bottom: 1.5%!important">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 15%; text-align: center!important">@Html.DisplayNameFor(model => model.DoctorReferrals[0].CreatedDate) <i class="fa fa-fw fa-sort"></i></th>
+                                                        <th style="width: 15%; text-align: center!important">@Html.DisplayNameFor(model => model.DoctorReferrals[0].ReferralDate) <i class="fa fa-fw fa-sort"></i></th>
+                                                        <th style="width: 45%">@Html.DisplayNameFor(model => model.DoctorReferrals[0].Comment) <i class="fa fa-fw fa-sort"></i></th>
+                                                        <th style="width: 10%; text-align: center!important">@Html.DisplayNameFor(model => model.DoctorReferrals[0].Program) <i class="fa fa-fw fa-sort"></i></th>
+                                                        <th style="width: 10%; text-align: center!important">@Html.DisplayName("Action")</th>
+                                                    </tr>
+                                                </thead>
+                                                @if (Model.DoctorReferrals.Count() == 0)
+                                                {
+                                                    <tr><td colspan="5" style="text-align: center!important; color: rgba(128, 128, 128, 0.50)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="color: rgba(128, 128, 128, 0.50)"></i></span> no records found</td></tr>
+                                                }
+                                                else
+                                                {
+                                                    foreach (var item in Model.DoctorReferrals)
+                                                    {
+                                                        <tbody>
+
+                                                            @if (item.FollowUp == true)
+                                                            {
+                                                                <tr>
+                                                                    <td colspan="4" style="text-align: center!important; color: rgba(204, 0, 0, 0.70)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="font-size: 18px; color: rgba(204, 0, 0, 0.70)!important"></i></span> Follow up required!</td>
+                                                                    <td class="text-center">
+                                                                        <input type="submit" class="link-button" value="View" onclick="location.href='@Url.Action("DoctorReferral_Details", "Member", new { id = item.Id, pro = Context.Request.Query["pro"] })'" /> /
+                                                                        <input type="submit" class="link-button" value="Edit" onclick="location.href='@Url.Action("DoctorReferral_Edit", "Member", new { id = item.Id, DependentID= item.DependantID, pro = Context.Request.Query["pro"] })'" />
+                                                                    </td>
+                                                                </tr>
+                                                            }
+                                                            else
+                                                            {
+                                                                <tr>
+                                                                    <td class="text-center" data-dateformat="DD-MM-YYYY">@Html.DisplayFor(modelItem => item.CreatedDate)</td>
+                                                                    <td class="text-center" data-dateformat="DD-MM-YYYY">@Html.DisplayFor(modelItem => item.ReferralDate)</td>
+                                                                    <td>@Html.DisplayFor(modelItem => item.Comment)</td>
+                                                                    <td class="text-center">@Html.DisplayFor(modelItem => item.Program)</td>
+                                                                    <td class="text-center">
+                                                                        <input type="submit" class="link-button" value="View" onclick="location.href='@Url.Action("DoctorReferral_Details", "Member", new { id = item.Id, pro = Context.Request.Query["pro"] })'" /> /
+                                                                        <input type="submit" class="link-button" value="Edit" onclick="location.href='@Url.Action("DoctorReferral_Edit", "Member", new { id = item.Id,DependentID= item.DependantID, pro = Context.Request.Query["pro"] })'" />
+                                                                    </td>
+                                                                </tr>
+                                                            }
+                                                        </tbody>
+                                                    }
+                                                }
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <!------ clinical rules ------>
+                                    <div class="clinical-summary">
+                                        <h4 class="subHeading">Clinical rules</h4>
+                                        <hr class="patientProfile_Ruler" />
+                                        <div class="row">
+                                            <table class="table patient-clinical-table sortable" id="clinical_rules" style="margin-bottom: 1.5%!important">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 10%">@Html.DisplayNameFor(model => model.rulesBroken[0].effectiveDate) <i class="fa fa-fw fa-sort"></i></th>
+                                                        <th style="width: 20%">@Html.DisplayNameFor(model => model.rulesBroken[0].ruleName) <i class="fa fa-fw fa-sort"></i></th>
+                                                        <th style="width: 20%">@Html.DisplayNameFor(model => model.rulesBroken[0].RuleBroken) <i class="fa fa-fw fa-sort"></i></th>
+                                                        <th>@Html.DisplayNameFor(model => model.rulesBroken[0].RuleInstructions)</th>
+                                                    </tr>
+                                                </thead>
+                                                @if (Model.BrokenRules.Count() == 0)
+                                                {
+                                                    <tr><td colspan="4" style="text-align: center!important; color: rgba(128, 128, 128, 0.50)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="color: rgba(128, 128, 128, 0.50)"></i></span> no records found</td></tr>
+                                                }
+                                                else
+                                                {
+                                                    foreach (var item in Model.BrokenRules)
+                                                    {
+                                                        <tbody>
+                                                            <tr>
+                                                                <td data-dateformat="DD-MM-YYYY">@Html.DisplayFor(modelItem => item.CreatedDate)</td>
+                                                                <td>@Html.DisplayFor(modelItem => item.RuleName)</td>
+                                                                <td>@Html.DisplayFor(modelItem => item.RuleBroken)</td>
+                                                                <td>@Html.DisplayFor(modelItem => item.Instruction)</td>
+                                                            </tr>
+                                                        </tbody>
+                                                    }
+                                                }
+
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <!------ risk rating ------>
+                                    <div class="clinical-summary">
+                                        <div class="row">
+                                            <h4 class="subHeading">
+                                                Risk rating
+                                                @if (User.HasRole("4. Advisor") || (User.HasRole("5. Super user")))
+                                                {
+                                                    <a class="create-new" href="@Url.Action("CreateRiskRating", "Member", new { DependentID = Model.DependentID, pro=Context.Request.Query["pro"] })" style="font-size: 14px">Create new <span><i class="fa fa-plus-circle" style="font-size: 12px"></i></span></a>
+                                                }
+                                            </h4>
+                                            <hr class="patientProfile_Ruler" />
+                                        </div>
+                                        <div class="row">
+                                            <table class="table patient-clinical-table sortable" id="risk_rating" style="margin-bottom: 1.5%!important">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 15%">@Html.DisplayNameFor(model => model.RiskRating[0].effectiveDate) <i class="fa fa-fw fa-sort"></i></th>
+                                                        <th style="width: 20%">@Html.DisplayNameFor(model => model.RiskRating[0].RiskId) <i class="fa fa-fw fa-sort"></i></th>
+                                                        <th onclick="sortTable(0)" style="width: 45%">@Html.DisplayNameFor(model => model.RiskRating[0].reason)</th>
+                                                        <th style="width: 10%">Action</th>
+                                                    </tr>
+                                                </thead>
+                                                @if (Model.RiskRating.Count() == 0)
+                                                {
+                                                    <tr><td colspan="3" style="text-align: center!important; color: rgba(128, 128, 128, 0.50)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="color: rgba(128, 128, 128, 0.50)"></i></span> no records found</td></tr>
+                                                }
+                                                else
+                                                {
+                                                    foreach (var item in Model.RiskRating)
+                                                    {
+                                                        <tbody>
+                                                            <tr>
+                                                                <td data-dateformat="DD-MM-YYYY">@Html.DisplayFor(modelItem => item.effectiveDate)</td>
+                                                                <td>@Html.DisplayFor(modelItem => item.RiskId)</td>
+                                                                <td data-value="0">
+                                                                    @Html.DisplayFor(modelItem => item.reason)
+                                                                    @if (item.modifiedDate != null)
+                                                                    {
+                                                                        <div class="edit-badge">edited</div>
+                                                                    }
+                                                                </td>
+
+                                                                @if (User.Identity.IsAuthenticated)
+                                                                {
+                                                                    if (User.HasRole("6. Global user") || (User.HasRole("5. Super user")))
+                                                                    {
+                                                                        <td class="text-center">
+                                                                            <input type="submit" class="link-button" value="View" onclick="location.href='@Url.Action("RiskRating_Details", "Member", new { id = item.id, pro = Context.Request.Query["pro"] })'" /> /
+                                                                            <input type="submit" class="link-button" value="Edit" onclick="location.href='@Url.Action("RiskRating_Edit", "Member", new { id = item.id, pro = Context.Request.Query["pro"] })'" />
+                                                                        </td>
+                                                                    }
+                                                                    else if (User.HasRole("1. Consultant") || (User.HasRole("2. Case manager")) || (User.HasRole("3. Specialist")) || (User.HasRole("4. Advisor")))
+                                                                    {
+                                                                        <td class="text-center">
+                                                                            <input type="submit" class="link-button" value="View" onclick="location.href='@Url.Action("RiskRating_Details", "Member", new { id = item.id, pro = Context.Request.Query["pro"] })'" />
+                                                                        </td>
+                                                                    }
+                                                                }
+                                                            </tr>
+                                                        </tbody>
+                                                    }
+                                                }
+
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <!-- collapse - hidden 10 January 2020-->
+                                    <div class="row col-md-12 hidden">
+                                        <div class="showCollapse">
+                                            <a data-toggle="collapse" href="#clinicalCollapse" aria-expanded="false" input type="button" class="btn buttonRound_formCreate">Full Details</a>
+                                        </div>
+
+                                        <div class="collapse" id="clinicalCollapse">
+                                            <div style="margin-bottom: 5%!important"></div>
+                                            <div class="contentBlock_fullDetailsPC">
+                                                <div class="row" style="text-align:center">
+
+                                                    <h4 style="color: #003366; margin-top: 1%; margin-left: 2%; margin-bottom: 1%!important; font-size: 18px; font-family: 'Century Gothic'; font-weight: 300; font-style: normal;">Patient Treatment Details</h4>
+                                                    <hr class="fancyruler">
+                                                    <h4 style="color: #003366; margin-top: 0%; margin-left: 2%; margin-bottom: 0%!important; font-size: 16px; font-family: 'Century Gothic'; font-weight: 300; font-style: normal;">Last Order Details</h4>
+                                                    <hr class="fancyruler">
+                                                </div>
+                                                <br />
+
+                                                <!--Full Details / Last Order Details-->
+
+                                                <div class="row col-md-12">
+                                                    <div class="col-md-3">
+                                                        Has Claimed Before
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        unavailable
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        Date Due for Reorder
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        unavailable
+                                                    </div>
+                                                </div>
+
+                                                <div class="row col-md-12">
+                                                    <div class="col-md-3">
+                                                        Last Claim Date
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        unavailable
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        Has Open Assignment
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        yes/no
+                                                    </div>
+                                                </div>
+
+                                                <div class="row col-md-12">
+                                                    <div class="col-md-3">
+                                                        Due for Reorder
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        unavailable
+                                                    </div>
+                                                </div>
+                                                <div class="row"></div>
+                                                <br />
+                                                <hr class="fancyruler">
+
+                                                <!--Full Details / Script Details-->
+                                                <div style="text-align:center">
+                                                    <h4 style="color: #003366; margin-top: 0%; margin-left: 2%; margin-bottom: 0%!important; font-size: 16px; font-family: 'Century Gothic'; font-weight: 300; font-style: normal;">Script Details</h4>
+                                                    <hr class="fancyruler">
+                                                </div>
+                                                <br />
+
+                                                <div class="row col-md-12">
+                                                    <div class="col-md-3">
+                                                        Patient has a script
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        @Html.DisplayFor(model => model.hasScript)
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        Patient script outstanding
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        @Html.DisplayFor(model => model.requiresNewScript)
+                                                    </div>
+                                                </div>
+
+                                                <div class="row col-md-12">
+                                                    <div class="col-md-3">
+                                                        Patient last script effective date
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        @Html.DisplayFor(model => model.scriptEffectiveDate)
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        Patient effective script date time created
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        @Html.DisplayFor(model => model.scriptEffectiveDate)
+                                                    </div>
+                                                </div>
+
+                                                <div class="row col-md-12">
+                                                    <div class="col-md-3">
+                                                        Patient effective script repeats
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        @Html.DisplayFor(model => model.scriptRepeats)
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        Patient effective script created by
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        @Html.DisplayFor(model => model.scriptCreatedBy)
+                                                    </div>
+                                                </div>
+
+                                                <div class="row col-md-12">
+                                                    <div class="col-md-3">
+                                                        Number of orders on current script
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        unavailable
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        Script extension allowed
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        unavailable
+                                                    </div>
+                                                </div>
+
+                                                <div class="row col-md-12">
+                                                    <div class="col-md-3">
+                                                        Patient estimated expiry date
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        @Html.DisplayFor(model => model.scriptExpiry)
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        Script warning SMS
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        yes/no
+                                                    </div>
+                                                </div>
+
+                                                <div class="row col-md-12">
+                                                    <div class="col-md-3 ">
+                                                        Patient estimated expiry date
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        @Html.DisplayFor(model => model.pathologyBehind)
+                                                    </div>
+                                                    <div class="col-md-3 ">
+                                                        Script overdue SMS
+                                                    </div>
+                                                    <div class="col-md-3 ">
+                                                        yes/no
+                                                    </div>
+                                                </div>
+                                                <div class="row"></div>
+                                                <br />
+                                                <hr class="fancyruler">
+
+
+                                                <!--Full Details / Pathology Details-->
+                                                <div class="row" style="text-align:center">
+                                                    <h4 style="color: #003366; margin-top: 0%; margin-left: 2%; margin-bottom: 0%!important; font-size: 16px; font-family: 'Century Gothic'; font-weight: 300; font-style: normal;">Pathology Details</h4>
+                                                    <hr class="fancyruler">
+                                                </div>
+
+                                                <br />
+                                                <div class="row col-md-12">
+                                                    <div class="col-md-3">
+                                                        Patient Has A Pathology
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        @Html.DisplayFor(model => model.hasPathology)
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        Patient pathology due date
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        @Html.DisplayFor(model => model.nextPathologyDate)
+                                                    </div>
+                                                </div>
+
+                                                <div class="row col-md-12">
+                                                    <div class="col-md-3">
+                                                        Patient Last Pathology Effective Date
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        @Html.DisplayFor(model => model.lastPathologyDate)
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        Patient requires warning SMS
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        unavailable
+                                                    </div>
+                                                </div>
+
+                                                <div class="row col-md-12">
+                                                    <div class="col-md-3">
+                                                        Patient Requires Pathology
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        @Html.DisplayFor(model => model.pathologyBehind)
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        Patient requires SMS
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        unavailable
+                                                    </div>
+
+                                                </div>
+                                                <br />
+                                                <br />
+                                                <br />
+                                                <br />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!------ DSM5 Scoring ------>
+                                    @if (Model.programcode == "MNTLH")
+                                    {
+                                        <div class="clinical-summary">
+                                            <div class="row">
+                                                <h4 class="subHeading">
+                                                    DSM5 Scoring
+                                                </h4>
+                                                <hr class="patientProfile_Ruler" />
+                                            </div>
+                                            <div class="row">
+                                                <table class="table patient-clinical-table sortable" id="dsm5-score" style="margin-bottom: 1.5%!important">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width: 15%">@Html.DisplayNameFor(model => model.DSM5Scores[0].EffectiveDate) <i class="fa fa-fw fa-sort"></i></th>
+                                                            <th style="width: 20%">@Html.DisplayNameFor(model => model.DSM5Scores[0].Score) <i class="fa fa-fw fa-sort"></i></th>
+                                                            <th onclick="sortTable(0)" style="width: 45%">@Html.DisplayNameFor(model => model.DSM5Scores[0].Reason)</th>
+                                                            <th style="width: 10%">Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    @if (Model.DSM5Scores.Count() == 0)
+                                                    {
+                                                        <tr><td colspan="3" style="text-align: center!important; color: rgba(128, 128, 128, 0.50)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="color: rgba(128, 128, 128, 0.50)"></i></span> no records found</td></tr>
+                                                    }
+                                                    else
+                                                    {
+                                                        foreach (var item in Model.DSM5Scores)
+                                                        {
+                                                            <tbody>
+                                                                <tr>
+                                                                    <td data-dateformat="DD-MM-YYYY">@Html.DisplayFor(modelItem => item.EffectiveDate)</td>
+                                                                    <td>@Html.DisplayFor(modelItem => item.Score)</td>
+                                                                    <td data-value="0">
+                                                                        @Html.DisplayFor(modelItem => item.Reason)
+                                                                        @if (item.ModifiedDate != null)
+                                                                        {
+                                                                            <div class="edit-badge">edited</div>
+                                                                        }
+                                                                    </td>
+                                                                    <td class="text-center">
+                                                                        <input type="submit" class="link-button" value="View" onclick="location.href='@Url.Action("MH_DSM5Score_Details", "Member", new { id = item.Id, pro = Context.Request.Query["pro"] })'" />
+                                                                    </td>
+                                                                </tr>
+                                                            </tbody>
+                                                        }
+                                                    }
+                                                </table>
+                                            </div>
+                                        </div>
+                                    }
+                                    <!------ HIV Staging ------>
+                                    @if (Model.programcode == "HIVPR")
+                                    {
+                                        <div class="clinical-summary">
+                                            <div class="row">
+                                                <h4 class="subHeading">
+                                                    HIV stage
+                                                    @if (User.HasRole("4. Advisor") || (User.HasRole("5. Super user")))
+                                                    {
+                                                        <a class="create-new" href="@Url.Action("CreateHIVstaging", "Member", new { DependentID = Model.DependentID, pro = Context.Request.Query["pro"] })" style="font-size: 14px">Create new <span><i class="fa fa-plus-circle" style="font-size: 12px"></i></span></a>
+                                                    }
+                                                </h4>
+                                                <hr class="patientProfile_Ruler" />
+                                            </div>
+                                            <div class="row">
+                                                <table class="table patient-clinical-table sortable" id="risk_rating" style="margin-bottom: 1.5%!important">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width: 15%">
+                                                                @Html.DisplayName("Effective Date") <i class="fa fa-fw fa-sort"></i>
+                                                            </th>
+                                                            <th style="width: 30%">
+                                                                @Html.DisplayName("HIV staging") <i class="fa fa-fw fa-sort"></i>
+                                                            </th>
+                                                            <th onclick="sortTable(0)" style="width: 45%">
+                                                                @Html.DisplayName("Reason")
+                                                            </th>
+                                                            <th onclick="sortTable(0)" style="width: 45%">
+                                                                @Html.DisplayName("Action")
+                                                            </th>
+                                                        </tr>
+                                                    </thead>
+                                                    @if (Model.patientStagingHistories.Count() == 0)
+                                                    {
+                                                        <tr><td colspan="4" style="text-align: center!important; color: rgba(128, 128, 128, 0.50)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="color: rgba(128, 128, 128, 0.50)"></i></span> no records found</td></tr>
+                                                    }
+                                                    else
+                                                    {
+                                                        foreach (var item in Model.patientStagingHistories)
+                                                        {
+                                                            <tbody>
+                                                                <tr>
+                                                                    <td data-dateformat="DD-MM-YYYY">
+                                                                        @string.Format("{0:dd-MM-yyyy}", Convert.ToDateTime(Html.DisplayFor(modelItem => item.effectiveDate).ToString()))
+
+                                                                        @*@Html.DisplayFor(modelItem => item.effectiveDate.ToString("dd-MM-yyyy"))*@
+                                                                    </td>
+                                                                    <td>
+                                                                        @Html.DisplayFor(modelItem => item.HivStaging)
+                                                                    </td>
+                                                                    <td data-value="0">
+                                                                        @Html.DisplayFor(modelItem => item.Reason)
+                                                                    </td>
+                                                                    @if (User.HasRole("4. Advisor") || (User.HasRole("5. Super user")))
+                                                                    {
+
+
+                                                                        if (item.CreatedBy.ToString() != "Rating App")
+                                                                        {
+                                                                            <td class="text-center">
+                                                                                <input type="submit" class="link-button" value="View" onclick="location.href='@Url.Action("HIVstagingDetails", "Member", new { id= item.id,stagingIdFK = 0, pro = Context.Request.Query["pro"] })'" />/
+                                                                                <input type="submit" class="link-button" value="Edit" onclick="location.href='@Url.Action("HIVstagingEdit", "Member", new { id= item.id , stagingIdFK = 0,pro = Context.Request.Query["pro"] })'" />
+                                                                            </td>
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            <td class="text-center">
+                                                                                <input type="submit" class="link-button" value="View" onclick="location.href='@Url.Action("HIVstagingDetails", "Member", new {id = 0,stagingIdFK = item.StagingFk, pro = Context.Request.Query["pro"] })'" />
+                                                                            </td>
+                                                                        }
+
+
+                                                                    }
+                                                                    else if (!User.HasRole("4. Advisor") || (!User.HasRole("5. Super user")))
+                                                                    {
+                                                                        if (item.CreatedBy.ToString() != "Rating App")
+                                                                        {
+                                                                            <td class="text-center">
+                                                                                <input type="submit" class="link-button" value="View" onclick="location.href='@Url.Action("HIVstagingDetails", "Member", new {id= item.id,stagingIdFK = 0, DependentID= item.dependentID, pro = Context.Request.Query["pro"] })'" />
+                                                                            </td>
+
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            <td class="text-center">
+                                                                                <input type="submit" class="link-button" value="View" onclick="location.href='@Url.Action("HIVstagingDetails", "Member", new {id = 0,stagingIdFK = item.StagingFk, DependentID= item.dependentID, pro = Context.Request.Query["pro"] })'" />
+                                                                            </td>
+
+                                                                        }
+
+                                                                    }
+
+                                                                </tr>
+                                                            </tbody>
+                                                        }
+                                                    }
+
+                                                </table>
+                                            </div>
+                                        </div>
+                                    }
+                                    <!------ Hba1c Range HCare-1241------>
+                                    @if (Model.programcode == "DIABD")
+                                    {
+                                        <div class="clinical-summary">
+                                            <div class="row">
+                                                <h4 class="subHeading">
+                                                    HbA1c Outcomes
+                                                    <a class="create-new" href="@Url.Action("Hba1cHistory", "Member", new { DependentID = Model.DependentID, pro=Context.Request.Query["pro"] })" style="font-size: 14px">History<span><i class="fa" style="font-size: 12px"></i></span></a>
+                                                </h4>
+                                                <hr class="patientProfile_Ruler" />
+                                            </div>
+                                            <div class="row">
+                                                <table class="table patient-clinical-table sortable" id="risk_rating" style="margin-bottom: 1.5%!important">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width: 15%">
+                                                                @Html.DisplayName("Date") <i class="fa fa-fw fa-sort"></i>
+                                                            </th>
+                                                            <th style="width: 30%">
+                                                                @Html.DisplayName("Patient target outcome") <i class="fa fa-fw fa-sort"></i>
+                                                            </th>
+                                                        </tr>
+                                                    </thead>
+                                                    @if (Model.RangeHistory.Count() == 0)
+                                                    {
+                                                        <tr><td colspan="4" style="text-align: center!important; color: rgba(128, 128, 128, 0.50)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="color: rgba(128, 128, 128, 0.50)"></i></span> no records found</td></tr>
+                                                    }
+                                                    else
+                                                    {
+                                                        foreach (var item in Model.RangeHistory)
+                                                        {
+                                                            <tbody>
+                                                                <tr>
+                                                                    <td data-dateformat="DD-MM-YYYY">
+                                                                        @Html.DisplayFor(modelItem => item.effectiveDate)
+                                                                    </td>
+                                                                    <td>
+                                                                        @Html.DisplayFor(modelItem => item.targetOutcome)
+                                                                    </td>
+                                                                </tr>
+                                                            </tbody>
+                                                        }
+                                                    }
+
+                                                </table>
+                                            </div>
+                                        </div>
+                                    }
+
+                                </div>
+                                <br />
+                                <br />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+<script src="js/jquery.tablesorter.min.js"></script>
+
+
+@section scripts{
+    <script src="~/bundles/jqueryval"></script>
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <!-- loading-screen -->
+    @*<script>
+            $(window).on('load', function () {
+                $("#loadingscreen").addClass("hidden");
+
+            });
+        </script>*@
+    <!-- collapsible -->
+    <script>
+        $(document).on('click', '.panel-heading span.clickable', function (e) {
+            var $this = $(this);
+            if (!$this.hasClass('panel-collapsed')) {
+                $this.parents('.panel').find('.panel-body').slideUp();
+                $this.addClass('panel-collapsed');
+                $this.find('i').removeClass('fa-caret-up').addClass('fa-caret-down');
+            } else {
+                $this.parents('.panel').find('.panel-body').slideDown();
+                $this.removeClass('panel-collapsed');
+                $this.find('i').removeClass('fa-caret-down').addClass('fa-caret-up');
+            }
+        });
+        $(document).on('click', '.panel div.clickable', function (e) {
+            var $this = $(this);
+            if (!$this.hasClass('panel-collapsed')) {
+                $this.parents('.panel').find('.panel-body').slideUp();
+                $this.addClass('panel-collapsed');
+                $this.find('i').removeClass('fa-caret-up').addClass('fa-caret-down');
+            } else {
+                $this.parents('.panel').find('.panel-body').slideDown();
+                $this.removeClass('panel-collapsed');
+                $this.find('i').removeClass('fa-caret-down').addClass('fa-caret-up');
+            }
+        });
+        $(document).ready(function () {
+            $('.panel-heading span.clickable').click();
+            $('.panel div.clickable').click();
+        });
+    </script>
+
+
+}
+
+

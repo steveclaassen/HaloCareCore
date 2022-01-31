@@ -1,0 +1,93 @@
+﻿
+@{
+    ViewBag.Title = "diabetesDashboard";
+    Layout = "~/Views/Shared/_LayoutReport_Menu.cshtml";
+}
+
+
+
+<style>
+    .indexnav {
+        margin-top: 100px;
+    }
+
+    body {
+        background-image: url('../../Content/Images/Backgrounds/homePage/homePage_one.png');
+        background-size: 100%;
+    }
+</style>
+
+
+<div class="topBar_reports">
+    <h2>Report Management</h2>
+    <img src="~/Content/Images/memberProfile/topBar Icons/Reports_shadow.png" style="margin-top: 0.5%" />
+</div>
+
+<br />
+<br />
+<br />
+<br />
+
+
+<!--Navigation Icons-->
+
+<h2 style="color: #003366; font-size: 250%; text-align: center; margin-bottom: 10%"><i><span style="color: #0081b3">Report Management</span></i><br /> <span style="font-family: 'Antro Vectra'; font-size: 80%; padding-left: 10em">Diabetes</span></h2>
+
+<div class="container indexnav">
+    <div class="row">
+        <div class="col-md-12">
+
+            <!--Client-->
+            <div class="col-md-3">
+                <a href="@Url.Action("diabetesClientDashboard", "ReportManagement", null)">
+                    <img src="~/Content/Images/Navigation/5. Reports/patientList.png" style="width: 25%; margin-top: 14%; margin-bottom: 5%" />
+                    <div class="col-xs-12 homenavbtns">
+                        <h8>Client <span>Dashboard</span></h8>
+                    </div>
+                </a>
+            </div>
+
+            <!--boardPack-->
+            <div class="col-md-3">
+                <a href="@Url.Action("#", "ReportManagement", null)">
+                    <img src="~/Content/Images/Navigation/5. Reports/boardPacks.png" style="width: 26%; margin-top: 14%; margin-bottom: 5%" />
+                    <div class="col-xs-12 homenavbtns">
+                        <h8>Board <span>Dashboard</span></h8>
+                    </div>
+                </a>
+            </div>
+
+            <!--Production-->
+
+            <div class="col-md-3">
+                <a href="@Url.Action("#", "ReportManagement", null)">
+                    <img src="~/Content/Images/Navigation/5. Reports/OperationsSummary.png" style="width: 16%; margin-top: 16%; margin-bottom: 5.5%" />
+                    <div class="col-xs-12 homenavbtns">
+                        <h8>Production <span>Dashboard</span></h8>
+                    </div>
+                </a>
+            </div>
+
+            <!--Analytics-->
+
+            <div class="col-md-3">
+                <a href="@Url.Action("diabetesReportAnalytics", "ReportManagement", null)">
+                    <img src="~/Content/Images/Navigation/5. Reports/Analytics.png" style="width: 25%; margin-top: 17.8%; margin-bottom: 6.5%" />
+                    <div class="col-xs-12 homenavbtns">
+                        <h8>Analytics <span>Dashboard</span></h8>
+                    </div>
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<footer class="backButton_Navigation" style="position: fixed; bottom: 1.5%; left: 50px">
+    @Html.ActionLink("Back", "diseaseManagement", "ReportManagement")
+</footer>
+
+<footer>
+    <img src="~/Content/Images/Navigation/5. Reports/diabetesX.png" style="position:fixed; bottom:3.5%; right: 0; left: 0; margin-left: 96%; width: 2%">
+</footer>

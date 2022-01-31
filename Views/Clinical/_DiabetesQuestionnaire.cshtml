@@ -322,7 +322,7 @@
                             </tr>
                             <tr>
                                 <td>•</td>
-                                <td>The patient herewith authorises the doctor and pathology service providers to disclose test results and examination findings to HaloCare.</td>
+                                <td>The patient herewith authorises the doctor and pathology service providers to disclose test results and examination findings to HaloCareCore.</td>
                             </tr>
                             <tr>
                                 <td>•</td>
@@ -572,16 +572,16 @@
                                 <td data-name="Comment">
                                     <div class="col-md-12">
                                         <div class="col-md-6">
-                                            <p style="color: #ccc; text-align: right; position: absolute; margin-top: -11%; margin-left: 61%">SistalicBP  &nbsp;</p>
-                                            @Html.EditorFor(model => model.pathology.sistalicBP, new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire nodecimal", placeholder = "0", @onblur = "CheckDecimal1();" } })
-                                            <input type="hidden" name="sistalicBP-decimal" id="sistalicBP-decimal" />
-                                            <p id="sistalicBPerror" class="houdini pulse val-error"> <i class="fas fa-exclamation-circle"></i> Decimal point not allowed!</p>
+                                            <p style="color: #ccc; text-align: right; position: absolute; margin-top: -11%; margin-left: 61%">systolicBP  &nbsp;</p>
+                                            @Html.EditorFor(model => model.pathology.systolicBP, new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire nodecimal", placeholder = "0", @onblur = "CheckDecimal1();" } })
+                                            <input type="hidden" name="systolicBP-decimal" id="systolicBP-decimal" />
+                                            <p id="systolicBPerror" class="houdini pulse val-error"> <i class="fas fa-exclamation-circle"></i> Decimal point not allowed!</p>
                                         </div>
                                         <div class="col-md-6">
-                                            <p style="color: #ccc; text-align: right; position: absolute; margin-top: -11%; margin-left: 55%">DiastalicBP  &nbsp;</p>
-                                            @Html.EditorFor(model => model.pathology.diastalicBP, new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire nodecimal", placeholder = "0", @onblur = "CheckDecimal2();" } })
-                                            <input type="hidden" name="diastalicBP-decimal" id="diastalicBP-decimal" />
-                                            <p id="diastalicBPerror" class="houdini pulse val-error"> <i class="fas fa-exclamation-circle"></i> Decimal point not allowed!</p>
+                                            <p style="color: #ccc; text-align: right; position: absolute; margin-top: -11%; margin-left: 55%">diastolicBP  &nbsp;</p>
+                                            @Html.EditorFor(model => model.pathology.diastolicBP, new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire nodecimal", placeholder = "0", @onblur = "CheckDecimal2();" } })
+                                            <input type="hidden" name="diastolicBP-decimal" id="diastolicBP-decimal" />
+                                            <p id="diastolicBPerror" class="houdini pulse val-error"> <i class="fas fa-exclamation-circle"></i> Decimal point not allowed!</p>
                                         </div>
                                     </div>
                                 </td>
@@ -672,85 +672,85 @@
                                     {
                                         <tbody>
                                             <tr style="text-indent: 5px">
-                                                @if (item.followUp == true)
+                                                @if (item.FollowUp == true)
                                                 {
                                                     <td colspan="6" style="text-align: center!important; color: rgba(204, 0, 0, 0.70)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="font-size: 18px; color: rgba(204, 0, 0, 0.70)!important"></i></span> Follow up required!</td>
                                                 }
                                                 else
                                                 {
                                                     <td data-dateformat="DD-MM-YYYY">
-                                                        @Html.DisplayFor(modelItem => item.createdDate)
+                                                        @Html.DisplayFor(modelItem => item.CreatedDate)
                                                     </td>
                                                 }
                                                 <!---->
                                                 <!---->
-                                                @if (item.followUp == true)
+                                                @if (item.FollowUp == true)
                                                 {
                                                 }
                                                 else
                                                 {
                                                     <td>
-                                                        @Html.DisplayFor(modelItem => item.programCode)
+                                                        @Html.DisplayFor(modelItem => item.ProgramCode)
                                                     </td>
                                                 }
                                                 <!---->
                                                 <!---->
-                                                @if (item.followUp == true)
+                                                @if (item.FollowUp == true)
                                                 {
                                                 }
                                                 else
                                                 {
                                                     <td>
-                                                        @Html.DisplayFor(modelItem => item.programDescription)
+                                                        @Html.DisplayFor(modelItem => item.ProgramDescription)
                                                     </td>
                                                 }
                                                 <!---->
                                                 <!---->
-                                                @if (item.followUp == true)
+                                                @if (item.FollowUp == true)
                                                 {
                                                 }
                                                 else
                                                 {
-                                                    if (item.diagnosisDate == null)
+                                                    if (item.EffectiveDate == null)
                                                     {
                                                         <td style="text-align: center!important"> - </td>
                                                     }
                                                     else
                                                     {
                                                         <td>
-                                                            @Html.DisplayFor(modelItem => item.diagnosisDate)
+                                                            @Html.DisplayFor(modelItem => item.EffectiveDate)
                                                         </td>
                                                     }
                                                 }
-                                                @if (item.followUp == true)
+                                                @if (item.FollowUp == true)
                                                 {
                                                 }
                                                 else
                                                 {
                                                     <td>
-                                                        @Html.DisplayFor(modelItem => item.createdBy)
+                                                        @Html.DisplayFor(modelItem => item.CreatedBy)
                                                     </td>
                                                 }
                                                 <!---->
                                                 <!---->
-                                                @if (item.followUp == true)
+                                                @if (item.FollowUp == true)
                                                 {
                                                 }
-                                                else if (item.generalComments == "None" || item.generalComments == "none" || item.generalComments == "NONE")
+                                                else if (item.Comment == "None" || item.Comment == "none" || item.Comment == "NONE")
                                                 {
                                                     <td style="text-align: center!important"><span style="font-size: 14px; color: darkred; text-align: center!important"><i class="fas fa-times" title="No comment"></i></span></td>
                                                 }
-                                                else if (item.generalComments == "Follow up")
+                                                else if (item.Comment == "Follow up")
                                                 {
                                                     <td style="text-align: center!important; color: rgba(204, 0, 0, 0.70)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="font-size: 18px; color: rgba(204, 0, 0, 0.70)!important"></i></span> Follow up!</td>
                                                 }
-                                                else if (item.generalComments == null || item.generalComments == " " || item.generalComments == "")
+                                                else if (item.Comment == null || item.Comment == " " || item.Comment == "")
                                                 {
                                                     <td style="text-align: center!important"><span style="font-size: 14px; color: darkred; text-align: center!important"><i class="fas fa-times" title="No comment"></i></span></td>
                                                 }
                                                 else
                                                 {
-                                                    <td style="text-align: center!important"><span style="font-size: 14px; color: forestgreen; text-align: center!important"><i class="fas fa-check" title="@item.generalComments"></i></span></td>
+                                                    <td style="text-align: center!important"><span style="font-size: 14px; color: forestgreen; text-align: center!important"><i class="fas fa-check" title="@item.Comment"></i></span></td>
                                                 }
                                             </tr>
                                         </tbody>
@@ -772,7 +772,7 @@
                             </p>
                         </div>
                         <div class="col-md-8">
-                            <input class="text-box single-line input-validation-error infoBox_doctorQuestionnaire" data-val="true" data-val-date="The field must be a date." id="PatientDiagnosis.EffectiveDate" name="PatientDiagnosis.EffectiveDate" required type="date" aria-required="true" aria-describedby="DOB-error" aria-invalid="true" min="@DateTime.Now.ToString("1900-01-01")" max="@DateTime.Now.ToString("yyyy-MM-dd")" oninvalid="InvalidMsg(this);">
+                            <input class="text-box single-line input-validation-error infoBox_doctorQuestionnaire" data-val="true" data-val-date="The field must be a date." id="PatientDiagnosis.diagnosisDate" name="PatientDiagnosis.diagnosisDate" required type="date" aria-required="true" aria-describedby="DOB-error" aria-invalid="true" min="@DateTime.Now.ToString("1900-01-01")" max="@DateTime.Now.ToString("yyyy-MM-dd")" oninvalid="InvalidMsg(this);">
                             @Html.ValidationMessageFor(model => model.PatientDiagnosis.EffectiveDate, "", new { @class = "text-danger", @style = "font-size: 90%; margin-left: 1%" })
                         </div>
                         <br />
@@ -1311,7 +1311,7 @@
 
                     <div class="form-group houdini" id="medication-initiatedDate" style="margin-top: -0.5%">
                         <div class="col-md-3" style="margin-left: 3.5%; text-align: right">
-                            @Html.Label("Date diabetes meds first initiated: ", htmlAttributes: new { @class = "control-label" })
+                            @Html.Label(null,"Date diabetes meds first initiated: ", htmlAttributes: new { @class = "control-label" })
                         </div>
                         <div class="col-md-8">
                             @*@Html.EditorFor(model => model.MedicationHistory.startDate, new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire dateLimit", @id = "medication-startDate" } })
@@ -1509,7 +1509,7 @@
                     </div>
                     <div class="form-group houdini" id="allergies-question" style="margin-top: 2%">
                         <div class="col-md-3" style="margin-left: 3.5%; text-align: right">
-                            @Html.Label("Allergies: ", htmlAttributes: new { @class = "control-label" })
+                            @Html.Label(null, "Allergies: ", htmlAttributes: new { @class = "control-label" })
                         </div>
                         <div class="col-md-8">
                             @Html.EditorFor(model => model.allergy.Allergy, new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire", @placeholder = "Allergy Details" } })
@@ -3260,8 +3260,8 @@
                                                     <tr style="background-color: #fff">
                                                         <td class="socialHistory_Category" style="width: 50%">
                                                             <p class="questionnaireQuestion">
-                                                                How often do you have a glucose reading < 4.1mmol/L?<br />
-                                                                Hoe gereeld het u glukose lesing < 4.1 mmol/L?
+                                                                @Html.Raw(@"How often do you have a glucose reading < 4.1mmol/L?<br />
+                                                                Hoe gereeld het u glukose lesing < 4.1 mmol/L?")
                                                             </p>
                                                         </td>
                                                         <td style="width: 50%">
@@ -3518,8 +3518,8 @@
                                     <br />
                                     <div class="col-md-6" style="margin-left: 1.5%; text-indent:0; text-indent: each-line ">
                                         <p class="questionnaireQuestion">
-                                            Is the patient < 77 years old?<br />
-                                            Is die pasiënt < 77 jaar oud?
+                                            @Html.Raw(@"Is the patient < 77 years old?<br />
+                                            Is die pasiënt < 77 jaar oud?")                                         
                                         </p>
                                     </div>
                                     <div style="margin-left: 52%!important">
@@ -3746,7 +3746,7 @@
                                     <!--hospitalisation-01-->
                                     <tr style="background-color: #fff">
                                         <td data-name="hospitalisationsAdminDate_ci1">
-                                            <input type="date" name='hospitalisationsAdminDate_ci1' class="infoBox_doctorQuestionnaire" aria-required="true" aria-describedby="DOB-error" aria-invalid="true" min="@DateTime.Now.ToString("1900-01-01")" max="@DateTime.Now.ToString("yyyy-MM-dd")" oninvalid="InvalidMsg(this);"
+                                            <input type="date" name='hospitalisationsAdminDate_ci1' class="infoBox_doctorQuestionnaire" aria-required="true" aria-describedby="DOB-error" aria-invalid="true" min="@DateTime.Now.ToString("1900-01-01")" max="@DateTime.Now.ToString("yyyy-MM-dd")" oninvalid="InvalidMsg(this);" />
                                                    @Html.EditorFor(model => model.HospitalAuth.actualAdminDate, new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire" } })
                                                    @Html.ValidationMessage("hospitalisationsAdminDate_ci1", "", new { @class = "text-danger", @style = "font-size: 70%" })
                                         </td>
@@ -3761,7 +3761,7 @@
                                     <!--hospitalisation-02-->
                                     <tr style="background-color: #fff">
                                         <td data-name="hospitalisationsAdminDate_ci2">
-                                            <input type="date" name='hospitalisationsAdminDate_ci2' class="infoBox_doctorQuestionnaire" aria-required="true" aria-describedby="DOB-error" aria-invalid="true" min="@DateTime.Now.ToString("1900-01-01")" max="@DateTime.Now.ToString("yyyy-MM-dd")" oninvalid="InvalidMsg(this);"
+                                            <input type="date" name='hospitalisationsAdminDate_ci2' class="infoBox_doctorQuestionnaire" aria-required="true" aria-describedby="DOB-error" aria-invalid="true" min="@DateTime.Now.ToString("1900-01-01")" max="@DateTime.Now.ToString("yyyy-MM-dd")" oninvalid="InvalidMsg(this);" />
                                                    @Html.EditorFor(model => model.HospitalAuth.actualAdminDate, new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire" } })
                                                    @Html.ValidationMessage("hospitalisationsAdminDate_ci2", "", new { @class = "text-danger", @style = "font-size: 70%" })
                                         </td>
@@ -3776,7 +3776,7 @@
                                     <!--hospitalisation-03-->
                                     <tr style="background-color: #fff">
                                         <td data-name="hospitalisationsAdminDate_ci3">
-                                            <input type="date" name='hospitalisationsAdminDate_ci3' class="infoBox_doctorQuestionnaire" aria-required="true" aria-describedby="DOB-error" aria-invalid="true" min="@DateTime.Now.ToString("1900-01-01")" max="@DateTime.Now.ToString("yyyy-MM-dd")" oninvalid="InvalidMsg(this);"
+                                            <input type="date" name='hospitalisationsAdminDate_ci3' class="infoBox_doctorQuestionnaire" aria-required="true" aria-describedby="DOB-error" aria-invalid="true" min="@DateTime.Now.ToString("1900-01-01")" max="@DateTime.Now.ToString("yyyy-MM-dd")" oninvalid="InvalidMsg(this);" />
                                                    @Html.EditorFor(model => model.HospitalAuth.actualAdminDate, new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire ha3d-select" } })
                                                    @Html.ValidationMessage("hospitalisationsAdminDate_ci3", "", new { @class = "text-danger", @style = "font-size: 70%" })
                                         </td>
@@ -3791,7 +3791,7 @@
                                     <!--hospitalisation-04-->
                                     <tr style="background-color: #fff" id="ha4" class="hidden">
                                         <td data-name="hospitalisationsAdminDate_ci4">
-                                            <input type="date" name='hospitalisationsAdminDate_ci4' class="infoBox_doctorQuestionnaire" aria-required="true" aria-describedby="DOB-error" aria-invalid="true" min="@DateTime.Now.ToString("1900-01-01")" max="@DateTime.Now.ToString("yyyy-MM-dd")" oninvalid="InvalidMsg(this);"
+                                            <input type="date" name='hospitalisationsAdminDate_ci4' class="infoBox_doctorQuestionnaire" aria-required="true" aria-describedby="DOB-error" aria-invalid="true" min="@DateTime.Now.ToString("1900-01-01")" max="@DateTime.Now.ToString("yyyy-MM-dd")" oninvalid="InvalidMsg(this);" />
                                                    @Html.EditorFor(model => model.HospitalAuth.actualAdminDate, new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire ha4d-select" } })
                                                    @Html.ValidationMessage("hospitalisationsAdminDate_ci4", "", new { @class = "text-danger", @style = "font-size: 70%" })
                                         </td>
@@ -3806,7 +3806,7 @@
                                     <!--hospitalisation-05-->
                                     <tr style="background-color: #fff" id="ha5" class="hidden">
                                         <td data-name="hospitalisationsAdminDate_ci5">
-                                            <input type="date" name='hospitalisationsAdminDate_ci5' class="infoBox_doctorQuestionnaire" aria-required="true" aria-describedby="DOB-error" aria-invalid="true" min="@DateTime.Now.ToString("1900-01-01")" max="@DateTime.Now.ToString("yyyy-MM-dd")" oninvalid="InvalidMsg(this);"
+                                            <input type="date" name='hospitalisationsAdminDate_ci5' class="infoBox_doctorQuestionnaire" aria-required="true" aria-describedby="DOB-error" aria-invalid="true" min="@DateTime.Now.ToString("1900-01-01")" max="@DateTime.Now.ToString("yyyy-MM-dd")" oninvalid="InvalidMsg(this);" />
                                                    @Html.EditorFor(model => model.HospitalAuth.actualAdminDate, new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire ha5d-select" } })
                                                    @Html.ValidationMessage("hospitalisationsAdminDate_ci5", "", new { @class = "text-danger", @style = "font-size: 70%" })
                                         </td>
@@ -5522,8 +5522,8 @@
         $(document).ready(function () {
             $("[name='clinicalexam.height']").val(0),
                 $("[name='clinicalexam.weight']").val(0),
-                $("[name='pathology.diastalicBP']").val(0),
-                $("[name='pathology.sistalicBP']").val(0);
+                $("[name='pathology.diastolicBP']").val(0),
+                $("[name='pathology.systolicBP']").val(0);
 
         });
 
@@ -5533,8 +5533,8 @@
                     $("[name='clinicalexam.weight']").attr("required", false),
                     //$("[name='clinicalexam.height']").val(0),
                     //$("[name='clinicalexam.weight']").val(0),
-                    //$("[name='pathology.sistalicBP']").val(0),
-                    //$("[name='pathology.diastalicBP']").val(0),
+                    //$("[name='pathology.systolicBP']").val(0),
+                    //$("[name='pathology.diastolicBP']").val(0),
                     $('.clinical-true').addClass('checkBox_blue'),
                     $('#ClinicalPanel_ic').addClass('houdini'),
                     $('.clinical-followUp').removeClass('checkBox_orange'),
@@ -5553,8 +5553,8 @@
                     $("[name='clinicalexam.weight']").attr("required", false),
                     //$("[name='clinicalexam.height']").val(0),
                     //$("[name='clinicalexam.weight']").val(0),
-                    //$("[name='pathology.sistalicBP']").val(0),
-                    //$("[name='pathology.diastalicBP']").val(0),
+                    //$("[name='pathology.systolicBP']").val(0),
+                    //$("[name='pathology.diastolicBP']").val(0),
                     $('.clinical-followUp').addClass('checkBox_orange'),
                     $('#ClinicalPanel_ic').addClass('houdini'),
                     $('.clinical-true').removeClass('checkBox_blue'),
@@ -6745,49 +6745,49 @@
     <script>
         //HCare-1190
         function CheckDecimal1() {
-            var inputtxt = $('#pathology_sistalicBP').val();
+            var inputtxt = $('#pathology_systolicBP').val();
             var decimal = /[^\d].+/;
 
             if (inputtxt.match(decimal)) {
-                $('span[data-valmsg-for="pathology.sistalicBP"]').html('<span style="font-size: 10px"><i class="fas fa-exclamation-circle"></i> </span> Decimal point not allowed!');
-                $('#sistalicBPerror').removeClass('houdini');
-                $("#sistalicBP-decimal").val(inputtxt);
+                $('span[data-valmsg-for="pathology.systolicBP"]').html('<span style="font-size: 10px"><i class="fas fa-exclamation-circle"></i> </span> Decimal point not allowed!');
+                $('#systolicBPerror').removeClass('houdini');
+                $("#systolicBP-decimal").val(inputtxt);
             }
             else {
-                $('span[data-valmsg-for="pathology.sistalicBP"]').html('');
-                $('#sistalicBPerror').addClass('houdini');
-                $("#sistalicBP-decimal").val('');
+                $('span[data-valmsg-for="pathology.systolicBP"]').html('');
+                $('#systolicBPerror').addClass('houdini');
+                $("#systolicBP-decimal").val('');
             }
         }
         function CheckDecimal2() {
-            var inputtxt = $('#pathology_diastalicBP').val();
+            var inputtxt = $('#pathology_diastolicBP').val();
             var decimal = /[^\d].+/;
 
             if (inputtxt.match(decimal)) {
-                $('span[data-valmsg-for="pathology.diastalicBP"]').html('<span style="font-size: 10px"><i class="fas fa-exclamation-circle"></i> </span> Decimal point not allowed!');
-                $("#diastalicBP-decimal").val(inputtxt);
-                $('#diastalicBPerror').removeClass('houdini');
+                $('span[data-valmsg-for="pathology.diastolicBP"]').html('<span style="font-size: 10px"><i class="fas fa-exclamation-circle"></i> </span> Decimal point not allowed!');
+                $("#diastolicBP-decimal").val(inputtxt);
+                $('#diastolicBPerror').removeClass('houdini');
 
             }
             else {
-                $('span[data-valmsg-for="pathology.diastalicBP"]').html('');
-                $("#diastalicBP-decimal").val('');
-                $('#diastalicBPerror').addClass('houdini');
+                $('span[data-valmsg-for="pathology.diastolicBP"]').html('');
+                $("#diastolicBP-decimal").val('');
+                $('#diastolicBPerror').addClass('houdini');
 
             }
         }
 
         $("#submit").click(function () {
-            if ($("#diastalicBP-decimal").val().length > 0) {
-                //$('#diastalicBPerror').removeClass('houdini');
-                $("#pathology_diastalicBP").focus();
+            if ($("#diastolicBP-decimal").val().length > 0) {
+                //$('#diastolicBPerror').removeClass('houdini');
+                $("#pathology_diastolicBP").focus();
                 return false;
             }
         });
         $("#submit").click(function () {
-            if ($("#sistalicBP-decimal").val().length > 0) {
-                //$('#sistalicBPerror').removeClass('houdini');
-                $("#pathology_sistalicBP").focus();
+            if ($("#systolicBP-decimal").val().length > 0) {
+                //$('#systolicBPerror').removeClass('houdini');
+                $("#pathology_systolicBP").focus();
                 return false;
             }
         });

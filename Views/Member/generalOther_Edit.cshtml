@@ -1,0 +1,794 @@
+﻿@model HaloCareCore.Models.Questionnaire.QuestionnaireOther
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Other";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<comment>
+    <!--
+        01 June 2020 -- HCare-930 (Frail Care General Questionnaire)
+        Addition of Frail care questions added to the General questionnaire under the General/Other section. This information has also been added to the Patient Clinical / Patient History section under the "Other" panel.
+        The user will also have access to Add, Edit, View the additional information linked to the Frail care question via the Patient Clinical / Patient History section under the "Other" panel.
+
+    -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .input-group-addon {
+        visibility: hidden;
+    }
+
+    textarea#generalComments {
+        display: block;
+        width: 460%;
+        max-width: 1500px !important;
+        height: 100px;
+        max-height: 250px;
+        padding: 6px 6px;
+        line-height: 1.428571429;
+        color: #003366;
+        vertical-align: middle;
+        border: 1px solid #f4f4f4;
+        background-color: transparent;
+        border-radius: 2px;
+        margin-left: 8%;
+        -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+        box-shadow: 1px 1px 1px 0px rgba(0,0,0,0.20);
+        -webkit-transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+        transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+        outline: none !important;
+        font-family: 'Century Gothic';
+        font-size: 100%;
+        font-weight: 200;
+        margin-top: -10%;
+    }
+
+    textarea#frailCareComment {
+        display: block;
+        width: 460%;
+        max-width: 1500px !important;
+        height: 100px;
+        max-height: 250px;
+        padding: 6px 6px;
+        line-height: 1.428571429;
+        color: #003366;
+        vertical-align: middle;
+        border: 1px solid #f4f4f4;
+        background-color: transparent;
+        border-radius: 2px;
+        margin-top: -10%;
+        margin-left: 0%;
+        -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+        box-shadow: 1px 1px 1px 0px rgba(0,0,0,0.20);
+        -webkit-transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+        transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+        outline: none !important;
+        font-family: 'Century Gothic';
+        font-size: 100%;
+        font-weight: 200;
+    }
+
+    .field-validation-error:before {
+        font-family: FontAwesome;
+        content: "\f06a\00a0";
+        animation: pulse 2s ease infinite;
+    }
+</style>
+
+<!----------------------------------------------------------------------------- html-top-navigation-panel  ---------------------------------------------------------------------------->
+<nav id="global-nav" class="nav" style="z-index: 10000">
+    <div class="pull-left title">
+        <h1 class="site-title_patientProfile">
+            <span><img src="~/Content/Images/memberProfile/topBar Icons/clincalHistory.png" /></span>&emsp; Other
+        </h1>
+    </div>
+    <div class="pull-right title">
+        <h1 class="site-title_userID pull-right">
+            <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+        </h1>
+        <h1 class="site-title_userID pull-right">
+            @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+            {
+                <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+            }
+        </h1>
+        <h1 class="site-waffleIcon pull-right">
+            <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+        </h1>
+    </div>
+</nav>
+
+
+<!-------------------------------------------------------------------------------------- html-body ------------------------------------------------------------------------------------>
+<div class="dashboardContainer zero-padding">
+    <div class="patientDashboard_View">
+        <!-- breadcrumbs -->
+        <ul class="breadcrumbs_patientDashboard">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+            <li><a href="@Url.Action("patientClinical", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"]})">Patient clinical</a></li>
+            <li><a href="#">@ViewBag.Title</a></li>
+        </ul>
+        <!-- navigation-collection -->
+        <div class="navCollection_patientDashboard">
+            @Html.Partial("_navCollection")
+        </div>
+        <!-- left-navigation-panel -->
+        @Html.Partial("_navSlider", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })
+        <!--profile-information-->
+        <div class="profileBar">
+            @Html.Action("_profileBar_edit", "Member", new { DependentID = Model.dependentID })
+        </div>
+    </div>
+    <div class="profilebar-spacer"></div>
+    <div class="patientDashboard_container">
+        <h4 class="summaryHeading">Patient clinical</h4>
+        <hr class="patientProfile_Ruler" />
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+
+            <div class="form-horizontal editForm">
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                @Html.HiddenFor(model => model.QuestionnaireOtherID)
+                @Html.HiddenFor(model => model.dependentID)
+                @Html.HiddenFor(model => model.frailCare)
+                @Html.HiddenFor(model => model.programType)
+
+
+                @if (Model.followUp == true)
+                {
+                    <div id="followUp_anchor">
+                        <a id="followUpLink" href="#anchor_followUp">
+                            <i class="fas fa-exclamation-triangle pulse anchor_warning" title="check box"></i>
+                        </a>
+                    </div>
+                }
+                @if (Model.generalComments == "FOLLOW UP" || Model.generalComments == "follow up" || Model.generalComments == "Follow up" || Model.generalComments == "Follow Up" || Model.generalComments == "" || Model.generalComments == null)
+                {
+                    <div id="comment_anchor">
+                        <a id="commentLink" href="#anchor_comment">
+                            <i class="fas fa-exclamation-triangle pulse anchor_warning" title="comment"></i>
+                        </a>
+                    </div>
+                }
+                @if (Model.occupation == "" || Model.occupation == null || Model.occupation == "Follow up" || Model.occupation == "Follow Up" || Model.occupation == "follow up" || Model.occupation == "FOLLOW UP")
+                {
+                    <div id="occupation_anchor">
+                        <a id="occupationLink" href="#anchor_occupation">
+                            <i class="fas fa-exclamation-triangle pulse anchor_warning" title="occupation"></i>
+                        </a>
+                    </div>
+                }
+
+                <div id="">
+                    @if (Model.occupation == null || Model.occupation == "Follow up" || Model.occupation == "")
+                    {
+                        <div id="warning_occupation">
+                            <i class="fas fa-exclamation-triangle pulse followUp_alert"></i>
+                        </div>
+
+                    }
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.occupation, htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-10">
+                            @Html.EditorFor(model => model.occupation, new { htmlAttributes = new { @class = "contentBlock_Info", @placeholder = "example: Retail sales" } })
+                            @Html.ValidationMessageFor(model => model.occupation, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.Label(null,"Shift worker", htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-8">
+                        <div class="questionRadio" style="color: black; margin-left: 2.5%">
+                            @Html.RadioButtonFor(model => model.shiftWorkCheck, true, new { @id = "shiftWorkCheck-true" }) Yes
+                            @Html.RadioButtonFor(model => model.shiftWorkCheck, false, new { @id = "shiftWorkCheck-false" }) No
+
+                            @Html.ValidationMessageFor(model => model.shiftWorkCheck, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div id="">
+                    <div id="warning_shiftWorker" class="hidden">
+                        <a id="linkShiftWorker" href="#shifts">
+                            <i class="fas fa-exclamation-triangle pulse followUp_alert" title="follow up"></i>
+                        </a>
+                    </div>
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.shiftWorker, htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-10">
+                            @Html.EditorFor(model => model.shiftWorker, new { htmlAttributes = new { @class = "contentBlock_Info", @placeholder = "example: 9am - 5pm" } })
+                            @Html.ValidationMessageFor(model => model.shiftWorker, "", new { @class = "text-danger", @style = "font-size: 110%!important; margin-left: 2.5%!important" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.Label(null,"Drug user", htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-8">
+                        <div class="questionRadio" style="color: black; margin-left: 2.5%">
+                            @Html.RadioButtonFor(model => model.recDrugs, true, new { @id = "recDrugs-true" }) Yes
+                            @Html.RadioButtonFor(model => model.recDrugs, false, new { @id = "recDrugs-false" }) No
+
+                            @Html.ValidationMessageFor(model => model.recDrugs, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div id="">
+                    <div id="warning_drugs" class="hidden">
+                        <a id="drugs_link" href="#drugs">
+                            <i class="fas fa-exclamation-triangle pulse followUp_alert" title="follow up"></i>
+                        </a>
+                    </div>
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.recDrugsLastUsed, htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-10">
+                            <!-- Datepicker as text field -->
+                            <div class="input-group date pickerBox futureDate">
+                                @Html.TextBoxFor(model => model.recDrugsLastUsed, "{0:dd MMM yyyy}", new { @class = "contentBlock_Info dateLimit", @autocomplete = "off", @placeholder = "example: 01 Jan 2000" })
+                                <div class="input-group-addon">
+                                    <span class="glyphicon glyphicon-th"></span>
+                                </div>
+                            </div>
+                            @Html.ValidationMessageFor(model => model.recDrugsLastUsed, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.Label(null,"Tuberculosis Screening", htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-8">
+                        <div class="questionRadio" style="color: black; margin-left: 2.5%">
+                            @Html.RadioButtonFor(model => model.TBScreen, true, new { @id = "tbDiagnosed-true" }) Yes
+                            @Html.RadioButtonFor(model => model.TBScreen, false, new { @id = "tbDiagnosed-false" }) No
+
+                            @Html.ValidationMessageFor(model => model.TBScreen, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.TBScreenDate, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        <!-- Datepicker as text field -->
+                        <div class="input-group date pickerBox futureDate">
+                            @Html.TextBoxFor(model => model.TBScreenDate, "{0:dd MMM yyyy}", new { @class = "contentBlock_Info dateLimit", @autocomplete = "off", @placeholder = "example: 01 Jan 2000" })
+                            <div class="input-group-addon">
+                                <span class="glyphicon glyphicon-th"></span>
+                            </div>
+                        </div>
+                        @Html.ValidationMessageFor(model => model.TBScreenDate, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.TBScreenResult, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.DropDownListFor(model => model.TBScreenResult, new List<SelectListItem>
+                       {
+                            new SelectListItem() { Text = "Positive", Value = "Positive"},
+                            new SelectListItem() { Text = "Negative", Value = "Negative"},
+
+                        }, "-- Select --", new { @class = "contentBlock_Info" })
+
+                        @Html.ValidationMessageFor(model => model.TBScreenResult, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.Label(null,"Diagnosed with TB", htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-8">
+                        <div class="questionRadio" style="color: black; margin-left: 2.5%">
+                            @Html.RadioButtonFor(model => model.tbDiagnosed, true, new { @id = "tbDiagnosed-true" }) Yes
+                            @Html.RadioButtonFor(model => model.tbDiagnosed, false, new { @id = "tbDiagnosed-false" }) No
+
+                            @Html.ValidationMessageFor(model => model.tbDiagnosed, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div id="">
+                    <div id="warning_tbStart" class="hidden">
+                        <a id="tbStart_link" href="#tbStart">
+                            <i class="fas fa-exclamation-triangle pulse followUp_alert" title="follow up"></i>
+                        </a>
+                    </div>
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.tbTreatmentStartDate, htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-10">
+                            <!-- Datepicker as text field -->
+                            <div class="input-group date pickerBox futureDate">
+                                @Html.TextBoxFor(model => model.tbTreatmentStartDate, "{0:dd MMM yyyy}", new { @class = "contentBlock_Info dateLimit", @autocomplete = "off", @placeholder = "example: 01 Jan 2000" })
+                                <div class="input-group-addon">
+                                    <span class="glyphicon glyphicon-th"></span>
+                                </div>
+                            </div>
+                            @Html.ValidationMessageFor(model => model.tbTreatmentStartDate, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div id="">
+                    <div id="warning_tbEnd" class="hidden">
+                        <a id="tbEnd_link" href="#tbEnd">
+                            <i class="fas fa-exclamation-triangle pulse followUp_alert" title="follow up"></i>
+                        </a>
+                    </div>
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.tbTreatmentEndDate, htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-10">
+                            <!-- Datepicker as text field -->
+                            <div class="input-group date pickerBox futureDate">
+                                @Html.TextBoxFor(model => model.tbTreatmentEndDate, "{0:dd MMM yyyy}", new { @class = "contentBlock_Info dateLimit", @autocomplete = "off", @placeholder = "example: 01 Jan 2000" })
+                                <div class="input-group-addon">
+                                    <span class="glyphicon glyphicon-th"></span>
+                                </div>
+                            </div>
+                            @Html.ValidationMessageFor(model => model.tbTreatmentEndDate, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.Label(null,"Patient is pregnant", htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-8">
+                        <div class="questionRadio" style="color: black; margin-left: 2.5%">
+                            @Html.RadioButtonFor(model => model.Pregnant, true, new { @id = "Pregnant-true" }) Yes
+                            @Html.RadioButtonFor(model => model.Pregnant, false, new { @id = "Pregnant-false" }) No
+
+                            @Html.ValidationMessageFor(model => model.Pregnant, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div id="">
+                    <div id="warning_pregnant" class="hidden">
+                        <a id="pregnant_link" href="#pregnant">
+                            <i class="fas fa-exclamation-triangle pulse followUp_alert" title="follow up"></i>
+                        </a>
+                    </div>
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.EDD, htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-10">
+                            <div class="input-group date pickerBox EDD">
+                                @Html.TextBoxFor(model => model.EDD, "{0:dd MMM yyyy}", new { @class = "contentBlock_Info", @autocomplete = "off", @placeholder = "example: 01 Jan 2000" })
+                                <div class="input-group-addon">
+                                    <span class="glyphicon glyphicon-th"></span>
+                                </div>
+                            </div>
+                            @Html.ValidationMessageFor(model => model.EDD, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.Label(null,"Has kidney infection", htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        <div class="checkbox">
+                            @Html.EditorFor(model => model.hasKidneyInfection)
+                            @Html.ValidationMessageFor(model => model.hasKidneyInfection, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.Label(null,"Frail care required", htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        <div class="checkbox">
+                            @Html.EditorFor(model => model.frailCareCheck)
+                            @Html.ValidationMessageFor(model => model.frailCareCheck, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div id="eyeTreatmentAnchor" class="">
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.frailCare, htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-10">
+                            @Html.ListBoxFor(model => model.frailCare_Concat, new List<SelectListItem>
+                           {
+                            new SelectListItem() { Text = "• Toileting/Bathroom assistance", Value = "• Toileting/Bathroom assistance"},
+                            new SelectListItem() { Text = "• Feeding", Value = "• Feeding"},
+                            new SelectListItem() { Text = "• Dressing", Value = "• Dressing"},
+                            new SelectListItem() { Text = "• Grooming", Value = "• Grooming"},
+                            new SelectListItem() { Text = "• Walking", Value = "• Walking"},
+                            new SelectListItem() { Text = "• Bathing", Value = "• Bathing"},
+                            new SelectListItem() { Text = "• Other", Value = "• Other"},
+                            new SelectListItem() { Text = "• None", Value = "• None"},
+
+                            }, new { @class = "questionDrop", @id = "frailCare", @multiple = "multiple", @style = "width: 455px; margin-left: 2.2%" })
+
+                            @Html.ValidationMessageFor(model => model.frailCare, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.frailCareComment, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        <div>
+                            @Html.TextAreaFor(model => model.frailCareComment)
+                            @Html.ValidationMessageFor(model => model.frailCareComment, "", new { @class = "text-danger", @style = "font-size: 110%;margin-left: 2%" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.Label(null,"Blood test frequency", htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.bloodTestFrequency, new { htmlAttributes = new { @class = "contentBlock_Info" } })
+                        @Html.ValidationMessageFor(model => model.bloodTestFrequency, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div id="">
+                    <div id="warning_pregnant" class="hidden">
+                        <a id="pregnant_link" href="#pregnant">
+                            <i class="fas fa-exclamation-triangle pulse followUp_alert" title="follow up"></i>
+                        </a>
+                    </div>
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.bloodTestEffectiveDate, htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-10">
+                            <!-- Datepicker as text field -->
+                            <div class="input-group date pickerBox futureDate">
+                                @Html.TextBoxFor(model => model.bloodTestEffectiveDate, "{0:dd MMM yyyy}", new { @class = "contentBlock_Info", @autocomplete = "off", @placeholder = "example: 01 Jan 2000" })
+                                <div class="input-group-addon">
+                                    <span class="glyphicon glyphicon-th"></span>
+                                </div>
+                            </div>
+                            @Html.ValidationMessageFor(model => model.bloodTestEffectiveDate, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div id="comment_anchor">
+                    @if (Model.generalComments == null || Model.generalComments == "Follow up" || Model.generalComments == "" || Model.generalComments == "follow up" || Model.generalComments == "Follow Up" || Model.generalComments == "FOLLOW UP")
+                    {
+                        <div id="warning_comment">
+                            <i class="fas fa-exclamation-triangle pulse followUp_alert"></i>
+                        </div>
+
+                    }
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.generalComments, htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-10">
+                            <div class="checkbox">
+                                @Html.TextAreaFor(model => model.generalComments)
+                                @Html.ValidationMessageFor(model => model.generalComments, "", new { @class = "text-danger", @placeholder = "comment" })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="followUp_anchor">
+                    @if (Model.followUp == true)
+                    {
+                        <div id="warning_followUp">
+                            <i class="fas fa-exclamation-triangle pulse followUp_alert"></i>
+                        </div>
+
+                    }
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.followUp, htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-10">
+                            <div class="checkbox">
+                                @Html.EditorFor(model => model.followUp)
+                                @Html.ValidationMessageFor(model => model.followUp, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.active, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        <div class="checkbox">
+                            @Html.EditorFor(model => model.active)
+                            @Html.ValidationMessageFor(model => model.active, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="fixedBack" style="margin-left: 40%">
+                        <input value="Back" class="btn buttonRound_formBack go_back" onclick="backKey()" style="width: 15%" />
+                        <input type="submit" value="Save" class="btn buttonRound_formCreate patientClinical" onclick="storageKey()" style="width: 15%" />
+
+                    </div>
+                </div>
+
+            </div>
+        }
+
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/bundles/jqueryui"></script>
+    <style src="~/Content/themes/base/css" )
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.7.1/js/bootstrap-datepicker.min.js"></script>
+    <!-- general -->
+    <script>
+        //date-picker-future
+        $(function () {
+            $('.futureDate').datepicker({
+                format: "dd M yyyy",
+                showButtonPanel: true,
+                autoclose: true,
+                endDate: new Date()
+            });
+        });
+        //date-picker-pregnant
+        $(function () {
+            $('#EDD').datepicker({
+                format: "dd M yyyy",
+                showButtonPanel: true,
+                autoclose: true,
+                startDate: new Date(),
+                endDate: "+9M"
+            });
+        });
+    </script>
+    <!-- alerts -->
+    <script>
+        //occupation Check
+        $(document).ready(function () {
+            setInterval(function () {
+                if ($("#occupation").val().toLowerCase() == "follow up") {
+                    $("#occupation").addClass('warningFont'),
+                        $('#warning_occupation').removeClass('hidden'),
+                        $('#occupation_anchor').removeClass('hidden');
+                }
+                else if ($("#occupation").val() == "") {
+                    $("#occupation").removeClass('warningFont'),
+                        $('#warning_occupation').removeClass('hidden'),
+                        $('#occupation_anchor').removeClass('hidden');
+                }
+                else if ($("#occupation").val() == null) {
+                    $("#occupation").removeClass('warningFont'),
+                        $('#warning_occupation').removeClass('hidden'),
+                        $('#occupation_anchor').removeClass('hidden');
+                }
+                else {
+                    $("#occupation").removeClass('warningFont'),
+                        $('#occupation').addClass('fontUpdate'),
+                        $('#warning_occupation').addClass('hidden'),
+                        $('#occupation_anchor').addClass('hidden');
+
+
+                }
+            }, 0);
+        });
+
+        //shiftWorker field YES
+        $(document).ready(function () {
+            setInterval(function () {
+                $('#shiftWorkCheck-true').change(function () {
+                    if (this.checked)
+                        $("[name='shiftWorker']").attr("required", true),
+                            $('#warning_shiftWorker').removeClass('hidden');
+
+                });
+            }, 0);
+        });
+
+        //shiftWorker field NO
+        $(document).ready(function () {
+            setInterval(function () {
+                $('#shiftWorkCheck-false').change(function () {
+                    if (this.checked)
+                        $("[name='shiftWorker']").attr("required", false),
+                            $('#warning_shiftWorker').addClass('hidden'),
+                            $("[name='shiftWorker']").val('');
+
+                });
+            }, 0);
+        });
+
+        $(document).ready(function () {
+            setInterval(function () {
+                if ($("#shiftWorker").val() == "") {
+                    $("#shiftWorker").removeClass('warningFont'),
+                        $('#dailyCig_anchor').removeClass('hidden');
+                }
+                else if ($("#shiftWorker").val() == null) {
+                    $("#shiftWorker").removeClass('warningFont'),
+                        $('#dailyCig_anchor').removeClass('hidden');
+                }
+                else {
+                    $("#shiftWorker").removeClass('warningFont'),
+                        $('#shiftWorker').addClass('fontUpdate'),
+                        $('#dailyCig_anchor').addClass('houdini');
+
+
+                }
+            }, 0);
+        });
+
+        //drug field YES
+        $(document).ready(function () {
+            setInterval(function () {
+                $('#recDrugs-true').change(function () {
+                    if (this.checked)
+                        $('#warning_drugs').removeClass('hidden');
+
+                });
+            }, 0);
+        });
+
+        //drug field NO
+        $(document).ready(function () {
+            setInterval(function () {
+                $('#recDrugs-false').change(function () {
+                    if (this.checked)
+                        $('#warning_drugs').addClass('hidden'),
+                            $("[name='recDrugsLastUsed']").val('');
+
+                });
+            }, 0);
+        });
+
+        //tbDiagnosed field YES
+        $(document).ready(function () {
+            setInterval(function () {
+                $('#tbDiagnosed-true').change(function () {
+                    if (this.checked)
+                        $('#warning_tbStart').removeClass('hidden'),
+                            $('#warning_tbEnd').removeClass('hidden');
+
+                });
+            }, 0);
+        });
+
+        //tbDiagnosed field NO
+        $(document).ready(function () {
+            setInterval(function () {
+                $('#tbDiagnosed-false').change(function () {
+                    if (this.checked)
+                        $('#warning_tbStart').addClass('hidden'),
+                            $('#warning_tbEnd').addClass('hidden'),
+                            $("[name='tbTreatmentStartDate']").val(''),
+                            $("[name='tbTreatmentEndDate']").val('');
+
+                });
+            }, 0);
+        });
+
+        //pregnant field YES
+        $(document).ready(function () {
+            setInterval(function () {
+                $('#Pregnant-true').change(function () {
+                    if (this.checked)
+                        $('#warning_pregnant').removeClass('hidden');
+
+                });
+            }, 0);
+        });
+
+        //pregnant field NO
+        $(document).ready(function () {
+            setInterval(function () {
+                $('#Pregnant-false').change(function () {
+                    if (this.checked)
+                        $('#warning_pregnant').addClass('hidden'),
+                            $("[name='EDD']").val('');
+
+                });
+            }, 0);
+        });
+
+        //occupation Check
+        $(document).ready(function () {
+            setInterval(function () {
+                if ($("#generalComments").val().toLowerCase() == "follow up") {
+                    $("#generalComments").addClass('warningFont'),
+                        $('#warning_comment').removeClass('hidden'),
+                        $('#comment_anchor').removeClass('hidden');
+                }
+                else if ($("#generalComments").val() == "") {
+                    $("#generalComments").removeClass('warningFont'),
+                        $('#warning_comment').removeClass('hidden'),
+                        $('#comment_anchor').removeClass('hidden');
+                }
+                else if ($("#generalComments").val() == null) {
+                    $("#generalComments").removeClass('warningFont'),
+                        $('#warning_comment').removeClass('hidden'),
+                        $('#comment_anchor').removeClass('hidden');
+                }
+                else {
+                    $("#generalComments").removeClass('warningFont'),
+                        $('#generalComments').addClass('fontUpdate'),
+                        $('#warning_comment').addClass('hidden'),
+                        $('#comment_anchor').addClass('hidden');
+
+
+                }
+            }, 0);
+        });
+
+        //follow up Check
+        $('#followUp').change(function () {
+            if (this.checked)
+                $('#warning_followUp').removeClass('hidden'),
+                    $('#followUp_anchor').removeClass('hidden');
+
+            else
+                $('#warning_followUp').addClass('hidden'),
+                    $('#followUp_anchor').addClass('hidden');
+
+        });
+
+    </script>
+    <!-- links-->
+    <script>
+        //follow up
+        $("#followUpLink").click(function () {
+            $('html, body').animate({
+                scrollTop: $("#followUp_anchor").offset().top + 350
+            }, 500);
+
+        });
+        //commentLink
+        $("#commentLink").click(function () {
+            $('html, body').animate({
+                scrollTop: $("#comment_anchor").offset().top + 300
+            }, 500),
+
+                // toggle highlight for Allergy
+                $('#generalComments').toggleClass('textBox_highlight');
+            setTimeout(function () {
+                // toggle back after 1 second
+                $('#generalComments').toggleClass('textBox_highlight');
+            }, 300);
+        });
+
+        //occupation
+        $("#occupationLink").click(function () {
+            $('html, body').animate({
+                scrollTop: $("#occupation_anchor").offset().top - 350
+            }, 500),
+
+                // toggle highlight for Allergy
+                $('#occupation').toggleClass('textBox_highlight');
+            setTimeout(function () {
+                // toggle back after 1 second
+                $('#occupation').toggleClass('textBox_highlight');
+            }, 300);
+        });
+    </script>
+    <!-- local-storage-redirect -->
+    <script>
+        function backKey() {
+            localStorage.setItem("back_clinicalGeneral", Date.now());
+        }
+        function storageKey() {
+            localStorage.setItem("edit_clinicalGeneral", Date.now());
+        }
+    </script>
+    <script>
+        //frail-care-other
+        $('#frailCare').change(function () {
+            if ($('#frailCare').val() == "• Other") {
+                $("[name='frailCareComment']").attr("required", true);
+
+
+            }
+            else {
+                $("[name='frailCareComment']").attr("required", false);
+
+            }
+        });
+    </script>
+
+}

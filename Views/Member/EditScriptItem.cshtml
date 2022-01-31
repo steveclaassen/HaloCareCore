@@ -1,0 +1,142 @@
+﻿@model HaloCareCore.Models.Script.ScriptItems
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "EditScriptItem";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+</style>
+
+<div class="fullScreen_container zero-padding">
+
+    <!--pageHeader-->
+    <nav id="global-nav" class="nav">
+        <div class="pull-left title">
+            <h1 class="site-title_patientProfile">
+                <span><i class="fas fa-prescription"></i>&emsp; Script item</span>
+            </h1>
+        </div>
+        <div class="pull-right title">
+            <h1 class="site-title_userID pull-right">
+                <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+            </h1>
+            <h1 class="site-title_userID pull-right">
+                @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                {
+                    <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                }
+            </h1>
+            <h1 class="site-waffleIcon pull-right">
+                <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+            </h1>
+        </div>
+    </nav>
+
+    <!--breadCrumbs-->
+    <ul class="breadcrumbs_fullScreens">
+        <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+        <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+        <li><a href="@Url.Action("Details", "Scripts", new {ID = Model.scriptID})">Script</a></li>
+        <li><a href="#">Edit</a></li>
+    </ul>
+
+    <!--navCollection-->
+    <div class="navCollection_fullScreens">
+        @Html.Partial("_navCollection")
+    </div>
+
+    <div style="margin-bottom: 2%"></div>
+
+
+    <div class="row">
+        <div class="form-horizontal editForm">
+            <h4 class="tableHeading">Edit script item - @Html.Display("ItemName")</h4>
+            <hr class="fancyruler">
+            <br />
+
+            @using (Html.BeginForm())
+            {
+                @Html.AntiForgeryToken()
+
+                <div class="form-horizontal">
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                    @Html.HiddenFor(model => model.itemNo)
+                    @Html.HiddenFor(model => model.scriptID)
+                    @Html.HiddenFor(model => model.itemRepeats)
+                    @Html.Hidden("depId")
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.directions, htmlAttributes: new { @class = "control-label col-md-2 drop" })
+                        <div class="col-md-10">
+                            @Html.EditorFor(model => model.directions, new { htmlAttributes = new { @class = "infoBox_Enrollment" } })
+                            @Html.ValidationMessageFor(model => model.directions, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.quantity, htmlAttributes: new { @class = "control-label col-md-2 drop" })
+                        <div class="col-md-10">
+                            @Html.EditorFor(model => model.quantity, new { htmlAttributes = new { @class = "infoBox_Enrollment", @type = "number", @min = "0" } })
+                            @Html.ValidationMessageFor(model => model.quantity, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.icd10code, htmlAttributes: new { @class = "control-label col-md-2 drop" })
+                        <div class="col-md-10">
+                            @Html.EditorFor(model => model.icd10code, new { htmlAttributes = new { @class = "infoBox_Enrollment" } })
+                            @Html.ValidationMessageFor(model => model.icd10code, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.toDate, htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-10">
+                            @Html.EditorFor(model => model.toDate, new { htmlAttributes = new { @class = "infoBox_Enrollment" } })
+                            @Html.ValidationMessageFor(model => model.toDate, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.prophylaxis, htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-10">
+                            <div class="checkbox">
+                                @Html.EditorFor(model => model.prophylaxis)
+                                @Html.ValidationMessageFor(model => model.prophylaxis, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.active, htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-10">
+                            <div class="checkbox">
+                                @Html.EditorFor(model => model.active)
+                                @Html.ValidationMessageFor(model => model.active, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="fixedBack" style="margin-left: 40%">
+                        <input value="Back" class="btn buttonRound_formBack go_back" style="width: 15%!important" />
+                        <input type="submit" value="Submit" class="btn buttonRound_formCreate" style="width: 15%!important" />
+                    </div>
+
+                </div>
+            }
+
+
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script src="~/bundles/jqueryval"></script>
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+}

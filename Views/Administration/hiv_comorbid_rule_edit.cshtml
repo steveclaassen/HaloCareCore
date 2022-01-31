@@ -1,0 +1,383 @@
+﻿@model HaloCareCore.Models.ViewModels.HIVCormodisViewModel
+@{
+    ViewBag.Title = "Edit";
+    Layout = "~/Views/Shared/_layout-view-x.cshtml";
+}
+
+<javascript>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+    <script src="https://www.jqueryscript.net/demo/jQuery-Plugin-For-Sortable-Bootstrap-Tables-Bootstrap-Sortable/Scripts/bootstrap-sortable.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/js/standalone/selectize.js"></script>
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.default.css">
+</javascript>
+<style>
+    .selectize-control.single .selectize-input [data-value] {
+        border: 1px solid transparent !important;
+        border-radius: 0px !important;
+    }
+
+    .selectize-control.multi .selectize-input [data-value] {
+        border: 1px solid transparent !important;
+        border-radius: 0px !important;
+        box-shadow: none !important;
+    }
+
+    .error-alert {
+        display: none;
+        background-color: rgba(217, 48, 78, 0.2);
+        padding: 10px 12px 10px 12px;
+        border: 1px solid transparent;
+        border-radius: 0px;
+        font: 100 12px 'Open Sans', sans-serif;
+        color: rgb(217, 48, 78);
+        margin: 0 0 0 0;
+        margin-top: -10px;
+        margin-bottom: -10px;
+        margin-left: 0px;
+        width: 100%;
+        vertical-align: middle;
+    }
+
+        .error-alert span a {
+            color: rgb(217, 48, 78);
+            margin-top: -5px;
+        }
+
+    .new-account-row-insert {
+        display: block;
+        max-width: 1000px !important;
+        width: 42%;
+        max-height: 100px;
+        height: 30px;
+        margin-top: 5px;
+        margin-left: 10px;
+        padding: 6px 6px;
+        line-height: 1.428571429;
+        color: #003366;
+        border-radius: 0px;
+        border: none;
+        border-bottom: 1px solid #e8e6e6;
+        background-color: transparent !important;
+        font-family: 'Century Gothic' !important;
+        text-indent: 5px;
+    }
+
+    .required-color {
+        color: transparent !important;
+    }
+
+    label.attachment-btn {
+        color: #ffffff;
+        background-color: dodgerblue;
+        border: 1px solid dodgerblue;
+        margin-top: 0.5%;
+        margin-left: 1%;
+        padding: 4px 4px;
+        font-family: 'Century Gothic';
+        font-size: 1em;
+        line-height: 1.6;
+        border-radius: 3px;
+        width: 100px;
+        outline: none !important;
+        z-index: 40;
+        font-weight: 100;
+        transition: 0.3s;
+        text-align: center;
+    }
+
+    #file-chosen {
+        margin-left: 0.3rem;
+        font-family: 'Century Gothic';
+        color: #ccc;
+    }
+
+    .file-check-yes {
+        color: #33BB66;
+        font-size: 18px;
+    }
+
+    .file-check-no {
+        color: rgb(244 113 116 / 0.50);
+        font-size: 18px;
+        margin-bottom: -2px;
+        display: none;
+    }
+
+    .cke_toolbar_last {
+        display: none !important;
+    }
+
+    .check-box {
+        margin-left: 1% !important;
+        margin-top: 1.5% !important;
+    }
+</style>
+
+<div id="instruction-wrapper">
+    <div class="instruction-panel">
+        <h class="account-step">Instruction</h>
+        <p class="account-step-instruction">Edit information.</p>
+        <ul style="padding: 0">
+            <li class="account-step-list asl-1 active-step"><span class="number-circle circle-1 active-circle">1</span>@Html.DisplayNameFor(model => model.HivcomorbidRules.stage)</li>
+            <li class="account-step-list asl-2"><span class="number-circle circle-2">2</span>@Html.DisplayNameFor(model => model.HivcomorbidRules.Comorbid)</li>
+        </ul>
+    </div>
+</div>
+
+<div class="collapse in">
+    <div class="card card-body">
+        <div class="collapse-body">
+            <div class="new-account-panel">
+                @using (Html.BeginForm("hiv_comorbid_rule_edit", "Administration", FormMethod.Post, new { id = "hiv-cm-create", enctype = "multipart/form-data" }))
+                {
+                    <div class="col-md-12 row">
+                        <div class="account-heading">HIV comorbid addition setup</div>
+                        <p class="account-sub-header-new">Enter the information below and click submit to continue.</p>
+                    </div>
+                    <hr class="fancyruler">
+                    @Html.HiddenFor(model => model.HivcomorbidRules.Id)
+                    @Html.HiddenFor(model => model.HivcomorbidRules.createdDate)
+                    @Html.HiddenFor(model => model.HivcomorbidRules.createdBy)
+                    <input id="validation" name="validation" value="@ViewBag.Validation" hidden />
+                    <div id="hcm-validation" class="error-alert"></div>
+
+                    <table class="table details-table" id="new-template">
+                        <tr>
+                            <td class="new-account-row-heading">@Html.DisplayNameFor(model => model.HivcomorbidRules.stage) <sup style="font-size: 5px; top: -8px"><i id="required-stage" class="fas fa-asterisk pulser"></i></sup></td>
+                            <td class="row-information">
+                                @Html.DropDownListFor(model => model.HivcomorbidRules.stage, new SelectList(Model.HIVStages, "Id", "Name"), "Select", htmlAttributes: new { @class = "selectize-1", @required = "required", @onchange = "Validation1()" })
+                                <span id="stage-validation" class="text-danger" style="margin-left: 1%"></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="new-account-row-heading">@Html.DisplayNameFor(model => model.HivcomorbidRules.Comorbid) <sup style="font-size: 5px; top: -8px"><i id="required-cm" class="fas fa-asterisk pulser"></i></sup></td>
+                            <td class="row-information">
+                                @Html.DropDownListFor(model => model.HivcomorbidRules.Comorbid, new SelectList(Model.ComorbidConditionExclusions, "mappingDescription", "mappingDescription"), "Select", htmlAttributes: new { @class = "selectize-2", @required = "required", @onchange = "Validation2()" })
+                                <span id="cm-validation" class="text-danger" style="margin-left: 1%"></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="new-account-row-heading">@Html.DisplayNameFor(model => model.HivcomorbidRules.active)</td>
+                            <td class="row-information check-box">
+                                @Html.EditorFor(model => model.HivcomorbidRules.active)
+                            </td>
+                        </tr>
+                    </table>
+
+                    <div class="sf-footer">
+                        <input type="button" id="hcm-back" value="Back" class="btn modal-button-previous" onclick="location.href = '@Url.Action("Index", "Rules", null)'; backKey();" />
+                        <input type="submit" id="hcm-submit" value="Submit" class="btn modal-button-next" onclick="storageKey(); StageCheck(); ComorbidCheck();" />
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+@section scripts{
+    <script src="~/bundles/jqueryval"></script>
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/js/standalone/selectize.js"></script>
+    <script>
+        initSelectize();
+        function initSelectize() {
+            $('#HivcomorbidRules_stage').selectize({
+                persist: true,
+                preload: true,
+                maxItems: 1,
+                delimiter: ',',
+                valueField: 'id',
+                labelField: 'name',
+                searchField: ['name'],
+                hideSelected: true,
+                plugins: ['remove_button'],
+                render: {
+                    option: function (item, escape) {
+                        return '<span class="name">' + escape(item.name) + '</span>';
+                    }
+                },
+            }),
+                $('#HivcomorbidRules_Comorbid').selectize({
+                    persist: true,
+                    preload: true,
+                    maxItems: 1,
+                    delimiter: ',',
+                    valueField: 'id',
+                    labelField: 'name',
+                    searchField: ['name'],
+                    hideSelected: true,
+                    plugins: ['remove_button'],
+                    render: {
+                        option: function (item, escape) {
+                            return '<span class="name">' + escape(item.name) + '</span>';
+                        }
+                    },
+                })
+        }
+    </script>
+    <script>
+        $(function () {
+            var stage = $("#HivcomorbidRules_stage").val();
+            if (stage.length > 0) {
+                $("#required-stage").addClass("required-color");
+                $('li').find('span.circle-1').text("✓");
+                $('li').find('span.circle-1').addClass("complete-circle");
+            }
+            else {
+                $("#required-stage").removeClass("required-color");
+                $('li').find('span.circle-1').text("1");
+                $('li').find('span.circle-1').removeClass("complete-circle");
+            }
+            var cm = $("#HivcomorbidRules_Comorbid").val();
+            if (cm.length > 0) {
+                $("#required-cm").addClass("required-color");
+                $('li').find('span.circle-2').text("✓");
+                $('li').find('span.circle-2').addClass("complete-circle");
+            }
+            else {
+                $("#required-cm").removeClass("required-color");
+                $('li').find('span.circle-2').text("2");
+                $('li').find('span.circle-2').removeClass("complete-circle");
+            }
+        });
+    </script>
+    <script>
+        $(function () {
+            $(document).on('click', '.selectize-1 div.selectize-input.focus', function (e) {
+                $('li.asl-1').addClass("active-step");
+                $('li span.circle-1').addClass("active-circle");
+                $('li.asl-2').removeClass("active-step");
+                $('li span.circle-2').removeClass("active-circle");
+                $('li.asl-3').removeClass("active-step");
+                $('li span.circle-3').removeClass("active-circle");
+                $('li.asl-4').removeClass("active-step");
+                $('li span.circle-4').removeClass("active-circle");
+                $('li.asl-5').removeClass("active-step");
+                $('li span.circle-5').removeClass("active-circle");
+            });
+            $(document).on('click', '.selectize-2 div.selectize-input.focus', function (e) {
+                $('li.asl-1').removeClass("active-step");
+                $('li span.circle-1').removeClass("active-circle");
+                $('li.asl-2').addClass("active-step");
+                $('li span.circle-2').addClass("active-circle");
+                $('li.asl-3').removeClass("active-step");
+                $('li span.circle-3').removeClass("active-circle");
+                $('li.asl-4').removeClass("active-step");
+                $('li span.circle-4').removeClass("active-circle");
+                $('li.asl-5').removeClass("active-step");
+                $('li span.circle-5').removeClass("active-circle");
+            });
+        });
+    </script>
+    <script>
+        function Validation1() {
+            var stage = $("#HivcomorbidRules_stage").val();
+            $('#stage-validation').html('');
+            if (stage.length > 0) {
+                $("#required-stage").addClass("required-color");
+                $('li').find('span.circle-1').text("✓");
+                $('li').find('span.circle-1').addClass("complete-circle");
+            }
+            else {
+                $("#required-stage").removeClass("required-color");
+                $('li').find('span.circle-1').text("1");
+                $('li').find('span.circle-1').removeClass("complete-circle");
+            }
+        }
+        function Validation2() {
+            var cm = $("#HivcomorbidRules_Comorbid").val();
+            $('#cm-validation').html('');
+            if (cm.length > 0) {
+                $("#required-cm").addClass("required-color");
+                $('li').find('span.circle-2').text("✓");
+                $('li').find('span.circle-2').addClass("complete-circle");
+                $(':input[type="submit"]').prop('disabled', false);
+                $("#hcm-validation").fadeOut(200).html('');
+            }
+            else {
+                $("#hcm-validation").fadeIn(200).html('&emsp;&nbsp;Warning: Comorbid field is required!');
+                $('#cm-validation').html('<span style="font-size: 10px"><i class="fas fa-exclamation-circle"></i> </span>This field is required!');
+                $("#required-cm").removeClass("required-color");
+                $('li').find('span.circle-2').text("2");
+                $('li').find('span.circle-2').removeClass("complete-circle");
+            }
+
+
+            cm = cm.trim();
+            $.ajax({
+                url: '/Administration/CheckComorbid',
+                type: "POST",
+                dataType: "JSON",
+                data: { name: cm },
+                success: function (result) {
+
+                    var description = result;
+                    if (description == cm) {
+                        $("#hcm-validation").fadeIn(200).html('&emsp;&nbsp;Warning: Comorbid already exists!');
+                        $('#cm-validation').html('<span style="font-size: 10px"><i class="fas fa-exclamation-circle"></i> </span>Comorbid condition already exists!');
+                        $(':input[type="submit"]').prop('disabled', true);
+                    }
+                },
+                error: function (result) {
+                    console.log(result.claimCode);
+                    $('span[data-valmsg-for="HivcomorbidRules.Comorbid"]').html('');
+                    $("#carrier-validation-notice").addClass("hidden");
+                    $(':input[type="submit"]').prop('disabled', false);
+                }
+            });
+
+
+        }
+    </script>
+    <script>
+        function StageCheck() {
+            var value = $("#HivcomorbidRules_stage :selected").val();
+            if (value == "") {
+                $('#stage-validation').html('<span style="font-size: 10px"><i class="fas fa-exclamation-circle"></i> </span>This field is required!');
+                event.preventDefault();
+            }
+        }
+        function ComorbidCheck() {
+            var value = $("#HivcomorbidRules_Comorbid :selected").val();
+            if (value == "") {
+                $('#cm-validation').html('<span style="font-size: 10px"><i class="fas fa-exclamation-circle"></i> </span>This field is required!');
+                event.preventDefault();
+            }
+        }
+    </script>
+    <script>
+        $(function () {
+            $("#HivcomorbidRules_active").click(function () {
+                if ($("#HivcomorbidRules_active").prop('checked') == true) {
+                    Validation2();
+                }
+                else {
+                }
+            });
+        });
+    </script>
+    <script>
+        $(function () {
+            var validation = $("#validation").val();
+            if (validation == "duplicate") {
+                $("#hcm-validation").show().html('&emsp; Comorbid already exists!');
+            }
+        });
+    </script>
+    <script>
+        function backKey() {
+            localStorage.setItem("back-hiv-cm", Date.now());
+        }
+        function storageKey() {
+            localStorage.setItem("edit-hiv-cm", Date.now());
+        }
+    </script>
+}

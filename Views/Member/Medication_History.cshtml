@@ -1,0 +1,518 @@
+﻿@model HaloCareCore.Models.ScriptCreationViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Medication history";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+<comment>
+    <!--
+        03 June 2020 -- HCare-1023(Clinical > Patient History > Clinical / Diabetes - HIV > Medicine)
+        New view created as per request - I've used jquery to assist with showing the relvant table depending on which clinical history tab was being accessed ie. IF the user accessed the Diabetes/Medication panel, and clicked on
+        the History button, the Diabetes medication table will be shown in this view. The back button will also then redirect the user back to the Diabetes/Medication panel.
+
+        04 August -- HCare-897(Medication table / Script / Script history)
+
+        27 August -- HCare-1145(Add ChroniLine flag description and auth status to Medicine display)
+
+
+    -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .field-validation-error:before {
+        font-family: FontAwesome;
+        content: "\f06a\00a0";
+        animation: pulse 2s ease infinite;
+    }
+</style>
+<javascript>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://www.jqueryscript.net/demo/jQuery-Plugin-For-Sortable-Bootstrap-Tables-Bootstrap-Sortable/Scripts/bootstrap-sortable.js"></script>
+</javascript>
+<!---------------------------------------------------------------------- header ---------------------------------------------------------------------->
+<nav id="global-nav" class="nav">
+    <div class="pull-left title">
+        <h1 class="site-title_patientProfile">
+            <span><i class="fas fa-prescription"></i>&emsp; Medication</span>
+        </h1>
+    </div>
+    <div class="pull-right title">
+        <h1 class="site-title_userID pull-right">
+            <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+        </h1>
+        <h1 class="site-title_userID pull-right">
+            @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+            {
+                <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+            }
+        </h1>
+        <h1 class="site-waffleIcon pull-right">
+            <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+        </h1>
+    </div>
+</nav>
+
+<div class="dashboardContainer zero-padding">
+    <div class="patientDashboard_View">
+        <!------------------------------------------------------------------------ bread-crumbs ------------------------------------------------------------------------>
+        <ul class="breadcrumbs_patientDashboard">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+            <li><a href="@Url.Action("patientClinical", "Member", new {DependentID = Context.Request.Query["DependentID"]})">Patient</a></li>
+            <li><a href="#">@ViewBag.Title</a></li>
+        </ul>
+
+        <!--------------------------------------------------------------------- left-navigation-bar --------------------------------------------------------------------->
+        @Html.Partial("_navSlider", new { DependentID = Context.Request.Query["DependentID"] })
+
+        <!----------------------------------------------------------------------- nav-collection ----------------------------------------------------------------------->
+        <div class="navCollection_patientDashboard">
+            @Html.Partial("_navCollection")
+        </div>
+
+        <!----------------------------------------------------------------------- patient-profile ----------------------------------------------------------------------->
+        <div class="profileBar">
+            @Html.Action("_profileBar_edit", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })
+        </div>
+    </div>
+    <br />
+    <!----------------------------------------------------------------------- form ----------------------------------------------------------------------->
+    <div class="profilebar-spacer"></div>
+    <div class="patientDashboard_container">
+        <!-- general-medication-table -->
+        <div id="general-medication" class="hidden">
+            <div class="col-md-12 row">
+                <div class="heading-spacer"></div>
+                <div class="col-md-6">
+                    <div class="page-heading">Medication history</div>
+                </div>
+                <!--------------------------------------------------------------------------- jq-search -------------------------------------------------------------------------->
+                <div class="col-md-6 row">
+                    <div class="col-md-6">
+                        <!-------------------------------------------------------------------------- excel export -------------------------------------------------------------------------->
+                        @using (Html.BeginForm("ExportGeneralMedicationHistory", "Member", FormMethod.Post))
+                        {
+                            @Html.HiddenFor(x => x.script.dependentID)
+
+                            <div class="form-group">
+                                <input class="export-excel-icon" type="image" src="~/Content/Images/_2020/icons/microsoft-excel.png" title="export-excel" alt="Submit">
+                            </div>
+                        }
+                    </div>
+                    <div class="col-md-6">
+                        <div class="input-wrapper-new-search">
+                            <input type="text" class="form-control-new-search" id="general-search" onkeyup="myFunction()" placeholder="Search..." />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="row">
+                    <table class="table patient-clinical-history-table sortable" id="scriptHistoryTable">
+                        <thead>
+                            <tr>
+                                <th style="width: 50px; text-align: center!important">@Html.DisplayNameFor(model => model.items[0].icd10code) <i class="fa fa-fw fa-sort"></i></th>
+                                <th style="width: 80px; text-align: center!important">@Html.DisplayNameFor(model => model.items[0].nappiCode) <i class="fa fa-fw fa-sort"></i></th>
+                                <th style="width: 80px">@Html.DisplayNameFor(model => model.items[0].productName) <i class="fa fa-fw fa-sort"></i></th>
+                                <th style="width: 90px">@Html.DisplayNameFor(model => model.items[0].itemStatus) <i class="fa fa-fw fa-sort"></i></th>
+                                <th style="width: 80px">@Html.DisplayNameFor(model => model.items[0].directions) <i class="fa fa-fw fa-sort"></i></th>
+                                <th style="width: 80px; text-align: center!important">@Html.DisplayNameFor(model => model.items[0].fromDate) <i class="fa fa-fw fa-sort"></i></th>
+                                <th style="width: 80px; text-align: center!important">@Html.DisplayNameFor(model => model.items[0].toDate) <i class="fa fa-fw fa-sort"></i></th>
+                                <th style="width: 200px">@Html.DisplayNameFor(model => model.items[0].comment) <i class="fa fa-fw fa-sort"></i></th>
+                                <th style="width: 50px; text-align: center!important">Action</th>
+                            </tr>
+                        </thead>
+
+                        @if (Model.items.Count() == 0)
+                        {
+                            <tr><td colspan="9" style="text-align: center!important; color: rgba(128, 128, 128, 0.50)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="color: rgba(128, 128, 128, 0.50)"></i></span> no records found</td></tr>
+                        }
+                        else
+                        {
+                            foreach (var item in Model.items)
+                            {
+                                <tbody id="general-med-search">
+                                    <tr>
+                                        <td class="text-center">@Html.DisplayFor(modelItem => item.icd10code)</td>
+                                        <td class="text-center">@Html.DisplayFor(modelItem => item.nappiCode)</td>
+                                        <td class="text-left">@Html.DisplayFor(modelItem => item.productName)</td>
+
+                                        <td class="text-left">
+                                            @if (item.itemStatus.ToLower() == "authorised")
+                                            {<span><i class="si-approved fas fa-circle"></i>&nbsp;@Html.DisplayFor(modelItem => item.itemStatus)</span>}
+                                        else if (item.itemStatus.ToLower() == "rejected")
+                                        {<span><i class="si-rejected fas fa-circle"></i>&nbsp;@Html.DisplayFor(modelItem => item.itemStatus)</span>}
+                                    else if (item.itemStatus.ToLower() == "pending")
+                                    {<span><i class="si-pending fas fa-circle"></i>&nbsp;@Html.DisplayFor(modelItem => item.itemStatus)</span>}
+                                        </td>
+                                        <td class="text-left">@Html.DisplayFor(modelItem => item.directions)</td>
+                                        <td class="text-center" data-dateformat="DD-MM-YYYY">@Html.DisplayFor(modelItem => item.fromDate)</td>
+                                        <td class="text-center" data-dateformat="DD-MM-YYYY">@Html.DisplayFor(modelItem => item.toDate)</td>
+                                        <td class="text-left">@Html.DisplayFor(modelItem => item.comment)</td>
+                                        <td class="text-center">
+                                            <input type="submit" id="edit-general-medication" class="link-button" value="Edit" onclick="location.href='@Url.Action("EditMedicationItem", "Member", new { itemId = item.itemNo, pro = Context.Request.Query["pro"] }, null)'" />
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            }
+                        }
+                    </table>
+                </div>
+            </div>
+        </div>
+        <!-- diabetes-medication-table -->
+        <div id="diabetes-medication" class="hidden">
+            <div class="col-md-12 row">
+                <div class="heading-spacer"></div>
+                <div class="col-md-6">
+                    <div class="page-heading">Medication history</div>
+                </div>
+                <!--------------------------------------------------------------------------- jq-search -------------------------------------------------------------------------->
+                <div class="col-md-6 row">
+                    <div class="col-md-6">
+                        <!-------------------------------------------------------------------------- excel export -------------------------------------------------------------------------->
+                        @using (Html.BeginForm("ExportDiabetesMedicationHistory", "Member", FormMethod.Post))
+                        {
+                            @Html.HiddenFor(x => x.script.dependentID)
+
+                            <div class="form-group">
+                                <input class="export-excel-icon" type="image" src="~/Content/Images/_2020/icons/microsoft-excel.png" title="export-excel" alt="Submit">
+                            </div>
+                        }
+                    </div>
+                    <div class="col-md-6">
+                        <div class="input-wrapper-new-search">
+                            <input type="text" class="form-control-new-search" id="diabetes-search" onkeyup="myFunction()" placeholder="Search..." />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="row">
+                    <table class="table patient-clinical-history-table sortable" id="scriptHistoryTable">
+                        <thead>
+                            <tr>
+                            <tr>
+                                <th style="width: 50px; text-align: center!important">@Html.DisplayNameFor(model => model.DiabetesItems[0].icd10code) <i class="fa fa-fw fa-sort"></i></th>
+                                <th style="width: 80px; text-align: center!important">@Html.DisplayNameFor(model => model.DiabetesItems[0].nappiCode) <i class="fa fa-fw fa-sort"></i></th>
+                                <th style="width: 80px">@Html.DisplayNameFor(model => model.DiabetesItems[0].productName) <i class="fa fa-fw fa-sort"></i></th>
+
+                                <th style="width: 90px">@Html.DisplayNameFor(model => model.DiabetesItems[0].itemStatus) <i class="fa fa-fw fa-sort"></i></th>
+                                <th style="width: 80px">@Html.DisplayNameFor(model => model.DiabetesItems[0].directions) <i class="fa fa-fw fa-sort"></i></th>
+                                <th style="width: 80px; text-align: center!important">@Html.DisplayNameFor(model => model.DiabetesItems[0].fromDate) <i class="fa fa-fw fa-sort"></i></th>
+                                <th style="width: 80px; text-align: center!important">@Html.DisplayNameFor(model => model.DiabetesItems[0].toDate) <i class="fa fa-fw fa-sort"></i></th>
+                                <th style="width: 200px">@Html.DisplayNameFor(model => model.DiabetesItems[0].comment) <i class="fa fa-fw fa-sort"></i></th>
+                                <th style="width: 50px; text-align: center!important">Action</th>
+                            </tr>
+                        </thead>
+
+                        @if (Model.DiabetesItems.Count() == 0)
+                        {
+                            <tr><td colspan="9" style="text-align: center!important; color: rgba(128, 128, 128, 0.50)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="color: rgba(128, 128, 128, 0.50)"></i></span> no records found</td></tr>
+                        }
+                        else
+                        {
+                            foreach (var item in Model.DiabetesItems)
+                            {
+                                <tbody id="diabetes-med-search">
+                                    <tr>
+                                        <td class="text-center">@Html.DisplayFor(modelItem => item.icd10code)</td>
+                                        <td class="text-center">@Html.DisplayFor(modelItem => item.nappiCode)</td>
+                                        <td class="text-left">@Html.DisplayFor(modelItem => item.productName)</td>
+
+                                        <td class="text-left">
+                                            @if (item.itemStatus.ToLower() == "authorised")
+                                            {<span><i class="si-approved fas fa-circle"></i>&nbsp;@Html.DisplayFor(modelItem => item.itemStatus)</span>}
+                                        else if (item.itemStatus.ToLower() == "rejected")
+                                        {<span><i class="si-rejected fas fa-circle"></i>&nbsp;@Html.DisplayFor(modelItem => item.itemStatus)</span>}
+                                    else if (item.itemStatus.ToLower() == "pending")
+                                    {<span><i class="si-pending fas fa-circle"></i>&nbsp;@Html.DisplayFor(modelItem => item.itemStatus)</span>}
+                                        </td>
+                                        <td class="text-left">@Html.DisplayFor(modelItem => item.directions)</td>
+                                        <td class="text-center" data-dateformat="DD-MM-YYYY">@Html.DisplayFor(modelItem => item.fromDate)</td>
+                                        <td class="text-center" data-dateformat="DD-MM-YYYY">@Html.DisplayFor(modelItem => item.toDate)</td>
+                                        <td class="text-left">@Html.DisplayFor(modelItem => item.comment)</td>
+                                        <td class="text-center">
+                                            <input type="submit" id="edit-diabetes-medication" class="link-button" value="Edit" onclick="location.href='@Url.Action("EditMedicationItem", "Member", new { itemId = item.itemNo, pro = Context.Request.Query["pro"] }, null)'" />
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            }
+                        }
+                    </table>
+                </div>
+            </div>
+        </div>
+        <!-- hiv-medication-table -->
+        <div id="hiv-medication" class="hidden">
+            <div class="col-md-12 row">
+                <div class="heading-spacer"></div>
+                <div class="col-md-6">
+                    <div class="page-heading">Medication history</div>
+                </div>
+                <!--------------------------------------------------------------------------- jq-search -------------------------------------------------------------------------->
+                <div class="col-md-6 row">
+                    <div class="col-md-6">
+                        <!-------------------------------------------------------------------------- excel export -------------------------------------------------------------------------->
+                        @using (Html.BeginForm("ExportHIVMedicationHistory", "Member", FormMethod.Post))
+                        {
+                            @Html.HiddenFor(x => x.script.dependentID)
+
+                            <div class="form-group">
+                                <input class="export-excel-icon" type="image" src="~/Content/Images/_2020/icons/microsoft-excel.png" title="export-excel" alt="Submit">
+                            </div>
+                        }
+                    </div>
+                    <div class="col-md-6">
+                        <div class="input-wrapper-new-search">
+                            <input type="text" class="form-control-new-search" id="hiv-search" onkeyup="myFunction()" placeholder="Search..." />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="row">
+                    <table class="table patient-clinical-history-table sortable" id="scriptHistoryTable">
+                        <thead>
+                            <tr>
+                                <th style="width: 50px; text-align: center!important">@Html.DisplayNameFor(model => model.HIVItems[0].icd10code) <i class="fa fa-fw fa-sort"></i></th>
+                                <th style="width: 80px; text-align: center!important">@Html.DisplayNameFor(model => model.HIVItems[0].nappiCode) <i class="fa fa-fw fa-sort"></i></th>
+                                <th style="width: 80px">@Html.DisplayNameFor(model => model.HIVItems[0].productName) <i class="fa fa-fw fa-sort"></i></th>
+                                <th style="width: 90px">@Html.DisplayNameFor(model => model.HIVItems[0].itemStatus) <i class="fa fa-fw fa-sort"></i></th>
+                                <th style="width: 80px">@Html.DisplayNameFor(model => model.HIVItems[0].directions) <i class="fa fa-fw fa-sort"></i></th>
+                                <th style="width: 80px; text-align: center!important">@Html.DisplayNameFor(model => model.HIVItems[0].fromDate) <i class="fa fa-fw fa-sort"></i></th>
+                                <th style="width: 80px; text-align: center!important">@Html.DisplayNameFor(model => model.HIVItems[0].toDate) <i class="fa fa-fw fa-sort"></i></th>
+                                <th style="width: 200px">@Html.DisplayNameFor(model => model.HIVItems[0].comment) <i class="fa fa-fw fa-sort"></i></th>
+                                <th style="width: 50px; text-align: center!important">Action</th>
+                            </tr>
+                        </thead>
+
+                        @if (Model.HIVItems.Count() == 0)
+                        {
+                            <tr><td colspan="9" style="text-align: center!important; color: rgba(128, 128, 128, 0.50)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="color: rgba(128, 128, 128, 0.50)"></i></span> no records found</td></tr>
+                        }
+                        else
+                        {
+                            foreach (var item in Model.HIVItems)
+                            {
+                                <tbody id="hiv-med-search">
+                                    <tr>
+                                        <td class="text-center">@Html.DisplayFor(modelItem => item.icd10code)</td>
+                                        <td class="text-center">@Html.DisplayFor(modelItem => item.nappiCode)</td>
+                                        <td class="text-left">@Html.DisplayFor(modelItem => item.productName)</td>
+                                        <td class="text-left">
+                                            @if (item.itemStatus.ToLower() == "authorised")
+                                            {<span><i class="si-approved fas fa-circle"></i>&nbsp;@Html.DisplayFor(modelItem => item.itemStatus)</span>}
+                                        else if (item.itemStatus.ToLower() == "rejected")
+                                        {<span><i class="si-rejected fas fa-circle"></i>&nbsp;@Html.DisplayFor(modelItem => item.itemStatus)</span>}
+                                    else if (item.itemStatus.ToLower() == "pending")
+                                    {<span><i class="si-pending fas fa-circle"></i>&nbsp;@Html.DisplayFor(modelItem => item.itemStatus)</span>}
+                                        </td>
+                                        <td class="text-left">@Html.DisplayFor(modelItem => item.directions)</td>
+                                        <td class="text-center" data-dateformat="DD-MM-YYYY">@Html.DisplayFor(modelItem => item.fromDate)</td>
+                                        <td class="text-center" data-dateformat="DD-MM-YYYY">@Html.DisplayFor(modelItem => item.toDate)</td>
+                                        <td class="text-left">@Html.DisplayFor(modelItem => item.comment)</td>
+                                        <td class="text-center">
+                                            <input type="submit" id="edit-hiv-medication" class="link-button" value="Edit" onclick="location.href='@Url.Action("EditMedicationItem", "Member", new { itemId = item.itemNo, pro = Context.Request.Query["pro"] }, null)'" />
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            }
+                        }
+                    </table>
+                </div>
+            </div>
+        </div>
+        <!-- mh-medication-table -->
+        <div id="mh-medication" class="hidden">
+            <div class="col-md-12 row">
+                <div class="heading-spacer"></div>
+                <div class="col-md-6">
+                    <div class="page-heading">Medication history</div>
+                </div>
+                <!--------------------------------------------------------------------------- jq-search -------------------------------------------------------------------------->
+                <div class="col-md-6 row">
+                    <div class="col-md-6">
+                        <!-------------------------------------------------------------------------- excel export -------------------------------------------------------------------------->
+                        @using (Html.BeginForm("ExportMHMedicationHistory", "Member", FormMethod.Post))
+                        {
+                            @Html.HiddenFor(x => x.script.dependentID)
+
+                            <div class="form-group">
+                                <input class="export-excel-icon" type="image" src="~/Content/Images/_2020/icons/microsoft-excel.png" title="export-excel" alt="Submit">
+                            </div>
+                        }
+                    </div>
+                    <div class="col-md-6">
+                        <div class="input-wrapper-new-search">
+                            <input type="text" class="form-control-new-search" id="mh-search" onkeyup="myFunction()" placeholder="Search..." />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="row">
+                    <table class="table patient-clinical-history-table sortable" id="scriptHistoryTable">
+                        <thead>
+                            <tr>
+                                <th style="width: 50px; text-align: center!important">@Html.DisplayNameFor(model => model.MHItems[0].icd10code) <i class="fa fa-fw fa-sort"></i></th>
+                                <th style="width: 80px; text-align: center!important">@Html.DisplayNameFor(model => model.MHItems[0].nappiCode) <i class="fa fa-fw fa-sort"></i></th>
+                                <th style="width: 80px">@Html.DisplayNameFor(model => model.MHItems[0].productName) <i class="fa fa-fw fa-sort"></i></th>
+                                <th style="width: 90px">@Html.DisplayNameFor(model => model.MHItems[0].itemStatus) <i class="fa fa-fw fa-sort"></i></th>
+                                <th style="width: 80px">@Html.DisplayNameFor(model => model.MHItems[0].directions) <i class="fa fa-fw fa-sort"></i></th>
+                                <th style="width: 80px; text-align: center!important">@Html.DisplayNameFor(model => model.MHItems[0].fromDate) <i class="fa fa-fw fa-sort"></i></th>
+                                <th style="width: 80px; text-align: center!important">@Html.DisplayNameFor(model => model.MHItems[0].toDate) <i class="fa fa-fw fa-sort"></i></th>
+                                <th style="width: 200px">@Html.DisplayNameFor(model => model.MHItems[0].comment) <i class="fa fa-fw fa-sort"></i></th>
+                                <th style="width: 50px; text-align: center!important">Action</th>
+                            </tr>
+                        </thead>
+
+                        @if (Model.MHItems.Count() == 0)
+                        {
+                            <tr><td colspan="9" style="text-align: center!important; color: rgba(128, 128, 128, 0.50)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="color: rgba(128, 128, 128, 0.50)"></i></span> no records found</td></tr>
+                        }
+                        else
+                        {
+                            foreach (var item in Model.MHItems)
+                            {
+                                <tbody id="mh-med-search">
+                                    <tr>
+                                        <td class="text-center">@Html.DisplayFor(modelItem => item.icd10code)</td>
+                                        <td class="text-center">@Html.DisplayFor(modelItem => item.nappiCode)</td>
+                                        <td class="text-left">@Html.DisplayFor(modelItem => item.productName)</td>
+                                        <td class="text-left">
+                                            @if (item.itemStatus.ToLower() == "authorised")
+                                            {<span><i class="si-approved fas fa-circle"></i>&nbsp;@Html.DisplayFor(modelItem => item.itemStatus)</span>}
+                                        else if (item.itemStatus.ToLower() == "rejected")
+                                        {<span><i class="si-rejected fas fa-circle"></i>&nbsp;@Html.DisplayFor(modelItem => item.itemStatus)</span>}
+                                    else if (item.itemStatus.ToLower() == "pending")
+                                    {<span><i class="si-pending fas fa-circle"></i>&nbsp;@Html.DisplayFor(modelItem => item.itemStatus)</span>}
+                                        </td>
+                                        <td class="text-left">@Html.DisplayFor(modelItem => item.directions)</td>
+                                        <td class="text-center" data-dateformat="DD-MM-YYYY">@Html.DisplayFor(modelItem => item.fromDate)</td>
+                                        <td class="text-center" data-dateformat="DD-MM-YYYY">@Html.DisplayFor(modelItem => item.toDate)</td>
+                                        <td class="text-left">@Html.DisplayFor(modelItem => item.comment)</td>
+                                        <td class="text-center">
+                                            <input type="submit" id="edit-hiv-medication" class="link-button" value="Edit" onclick="location.href='@Url.Action("EditMedicationItem", "Member", new { itemId = item.itemNo, pro = Context.Request.Query["pro"] }, null)'" />
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            }
+                        }
+                    </table>
+                </div>
+            </div>
+        </div>
+        <br />
+        <br />
+        <div class="form-group">
+            <div style="text-align: center; margin-bottom: 1%">
+                <input value="Back" class="btn bck-button go_back" onclick="backKey()" style="width: 15%!important" />
+            </div>
+        </div>
+        <br />
+    </div>
+</div>
+
+
+
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <!-- hidden-tables -->
+    <script>
+        $(document).ready(function () {
+            if (localStorage.key(0) == "history_medication") {
+                $('#general-medication').removeClass('hidden');
+            }
+            if (localStorage.key(0) == "history_diabetes_medication") {
+                $('#diabetes-medication').removeClass('hidden');
+            }
+            if (localStorage.key(0) == "history_hiv_medication") {
+                $('#hiv-medication').removeClass('hidden');
+            }
+            if (localStorage.key(0) == "history_mh_medication") {
+                $('#mh-medication').removeClass('hidden');
+            }
+        });
+    </script>
+    <!-- local-storage-redirect -->
+    <script>
+        function backKey() {
+            if (localStorage.key(0) == "history_medication") {
+                localStorage.clear();
+                localStorage.removeItem("history_medication");
+                localStorage.setItem("back_medication", Date.now());
+            }
+            if (localStorage.key(0) == "history_diabetes_medication") {
+                $('#diabetes-medication').removeClass('hidden');
+                localStorage.clear();
+                localStorage.removeItem("history_diabetes_medication");
+                localStorage.setItem("back_diabetes_medication", Date.now());
+            }
+            if (localStorage.key(0) == "history_hiv_medication") {
+                $('#hiv-medication').removeClass('hidden');
+                localStorage.clear();
+                localStorage.removeItem("history_hiv_medication");
+                localStorage.setItem("back_hiv_medication", Date.now());
+            }
+            if (localStorage.key(0) == "history_mh_medication") {
+                $('#mh-medication').removeClass('hidden');
+                localStorage.clear();
+                localStorage.removeItem("history_mh_medication");
+                localStorage.setItem("back_mh_medication", Date.now());
+            }
+        }
+    </script>
+
+    <script src="js/jquery.tablesorter.min.js"></script>
+    <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+    <script>
+        $(document).ready(function () {
+            $("#general-search").on("keyup", function () {
+                var diabvalue = $(this).val().toLowerCase();
+                $("#general-med-search tr").filter(function () {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(diabvalue) > -1)
+                });
+            });
+        });
+    </script>
+    <script>
+        $(document).ready(function () {
+            $("#diabetes-search").on("keyup", function () {
+                var diabvalue = $(this).val().toLowerCase();
+                $("#diabetes-med-search tr").filter(function () {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(diabvalue) > -1)
+                });
+            });
+        });
+    </script>
+    <script>
+        $(document).ready(function () {
+            $("#hiv-search").on("keyup", function () {
+                var hivvalue = $(this).val().toLowerCase();
+                $("#hiv-med-search tr").filter(function () {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(hivvalue) > -1)
+                });
+            });
+        });
+    </script>
+    <script>
+        $(document).ready(function () {
+            $("#mh-search").on("keyup", function () {
+                var mhvalue = $(this).val().toLowerCase();
+                $("#mh-med-search tr").filter(function () {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(mhvalue) > -1)
+                });
+            });
+        });
+    </script>
+
+}
+
+
+

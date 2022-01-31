@@ -1,0 +1,577 @@
+﻿@model HaloCareCore.Models.coMorbidViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "EditComorbid";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<comment>
+    <!--
+    12 June 2019 -- HCare-722 (Change "Follow up" to red on patient history drop-down menus)
+    I have added alert badges that draw the users attention to the fields that are either marked with a follow up or that are empty/null.
+
+    12 June 2019 -- HCare-723 (Removing follow up lines from the patient history drop-down menus)
+    As per a discussion held with Mercia, we are not able to conduct the required as per the SR. Should a user uncheck the “Active” checkbox, the entry will be removed from the view entirely.
+    The issue is that the user needs to be aware of the word Follow up in the patient clinical dropdown table and EDIT the entry rather than adding a new entry. Mercia and I did however notice
+    that the CoMorbid edit view was not allowing the user to uncheck the Active checkbox per coMorbid entry which has been corrected using this SR number instead.
+    *NB* The purpose of the patient clinical / Clinical History tables is to view the history of the different sections and not to remove the entries after they have been edited. This SR has been
+    overwritten to only have corrected the CoMorbid Edit function with regard to the Active checkbox.
+
+    06 August 2019 -- HCare-758(Generel - Redirect to tab functionality)
+    Using jquery to add localStorage in order to redirect to the last tab that the user was on and a Submit/Save Button clicked. This will take you back to the origin tab.
+
+    30 December 2019 -- HCare-894(Co-Morbidities Patient Clinical / patient history)
+    The user will not be able to select the same CoMorbid from the dropdown list unless there is an end date for existing comorbid. ie. If the member has a history of comorbid, the Add/Edit comorbid view will exclude the all historic comorbids from the dropdown list unless an end date
+    has been recorded for that comorbid. The dropdown in the Edit view is disabled unless the option selected is a Follow up in the dropdown. This will allow the user to change in the event that a follow up was selected from the Questionnaire. The Questionnaire's dropdown for the comorbids
+    will follow the same logic.
+
+    06 March 2020 -- HCare-894(Co-Morbidities Patient Clinical / patient history)
+    Adjustments made to the process regarding the CoMorbids. The manual addition of the comorbid condition and its ICD-10 has been split that the user can only add the condition if the condition has not been added before and will then be required to select an ICD-10 which is populated based 
+    on the condition selected. Additionally, date overlap validation has been added to the Create and Edit function. If the entry has an end-date added to it, this will allow the user to add the condition again. In order to avoid any duplication, the effective and end-date field will be a required
+    field should it have an effective and end-date already added. ie. When you access an entry to edit, and either the start or end-date is populated, the user will not be able to remove this date.
+
+
+    -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .select2-container {
+        border: none !important;
+    }
+
+        .select2-container:focus {
+            outline: none !important
+        }
+
+    .select2-container--default .select2-selection--single {
+        display: block !important;
+        max-width: 500px !important;
+        width: 100% !important;
+        max-height: 100px !important;
+        height: 30px !important;
+        margin-top: 5px !important;
+        margin-left: 10px !important;
+        padding: 6px 6px !important;
+        line-height: 1.428571429 !important;
+        color: #003366 !important;
+        border-radius: 0px !important;
+        border: none !important;
+        border-bottom: 1px solid #e8e6e6 !important;
+        background-color: transparent !important;
+        font-family: 'Century Gothic' !important;
+        -webkit-box-shadow: none !important;
+        box-shadow: none !important;
+    }
+
+        .select2-container--default .select2-selection--single:focus {
+            outline: none !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__placeholder {
+            color: white !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow b {
+            margin-top: -0px !important;
+        }
+
+    .field-validation-error:before {
+        font-family: FontAwesome;
+        content: "\f06a\00a0";
+        animation: pulse 2s ease infinite;
+    }
+
+    #datecheck:before,
+    #effdatecheck:before {
+        font-family: FontAwesome;
+        content: "\f06a\00a0";
+        animation: pulse 2s ease infinite;
+    }
+</style>
+<javascript>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css" integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">
+</javascript>
+
+<!----------------------------------------------------------------------------- html-top-navigation-panel  ---------------------------------------------------------------------------->
+<nav id="global-nav" class="nav">
+    <div class="pull-left title">
+        <h1 class="site-title_patientProfile">
+            <span><i class="fa fa-notes-medical"></i></span>&emsp; CoMorbid conditions
+        </h1>
+    </div>
+    <div class="pull-right title">
+        <h1 class="site-title_userID pull-right">
+            <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+        </h1>
+        <h1 class="site-title_userID pull-right">
+            @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+            {
+                <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+            }
+        </h1>
+        <h1 class="site-waffleIcon pull-right">
+            <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+        </h1>
+    </div>
+</nav>
+
+<!-------------------------------------------------------------------------------------- html-body ------------------------------------------------------------------------------------>
+<div class="dashboardContainer zero-padding">
+    <div class="patientDashboard_View">
+
+        <!--breadCrumbs-->
+        <ul class="breadcrumbs_patientDashboard">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+            <li><a class="go_back">Patient</a></li>
+            <li><a href="#">Co-Morbid</a></li>
+        </ul>
+
+        <!--Left navSlider -->
+        @Html.Partial("_navSlider_blank", new { })
+
+        <!--navCollection-->
+        <div class="navCollection_patientDashboard">
+            @Html.Partial("_navCollection")
+        </div>
+
+        <!--profileInformation-->
+        <div class="profileBar">
+            @Html.Action("_profileBar_edit", "Member", new { DependentID = Model.coMormidCondition.dependantID, pro = Context.Request.Query["pro"] })
+        </div>
+    </div>
+
+    <div class="profilebar-spacer-assignment"></div>
+
+    <!------------------------------------------------------------------------------------ form ----------------------------------------------------------------------------------->
+    <div class="patientDashboard_container">
+        <h4 class="tableHeading">Edit CoMorbid</h4>
+        <hr class="fancyruler">
+        <br />
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+            <div class="form-horizontal editForm">
+                <div class="hidden-fields">
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                    @Html.HiddenFor(model => model.coMormidCondition.id)
+                    @Html.HiddenFor(model => model.coMormidCondition.coMorbidId)
+                    @Html.HiddenFor(model => model.coMormidCondition.dependantID)
+                    @Html.HiddenFor(model => model.coMormidCondition.createdDate)
+                    @Html.HiddenFor(model => model.coMormidCondition.createdBy)
+                    @Html.HiddenFor(model => model.coMormidCondition.programType)
+                    @Html.Hidden("comorbidID", (object)ViewBag.CoMorbidID)
+                </div>
+
+                <!-- condition -->
+                <div>
+                    @if (Model.coMorbidConditionVM.CMConditionId == 99998)
+                    {
+                        <div id="warning_required_followUp">
+                            <i class="fas fa-exclamation-circle pulser asterisk-warning-single"></i>
+                        </div>
+                    }
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.coMorbidType.condition, htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-9">
+                            @if (Model.coMorbidConditionVM.CMConditionId == 99998)
+                            {
+                                @Html.DropDownList("comorb", null, Model.coMorbidConditionVM.Condition, htmlAttributes: new { @class = "", @onchange = "FillICD()", @name = "comorb" })
+                                @Html.ValidationMessage("comorb", "", new { @class = "text-danger", @style = "font-size: 110%; margin-left: 1%" })
+                            }
+                            else
+                            {
+                                @Html.DropDownList("comorb", null, Model.coMorbidConditionVM.Condition, htmlAttributes: new { @class = "", @disabled = "disabled", @onchange = "FillICD()", @name = "comorb" })
+                                @Html.ValidationMessage("comorb", "", new { @class = "text-danger", @style = "font-size: 110%; margin-left: 1%" })
+                                <i class="fas fa-question-circle information-icon" data-toggle="tooltip" data-original-title="This field is disabled"></i>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <!-- icd-10 -->
+                <div>
+                    <div id="warning_required_condition" class="hidden">
+                        <i class="fas fa-exclamation-circle pulser asterisk-warning-single"></i>
+                    </div>
+                    <div class="form-group">
+                        @Html.Label(null, "ICD-10", htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-9">
+                            @Html.DropDownList("icd10", null, Model.coMorbidConditionVM.icd10, htmlAttributes: new { @class = "", @name = "icd10" })
+                            @Html.ValidationMessage("icd10", "", new { @class = "text-danger", @style = "font-size: 110%;margin-left: 1%" })
+                        </div>
+                    </div>
+                </div>
+                <!-- effective-date -->
+                @if (Model.coMormidCondition.effectiveDate != null)
+                {
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.coMormidCondition.effectiveDate, htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-9">
+                            <input class="form-control-new startDate" data-val="true" id="coMormidCondition_effectiveDate" name="coMormidCondition.effectiveDate" value="@string.Format("{0:yyyy-MM-dd}", Model.coMormidCondition.effectiveDate)" type="date" min="1900-01-01" aria-required="true" aria-invalid="true" max="@DateTime.Now.ToString("yyyy-MM-dd")" required> @*Hacare-904*@
+                            @Html.ValidationMessageFor(model => model.coMormidCondition.effectiveDate, "", new { @class = "text-danger", @style = "font-size: 110%;margin-left: 1%" })
+                            <div id="effdatecheck" class="text-danger hidden" style="font-size: 95%;margin-left: 1%; margin-top: -1%"></div>
+
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.coMormidCondition.effectiveDate, htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-9">
+                            <input class="form-control-new startDate" data-val="true" id="coMormidCondition_effectiveDate" name="coMormidCondition.effectiveDate" value="@string.Format("{0:yyyy-MM-dd}", Model.coMormidCondition.effectiveDate)" type="date" aria-required="true" aria-invalid="true" min="1900-01-01" max="@DateTime.Now.ToString("yyyy-MM-dd")"> @*HCare-904*@
+                            @Html.ValidationMessageFor(model => model.coMormidCondition.effectiveDate, "", new { @class = "text-danger", @style = "font-size: 110%;margin-left: 1%" })
+                            <div id="effdatecheck" class="text-danger hidden" style="font-size: 95%;margin-left: 1%; margin-top: -1%"></div>
+
+                        </div>
+                    </div>
+                }
+                <!-- end-date -->
+                @if (Model.coMormidCondition.treatementEndDate != null)
+                {
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.coMormidCondition.treatementEndDate, htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-9">
+                            <input class="form-control-new endDate" data-val="true" id="coMormidCondition_treatementEndDate" name="coMormidCondition.treatementEndDate" value="@string.Format("{0:yyyy-MM-dd}", Model.coMormidCondition.treatementEndDate)" type="date" aria-required="true" aria-invalid="true" min="1900-01-01" required> @*Hcare-904*@
+                            @Html.ValidationMessageFor(model => model.coMormidCondition.treatementEndDate, "", new { @class = "text-danger", @style = "font-size: 110%;margin-left: 1%" })
+                            <div id="datecheck" class="text-danger hidden" style="font-size: 95%;margin-left: 1%; margin-top: -1%"></div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.coMormidCondition.treatementEndDate, htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-9">
+                            <input class="form-control-new endDate" data-val="true" id="coMormidCondition_treatementEndDate" name="coMormidCondition.treatementEndDate" value="@string.Format("{0:yyyy-MM-dd}", Model.coMormidCondition.treatementEndDate)" type="date" aria-required="true" aria-invalid="true" min="1900-01-01"> @*HCare-904*@
+                            @Html.ValidationMessageFor(model => model.coMormidCondition.treatementEndDate, "", new { @class = "text-danger", @style = "font-size: 110%;margin-left: 1%" })
+                            <div id="datecheck" class="text-danger hidden" style="font-size: 95%;margin-left: 1%; margin-top: -1%"></div>
+                        </div>
+                    </div>
+                }
+                <div style="margin-bottom: 1.5%"></div>
+                <!-- comment -->
+                <div id="anchor_clinComment">
+                    <div id="warning_required_comment" class="hidden">
+                        <i class="fas fa-exclamation-circle pulser asterisk-warning-single"></i>
+                    </div>
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.coMormidCondition.generalComments, htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-9">
+                            <div class="">
+                                @Html.TextAreaFor(model => model.coMormidCondition.generalComments, new { @placeholder = "comment", @class = "form-control-new" })
+                                @Html.ValidationMessageFor(model => model.coMormidCondition.generalComments, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- follow-up -->
+                @if (Model.coMormidCondition.followUp == true)
+                {
+                    <div id="warning_required_followUp">
+                        <i class="fas fa-exclamation-circle pulser asterisk-warning-single"></i>
+                    </div>
+                }
+                <div class="form-group">
+                    @Html.LabelFor(model => model.coMormidCondition.followUp, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-9">
+                        <div class="checkbox">
+                            @Html.EditorFor(model => model.coMormidCondition.followUp)
+                            @Html.ValidationMessageFor(model => model.coMormidCondition.followUp, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+                <!-- active -->
+                <div class="form-group">
+                    @Html.LabelFor(model => model.coMormidCondition.active, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-9">
+                        <div class="checkbox">
+                            @Html.EditorFor(model => model.coMormidCondition.active)
+                            @Html.ValidationMessageFor(model => model.coMormidCondition.active, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+                <!-- submit -->
+                <div class="fixedBack" style="margin-left: 44%">
+                    <input value="Back" class="btn buttonRound_formBack go_back" onclick="backKey()" style="width: 15%!important" />
+                    <input type="submit" value="Save" class="btn buttonRound_formCreate patientClinical" onclick="storageKey()" style="width: 15%!important" />
+                </div>
+
+            </div>
+        }
+    </div>
+</div>
+
+@section scripts{
+    <script src="~/bundles/jqueryui"></script>
+    <style src="~/Content/themes/base/css" )
+
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+
+    @if (ViewBag.Message != null)
+    {
+        <script type="text/javascript">
+
+        window.onload = function () {
+            toastr.options.positionClass = 'toast-bottom-right';
+            toastr.options.timeOut = 10000;
+
+            toastr.error("@ViewBag.Message");
+
+        }
+        </script>
+    }
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.7.1/js/bootstrap-datepicker.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+
+    <!--Select dropdowns-->
+    <script>
+        $(document).ready(function () { $("#coMorbids").select2({ multiple: false }); });
+        $(document).ready(function () { $("#comorb").select2({ multiple: false }); });
+        $(document).ready(function () { $("#icd10").select2({ multiple: false }); });
+    </script>
+    <!--Date/Back/Slider-->
+    <script>
+        $(function () {
+            $('.input-group.date').datepicker({
+                format: "dd M yyyy",
+                showButtonPanel: true,
+                autoclose: true,
+                endDate: new Date()
+            });
+        });
+
+    </script>
+    <!-- alerts -->
+    <script>
+        //condition
+        $(document).ready(function () {
+            setInterval(function () {
+                if ($("#coMormidCondition_generalComments").val() == "" || $("#coMormidCondition_generalComments").val() == null || $("#coMormidCondition_generalComments").val().toLowerCase() == "follow up") {
+                    $("#warning_required_comment").removeClass('hidden');
+                }
+                else {
+                    $("#warning_required_comment").addClass('hidden');
+                }
+            }, 0);
+        });
+
+        //followUp condition field
+        $(document).ready(function () {
+            setInterval(function () {
+                if ($("#comorb").val() == "99998") {
+                    $('#warning_Condition').removeClass('houdini'),
+                        $("#coMorbidDD").addClass('followUPs'),
+                        $('#anchor_warning_FullScreen').removeClass('houdini');
+                }
+                else if ($("#comorb").val() == "99999") {
+                    $('#warning_Condition').removeClass('houdini'),
+                        $("#coMorbidDD").addClass('followUPs'),
+                        $('#anchor_warning_FullScreen').removeClass('houdini');
+                }
+                else {
+                    $('#warning_Condition').addClass('houdini'),
+                        $("#coMorbidDD").removeClass('followUPs'),
+                        $('#anchor_warning_FullScreen').addClass('houdini');
+
+
+                }
+            }, 0);
+        });
+
+        //followUp condition field
+        //$(document).ready(function () {
+        //    setInterval(function () {
+        //        if ($("#coMorbids").val() == "99998") {
+        //            $('#warning_Condition').removeClass('houdini'),
+        //                $("#coMorbidDD").addClass('followUPs'),
+        //                $('#anchor_warning_FullScreen').removeClass('houdini');
+        //        }
+        //        else if ($("#coMorbids").val() == "99999") {
+        //            $('#warning_Condition').removeClass('houdini'),
+        //                $("#coMorbidDD").addClass('followUPs'),
+        //                $('#anchor_warning_FullScreen').removeClass('houdini');
+        //        }
+        //        else {
+        //            $('#warning_Condition').addClass('houdini'),
+        //                $("#coMorbidDD").removeClass('followUPs'),
+        //                $('#anchor_warning_FullScreen').addClass('houdini');
+
+
+        //        }
+        //    }, 0);
+        //});
+
+        //followUp comments field
+        $(document).ready(function () {
+            setInterval(function () {
+                if ($("#coMormidCondition_generalComments").val().toLowerCase() == "follow up") {
+                    $("#coMormidCondition_generalComments").addClass('warningFont'),
+                        $('#warning_generalComment').removeClass('houdini'),
+                        $('#comment_anchor').removeClass('houdini');
+                }
+                else if ($("#coMormidCondition_generalComments").val().toLowerCase() == "") {
+                    $('#warning_generalComment').removeClass('houdini'),
+                        $('#comment_anchor').removeClass('houdini');
+                }
+                else if ($("#coMormidCondition_generalComments").val().toLowerCase() == null) {
+                    $('#warning_generalComment').removeClass('houdini'),
+                        $('#comment_anchor').removeClass('houdini');
+                }
+                else {
+                    $("#coMormidCondition_generalComments").removeClass('warningFont'),
+                        $('#coMormidCondition_generalComments').addClass('fontUpdate'),
+                        $('#warning_generalComment').addClass('houdini'),
+                        $('#comment_anchor').addClass('houdini');
+
+                }
+            }, 0);
+        });
+
+        //followUp field
+        $(document).ready(function () {
+            setInterval(function () {
+                $('#coMormidCondition_followUp').change(function () {
+                    if (this.checked)
+                        $('#warning_followUp').removeClass('houdini'),
+                            $('#warning_anchor').removeClass('houdini');
+
+                    else
+                        $('#warning_followUp').addClass('houdini'),
+                            $('#warning_anchor').addClass('houdini');
+
+
+                });
+            }, 0);
+        });
+
+    </script>
+    <!-- highlightLinking -->
+    <script>
+        //anchor_condition
+        $("#commentLink").click(function () {
+            $('#coMormidCondition_generalComments').toggleClass('textBox_highlight');
+            setTimeout(function () {
+                $('#coMormidCondition_generalComments').toggleClass('textBox_highlight');
+            }, 300);
+        });
+    </script>
+    <!-- tooltip -->
+    <script>
+        $(document).ready(function () {
+            $('[data-toggle="tooltip"]').tooltip({
+                placement: 'top'
+            });
+        });
+    </script>
+    <!-- local-storage-redirect -->
+    <script>
+        function backKey() {
+            localStorage.setItem("back_comorbid", Date.now());
+        }
+        function storageKey() {
+            localStorage.setItem("edit_comorbid", Date.now());
+        }
+    </script>
+    <!-- icd-10 fill -->
+    <script>
+        function FillICD() {
+            var stateId = $('#comorb').val();
+            var id = $('#coMormidCondition_id').val();
+            var depID = $('#coMormidCondition_dependantID').val();
+            $.ajax({
+                url: '/Member/FillICD10_Add',
+                type: "GET",
+                dataType: "JSON",
+                data: { condition: stateId, dependantID: depID },
+                success: function (options) {
+                    $("#icd10").html(""); // clear before appending new list
+                    $.each(options, function (i, option) {
+                        $("#icd10").append(
+                            $('<option></option>').val(option.id).html(option.icd10));
+                    });
+                }
+            });
+        }
+    </script>
+    <!-- date-validation -->
+    <script>
+        $(".startDate").change(function () {
+            var start = $("#coMormidCondition_effectiveDate").val();
+            var end = $("#coMormidCondition_treatementEndDate").val();
+
+            if (end == "") { }
+            else {
+                if (end < start) {
+                    $('#datecheck').removeClass('hidden');
+                    $("#datecheck").html('Treatment end date cannot precede Effective date.');
+                    return false;
+                }
+                else {
+                    $('#datecheck').addClass('hidden');
+                }
+            }
+
+            // start-date null check if end date is populated??
+            //if (end == "") {
+            //}
+            //else {
+            //    if (start == "") {
+            //        $("[name='coMormidCondition.effectiveDate']").attr("required", true);
+            //        $('#effdatecheck').removeClass('hidden');
+            //        $("#effdatecheck").html('Effective date is required if Treatement end date is populated.');
+            //        return false;
+            //    }
+            //    else {
+            //        $('#effdatecheck').addClass('hidden');
+            //        $("[name='coMormidCondition.effectiveDate']").attr("required", false);
+            //    }
+            //}
+
+        });
+
+        $(".endDate").change(function () {
+            var start = $("#coMormidCondition_effectiveDate").val();
+            var end = $("#coMormidCondition_treatementEndDate").val();
+
+            if (end == "") { }
+            else {
+                if (end < start) {
+                    $('#datecheck').removeClass('hidden');
+                    $("#datecheck").html('Treatment end date cannot precede Effective date.');
+                    return false;
+                }
+                else {
+                    $('#datecheck').addClass('hidden');
+                }
+            }
+
+            // start-date null check if end date is populated??
+            //if (end == "") {
+            //}
+            //else {
+            //    if (start == "") {
+            //        $("[name='coMormidCondition.effectiveDate']").attr("required", true);
+            //        $('#effdatecheck').removeClass('hidden');
+            //        $("#effdatecheck").html('Effective date is required if Treatement end date is populated.');
+            //        return false;
+            //    }
+            //    else {
+            //        $('#effdatecheck').addClass('hidden');
+            //        $("[name='coMormidCondition.effectiveDate']").attr("required", false);
+            //    }
+            //}
+
+        });
+    </script>
+
+}

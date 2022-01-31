@@ -1,0 +1,182 @@
+﻿@model IEnumerable<HaloCareCore.Models.Validation.AssignmentItemTypes>
+
+@{
+    ViewBag.Title = "Index_AssignmentItem";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<div class="fullScreen zero-padding">
+    <div class="whitePanel">
+
+        <!--breadCrumbs-->
+        <ul class="breadcrumbs">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Administration", new {})">Settings</a></li>
+            <li><a href="#">Assignment Item Types</a></li>
+        </ul>
+
+        <!--funcationlActionButton-->
+        @Html.Partial("_FAB")
+
+        <!--pageHeader-->
+
+        <div class="container zero-padding">
+            <div class="topBar_reports img-responsive">
+                <h2>Assignment Items</h2>
+                <img src="~/Content/Images/Icons/Administration/assignmentItemType_White.png" style="width: 2.8%; margin-top: -0.8%;" />
+                <img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" style="width: 8%; float: right; margin-right: 100px; margin-top: 3px" />
+            </div>
+        </div>
+
+        <div style="margin-bottom: 2%"></div>
+
+        <h4 class="tableHeading">Assignment Item Types</h4>
+
+        <!--addNew-->
+        <div class="addTable_Button">
+            <a href="@Url.Action("Create_AssignmentItem", "Tasks", new { })">
+                <i id="ico" class="far fa-plus-square"></i>
+                <span id="text">&nbsp; Add</span>
+            </a>
+        </div>
+
+        <!--Search-->
+        <div class="indexSearch" style="margin-top:-5.5%!important">
+            <label for="tableSearch" class="control-label"></label> <input type="text" class="form-control-search" id="search" onkeyup="myFunction()" placeholder="Search..." style="width: 150px; margin-top: 1.6%; margin-left: 87%; position: relative" />
+            <div class="searchIcon">
+                <img src="~/Content/Images/memberProfile/Search_gray.png" style="width: 0.8%!important; margin-left: 95.5%; margin-top: -3.5%; position: relative" />
+            </div>
+        </div>
+
+        <!--addSymbol-->
+
+        <br />
+
+        <table class="table indexTable" id="table">
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.assignmentItemType) <i class="fa fa-fw fa-sort"></i>
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.itemDescription) <i class="fa fa-fw fa-sort"></i>
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.sourceType) <i class="fa fa-fw fa-sort"></i>
+                </th>
+                <th style="text-align: center!important">
+                    @Html.DisplayNameFor(model => model.active)
+                </th>
+                <th style="text-align: center!important">
+                    Action
+                </th>
+            </tr>
+
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.assignmentItemType)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.itemDescription)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.sourceType)
+                    </td>
+                    <td class="activeCheck">
+
+                        @if (item.active)
+                        {
+                            <img src="~/Content/Images/Navigation/5. Reports/reportCheck.png" />
+                        }
+                        else
+                        {
+                            <img src="~/Content/Images/Navigation/5. Reports/reportCheck_x.png" />
+                        }
+
+                    </td>
+                    <td class="linkNav" style="text-align: center!important">
+                        @Html.ActionLink("Edit", "Edit_AssignmentItem", new { id = item.assignmentItemType })
+                    </td>
+                </tr>
+            }
+
+        </table>
+        <div class="pageBack">
+            <input value="Back" class="btn buttonRound_formBack go_back" style="width: 15%!important" />
+        </div>
+    </div>
+</div>
+
+<script src="js/jquery.tablesorter.min.js"></script>
+
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <script>
+
+        var $rows = $('#table tr');
+        $('#search').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $rows.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+
+
+        function sortTable(n) {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("table");
+            switching = true;
+            dir = "asc";
+
+            while (switching) {
+                switching = false;
+                rows = table.getElementsByTagName("TR");
+
+                for (i = 1; i < (rows.length - 1); i++) {
+
+                    shouldSwitch = false;
+
+                    x = rows[i].getElementsByTagName("TD")[n];
+                    y = rows[i + 1].getElementsByTagName("TD")[n];
+
+                    if (dir == "asc") {
+                        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                            //if so, mark as a switch and break the loop:
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (dir == "desc") {
+                        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                            //if so, mark as a switch and break the loop:
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+                if (shouldSwitch) {
+                    /*If a switch has been marked, make the switch
+                    and mark that a switch has been done:*/
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                    //Each time a switch is done, increase this count by 1:
+                    switchcount++;
+                } else {
+                    /*If no switching has been done AND the direction is "asc",
+                    set the direction to "desc" and run the while loop again.*/
+                    if (switchcount == 0 && dir == "asc") {
+                        dir = "desc";
+                        switching = true;
+                    }
+                }
+            }
+        }
+
+
+
+
+    </script>
+}

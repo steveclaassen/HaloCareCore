@@ -1,0 +1,60 @@
+﻿@model HaloCareCore.Models.ViewModels.AccountSetupStep2ViewModal
+
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(model => model.accountId, new { htmlAttributes = new { @class = "form-control" } })
+
+    <div class="form-horizontal">
+        <h4>AccountSetupStep2ViewModal</h4>
+        <hr />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        <table class="table userTable" id="tableUser">
+            <tr>
+                <th onclick="userTable(0)">
+                    @Html.DisplayNameFor(model => model.medicalAids[0].Name) <i class="fa fa-fw fa-sort"></i>
+                </th>
+                <th onclick="userTable(1)">
+                    @Html.DisplayNameFor(model => model.medicalAids[0].allowAuth) <i class="fa fa-fw fa-sort"></i>
+                </th>
+                <th style="text-align: center!important">
+                    Status
+                </th>
+                <th style="text-align: center!important">
+                    Action
+                </th>
+            </tr>
+
+            @foreach (var item in Model.medicalAids)
+            {
+                <tr>
+                    <td>
+                        @Html.HiddenFor(modelItem => item.medicalAidID)
+                        @Html.DisplayFor(modelItem => item.Name)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.allowAuth)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.selectedPrograms)
+                    </td>
+                    <td class="statusCode linkNav" style="text-align: center!important">
+                        @Html.ActionLink("Edit", "AccountSetupMedicalAid", new { id = item.Id })
+                    </td>
+                </tr>
+            }
+
+        </table>
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Next" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script src="~/bundles/jqueryval"></script>
+}

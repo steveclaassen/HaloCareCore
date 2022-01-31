@@ -1,0 +1,217 @@
+﻿@model HaloCareCore.Models.Validation.TaskTypeRequirements
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Edit_TaskRequirement";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .field-validation-error:before {
+        font-family: FontAwesome;
+        content: "\f06a\00a0";
+        animation: pulse 2s ease infinite;
+    }
+
+    .error-alert {
+        width: 100%;
+        margin: 0 auto;
+        background-color: rgba(217, 83, 79, 0.1);
+        padding: 10px;
+        border-left-color: #d9534f !important;
+        border: 1px solid transparent;
+        border-left-width: 5px;
+        border-radius: 3px;
+        margin: 0 auto;
+        font-family: 'Open Sans', sans-serif;
+        font-size: 12px;
+        margin: 0 0 5px 0;
+        margin-top: -10px;
+        margin-bottom: 20px;
+    }
+
+        .error-alert span {
+            color: #d9534f;
+            text-align: center;
+        }
+
+    .form-control-new-tr {
+        display: block;
+        max-width: 1000px !important;
+        width: 100%;
+        margin-top: 5px;
+        margin-left: 10px;
+        padding: 6px 6px;
+        line-height: 1.428571429;
+        color: #003366;
+        border-radius: 0px;
+        border: none;
+        border-bottom: 1px solid #e8e6e6;
+        background-color: transparent !important;
+        font-family: 'Century Gothic' !important;
+    }
+</style>
+<javascript>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+</javascript>
+
+<div class="fullScreen_container zero-padding">
+
+    <!--pageHeader-->
+    <nav id="global-nav" class="nav">
+        <div class="pull-left title">
+            <h1 class="site-title_patientProfile">
+                <span><i class="fas fa-thumbtack"></i></span>&emsp; Task requirements
+            </h1>
+        </div>
+        <div class="pull-right title">
+            <h1 class="site-title_userID pull-right">
+                <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+            </h1>
+            <h1 class="site-title_userID pull-right">
+                @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                {
+                    <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                }
+            </h1>
+            <h1 class="site-waffleIcon pull-right">
+                <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+            </h1>
+        </div>
+    </nav>
+    <!--breadCrumbs-->
+    <ul class="breadcrumbs_fullScreens">
+        <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+        <li><a href="@Url.Action("Index", "Administration", new {})">Settings</a></li>
+        <li><a href="@Url.Action("Index_AssignmentType", "Tasks", new {})">Task requirements</a></li>
+        <li><a href="#">Edit</a></li>
+    </ul>
+    <!--navCollection-->
+    <div class="navCollection_fullScreens">
+        @Html.Partial("_navCollection")
+    </div>
+
+    <div style="margin-bottom: 1%"></div>
+    <div class="row">
+        <h4 class="tableHeading">Edit</h4>
+        <hr class="fancyruler">
+
+        @using (Html.BeginForm())
+        {
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+            @Html.AntiForgeryToken()
+            <div class="hidden-fields">
+                @Html.HiddenFor(model => model.id)
+                @Html.HiddenFor(model => model.createdBy)
+                @Html.HiddenFor(model => model.createdDate)
+                @Html.HiddenFor(model => model.templateID)
+                <input type="hidden" name="description-validation" id="description-validation" />
+                <input type="hidden" name="error-description" id="error-description" value="@ViewBag.Description" />
+                <div class="col-md-12"><div id="duplicate-description-notice" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; Description already exists!</span></div></div></div>
+                <div class="col-md-12"><div id="error-duplicate-description" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; Description already exists!</span></div></div></div>
+            </div>
+            <br />
+            <br />
+            <div class="form-horizontal editForm">
+
+                @*<div class="form-group" id="optionId">
+                        @Html.Label(null,"SMS templates", htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-10">
+                            @Html.DropDownListFor(model => model.templateID, null, "**Select**", htmlAttributes: new { @class = "infoBox_editMember", @id = "optionId" })
+                            @Html.ValidationMessageFor(model => model.templateID, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="form-group" id="controlId">
+                        @Html.Label(null,"Email templates", htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-10">
+                            @Html.DropDownListFor(model => model.templateID, (IEnumerable<SelectListItem>)ViewBag.emailTemplatesID, "**Select**", new { @class = "infoBox_editMember", @id = "controlId" })
+                            @Html.ValidationMessageFor(model => model.templateID, "", new { @class = "text-danger" })
+                        </div>
+                    </div>*@
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.requirementText, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-8">
+                        <textarea id="requirementText" name="requirementText" class="form-control-new-tr">@Model.requirementText</textarea>
+                        @Html.ValidationMessage("requirementText", "", new { @class = "text-danger", @style = "font-size: 90%; margin-left: 1%" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.active, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        <div class="checkbox">
+                            @Html.EditorFor(model => model.active)
+                            @Html.ValidationMessageFor(model => model.active, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="fixed-btn">
+                    <input id="submit" type="submit" value="Submit" class="btn create-button-large" style="width: 12%" /><br />
+                    <input type="text" value="Back" class="btn reset-button go_back" />
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section scripts{
+    <script src="https://rawgit.com/jackmoore/autosize/master/dist/autosize.min.js"></script>
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+    <script>
+        function CheckName() {
+            var code = $('#id').val();
+            var name = $('#requirementText').val();
+            name = name.trim();
+            $("#description-validation").val("");
+            $("#duplicate-description-notice").addClass("hidden");
+
+            $.ajax({
+                url: '/Tasks/TaskRequirementNameCheck',
+                type: "POST",
+                dataType: "JSON",
+                data: { requirementText: name },
+                success: function (result) {
+                    var cod3 = result.id;
+                    var description = result.requirementText;
+                    if (cod3 + '-' + description.toLowerCase() == code + '-' + name.toLowerCase()) {
+                        $('span[data-valmsg-for="requirementText"]').html('');
+                    }
+                    if (description.toLowerCase() == name.toLowerCase() && cod3 != code) {
+                        $("#duplicate-description-notice").removeClass("hidden");
+                        $('span[data-valmsg-for="requirementText"]').html('<span style="font-size: 12px"><i class="fas fa-exclamation-circle"></i> </span>Description already exists!');
+                        $("#description-validation").val(description);
+                    }
+                },
+                error: function (result) {
+                    $('span[data-valmsg-for="requirementText"]').html('');
+                    $("#duplicate-description-notice").addClass("hidden");
+                }
+            });
+        }
+        $("#submit").click(function () {
+            if ($("#description-validation").val().length > 0) {
+                $("#requirementText").focus();
+                return false;
+            }
+        });
+
+        autosize(document.getElementById("requirementText"));
+
+    </script>
+    <script>
+        $(document).ready(function () {
+            var d = $('#error-description').val();
+            if (d.length > 0) {
+                $("#error-duplicate-description").removeClass("hidden");
+            }
+        });
+    </script>
+
+}

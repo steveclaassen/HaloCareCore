@@ -1,0 +1,172 @@
+﻿@model HaloCareCore.Models.ViewModels.EmailVM
+@using HaloCareCore.Extensions
+@{
+    ViewBag.Title = "Email";
+    Layout = "~/Views/Shared/_layout-view-x.cshtml";
+}
+
+<javascript>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+</javascript>
+<style>
+    .default-badge {
+        display: inline-block;
+        background-color: rgb(204 204 204 / 0.40);
+        border-radius: 10px;
+        padding: 6px;
+        min-width: 10px;
+        font: 100 10px 'Century Gothic';
+        color: darkgray;
+        line-height: 1;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: baseline;
+    }
+</style>
+
+<div class="collapse in">
+    <div class="card card-body">
+        <div class="collapse-body">
+            <div class="account-setting-panel">
+                <div class="col-md-12 row">
+                    <div class="account-heading">Details</div>
+                    <p class="account-sub-header-new">Attachment details listed below.</p>
+                </div>
+                <hr class="fancyruler">
+                <table class="table details-table table-hover" id="bipolar-details">
+                    <tbody>
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayNameFor(model => model.Subject)</td>
+                            <td class="row-information">@Html.DisplayFor(model => model.Subject)</td>
+                        </tr>
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayName("Email address")</td>
+                            <td class="row-information">@Html.DisplayFor(model => model.EmailAddressTo)</td>
+                        </tr>
+                        @if (Model.EmailAddressCc != null)
+                        {
+                            <tr>
+                                <td class="row-heading subject">@Html.DisplayName("Email address Cc")</td>
+                                <td class="row-information">@Html.DisplayFor(model => model.EmailAddressCc)</td>
+                            </tr>
+                        }
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayName("Email message")</td>
+                            <td>
+                                @Html.TextAreaFor(m => m.EmailMessage, new { @readonly = true })
+                            </td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        @if (Model.Attachments.Count != 0)
+                        {
+                            <tr>
+                                <td class="row-heading subject">@Html.DisplayName("Attachments")</td>
+                                <td>
+                                    <table class="table email-attachment-table">
+                                        @{ var count = 0;}
+                                        @foreach (var item in Model.Attachments)
+                                        {
+                                            count++;
+                                            <tr>
+                                                <td>
+                                                    @count.&nbsp;<b>Attachment name:</b>&nbsp;@Html.DisplayFor(model => item.AttachmentName) &nbsp;( <b>File name:</b>&nbsp;@Html.DisplayFor(model => item.FileName)) &nbsp;
+                                                    <span>&emsp;<input type="button" id="attachment-download" value="Download" class="modal-button-download" onclick="location.href = '@Url.Action("GetAttachment", "Template", new { attachment = item.FileName})'" /></span>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </table>
+                                </td>
+                            </tr>
+                        }
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayName("Effective date")</td>
+                            <td class="row-information">@Html.DisplayFor(model => model.EffectiveDate)</td>
+                        </tr>
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayName("Created date")</td>
+                            <td class="row-information">@Html.DisplayFor(model => model.CreatedDate)</td>
+                        </tr>
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayName("Created by")</td>
+                            <td class="row-information">@Html.DisplayFor(model => model.CreatedBy)</td>
+                        </tr>
+                        @if (Model.ModifiedDate != null)
+                        {
+                            <tr>
+                                <td class="row-heading subject">@Html.DisplayName("Modified date")</td>
+                                <td class="row-information">@Html.DisplayFor(model => model.ModifiedDate)</td>
+                            </tr>
+                            <tr>
+                                <td class="row-heading subject">@Html.DisplayName("Modified by")</td>
+                                <td class="row-information">@Html.DisplayFor(model => model.ModifiedBy)</td>
+                            </tr>
+                        }
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayName("Program")</td>
+                            <td class="row-information">@Html.DisplayFor(model => model.Program)</td>
+                        </tr>
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayName("Status")</td>
+                            <td class="row-information">
+                                <span class="@(Model.Status.ToLower() == "queued" ? "si-pending fas fa-circle" : Model.Status.ToLower() == "sent" ? "si-approved fas fa-circle": Model.Status.ToLower() == "rejected" ? "si-rejected fas fa-circle": Model.Status.ToLower().Contains("error") ? "si-rejected fas fa-circle": "")"></span>
+                                &nbsp;
+                                @if (Model.Status.ToLower().Contains("error"))
+                                {
+                                    <span>Error: Please contact your administrator.</span>
+                                }
+                                else
+                                {
+                                    @Html.DisplayFor(model => model.Status)
+                                }
+                            </td>
+
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="sf-footer">
+                    <input type="button" id="attachment-back" value="Back" class="btn modal-button-previous go_back" onclick="backKey();" />
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+@section scripts{
+    <script src="~/bundles/jqueryval"></script>
+    <script type="text/javascript">
+        CKEDITOR.replace('EmailMessage', {
+            toolbar: [
+                { name: 'tools', items: ['Maximize'] },
+                {
+
+                    name: 'hidden', items: [
+                        'Image', 'Source', 'NewPage', 'Preview', 'Subscript', 'Superscript', 'TextColor', 'BGColor', '-', 'CopyFormatting', 'RemoveFormat', 'Styles',
+                        'Format', 'Font', 'FontSize', '-', 'Outdent', 'Indent', '-', 'Blockquote', 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock',
+                        'Table', 'HorizontalRule', 'SpecialChar', 'NumberedList', 'BulletedList', 'Undo', 'Redo', 'Bold', 'Italic', 'Underline'
+                    ]
+                },
+            ],
+            height: '50em',
+            width: '100em',
+        });
+    </script>
+    <style>
+        .cke_toolbar_last {
+            display: none !important;
+        }
+    </style>
+    <script>
+        function backKey() {
+            localStorage.setItem("back_email", Date.now());
+        }
+    </script>
+}

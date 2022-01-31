@@ -1,0 +1,272 @@
+﻿@model HaloCareCore.Models.Validation.Programs
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Program_Edit";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<comment>
+    <!--
+        18 September 2019 -- HCare-795 (HaloCare Program Management Maintenance Screen)
+        Created views for user to manage Programs. Set the Administration controller up with the CRUD functionality. Added CSS to the views as well as a duplicate check on the code and description in the Create Program view.
+        The index view allows a user to view the active and inactive entries in order to control the Programs from a settings perspective. I have added a search bar as well as a sort function that will allow the user to sort the columns.
+    -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .field-validation-error:before {
+        font-family: FontAwesome;
+        content: "\f06a\00a0";
+        animation: pulse 2s ease infinite;
+    }
+
+    .error-alert {
+        width: 100%;
+        margin: 0 auto;
+        background-color: rgba(217, 83, 79, 0.1);
+        padding: 10px;
+        border-left-color: #d9534f !important;
+        border: 1px solid transparent;
+        border-left-width: 5px;
+        border-radius: 3px;
+        margin: 0 auto;
+        font-family: 'Open Sans', sans-serif;
+        font-size: 12px;
+        margin: 0 0 5px 0;
+        margin-top: -10px;
+        margin-bottom: 20px;
+    }
+
+        .error-alert span {
+            color: #d9534f;
+            text-align: center;
+        }
+</style>
+<javascript>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet" />
+    <link href='http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.min.css' rel='stylesheet' type='text/css'>
+</javascript>
+
+<div class="fullScreen_container zero-padding">
+
+    <!--pageHeader-->
+    <nav id="global-nav" class="nav">
+        <div class="pull-left title">
+            <h1 class="site-title_patientProfile">
+                <span><i class="fab fa-digital-ocean fa-rotate-90"></i>&emsp; Program</span>
+            </h1>
+        </div>
+        <div class="pull-right title">
+            <h1 class="site-title_userID pull-right">
+                <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+            </h1>
+            <h1 class="site-title_userID pull-right">
+                @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                {
+                    <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                }
+            </h1>
+            <h1 class="site-waffleIcon pull-right">
+                <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+            </h1>
+        </div>
+    </nav>
+    <!--breadCrumbs-->
+    <ul class="breadcrumbs_fullScreens">
+        <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+        <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+        <li><a href="@Url.Action("Program_Index", "Administration", new {})">Program</a></li>
+        <li><a href="#">Edit</a></li>
+    </ul>
+    <!--navCollection-->
+    <div class="navCollection_fullScreens">
+        @Html.Partial("_navCollection")
+    </div>
+    <div style="margin-bottom: 1%"></div>
+
+    <div class="row">
+        <h4 class="tableHeading">Edit program</h4>
+        <hr class="fancyruler">
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+            @Html.HiddenFor(model => model.programID)
+            @Html.HiddenFor(model => model.code)
+            <div class="hidden-fields">
+                <input type="hidden" name="code-validation" id="code-validation" />
+                <input type="hidden" name="icd10code-validation" id="icd10code-validation" />
+                <input type="hidden" name="description-validation" id="description-validation" />
+                <input type="hidden" name="error-code" id="error-code" value="@ViewBag.Code" />
+                <input type="hidden" name="error-description" id="error-description" value="@ViewBag.Description" />
+                <input type="hidden" name="error-icd10" id="error-icd10" value="@ViewBag.ICD10" />
+                <div class="col-md-12"><div id="duplicate-code-notice" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; Code already exists!</span></div></div></div>
+                <div class="col-md-12"><div id="duplicate-icd10code-notice" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; ICD-10 Code already exists!</span></div></div></div>
+                <div class="col-md-12"><div id="duplicate-description-notice" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; Description already exists!</span></div></div></div>
+                <div class="col-md-12"><div id="error-duplicate-code" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; <b>Code:</b> @ViewBag.Code, already exists!</span></div></div></div>
+                <div class="col-md-12"><div id="error-duplicate-description" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; <b>Description:</b> @ViewBag.Description, already exists!</span></div></div></div>
+                <div class="col-md-12"><div id="error-duplicate-icd10" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; <b>ICD-10:</b> @ViewBag.ICD10, already exists!</span></div></div></div>
+                <div class="col-md-12"><div id="error-duplicate" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; This combination, <b>Description:</b> @ViewBag.Description & <b>ICD-10:</b> @ViewBag.ICD10, already exists!</span></div></div></div>
+            </div>
+            <br />
+            <br />
+            <div class="form-horizontal editForm">
+                <div class="form-group">
+                    @Html.LabelFor(model => model.code, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-8">
+                        @Html.EditorFor(model => model.code, new { htmlAttributes = new { @class = "form-control-new active-false", @placeholder = "example: DIABD", @disabled = "disabled" } })
+                        @Html.ValidationMessageFor(model => model.code, "", new { @class = "text-danger" })
+                    </div>
+                    <div class="col-md-2">
+                        <i class="fas fa-question-circle information-icon" data-toggle="tooltip" data-original-title="This field is has been disabled"></i>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.ProgramName, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.ProgramName, new { htmlAttributes = new { @class = "form-control-new", @placeholder = "example: Diabetes", autocomplete = "off", @onblur = "CheckName()" } })
+                        @Html.ValidationMessageFor(model => model.ProgramName, "", new { @class = "text-danger", @style = "font-size: 90%; margin-left: 1%" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.icd10code, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.icd10code, new { htmlAttributes = new { @class = "form-control-new", @placeholder = "example: E11.9", autocomplete = "off", @onblur = "CheckICD10Code()" } })
+                        @Html.ValidationMessageFor(model => model.icd10code, "", new { @class = "text-danger", @style = "font-size: 90%; margin-left: 1%" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Active, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        <div class="checkbox">
+                            @Html.EditorFor(model => model.Active)
+                            @Html.ValidationMessageFor(model => model.Active, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="fixed-btn">
+                    <input id="submit" type="submit" value="Submit" class="btn create-button-large" style="width: 12%" /><br />
+                    <input type="text" value="Back" class="btn reset-button go_back" />
+                </div>
+
+            </div>
+        }
+    </div>
+</div>
+
+
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('[data-toggle="tooltip"]').tooltip({
+                placement: 'top'
+            });
+        });
+    </script>
+    <script>
+        function CheckName() {
+            var code = $('#code').val();
+            var name = $('#ProgramName').val();
+            name = name.trim();
+            $("#description-validation").val("");
+            $("#duplicate-description-notice").addClass("hidden");
+            $('span[data-valmsg-for="ProgramName"]').html('');
+
+            $.ajax({
+                url: '/Administration/ProgramNameCheck',
+                type: "POST",
+                dataType: "JSON",
+                data: { ProgramName: name },
+                success: function (result) {
+                    var cod3 = result.code;
+                    var description = result.ProgramName;
+                    if (cod3.toLowerCase() + '-' + description.toLowerCase() == code.toLowerCase() + '-' + name.toLowerCase()) { }
+                    if (description.toLowerCase() == name.toLowerCase() && cod3.toLowerCase() != code.toLowerCase()) {
+                        $("#duplicate-description-notice").removeClass("hidden");
+                        $('span[data-valmsg-for="ProgramName"]').html('<span style="font-size: 12px"><i class="fas fa-exclamation-circle"></i> </span>Description already exists!');
+                        $("#description-validation").val(description);
+                    }
+                },
+                error: function (result) {
+                    $('span[data-valmsg-for="ProgramName"]').html('');
+                    $("#duplicate-description-notice").addClass("hidden");
+                }
+            });
+        }
+        $("#submit").click(function () {
+            if ($("#description-validation").val().length > 0) {
+                $("#ProgramName").focus();
+                return false;
+            }
+        });
+
+    </script>
+    <script>
+        function CheckICD10Code() {
+            var code = $('#code').val();
+            var icdcode = $('#icd10code').val();
+            icdcode = icdcode.trim();
+            $("#icd10code-validation").val("");
+            $("#duplicate-icd10code-notice").addClass("hidden");
+            $('span[data-valmsg-for="icd10code"]').html('');
+
+            $.ajax({
+                url: '/Administration/ProgramICD10Check',
+                type: "POST",
+                dataType: "JSON",
+                data: { icd10code: icdcode },
+                success: function (result) {
+                    var cod3 = result.code;
+                    var description = result.icd10code;
+                    if (cod3.toLowerCase() + '-' + description.toLowerCase() == code.toLowerCase() + '-' + icdcode.toLowerCase()) { }
+                    if (description.toLowerCase() == icdcode.toLowerCase() && cod3.toLowerCase() != code.toLowerCase()) {
+                        $("#duplicate-icd10code-notice").removeClass("hidden");
+                        $('span[data-valmsg-for="icd10code"]').html('<span style="font-size: 12px"><i class="fas fa-exclamation-circle"></i> </span>Code already exists!');
+                        $("#icd10code-validation").val(cod3);
+                    }
+                },
+                error: function (result) {
+                    $("#duplicate-icd10code-notice").addClass("hidden");
+                    $('span[data-valmsg-for="icd10code"]').html('');
+                }
+            });
+        }
+
+        $("#submit").click(function () {
+            if ($("#icd10code-validation").val().length > 0) {
+                $("#icd10code").focus();
+                return false;
+            }
+        });
+
+    </script>
+    <script>
+        $(document).ready(function () {
+            var c = $('#error-code').val();
+            var d = $('#error-description').val();
+            var i = $('#error-icd10').val();
+            if (c.length > 0 && d.length > 0 && i.length > 0) {
+                $("#error-duplicate").removeClass("hidden");
+            }
+            else if (c.length > 0) {
+                $("#error-duplicate-code").removeClass("hidden");
+            }
+            else if (d.length > 0) {
+                $("#error-duplicate-description").removeClass("hidden");
+            }
+            else if (i.length > 0) {
+                $("#error-duplicate-icd10").removeClass("hidden");
+            }
+        });
+    </script>
+}

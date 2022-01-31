@@ -1,0 +1,307 @@
+﻿@model HaloCareCore.Models.ViewModels.UserEditViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "EditUser";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+</style>
+<javascript>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+    <script src="https://www.jqueryscript.net/demo/jQuery-Plugin-For-Sortable-Bootstrap-Tables-Bootstrap-Sortable/Scripts/bootstrap-sortable.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/js/standalone/selectize.js"></script>
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.default.css">
+</javascript>
+
+<div class="fullScreen_container zero-padding">
+
+    <!--pageHeader-->
+    <nav id="global-nav" class="nav">
+        <div class="pull-left title">
+            <h1 class="site-title_patientProfile">
+                <span><i class="fas fa-user-circle"></i>&emsp; Users</span>
+            </h1>
+        </div>
+        <div class="pull-right title">
+            <h1 class="site-title_userID pull-right">
+                <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+            </h1>
+            <h1 class="site-title_userID pull-right">
+                @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                {
+                    <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                }
+            </h1>
+            <h1 class="site-waffleIcon pull-right">
+                <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+            </h1>
+        </div>
+    </nav>
+
+    <!--breadCrumbs-->
+    <ul class="breadcrumbs_fullScreens">
+        <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+        <li><a href="@Url.Action("Index", "Administration", new {})">Settings</a></li>
+        <li><a href="@Url.Action("User_Index", "Account", new {})">Users</a></li>
+        <li><a href="#">Edit</a></li>
+    </ul>
+
+    <!--navCollection-->
+    <div class="navCollection_fullScreens">
+        @Html.Partial("_navCollection")
+    </div>
+
+    <div style="margin-bottom: 1%"></div>
+
+
+    @using (Html.BeginForm("EditUser", "Account", FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="row">
+            <h4 class="tableHeading">Edit a user</h4>
+            <hr class="fancyruler">
+
+            <div class="form-horizontal editForm">
+                <br />
+                <br />
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                @Html.HiddenFor(model => model.userID)
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.username, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-8">
+                        @Html.EditorFor(model => model.username, new { htmlAttributes = new { @class = "form-control-new active-false", @disabled = "disabled" } })
+                        @Html.ValidationMessageFor(model => model.username, "", new { @class = "text-danger" })
+                    </div>
+                    <div class="col-md-2">
+                        <i class="fas fa-question-circle information-icon" data-toggle="tooltip" data-original-title="This field is has been disabled"></i>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.email, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.email, new { htmlAttributes = new { @class = "form-control-new" } })
+                        @Html.ValidationMessageFor(model => model.email, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.password, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.password, new { htmlAttributes = new { @class = "form-control-new", @type = "password" } })
+                        @Html.ValidationMessageFor(model => model.password, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.Label(null,"User role", htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.DropDownList("role", null, htmlAttributes: new { @class = "" })
+                    </div>
+                </div>
+                <br />
+                <div class="form-group">
+                    @Html.LabelFor(model => model.SearchManagement, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        <div class="checkbox assignmentCheck">
+                            @Html.EditorFor(model => model.SearchManagement)
+                            @Html.ValidationMessageFor(model => model.SearchManagement, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+                <br />
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Active, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        <div class="checkbox assignmentCheck">
+                            @Html.EditorFor(model => model.Active)
+                            @Html.ValidationMessageFor(model => model.Active, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <br />
+            <hr class="fancyruler">
+            <br />
+            <div class="col-md-12 row">
+                <div class="col-md-6">
+                    <h4 class="subHeading">
+                        User/Scheme overview
+                    </h4>
+                </div>
+                <!--------------------------------------------------------------------------- jq-search -------------------------------------------------------------------------->
+                <div class="col-md-6">
+                    <div class="input-wrapper-new-search">
+                        <input type="text" class="form-control-new-search" id="search" onkeyup="myFunction()" placeholder="Search..." />
+                    </div>
+                </div>
+            </div>
+            <br />
+            <div>
+                <table class="table riskRatingTable sortable" id="aTable">
+                    <thead>
+                        <tr>
+                            <th>@Html.DisplayNameFor(model => model.schemes[0].medicalAidName)</th>
+                            <th style="width: 10%; text-align: center!important">@Html.DisplayNameFor(model => model.schemes[0].hasAccess)</th>
+                            <th style="width: 10%; text-align: center !important">@Html.DisplayName("Action")</th>
+                        </tr>
+                    </thead>
+
+                    @for (int i = 0; i < Model.schemes.Count(); i++)
+                    {
+                        <tbody id="scheme-search">
+                            <tr>
+                                @Html.HiddenFor(model => model.schemes[i].Id)
+                                @Html.HiddenFor(model => model.schemes[i].userId)
+                                @Html.HiddenFor(model => model.schemes[i].medicalAidId)
+                                <td>
+                                    <span id="medical-aid-status-@i" style="font-size: 6px" class="@(Model.schemes[i].hasAccess == true ? "chk-yes fas fa-circle" : "chk-no fas fa-circle")"></span>&emsp;&emsp;
+                                    <span id="medical-aid-name-@i" class="@(Model.schemes[i].hasAccess == true ? "" : "active-false")">@Html.DisplayFor(model => model.schemes[i].medicalAidName)</span> &emsp;
+                                    <span class="badge-active hidden" id="active-status-@i">Activated</span>
+                                    <span class="badge-inactive hidden" id="inactive-status-@i">Inactivated</span>
+                                </td>
+                                @*<td class="accountCheck">@Html.EditorFor(model => model.schemes[i].hasAccess)</td>*@
+                                <td class="check-box-center" style="z-index: 1000"><input type="checkbox" class="scheme-checkbox" id="@Model.schemes[i].hasAccess" name="@Model.schemes[i].hasAccess" checked="@Model.schemes[i].hasAccess" value="@Model.schemes[i].medicalAidId" tabindex="@i" /></td>
+
+                                <td style="text-align: center!important">
+                                    @if (Model.schemes[i].hasAccess)
+                                    {
+                                        <input id="program-edit-@i" type="button" class="link-button" value="Edit" onclick="location.href='@Url.Action("UserProgramEdit", "Account",  new { id = Model.userID, medId = Model.schemes[i].medicalAidId })'" />
+                                    }
+                                    else
+                                    {
+                                        <input id="program-edit-disabled-@i" type="button" class="disabled-button active-false" value="Edit" onclick="location.href='@Url.Action("UserProgramEdit", "Account",  new { id = Model.userID, medId = Model.schemes[i].medicalAidId })'" disabled />
+                                    }
+                                </td>
+                            </tr>
+                        </tbody>
+                    }
+
+                </table>
+            </div>
+
+            <div class="fixed-btn">
+                <input id="submit" type="submit" value="Save" class="btn create-button-large" style="width: 12%" /><br />
+                <input type="text" value="Back" class="btn reset-button" onclick="MainbackBtn();" />
+            </div>
+
+        </div>
+    }
+
+</div>
+
+@section scripts{
+    <script src="~/bundles/jqueryval"></script>
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('[data-toggle="tooltip"]').tooltip({
+                placement: 'top'
+            });
+        });
+    </script>
+    <script>
+        var $rows = $('#scheme-search tr');
+        $('#search').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $rows.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+
+        function MainbackBtn() {
+            window.location.href = '@Url.Action("User_Index", "Account")';
+        }
+    </script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/js/standalone/selectize.js"></script>
+    <script>
+        initSelectize();
+        function initSelectize() {
+            $('#role').selectize({
+                persist: true,
+                preload: true,
+                maxItems: 1,
+                delimiter: ',',
+                valueField: 'id',
+                labelField: 'name',
+                searchField: ['name'],
+                hideSelected: true,
+                plugins: ['remove_button'],
+                render: {
+                    option: function (item, escape) {
+                        return '<span class="name">' + escape(item.name) + '</span>';
+
+                    }
+                }
+            })
+        }
+    </script>
+    <script>
+        $(".scheme-checkbox").change(function () {
+            //document.getElementById("demo").innerHTML = "Clicked Index " + $(this).index();
+            var status = $(this).prop("tabindex");
+            $("#active-status-" + status).addClass("hidden");
+            $("#inactive-status-" + status).addClass("hidden");
+
+            var medicalaidid = $(this).val();
+            var userid = $("#schemes_0__userId").val();
+            if (this.checked) {
+                $.ajax({
+                    url: '/Account/UserHasAccess',
+                    type: "POST",
+                    dataType: "JSON",
+                    data: { medicalaidID: medicalaidid, userID: userid, status: true },
+                    success: function (result) {
+                        if (result == 'insert') {
+                            $("#active-status-" + status).removeClass("hidden").fadeIn('slow');
+                            $("#medical-aid-name-" + status).removeClass("active-false").fadeIn('slow');
+                            $("#medical-aid-status-" + status).removeClass("chk-no").fadeIn('slow').addClass("chk-yes").fadeIn('slow');
+                            $("#program-edit-disabled-" + status).attr("disabled", false).removeClass("disabled-button").addClass("link-button").removeClass("active-false").fadeIn('slow');
+                            $("#program-edit-" + status).attr("disabled", false).removeClass("disabled-button").addClass("link-button").removeClass("active-false").fadeIn('slow');
+                        }
+                        if (result == 'update') {
+                            $("#active-status-" + status).removeClass("hidden").fadeIn('slow');
+                            $("#medical-aid-name-" + status).removeClass("active-false").fadeIn('slow');
+                            $("#medical-aid-status-" + status).removeClass("chk-no").fadeIn('slow').addClass("chk-yes").fadeIn('slow');
+                            $("#program-edit-disabled-" + status).attr("disabled", false).removeClass("disabled-button").addClass("link-button").removeClass("active-false").fadeIn('slow');
+                            $("#program-edit-" + status).attr("disabled", false).removeClass("disabled-button").addClass("link-button").removeClass("active-false").fadeIn('slow');
+                        }
+                    }
+                });
+            }
+            else {
+                $.ajax({
+                    url: '/Account/UserHasAccess',
+                    type: "POST",
+                    dataType: "JSON",
+                    data: { medicalaidID: medicalaidid, userID: userid, status: false },
+                    success: function (result) {
+                        if (result == 'update') {
+                            $("#inactive-status-" + status).removeClass("hidden").fadeIn('slow');
+                            $("#medical-aid-name-" + status).addClass("active-false").fadeIn('slow');
+                            $("#medical-aid-status-" + status).removeClass("chk-yes").fadeIn('slow').addClass("chk-no").fadeIn('slow');
+                            $("#program-edit-" + status).attr("disabled", true).removeClass("link-button").addClass("disabled-button").addClass("active-false").fadeIn('slow');
+                            $("#program-edit-disabled-" + status).attr("disabled", true).removeClass("link-button").addClass("disabled-button").addClass("active-false").fadeIn('slow');
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+
+
+
+}

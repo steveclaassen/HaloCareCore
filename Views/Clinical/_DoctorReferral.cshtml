@@ -1,0 +1,245 @@
+﻿@model HaloCareCore.Models.ViewModels.MentalHealthVM
+
+@{
+    ViewBag.Title = "Doctor referral";
+    Layout = "~/Views/Shared/_LayoutModal.cshtml";
+}
+<comment>
+    <!--
+        07 August 2020 -- HCare-1126(Mental Health Disease: QUESTIONNAIRE - DEPRESSION)
+    -->
+</comment>
+<style>
+    .field-validation-error:before {
+        font-family: FontAwesome;
+        content: "\f06a\00a0";
+    }
+
+    .warning-alert {
+        width: 100%;
+        margin: 0 auto;
+        background-color: #fff3cd;
+        padding: 10px;
+        border-left-color: #FEAF20 !important;
+        border: 1px solid transparent;
+        border-left-width: 5px;
+        border-radius: 3px;
+        margin: 0 auto;
+        font-family: 'Open Sans', sans-serif;
+        font-size: 12px;
+        margin: 0 0 5px 0;
+    }
+
+        .warning-alert span {
+            color: #FEAF20;
+            text-align: center;
+        }
+
+    .textbox-control-date {
+        display: block !important;
+        max-width: 600px !important;
+        width: 350px;
+        max-height: 100px;
+        height: 30px;
+        margin-top: 10px;
+        margin-left: 10px;
+        padding: 6px 6px;
+        line-height: 1.428571429;
+        color: #003366;
+        border-radius: 0px !important;
+        border: none !important;
+        border-bottom: 1px solid #e8e6e6 !important;
+        background-color: transparent !important;
+        -webkit-box-shadow: none !important;
+        box-shadow: none !important;
+    }
+
+    textarea#DoctorReferral_Comment {
+        display: block;
+        max-width: 1500px !important;
+        width: 90% !important;
+        max-height: 200px !important;
+        height: auto !important;
+        margin-top: 10px;
+        margin-left: 10px;
+        display: block;
+        padding: 6px 6px !important;
+        line-height: 1.428571429 !important;
+        color: #003366 !important;
+        border-radius: 0px !important;
+        border: none !important;
+        border-bottom: 1px solid #e8e6e6 !important;
+        background-color: transparent !important;
+        padding-left: 5px !important;
+        -webkit-box-shadow: none !important;
+        box-shadow: none !important;
+        -webkit-transition: none !important;
+        transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+        outline: none !important;
+    }
+
+    .history-collapse {
+        color: #ccc;
+        margin-left: 10px;
+    }
+</style>
+
+<div class="modal-content-mental-health" style="margin-top: 0%;">
+    @using (Ajax.BeginForm("_DoctorReferral", "Clinical", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "divPath", OnSuccess = "hideModal(); alert('Saved');" }, new { id = "dr-referral-assignment" }))
+    {
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        @Html.Hidden("taskId", (object)ViewBag.task)
+        @Html.Hidden("DependantID", (object)ViewBag.DependantID)
+        @Html.Hidden("id", (object)ViewBag.id)
+        @Html.Hidden("template", (object)ViewBag.templateID)
+        @Html.Hidden("pro", (object)ViewBag.pro)
+
+        @Html.AntiForgeryToken()
+
+        <div class="modal-dialog-mental-health">
+            <div class="modal-header-mental-health">
+                <div class="mental-health-checkbox pull-right">
+                    @Html.CheckBox("close") <label for="follow-up" title="Close" data-dismiss="modal"><span><i class="fas fa-circle close-button"></i></span></label>
+                </div>
+                <div class="mental-health-checkbox pull-right" style="margin-right: 10px">
+                    @Html.CheckBox("dr-referral-follow-up") <label for="dr-referral-follow-up" title="Follow Up"><span><i class="fas fa-circle follow-up-button"></i></span></label>
+                </div>
+                <div class="col-md-4"><h5 class="modal-title" id="modal-email"><img src="~/Content/Images/_2020/icons/modal-icons/mental-health-assignment.png" class="logo-modal" /></h5></div>
+                <div class="col-md-4 div-center"><p class="div-header">Doctor Referral</p></div>
+            </div>
+            <div class="modal-body-mental-health" style="margin-left: 0px; margin-top: 10px;">
+                <div class="form-horizontal">
+                    <div class="col-md-12">
+                        <div id="follow-up-dr-referral" class="hidden"><div class="warning-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; Follow up!</span></div></div>
+                    </div>
+
+                    @if (Model.DoctorReferrals.Count() != 0)
+                    {
+                        <div class="dr-referral-history">
+                            <div>
+                                <p class="history-collapse">History &nbsp;<i class="fas fa-sort-down" style="font-size: 15px"></i></p>
+                            </div>
+
+                            <div id="dr-referral-history" class="form-group hidden">
+                                <div class="row">
+                                    <table class="table mh-table table-hover" style="margin-left: 1.6%">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 15%; text-align: center!important">@Html.DisplayNameFor(model => model.DoctorReferral.CreatedDate)</th>
+                                                <th style="width: 15%; text-align: center!important">@Html.DisplayNameFor(model => model.DoctorReferral.ReferralDate)</th>
+                                                <th style="width: 55%">@Html.DisplayNameFor(model => model.DoctorReferral.Referral)</th>
+                                                <th style="width: 55%">@Html.DisplayNameFor(model => model.DoctorReferral.Comment)</th>
+                                                <th style="width: 15%; text-align: center!important">@Html.DisplayNameFor(model => model.DoctorReferral.Program)</th>
+                                            </tr>
+                                        </thead>
+
+                                        @foreach (var item in Model.DoctorReferrals)
+                                        {
+                                            <tbody>
+                                                @if (item.FollowUp == true)
+                                                {
+                                                    <tr>
+                                                        <td colspan="4" style="text-align: center!important; color: rgba(204, 0, 0, 0.70)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="font-size: 18px; color: rgba(204, 0, 0, 0.70)!important"></i></span> Follow up required!</td>
+                                                    </tr>
+                                                }
+                                                else
+                                                {
+                                            <tr style="text-indent: 5px">
+                                                <td style="text-align: center!important" data-dateformat="DD-MM-YYYY">@Html.DisplayFor(Modelitem => item.CreatedDate)</td>
+                                                <td style="text-align: center!important" data-dateformat="DD-MM-YYYY">@Html.DisplayFor(Modelitem => item.ReferralDate)</td>
+                                                <td>@Html.DisplayFor(Modelitem => item.Referral)</td>
+                                                <td>@Html.DisplayFor(Modelitem => item.Comment)</td>
+                                                <td style="text-align: center!important">@Html.DisplayFor(Modelitem => item.Program)</td>
+                                            </tr>
+                                                }
+                                            </tbody>
+                                        }
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <table id="dr-referral-table" class="table mental-health-table">
+                        <tr>
+                            <td style="width: 5%"></td>
+                            <td style="width: 10%; padding-top: 25px!important; text-align: right!important;font-weight: bolder">
+                                Referral date
+                            </td>
+                            <td style="width: 85%">
+                                <input class="text-box single-line input-validation-error textbox-control-date" data-val="true" data-val-date="The field must be a date." id="referral-date" name="referral-date" type="date" aria-required="true" aria-describedby="DOB-error" aria-invalid="true" value="@DateTime.Now.ToString("yyyy-MM-dd")" min="@DateTime.Now.ToString("1900-01-01")" max="@DateTime.Now.ToString("yyyy-MM-dd")" required oninvalid="InvalidMsg(this);">
+                                @Html.ValidationMessage("referral-date", "", new { @class = "text-danger", @style = "font-size: 90%; margin-left: 2%" })
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 5%"></td>
+                            <td style="width: 10%; padding-top: 25px!important; text-align: right!important;font-weight: bolder">
+                                Referral
+                            </td>
+                            <td>
+                                @Html.DropDownList("referalID", null, "", htmlAttributes: new { @class = "infoBox_editMemberl" })
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 5%"></td>
+                            <td style="width: 10%; padding-top: 25px!important; text-align: right!important;font-weight: bolder">
+                                Comments
+                            </td>
+                            <td style="width: 85%">
+                                @Html.TextAreaFor(model => model.DoctorReferral.Comment, new { placeholder = "Your comment here...", @required = "required" })
+                                @Html.ValidationMessageFor(model => model.DoctorReferral.Comment, "", new { @class = "text-danger", @style = "font-size: 90%; margin-left: 2%" })
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer-mental-health">
+                <input id="cancel-depression" type="button" value="Cancel" class="modal-button" style="width: 10%" data-dismiss="modal" aria-label="Close" />
+                <input id="submit" type="submit" value="Submit" class="modal-button" style="width: 10%" />
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script src="~/bundles/jqueryval"></script>
+
+    <script>
+        $('#dr-referral-follow-up').change(function () {
+            if (this.checked) {
+                $("#follow-up-dr-referral").removeClass("hidden"),
+                    $('#DoctorReferral_Comment').prop("required", false);
+            }
+            else {
+                $("#follow-up-dr-referral").addClass("hidden"),
+                    $('#DoctorReferral.Comment').prop("required", true);
+            }
+        });
+    </script>
+    <script>
+        $(document).ready(function () {
+            $('[data-toggle="tooltip"]').tooltip({
+                placement: 'top'
+            });
+        });
+    </script>
+    <script>
+        $(document).ready(function () {
+            $(".history-collapse").on("click", function () {
+                $("#dr-referral-history").fadeIn("slow").toggleClass("hidden");
+            });
+        });
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            //$('#referalID').find(':selected');
+            $("#referalID").select2({ multiple: false, placeholder: "--Select--", allowClear: true });
+        });
+    </script>
+}
+
+}
+

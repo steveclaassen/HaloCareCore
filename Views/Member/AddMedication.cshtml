@@ -1,0 +1,367 @@
+﻿@model HaloCareCore.Models.ScriptCreationViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "AddMedication";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+<comment>
+    <!--
+        06 November 2019 -- HCare-856(Medication products - "SLOW" problem)
+        Adding medication from the AddMedication view as well as the General questionnaire was slow as a result of the large amount of products in the database. I have updated the way the information is called to the view by adding
+        AJAX that requires you to type a keyword which will filter out the medication. The user will have to use the first letter of that product as the filter looks for the exact match (not including letter case)
+
+        25 November 2019 -- HCare-893(Medication - Patient Clinical / patient history)
+        Added a default date to the End date as we cannot remove the required attribute from the view. The date added is 31 Dec 2039.
+        Additionally added a required attribute to the program which will force the user to select a program before adding a medication entry.
+    -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .select2-container--default .select2-selection--single {
+        width: 400px !important;
+        margin-left: 3% !important;
+        border: 1px solid transparent !important;
+    }
+
+        .select2-container--default .select2-selection--single .select2-selection__placeholder {
+            color: white !important;
+        }
+
+    .field-validation-error:before {
+        font-family: FontAwesome;
+        content: "\f06a\00a0";
+        animation: pulse 2s ease infinite;
+    }
+</style>
+
+<!----------------------------------------------------------------------------------- header -------------------------------------------------------------------------------->
+<nav id="global-nav" class="nav">
+    <div class="pull-left title">
+        <h1 class="site-title_patientProfile">
+            <span><i class="fas fa-user-circle"></i>&emsp; Patient summary</span>
+        </h1>
+    </div>
+    <div class="pull-right title">
+        <h1 class="site-title_userID pull-right">
+            <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+        </h1>
+        <h1 class="site-title_userID pull-right">
+            @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+            {
+                <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+            }
+        </h1>
+        <h1 class="site-waffleIcon pull-right">
+            <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+        </h1>
+    </div>
+</nav>
+
+<div class="dashboardContainer zero-padding">
+    <div class="patientDashboard_View">
+
+        <!--breadCrumbs-->
+        <ul class="breadcrumbs_patientDashboard">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+            <li><a href="@Url.Action("patientClinical", "Member", new {DependentID = Context.Request.Query["DependentID"]})">Patient clinical</a></li>
+            <li><a href="#">Medication create</a></li>
+        </ul>
+
+        <!--Left navSlider -->
+        @Html.Partial("_navSlider", new { DependentID = Context.Request.Query["DependentID"] })
+
+        <!--navCollection-->
+        <div class="navCollection_patientDashboard">
+            @Html.Partial("_navCollection")
+        </div>
+
+        <!--profileInformation-->
+        <div class="profileBar">
+            @Html.Action("_profileBar_edit", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })
+        </div>
+    </div>
+    <br />
+
+    <!------------------------------------------------------------------------------------ form --------------------------------------------------------------------------------->
+    <div class="profilebar-spacer"></div>
+    <div class="patientDashboard_container">
+        <h4 class="summaryHeading">Medication history</h4>
+        <hr class="fancyruler">
+        <br />
+        <br />
+        @using (Html.BeginForm())
+        {
+            @Html.Hidden("DependantID", (object)ViewBag.DependantID)
+            @Html.AntiForgeryToken()
+
+            <div class="form-horizontal editForm">
+
+                <div class="form-group">
+                    <div class="col-md-12">
+
+                        <div class="col-md-6">
+                            @Html.Label(null,"Product", htmlAttributes: new { @class = "control-label col-md-2 " })
+                            <div class="col-md-10">
+                                @*@Html.DropDownList("Product", null, "- Select -", htmlAttributes: new { @class = "infoBox_editMember" })*@
+                                @Html.TextBoxFor(model => model.item.productName, htmlAttributes: new { @class = "infoBox_editMember" })
+                                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            @Html.LabelFor(model => model.item.fromDate, htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-10">
+                                @Html.EditorFor(model => model.item.fromDate, new { htmlAttributes = new { @class = "infoBox_editMember dateLimit", min = "1900-01-01" } }) @*Hcare-904*@
+                                @Html.ValidationMessageFor(model => model.item.fromDate, "", new { @class = "text-danger", @style = "font-size: 75%;margin-left: 2%" })
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-md-12">
+                        <div class="col-md-6">
+                            @Html.Label(null,"Instructions", htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-10">
+                                @Html.EditorFor(model => model.item.directions, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                                @Html.ValidationMessageFor(model => model.item.directions, "", new { @class = "text-danger", @style = "font-size: 75%;margin-left: 2%" })
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            @Html.LabelFor(model => model.item.toDate, htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-10">
+                                <input class="text-box single-line input-validation-error infoBox_editMember" data-val="true" data-val-date="The field must be a date." id="item.toDate" name="item.toDate" type="date" aria-required="true" aria-describedby="DOB-error" aria-invalid="true" value="2039-12-31" min="@DateTime.Now.ToString("yyyy-MM-dd")"><br />
+                                @Html.ValidationMessageFor(model => model.item.toDate, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-md-12">
+                        <div class="col-md-6">
+                            @Html.Label(null,"Comment", htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-10">
+                                @Html.EditorFor(model => model.item.comment, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                                @Html.ValidationMessageFor(model => model.item.comment, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="col-md-6">
+                                @Html.Label(null,"Program", htmlAttributes: new { @class = "control-label col-md-2" })
+                                <div class="col-md-10">
+                                    <div>
+                                        @Html.DropDownList("programType", null, "- Select -", new { @class = "infoBox_editMember", @id = "programDescription", @style = "width: 400px", @required = "required" })
+                                        @Html.ValidationMessage("programType", "", new { @class = "text-danger", @style = "font-size: 75%;margin-left: 2%" })
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <br />
+                <div class="form-group">
+                    <div class="actionButton" style="margin-left: 43.5%; margin-bottom: -1.5%">
+                        <input type="submit" value="Add Medication" class="btn buttonRound_formCreate" style="width: 20%!important" id="submit" />
+                    </div>
+                </div>
+            </div>
+        }
+        <br />
+        <br />
+        <div class="col-md-12">
+            <div class="row">
+                <table class="table administration_Table sortable" id="scriptHistoryTable">
+                    <thead>
+                        <tr>
+                            <th onclick="scriptHistoryTable(2)" style="width: 80px">
+                                @Html.DisplayNameFor(model => model.items[0].icd10code) <i class="fa fa-fw fa-sort"></i>
+                            </th>
+                            <th onclick="scriptHistoryTable(3)" style="width: 100px">
+                                @Html.DisplayNameFor(model => model.items[0].nappiCode) <i class="fa fa-fw fa-sort"></i>
+                            </th>
+                            <th onclick="scriptHistoryTable(4)" style="width: 100px">
+                                @Html.DisplayNameFor(model => model.items[0].productName) <i class="fa fa-fw fa-sort"></i>
+                            </th>
+                            <th style="width: 100px">
+                                @Html.DisplayNameFor(model => model.items[0].itemStatus) <i class="fa fa-fw fa-sort"></i>
+                            </th>
+                            <th onclick="scriptHistoryTable(7)" style="width: 100px">
+                                @Html.DisplayNameFor(model => model.items[0].fromDate) <i class="fa fa-fw fa-sort"></i>
+                            </th>
+                            <th onclick="scriptHistoryTable(8)" style="width: 100px">
+                                @Html.DisplayNameFor(model => model.items[0].toDate) <i class="fa fa-fw fa-sort"></i>
+                            </th>
+                            <th onclick="scriptHistoryTable(10)" style="width: 230px">
+                                @Html.DisplayNameFor(model => model.items[0].comment) <i class="fa fa-fw fa-sort"></i>
+                            </th>
+                        </tr>
+                    </thead>
+
+                    @if (Model.items.Count() == 0)
+                    {
+                        <tr><td colspan="9" style="text-align: center!important; color: rgba(128, 128, 128, 0.50)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="color: rgba(128, 128, 128, 0.50)"></i></span> no records found</td></tr>
+                    }
+                    else
+                    {
+
+                        foreach (var item in Model.items)
+                        {
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.icd10code)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.nappiCode)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.productName)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.itemStatus)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.fromDate)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.toDate)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.comment)
+                                    </td>
+                                </tr>
+                            </tbody>
+                        }
+                    }
+
+                </table>
+            </div>
+        </div>
+        <br />
+        <br />
+
+        <div class="form-group">
+            <div class="actionButton" style="margin-left: 39%">
+                <input value="Back" class="btn buttonRound_formBack go_back" onclick="backKey()" style="width: 15%!important" />
+                <input type="button" class="btn buttonRound_formCreate patientClinical" style="width: 15%" value="Done" onclick="location.href='@Url.Action("PatientClinical_PatientHistory", "Member", new { DependentID = Model.script.dependentID, pro=Context.Request.Query["pro"]}, null)' ,storageKey()" />
+
+            </div>
+        </div>
+        <br />
+    </div>
+</div>
+
+
+
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <!-- local-storage-redirect -->
+    <script>
+        function backKey() {
+            if (localStorage.key(0) == "add_medication") {
+                localStorage.clear();
+                localStorage.removeItem("add_medication");
+                localStorage.setItem("back_medication", Date.now());
+            }
+            if (localStorage.key(0) == "add_diabetes_medication") {
+                localStorage.clear();
+                localStorage.removeItem("add_diabetes_medication");
+                localStorage.setItem("back_diabetes_medication", Date.now());
+            }
+            if (localStorage.key(0) == "add_hiv_medication") {
+                localStorage.clear();
+                localStorage.removeItem("add_hiv_medication");
+                localStorage.setItem("back_hiv_medication", Date.now());
+            }
+        }
+        function storageKey() {
+            if (localStorage.key(0) == "add_medication") {
+                localStorage.clear();
+                localStorage.removeItem("add_medication");
+                localStorage.setItem("create_medication", Date.now());
+            }
+            if (localStorage.key(0) == "add_diabetes_medication") {
+                localStorage.clear();
+                localStorage.removeItem("add_diabetes_medication");
+                localStorage.setItem("create_diabetes_medication", Date.now());
+            }
+            if (localStorage.key(0) == "add_hiv_medication") {
+                localStorage.clear();
+                localStorage.removeItem("add_hiv_medication");
+                localStorage.setItem("create_hiv_medication", Date.now());
+            }
+        }
+    </script>
+
+    <script src="js/jquery.tablesorter.min.js"></script>
+    <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/start/jquery-ui.css">
+    <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+
+    <!--Product AutoComplete-->
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#item_productName").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: "/Member/GetProducts",
+                        type: "POST",
+                        dataType: "json",
+                        data: { Prefix: request.term },
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return { label: item.productName, value: item.productName };
+                            }))
+
+                        }
+                    })
+                },
+                messages: {
+                    noResults: "",
+                    results: function (count) {
+                        return count + (count > 1 ? ' results' : ' result ') + ' found';
+                    }
+                }
+            });
+        })
+    </script>
+    <!--Select dropdowns-->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function () { $("#programType").select2({ multiple: false, placeholder: "- Select -", allowClear: true }); });
+    </script>
+    <!--DateLimit-->
+    <script>
+        var dateControler = {
+            currentDate: null
+        }
+
+        $(document).on("change", ".dateLimit", function (event, ui) {
+            var now = new Date();
+            var selectedDate = new Date($(this).val());
+
+            if (selectedDate > now) {
+                $(this).val(dateControler.currentDate)
+            } else {
+                dateControler.currentDate = $(this).val();
+            }
+        });
+
+    </script>
+
+}
+
+
+

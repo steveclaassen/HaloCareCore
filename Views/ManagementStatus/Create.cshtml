@@ -1,0 +1,304 @@
+﻿@model HaloCareCore.Models.Validation.ManagementStatus
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Create";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<comment>
+    <!--
+    14 May 2019 -- HCare-730 (Account Settings – Management status (Related to HCare-417))
+    Added CSS to the views as well as a duplicate check on the management status code and the management status description.
+
+    The index view allows a user to view the active and inactive entries in order to control the statuses from a settings perspective.
+    I have added a search bar as well as a sort function that will allow the user to sort the columns.
+    The duplication check is applied to the create and the edit view and will not allow a user to enter an entry that has the same Code or the same name.
+
+    30 August 2019 -- HCare-785 (Management status - Add Created and Modified fields to database)
+    Added the Created and modified fields to the ManagementStatus table as well as setting the Create and Edit method
+
+    13 September 2019 -- HCare-808 (Settings ~ Management status / Status type must be mandatory)
+    Added required attribute to the Status type in Management status Create view. i.e. OPEN, CLOSED OR PENDING is a required field
+
+    -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .field-validation-error:before {
+        font-family: FontAwesome;
+        content: "\f06a\00a0";
+        animation: pulse 2s ease infinite;
+    }
+
+    .error-alert {
+        width: 100%;
+        margin: 0 auto;
+        background-color: rgba(217, 83, 79, 0.1);
+        padding: 10px;
+        border-left-color: #d9534f !important;
+        border: 1px solid transparent;
+        border-left-width: 5px;
+        border-radius: 3px;
+        margin: 0 auto;
+        font-family: 'Open Sans', sans-serif;
+        font-size: 12px;
+        margin: 0 0 5px 0;
+        margin-top: -10px;
+        margin-bottom: 20px;
+    }
+
+        .error-alert span {
+            color: #d9534f;
+            text-align: center;
+        }
+</style>
+<javascript>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+    <script src="https://www.jqueryscript.net/demo/jQuery-Plugin-For-Sortable-Bootstrap-Tables-Bootstrap-Sortable/Scripts/bootstrap-sortable.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/js/standalone/selectize.js"></script>
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.default.css">
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet" />
+    <link href='http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.min.css' rel='stylesheet' type='text/css'>
+</javascript>
+
+<div class="fullScreen_container zero-padding">
+
+    <!--pageHeader-->
+    <nav id="global-nav" class="nav">
+        <div class="pull-left title">
+            <h1 class="site-title_patientProfile">
+                <span><i class="fas fa-id-card-alt"></i>&emsp; Management status</span>
+            </h1>
+        </div>
+        <div class="pull-right title">
+            <h1 class="site-title_userID pull-right">
+                <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+            </h1>
+            <h1 class="site-title_userID pull-right">
+                @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                {
+                    <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                }
+            </h1>
+            <h1 class="site-waffleIcon pull-right">
+                <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+            </h1>
+        </div>
+    </nav>
+    <!--breadCrumbs-->
+    <ul class="breadcrumbs_fullScreens">
+        <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+        <li><a href="@Url.Action("Index", "Administration", new {})">Settings</a></li>
+        <li><a href="@Url.Action("Index", "ManagementStatus", new {})">Management status</a></li>
+        <li><a href="#">Create</a></li>
+    </ul>
+    <!--navCollection-->
+    <div class="navCollection_fullScreens">
+        @Html.Partial("_navCollection")
+    </div>
+    <div style="margin-bottom: 1%"></div>
+
+    <div class="row">
+        <h4 class="tableHeading">Create new</h4>
+        <hr class="fancyruler">
+
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+            <div class="hidden-fields">
+                <input type="hidden" name="code-validation" id="code-validation" />
+                <input type="hidden" name="description-validation" id="description-validation" />
+                <input type="hidden" name="error-code" id="error-code" value="@ViewBag.Code" />
+                <input type="hidden" name="error-description" id="error-description" value="@ViewBag.Description" />
+                <div class="col-md-12"><div id="duplicate-code-notice" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; Code already exists!</span></div></div></div>
+                <div class="col-md-12"><div id="duplicate-description-notice" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; Description already exists!</span></div></div></div>
+                <div class="col-md-12"><div id="error-duplicate-code" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; <b>Code:</b> @ViewBag.Code already exists!</span></div></div></div>
+                <div class="col-md-12"><div id="error-duplicate-description" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; <b>Description:</b> @ViewBag.Description already exists!</span></div></div></div>
+                <div class="col-md-12"><div id="error-duplicate" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; This combination, <b>Code:</b> @ViewBag.Code & <b>Description:</b> @ViewBag.Description already exists!</span></div></div></div>
+            </div>
+            <div class="form-horizontal createForm">
+                <br />
+                <br />
+                <div class="form-group">
+                    @Html.LabelFor(model => model.statusCode, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.statusCode, new { htmlAttributes = new { @class = "form-control-new", @placeholder = "example: ACM", @onblur = "CheckCode();", @required = "required" } })
+                        @Html.ValidationMessageFor(model => model.statusCode, "", new { @class = "text-danger", @style = "font-size: 90%; margin-left: 1%" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.Label(null, "Status description", htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.statusName, new { htmlAttributes = new { @class = "form-control-new", @placeholder = "example: Active managed", @onblur = "CheckName();", @required = "required" } })
+                        @Html.ValidationMessageFor(model => model.statusName, "", new { @class = "text-danger", @style = "font-size: 90%; margin-left: 1%" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.statusType, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.DropDownList("statusTypes", null, "Select", htmlAttributes: new { @required = "required" })
+                        @Html.ValidationMessage("statusTypes", "", new { @class = "text-danger", @style = "font-size: 90%; margin-left: 1%" })
+
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.programCode, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.DropDownList("programs", null, "Select", htmlAttributes: new { @required = "required" })
+                        @Html.ValidationMessage("programs", "", new { @class = "text-danger", @style = "font-size: 90%; margin-left: 1%" })
+
+                    </div>
+                </div>
+
+                <div class="fixed-btn">
+                    <input id="submit" type="submit" value="Submit" class="btn create-button" style="width: 15%" /><br />
+                    <input type="text" value="Back" class="btn reset-button go_back" />
+                </div>
+
+            </div>
+        }
+    </div>
+</div>
+
+
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+@section scripts{
+    <script src="~/bundles/jqueryval"></script>
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/js/standalone/selectize.js"></script>
+    <script>
+        initSelectize();
+        function initSelectize() {
+            $('#statusTypes').selectize({
+                persist: true,
+                preload: true,
+                maxItems: 1,
+                delimiter: ',',
+                valueField: 'id',
+                labelField: 'name',
+                searchField: ['name'],
+                hideSelected: true,
+                plugins: ['remove_button'],
+                render: {
+                    option: function (item, escape) {
+                        return '<span class="name">' + escape(item.name) + '</span>';
+
+                    }
+                }
+            }),
+                $('#programs').selectize({
+                    persist: true,
+                    preload: true,
+                    maxItems: 1,
+                    delimiter: ',',
+                    valueField: 'id',
+                    labelField: 'name',
+                    searchField: ['name'],
+                    hideSelected: true,
+                    plugins: ['remove_button'],
+                    render: {
+                        option: function (item, escape) {
+                            return '<span class="name">' + escape(item.name) + '</span>';
+
+                        }
+                    }
+                })
+        }
+    </script>
+    <script>
+        function CheckName() {
+            var name = $('#statusName').val();
+            name = name.trim();
+            $("#description-validation").val("");
+
+            $.ajax({
+                url: '/ManagementStatus/ManagementStatusNameCheck',
+                type: "POST",
+                dataType: "JSON",
+                data: { statusName: name },
+                success: function (result) {
+                    var description = result.statusName;
+                    if (description.toLowerCase() == name.toLowerCase()) {
+                        $("#duplicate-description-notice").removeClass("hidden");
+                        $('span[data-valmsg-for="statusName"]').html('<span style="font-size: 12px"><i class="fas fa-exclamation-circle"></i> </span>Description already exists!');
+                        $("#description-validation").val(description);
+                    }
+                },
+                error: function (result) {
+                    $('span[data-valmsg-for="statusName"]').html('');
+                    $("#duplicate-description-notice").addClass("hidden");
+                }
+            });
+        }
+        $("#submit").click(function () {
+            if ($("#description-validation").val().length > 0) {
+                $("#statusName").focus();
+                return false;
+            }
+        });
+
+    </script>
+    <script>
+        function CheckCode() {
+            var code = $('#statusCode').val();
+            code = code.trim();
+            $("#code-validation").val("");
+            $.ajax({
+                url: '/ManagementStatus/ManagementStatusCodeCheck',
+                type: "POST",
+                dataType: "JSON",
+                data: { statusCode: code },
+                success: function (result) {
+                    var cod3 = result.statusCode;
+                    if (cod3.toLowerCase() == code.toLowerCase()) {
+                        $("#duplicate-code-notice").removeClass("hidden");
+                        $('span[data-valmsg-for="statusCode"]').html('<span style="font-size: 12px"><i class="fas fa-exclamation-circle"></i> </span>Code already exists!');
+                        $("#code-validation").val(cod3);
+                    }
+                },
+                error: function (result) {
+                    $("#duplicate-code-notice").addClass("hidden");
+                    $('span[data-valmsg-for="statusCode"]').html('');
+                }
+            });
+        }
+
+        $("#submit").click(function () {
+            if ($("#code-validation").val().length > 0) {
+                $("#statusCode").focus();
+                return false;
+            }
+        });
+
+    </script>
+    <script>
+        $(document).ready(function () {
+            var c1 = $('#error-code').val();
+            var d1 = $('#error-description').val();
+            if (c1.length > 0 && d1.length > 0) {
+                $("#error-duplicate").removeClass("hidden");
+            }
+            else if (c1.length > 0) {
+                $("#error-duplicate-code").removeClass("hidden");
+            }
+            else if (d1.length > 0) {
+                $("#error-duplicate-description").removeClass("hidden");
+            }
+        });
+    </script>
+
+
+}

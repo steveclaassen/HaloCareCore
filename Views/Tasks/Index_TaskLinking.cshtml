@@ -1,0 +1,321 @@
+﻿@model IEnumerable<HaloCareCore.Models.Communications.TaskRequirementItemLinking>
+
+@{
+    ViewBag.Title = "Index_TaskLinking";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+
+<style>
+    .container {
+        margin: auto;
+        display: block;
+        max-width: 1600px;
+        width: 1400px;
+        margin-left: 4% !important;
+    }
+
+    th {
+        cursor: pointer;
+    }
+
+    td {
+        cursor: pointer;
+    }
+
+    .table tr th {
+        color: black !important;
+        font-family: 'Century Gothic' !important;
+        font-weight: 600 !important;
+        text-align: left !important;
+        font-size: 14px !important;
+    }
+
+    .table tr td {
+        text-align: left !important;
+        font-family: 'Century Gothic' !important;
+        color: #0f4674 !important;
+        font-size: 14px !important;
+    }
+
+    /*breadCrumbs*/
+
+    ul.breadcrumb {
+        padding: 10px 16px;
+        list-style: none;
+        background-color: transparent;
+        margin-left: -5%
+    }
+
+        ul.breadcrumb li {
+            display: inline;
+            font-size: 10px;
+        }
+
+            ul.breadcrumb li + li:before {
+                padding: 8px;
+                color: #808080;
+                font-size: 10px;
+                content: "/\00a0";
+            }
+
+            ul.breadcrumb li a {
+                color: #808080;
+                text-decoration: none;
+                font-size: 10px;
+            }
+
+                ul.breadcrumb li a:hover {
+                    color: #eea236;
+                }
+
+    * {
+        color: #0f4674;
+    }
+
+
+
+    .fullWidth_table {
+        max-width: 1600px;
+        width: 1480px !important;
+        margin: auto;
+        margin-bottom: 2% !important;
+        font-size: 10px;
+        margin-left: -7%
+    }
+
+    .backButton_image img {
+        margin-left: 2% !important;
+    }
+
+    .scriptCheck img {
+        margin-left: 1% !important;
+    }
+
+    .fa {
+        font-size: 30px;
+    }
+
+
+        .fa:hover {
+            color: gray;
+        }
+
+    #text, #ico {
+        line-height: 50px;
+    }
+
+    #ico {
+        vertical-align: middle;
+    }
+</style>
+
+<div class="container zero-padding">
+
+    <!--breadCrumbs-->
+    <ul class="breadcrumb" style="margin-top: -2%;">
+        <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+        <li><a href="@Url.Action("Index", "Administration", new {})">Settings</a></li>
+        <li><a href="#">Task Linking</a></li>
+    </ul>
+    <!--breadCrumbs-->
+    <!--FAB-->
+    <div class="zoom">
+        <a class="zoom-fab zoom-btn-md zoom-btn-white" id="zoomBtn"><i class="glyphicon glyphicon-th-large" style="font-size: 12px; color: ghostwhite"></i></a>
+        <ul class="zoom-menu">
+            <li><a href="@Url.Action("Index", "Home", new { })" class="zoom-fab zoom-btn-sm zoom-btn-white scale-transition scale-out"><i class="fa fa-home" style="font-size: 14px; color: ghostwhite"></i></a></li>
+            <li><a href="@Url.Action("Index", "Administration", new { })" class="zoom-fab zoom-btn-sm zoom-btn-white scale-transition scale-out" title="Settings"><i class="fa fa-gear" style="font-size: 14px; color: ghostwhite"></i></a></li>
+            <li><a href="javascript:;" class="zoom-fab zoom-btn-sm zoom-btn-white scale-transition scale-out" title="Add Member"><i class="fa fa-plus" style="font-size: 14px; color: ghostwhite"></i></a></li>
+            <li><a href="@Url.Action("searchManagement", "patientManagement", new { })" class="zoom-fab zoom-btn-sm zoom-btn-white scale-transition scale-out" title="Advanced Search"><i class="fa fa-search" style="font-size: 14px; color: ghostwhite"></i></a></li>
+        </ul>
+    </div>
+    <!--FAB_End-->
+    <!--pageHeader-->
+
+    <div class="container zero-padding">
+        <div class="topBar_reports img-responsive">
+            <h2>Task Type Linking</h2>
+            <img src="~/Content/Images/Icons/Administration/TaskTypeLinking_White.png" style="width: 2.8%; margin-top: -0.8%;" />
+            <img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" style="width: 8%; float: right; margin-right: 100px; margin-top: 3px" />
+        </div>
+    </div>
+
+    <div style="margin-bottom: 2%"></div>
+
+    <!--pageHeader-->
+
+    <h4 style="color: #0f4674; margin-top: 0%; margin-left: -5%; margin-bottom: -9.5%!important; font-size: 25px; font-family: 'Century Gothic'; font-weight: 300; font-style: normal;">Task Type Linking</h4>
+
+    <div class="indexSearch" style="margin-top:4%!important">
+        <label for="tableSearch" class="control-label"></label> <input type="text" class="form-control-search" id="search" onkeyup="myFunction()" placeholder="Search..." style="width: 150px; margin-top: 1.6%; margin-left: 87%; position: relative" />
+        <div class="searchIcon">
+            <img src="~/Content/Images/memberProfile/Search_gray.png" style="width: 0.8%!important; margin-left: 96.2%; margin-top: -3.5%; position: relative" />
+        </div>
+    </div>
+
+    <!--addSymbol-->
+
+    <div class="addTable_Button" style="position: relative; margin-left: 81%; margin-right: 200px;margin-top:-3.5%!important; margin-bottom: -1%!important">
+        <a href="@Url.Action("Create_TaskLinking", "Tasks", new { })">
+            <i id="ico" class="fa fa-plus-circle"></i>
+            <span id="text">&nbsp; Add</span>
+        </a>
+    </div>
+
+    <!--addSymbol-->
+
+    <br />
+
+    <table class="table fullWidth_table" id="table">
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.itemId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.taskType)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.requirementId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.templateID)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.createdDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.createdBy)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.modifiedBy)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.modifiedDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.taskSequence)
+            </th>
+            <th>Action</th>
+        </tr>
+
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.itemId)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.taskType)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.requirementId)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.templateID)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.createdDate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.createdBy)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.modifiedBy)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.modifiedDate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.taskSequence)
+                </td>
+                <td>
+                    @Html.ActionLink("Edit", "Edit_TaskLinking", new { id = item.id })
+                </td>
+            </tr>
+        }
+
+    </table>
+
+</div>
+
+<div class="backButton">
+    <a class="go_back" style="left: 15px;bottom: 10px; position: fixed; padding: 2px 2px 2px 2px; z-index: 5">
+        Back
+    </a>
+</div>
+
+<script src="js/jquery.tablesorter.min.js"></script>
+
+
+
+<!-- Search -->
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <script>
+
+        var $rows = $('#table tr');
+        $('#search').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $rows.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+
+
+        function sortTable(n) {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("table");
+            switching = true;
+            dir = "asc";
+
+            while (switching) {
+                switching = false;
+                rows = table.getElementsByTagName("TR");
+
+                for (i = 1; i < (rows.length - 1); i++) {
+
+                    shouldSwitch = false;
+
+                    x = rows[i].getElementsByTagName("TD")[n];
+                    y = rows[i + 1].getElementsByTagName("TD")[n];
+
+                    if (dir == "asc") {
+                        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                            //if so, mark as a switch and break the loop:
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (dir == "desc") {
+                        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                            //if so, mark as a switch and break the loop:
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+                if (shouldSwitch) {
+                    /*If a switch has been marked, make the switch
+                    and mark that a switch has been done:*/
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                    //Each time a switch is done, increase this count by 1:
+                    switchcount++;
+                } else {
+                    /*If no switching has been done AND the direction is "asc",
+                    set the direction to "desc" and run the while loop again.*/
+                    if (switchcount == 0 && dir == "asc") {
+                        dir = "desc";
+                        switching = true;
+                    }
+                }
+            }
+        }
+
+
+
+
+    </script>
+}

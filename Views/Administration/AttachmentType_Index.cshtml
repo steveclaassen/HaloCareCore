@@ -1,0 +1,146 @@
+﻿@model IEnumerable<HaloCareCore.Models.Validation.AttachmentTypes>
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Attachment types";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<comment>
+    <!--
+    21 August 2020 -- HCare-1154(Attachment type setup)
+        -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+</style>
+<javascript>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="https://www.jqueryscript.net/demo/jQuery-Plugin-For-Sortable-Bootstrap-Tables-Bootstrap-Sortable/Scripts/bootstrap-sortable.js"></script>
+    <script src="js/jquery.tablesorter.min.js"></script>
+</javascript>
+
+<div class="fullScreen_container">
+    <!----------------------------------------------------------------------------- html-top-navigation-panel  ---------------------------------------------------------------------------->
+    <navigation>
+        <nav id="global-nav" class="nav">
+            <div class="pull-left title">
+                <h1 class="site-title_patientProfile">
+                    <span><i class="fas fa-square"></i></span>&emsp; Attachment types
+                </h1>
+            </div>
+            <div class="pull-right title">
+                <div class="site-title_userID pull-right">
+                    <div class="halocareLogoX"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+                </div>
+                <h1 class="site-title_userID pull-right">
+                    @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                    {
+                        <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                    }
+                </h1>
+                <h1 class="site-waffleIcon pull-right">
+                    <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+                </h1>
+            </div>
+        </nav>
+        <ul class="breadcrumbs_fullScreens">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+            <li><a href="@Url.Action("Index", "Administration", new {})">Settings</a></li>
+            <li><a href="#">@ViewBag.Title</a></li>
+        </ul>
+        <div class="navCollection_fullScreens">
+            @Html.Partial("_navCollection")
+        </div>
+
+        <div style="margin-bottom: 3%"></div>
+    </navigation>
+    <!-------------------------------------------------------------------------------------- html-body ------------------------------------------------------------------------------------>
+    <div class="container-tab">
+        <div class="row">
+            <div class="span12">
+                <br />
+                <!--------------------------------------------------------------------------- new/search -------------------------------------------------------------------------->
+                <div class="col-md-12 row">
+                    <div class="col-md-6">
+                        <h4 class="subHeading">
+                            Attachment type overview
+                            <a class="create-new" href="@Url.Action("AttachmentType_Create", "Administration", new { })" style="font-size: 14px">Create new <span><i class="fa fa-plus-circle" style="font-size: 12px"></i></span></a>
+                        </h4>
+                    </div>
+                    <!--------------------------------------------------------------------------- jq-search -------------------------------------------------------------------------->
+                    <div class="col-md-6">
+                        <div class="input-wrapper-new-search">
+                            <input type="text" class="form-control-new-search" id="search" onkeyup="myFunction()" placeholder="Search..." />
+                        </div>
+                    </div>
+                </div>
+                <!------------------------------------------------------------------------ question-table ---------------------------------------------------------------------->
+                <table class="table settings-table sortable" id="disclaimer-question">
+                    <thead>
+                        <tr>
+                            <th style="width: 8%; text-align: center!important">@Html.DisplayNameFor(model => model.attachmentType) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                            <th style="width: 40%">@Html.DisplayNameFor(model => model.typeDescription) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                            <th style="width: 10%; text-align: center!important">@Html.DisplayNameFor(model => model.createdDate) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                            <th style="width: 10%; text-align: center!important">@Html.DisplayNameFor(model => model.createdBy) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                            <th style="width: 10%; text-align: center!important">@Html.DisplayNameFor(model => model.active)</th>
+                            <th style="width: 10%; text-align: center!important">@Html.DisplayName("Action")</th>
+                        </tr>
+                    </thead>
+
+                    @foreach (var item in Model)
+                    {
+                        <tbody id="attachment-type-search">
+                            <tr style="text-indent: 5px">
+                                <td class="text-center"><span class="@(item.active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.attachmentType)</span></td>
+                                <td class="text-left"><span class="@(item.active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.typeDescription)</span></td>
+                                <td class="text-center" data-dateformat="DD-MM-YYYY"><span class="@(item.active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.createdDate)</span></td>
+                                <td class="text-center"><span class="@(item.active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.createdBy)</span></td>
+                                <td class="row-information text-center"><span class="@(item.active == true ? "chk-yes fas fa-circle" : "chk-no fas fa-circle")"></span></td>
+                                <td class="text-center">
+                                    <input type="submit" class="link-button" value="View" onclick="location.href='@Url.Action("AttachmentType_Details", "Administration", new { id = item.attachmentType })'" /> /
+                                    <input type="submit" class="link-button" value="Edit" onclick="location.href='@Url.Action("AttachmentType_Edit", "Administration", new { id = item.attachmentType })'" />
+                                </td>
+                            </tr>
+                        </tbody>
+                    }
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixedBack">
+        <input value="Back" class="btn buttonRound_formBack " onclick="MainbackBtn();" style="width: 15%" />
+    </div>
+</div>
+
+<script src="js/jquery.tablesorter.min.js"></script>
+
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+    <script type="text/javascript">
+        var $rows = $('#attachment-type-search tr');
+        $('#search').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $rows.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+    </script>
+    <script>
+            function MainbackBtn() {
+            window.location.href = '@Url.Action("Index", "Administration")';
+        }
+    </script>
+
+
+}
+

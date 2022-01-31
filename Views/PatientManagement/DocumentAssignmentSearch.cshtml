@@ -1,0 +1,95 @@
+﻿@model HaloCareCore.Models.Patient.Dependant
+
+@{
+    ViewBag.Title = "DocumentAssignmentSearch";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        <h4>Patient Management - Search Document Assignment</h4>
+        <hr class="fancyruler" />
+        <br />
+        <div class="advancedSearchIcon">
+            <img src="~/Content/Images/Icons/Patient/iPatient.png" style="width:10%; margin: auto; display: block" />
+            <h2 style="color: #003366; font-size: 150%; text-align: center; margin-bottom: 5%"><i>Document<span style="color: #0081b3"> Assignment</span></i></h2>
+        </div>
+
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+        <div class="form-group">
+            @Html.Label(null,"Date From", htmlAttributes: new { @class = "control-label col-md-3" })
+            <div class="col-md-9">
+                @Html.EditorFor(model => model.createdDate, new { htmlAttributes = new { @class = "form-control datepicker" } })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.Label(null,"Date To", htmlAttributes: new { @class = "control-label col-md-3" })
+            <div class="col-md-9">
+                @Html.EditorFor(model => model.createdDate, new { htmlAttributes = new { @class = "form-control datepicker" } })
+            </div>
+        </div>
+        <!--DocumentAssignmentNo.?-->
+        <div class="form-group">
+            @Html.Label(null,"Document Assignment No", htmlAttributes: new { @class = "control-label col-md-3" })
+            <div class="col-md-9">
+                @Html.EditorFor(model => model.firstName, new { htmlAttributes = new { @class = "form-control" } })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.Label(null,"Membership Number", htmlAttributes: new { @class = "control-label col-md-3" })
+            <div class="col-md-9">
+                @Html.EditorFor(model => model.memberID, new { htmlAttributes = new { @class = "form-control" } })
+            </div>
+        </div>
+        <!--Medical scheme?-->
+        <div class="form-group">
+            @Html.Label(null,"Medical scheme", htmlAttributes: new { @class = "control-label col-md-3" })
+            <div class="col-md-9">
+                @Html.EditorFor(model => model.memberID, new { htmlAttributes = new { @class = "form-control" } })
+            </div>
+        </div>
+        <!--PatientName?-->
+        <div class="form-group">
+            @Html.Label(null,"Patient Name", htmlAttributes: new { @class = "control-label col-md-3" })
+            <div class="col-md-9">
+                @Html.EditorFor(model => model.firstName, new { htmlAttributes = new { @class = "form-control" } })
+            </div>
+        </div>
+        <!--AssignmentStatus?-->
+        <div class="form-group">
+            @Html.Label(null,"Assignment Status", htmlAttributes: new { @class = "control-label col-md-3" })
+            <div class="col-md-9">
+                @Html.EditorFor(model => model.firstName, new { htmlAttributes = new { @class = "form-control" } })
+            </div>
+        </div>
+        <div>
+            &nbsp;
+        </div>
+
+
+
+        <div class="" style="margin-left: 33%">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Submit" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+    
+}
+<br />
+
+<div class="backButton">
+    @Html.ActionLink("Back to List", "Index")
+</div>
+<br />
+<br />
+@section Scripts {
+    <script src="~/bundles/jqueryval"></script>
+}

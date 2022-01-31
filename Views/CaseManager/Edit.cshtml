@@ -1,0 +1,225 @@
+﻿@model HaloCareCore.Models.Management.CaseManagers
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Edit";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<comment>
+    <!--
+     14 September 2020 -- HCare-956(Master table maintenance screens - DUP checks on EDIT)
+    -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .field-validation-error:before {
+        font-family: FontAwesome;
+        content: "\f06a\00a0";
+        animation: pulse 2s ease infinite;
+    }
+
+    .error-alert {
+        width: 100%;
+        margin: 0 auto;
+        background-color: rgba(217, 83, 79, 0.1);
+        padding: 10px;
+        border-left-color: #d9534f !important;
+        border: 1px solid transparent;
+        border-left-width: 5px;
+        border-radius: 3px;
+        margin: 0 auto;
+        font-family: 'Open Sans', sans-serif;
+        font-size: 12px;
+        margin: 0 0 5px 0;
+        margin-top: -10px;
+        margin-bottom: 20px;
+    }
+
+        .error-alert span {
+            color: #d9534f;
+            text-align: center;
+        }
+</style>
+<javascript>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+</javascript>
+
+<div class="fullScreen_container zero-padding">
+    <!--pageHeader-->
+    <nav id="global-nav" class="nav">
+        <div class="pull-left title">
+            <h1 class="site-title_patientProfile">
+                <span><i class="fas fa-medkit"></i>&emsp; Case managers</span>
+            </h1>
+        </div>
+        <div class="pull-right title">
+            <h1 class="site-title_userID pull-right">
+                <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+            </h1>
+            <h1 class="site-title_userID pull-right">
+                @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                {
+                    <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                }
+            </h1>
+            <h1 class="site-waffleIcon pull-right">
+                <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+            </h1>
+        </div>
+    </nav>
+    <!--breadCrumbs-->
+    <ul class="breadcrumbs_fullScreens">
+        <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+        <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+        <li><a href="@Url.Action("Index", "CaseManager", new {})">Case managers</a></li>
+        <li><a href="#">@ViewBag.Title</a></li>
+    </ul>
+    <!--navCollection-->
+    <div class="navCollection_fullScreens">
+        @Html.Partial("_navCollection")
+    </div>
+    <div style="margin-bottom: 1%"></div>
+
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="row">
+            <h4 class="tableHeading">Edit</h4>
+            <hr class="fancyruler">
+            <br />
+            <br />
+            @Html.HiddenFor(model => model.caseManagerNo)
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+            <input type="hidden" name="name-validation" id="name-validation" />
+            <div class="col-md-12"><div id="duplicate-notice" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; Case manager already exists!</span></div></div></div>
+
+            <div class="form-horizontal editForm">
+                <br />
+                <div class="form-group">
+                    @Html.LabelFor(model => model.caseManagerNo, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-8">
+                        @Html.EditorFor(model => model.caseManagerNo, new { htmlAttributes = new { @class = "form-control-new active-false", @disabled = "disabled" } })
+                        @Html.ValidationMessageFor(model => model.caseManagerNo, "", new { @class = "text-danger" })
+
+                    </div>
+                    <div class="col-md-2">
+                        <i class="fas fa-question-circle information-icon" data-toggle="tooltip" data-original-title="This field is has been disabled"></i>
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.caseManagerName, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.caseManagerName, new { htmlAttributes = new { @class = "form-control-new", @onblur = "NameCheck();" } })
+                        @Html.ValidationMessageFor(model => model.caseManagerName, "", new { @class = "text-danger", @style = "font-size: 90%; margin-left: 1%" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.caseManagerSurname, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.caseManagerSurname, new { htmlAttributes = new { @class = "form-control-new", @onblur = "NameCheck();" } })
+                        @Html.ValidationMessageFor(model => model.caseManagerSurname, "", new { @class = "text-danger", @style = "font-size: 90%; margin-left: 1%" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.extension, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.extension, new { htmlAttributes = new { @class = "form-control-new" } })
+                        @Html.ValidationMessageFor(model => model.extension, "", new { @class = "text-danger", @style = "font-size: 90%; margin-left: 1%" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.workNo, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.workNo, new { htmlAttributes = new { @class = "form-control-new" } })
+                        @Html.ValidationMessageFor(model => model.workNo, "", new { @class = "text-danger", @style = "font-size: 90%; margin-left: 1%" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.email, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.email, new { htmlAttributes = new { @class = "form-control-new" } })
+                        @Html.ValidationMessageFor(model => model.email, "", new { @class = "text-danger", @style = "font-size: 90%; margin-left: 1%" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Active, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        <div class="checkbox assignmentCheck">
+                            @Html.EditorFor(model => model.Active)
+                            @Html.ValidationMessageFor(model => model.Active, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="fixed-btn">
+                <input id="submit" type="submit" value="Submit" class="btn create-button" style="width: 15%" /><br />
+                <input type="text" value="Back" class="btn reset-button go_back" />
+            </div>
+
+        </div>
+    }
+
+</div>
+
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('[data-toggle="tooltip"]').tooltip({
+                placement: 'top'
+            });
+        });
+    </script>
+    <script>
+        //hcare-956
+        function NameCheck() {
+            var cmNo = $('#caseManagerNo').val();
+            cmNo = cmNo.trim();
+
+            var fname = $('#caseManagerName').val();
+            fname = fname.trim();
+            var lname = $('#caseManagerSurname').val();
+            lname = lname.trim();
+            var cmanager = fname + ' ' + lname;
+            $("#name-validation").val("");
+
+            $.ajax({
+                url: '/CaseManager/NameCheck',
+                type: "POST",
+                dataType: "JSON",
+                data: { firstName: fname, lastName: lname },
+                success: function (result) {
+                    var firstname = result.caseManagerName;
+                    var lastname = result.caseManagerSurname;
+                    var casemanager = result.caseManagerName + ' ' + result.caseManagerSurname;
+                    var cmNumber = result.caseManagerNo;
+
+                    if (cmNumber.toLowerCase() + '-' + casemanager == cmNo.toLowerCase() + '-' + cmanager) { }
+                    if (casemanager == cmanager && cmNumber.toLowerCase() != cmNo.toLowerCase()) {
+                        $("#duplicate-notice").removeClass("hidden");
+                        $('span[data-valmsg-for="caseManagerName"]').html('<span style="font-size: 12px"><i class="fas fa-exclamation-circle"></i> </span>Case manager already exists! - ' + '(' + result.caseManagerNo + ') ' + casemanager);
+                        $('span[data-valmsg-for="caseManagerSurname"]').html('<span style="font-size: 12px"><i class="fas fa-exclamation-circle"></i> </span>Case manager already exists! - ' + '(' + result.caseManagerNo + ') ' + casemanager);
+                        $("#name-validation").val(casemanager);
+                    }
+                },
+                error: function (result) {
+                    $("#duplicate-notice").addClass("hidden");
+                    $('span[data-valmsg-for="caseManagerName"]').html('');
+                    $('span[data-valmsg-for="caseManagerSurname"]').html('');
+                }
+            });
+        }
+        $("#submit").click(function () {
+            if ($("#name-validation").val().length > 0) {
+                $("#caseManagerName").focus();
+                return false;
+            }
+        });
+    </script>
+}

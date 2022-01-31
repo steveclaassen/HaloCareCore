@@ -1,0 +1,181 @@
+﻿@model IEnumerable<HaloCareCore.Models.Management.PatientManagementStatusHistory>
+@using HaloCareCore.Extensions
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Managed care";
+    Layout = "~/Views/Shared/_LayoutMember.cshtml";
+}
+
+<comment>
+    <!--
+        24 June 2020 -- HCare-974 (Pathology history display)
+    -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+</style>
+
+<!------------------------------------------------------------------------------------ jQ-dateSort  ----------------------------------------------------------------------------------->
+<javascript>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="https://www.jqueryscript.net/demo/jQuery-Plugin-For-Sortable-Bootstrap-Tables-Bootstrap-Sortable/Scripts/bootstrap-sortable.js"></script>
+    <script src="js/jquery.tablesorter.min.js"></script>
+</javascript>
+
+<!----------------------------------------------------------------------------- html-top-navigation-panel  ---------------------------------------------------------------------------->
+<nav id="global-nav" class="nav" style="z-index: 10000">
+    <div class="pull-left title">
+        <h1 class="site-title_patientProfile">
+            <span><img src="~/Content/Images/memberProfile/topBar Icons/medicalStatus.png" /></span>&emsp; Managed care
+        </h1>
+    </div>
+    <div class="pull-right title">
+        <h1 class="site-title_userID pull-right">
+            <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+        </h1>
+        <h1 class="site-title_userID pull-right">
+            @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+            {
+                <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+            }
+        </h1>
+        <h1 class="site-waffleIcon pull-right">
+            <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+        </h1>
+    </div>
+</nav>
+
+<div class="dashboardContainer zero-padding">
+
+    <div class="patientDashboard_View">
+        <!-- breadcrumbs -->
+        <ul class="breadcrumbs_patientDashboard">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+            <li><a href="@Url.Action("patientDashboard", "Member", new {DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })">Patient</a></li>
+            <li><a href="#">@ViewBag.Title</a></li>
+        </ul>
+        <!-- navigation-collection -->
+        <div class="navCollection_patientDashboard">
+            @Html.Partial("_navCollection")
+        </div>
+        <!-- left-navigation-panel -->
+        @Html.Partial("_navSlider", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })
+        <!--profile-information-->
+        <div class="profileBar">
+            @Html.Action("_profileBar_edit", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })
+        </div>
+    </div>
+
+    <div class="profilebar-spacer"></div>
+
+    <div class="patientDashboard_container">
+        <div class="row">
+            <br />
+            <!--------------------------------------------------------------------------- new/search -------------------------------------------------------------------------->
+            <div class="col-md-12 row">
+                <div class="col-md-6">
+                    <h4 class="subHeading">
+                        Management status history
+                        <a class="create-new" href="@Url.Action("SetManagementStatus", "Member", new {DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"]})" style="font-size: 14px">Create new <span><i class="fa fa-plus-circle" style="font-size: 12px"></i></span></a>
+                    </h4>
+                </div>
+                <!--------------------------------------------------------------------------- jq-search -------------------------------------------------------------------------->
+                <div class="col-md-6">
+                    <div class="input-wrapper-new-search">
+                        <input type="text" class="form-control-new-search" id="search" onkeyup="myFunction()" placeholder="Search..." />
+                    </div>
+                </div>
+            </div>
+
+            <table class="table statusHistory_Table sortable" id="statusTable">
+                <thead>
+                    <tr>
+                        <th style="width: 15%;">@Html.DisplayNameFor(model => model.createdDate) <i class="fa fa-fw fa-sort"></i></th>
+                        <th style="width: 30%;">@Html.DisplayNameFor(model => model.managementStatusCode) <i class="fa fa-fw fa-sort"></i></th>
+                        <th style="width: 15%;">@Html.DisplayNameFor(model => model.createdBy) <i class="fa fa-fw fa-sort"></i></th>
+                        <th style="width: 10%;">@Html.DisplayNameFor(model => model.effectiveDate) <i class="fa fa-fw fa-sort"></i></th>
+                        <th style="width: 10%;">@Html.DisplayNameFor(model => model.endDate) <i class="fa fa-fw fa-sort"></i></th>
+                        <th style="width: 10%; text-align: center!important">@Html.DisplayNameFor(model => model.active)</th>
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            if (User.HasRole("6. Global user") || User.HasRole("5. Super user"))
+                            {
+                                <th style="width: 10%;text-align: center!important">Action</th>
+                            }
+                        }
+
+                    </tr>
+                </thead>
+                @foreach (var item in Model)
+                {
+                    <tbody id="management-status-search">
+                        <tr>
+                            <td data-dateformat="DD-MM-YYYY" class="text-center"><span class="@(item.active == true ? "" : "active-false")">@(item.createdDate == null ? "" : item.createdDate.ToString("dd-MM-yyyy HH:mm:ss"))</span></td>
+                            <td><span class="@(item.active == true ? "" : "active-false")">@(item.managementStatusCode == null ? "" : item.managementStatusCode)</span></td>
+                            <td><span class="@(item.active == true ? "" : "active-false")">@(item.createdBy == null ? "" : item.createdBy)</span></td>
+                            <td data-dateformat="DD-MM-YYYY" class="text-center"><span class="@(item.active == true ? "" : "active-false")">@(item.effectiveDate == null ? "" : item.effectiveDate.Value.ToString("dd-MM-yyyy"))</span></td>
+                            <td data-dateformat="DD-MM-YYYY">
+                                @if (item.endDate < item.effectiveDate)
+                                {
+                                    <span style="color: darkred; font-weight: bold">@Html.DisplayFor(modelItem => item.endDate)</span>
+                                }
+                                else if (item.active == false && item.endDate > item.effectiveDate)
+                                {
+                                    <span class="active-false">@Html.DisplayFor(modelItem => item.endDate)</span>
+                                }
+                                else
+                                {
+                                    @Html.DisplayFor(modelItem => item.endDate)
+                                }
+                            </td>
+                            <td style="text-align:center!important"><span class="@(item.active == true ? "check-yes far fa-check-circle" : "check-no far fa-times-circle")"></span></td>
+
+                            @if (User.Identity.IsAuthenticated)
+                            {
+                                if (User.HasRole("6. Global user") || User.HasRole("5. Super user"))
+                                {
+                                    <td class="statusCode linkNav" style="text-align: center!important">
+                                        @Html.ActionLink("Edit", "EditManagementStatus", new { id = item.id, pro = Context.Request.Query["pro"] }) |
+                                        @Html.ActionLink("Details", "DetailsManagementStatus", new { id = item.id, pro = Context.Request.Query["pro"] })
+                                    </td>
+                                }
+                            }
+                        </tr>
+                    </tbody>
+                }
+            </table>
+            <div class="form-group">
+                <div class="fixedBack" style="margin-left: 42%!important">
+                    <input value="Back" class="btn buttonRound_formBack go_back" style="width: 15%!important" />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script src="~/bundles/jqueryval"></script>
+
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+    <!-- table-search -->
+    <script>
+        var $rows = $('#management-status-search tr');
+        $('#search').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $rows.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+    </script>
+}

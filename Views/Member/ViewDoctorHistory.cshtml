@@ -1,0 +1,232 @@
+﻿@model IEnumerable<HaloCareCore.Models.DoctorHistoryView>
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "ViewDoctorHistory";
+    Layout = "~/Views/Shared/_LayoutMember.cshtml";
+}
+
+
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+</style>
+
+<!--pageHeader-->
+<nav id="global-nav" class="nav">
+    <div class="pull-left title">
+        <h1 class="site-title_patientProfile">
+            <span><i class="fas fa-user-md"></i>&emsp; Doctors</span>
+        </h1>
+    </div>
+    <div class="pull-right title">
+        <h1 class="site-title_userID pull-right">
+            <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+        </h1>
+        <h1 class="site-title_userID pull-right">
+            @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+            {
+                <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+            }
+        </h1>
+        <h1 class="site-waffleIcon pull-right">
+            <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+        </h1>
+    </div>
+</nav>
+
+<div class="dashboardContainer zero-padding">
+    <div class="patientDashboard_Program_View">
+
+        <!--breadCrumbs-->
+        <ul class="breadcrumbs_patientDashboard_Program">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Administration", new {})">Settings</a></li>
+            <li><a href="@Url.Action("patientDashboard", "Member", new {DependentID = Context.Request.Query["DependentID"] })">Patient</a></li>
+            <li><a href="#">History</a></li>
+        </ul>
+
+        <!--Left navSlider -->
+        @Html.Partial("_navSlider", new { DependentID = Context.Request.Query["DependentID"] })
+
+        <!--navCollection-->
+        <div class="navCollection_patientDashboard_Program">
+            @Html.Partial("_navCollection")
+        </div>
+
+        <!--profileInformation-->
+        <div>
+            @Html.Action("_profileBar_edit", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })
+        </div>
+    </div>
+
+
+    <div style="margin-bottom: 11.5%"></div>
+
+    <div class="row patientDashboard_container">
+        <div style="margin-bottom: 1%"></div>
+        <h4 class="tableHeading">Doctor history</h4>
+
+        <!--createNew-->
+        <div class="createNew_link" style="margin-top: -1%; margin-bottom: -2%">
+            <a href="@Url.Action("#", "#" , new { })">
+                <span id="texts">
+                </span>
+
+                <i class="material-icons" id="icon" title="New enrolment">
+                </i>
+            </a>
+        </div>
+        <!--jQ_Search-->
+        <div class="programHistorySearch">
+            <div class="col-md-6 pull-right">
+                <ul class="input-group" id="adv-search">
+
+                    <ul class="nav navbar-nav navbar-right">
+                        <li class="focus">
+                            <input type="text" class="form-control-patientSearch" id="search" onkeyup="myFunction()" placeholder="Search..." />
+                        </li>
+                        <div class="btn-group" role="group">
+                            <button type="submit" class="btn btn-search" style="height: 30px"><span class="glyphicon glyphicon-search" aria-hidden="true" title="Search"></span></button>
+                        </div>
+                    </ul>
+                </ul>
+            </div>
+        </div>
+        <div style="margin-bottom:0.5%"></div>
+        <br />
+
+        <table class="table administration_Table" id="doctorTable">
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.effectiveDate)
+                </th>
+                <th onclick="doctorTable(1)">
+                    @Html.DisplayNameFor(model => model.doctorName) <i class="fa fa-fw fa-sort"></i>
+                </th>
+                <th onclick="doctorTable(2)">
+                    @Html.DisplayNameFor(model => model.tel) <i class="fa fa-fw fa-sort"></i>
+                </th>
+                <th onclick="doctorTable(3)">
+                    @Html.DisplayNameFor(model => model.cell) <i class="fa fa-fw fa-sort"></i>
+                </th>
+                <th onclick="doctorTable(4)">
+                    @Html.DisplayNameFor(model => model.email) <i class="fa fa-fw fa-sort"></i>
+                </th>
+
+            </tr>
+
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.effectiveDate)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.doctorName)
+                    </td>
+
+                    <td>
+                        @Html.DisplayFor(modelItem => item.tel)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.cell)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.email)
+                    </td>
+                </tr>
+            }
+
+        </table>
+        <div class="form-group">
+            <div class="fixedBack" style="margin-left: 42%!important; margin-bottom: 1%">
+                <input value="Back" class="btn buttonRound_formBack go_back" style="width: 15%!important" />
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script>
+        /*specialNote*/
+        $("#alert-toggle").click(function (e) {
+            e.preventDefault();
+            $("#alertWrapper").toggleClass("active");
+        });
+
+        /*Left navigationSlider*/
+        $("#menu-toggle").click(function (e) {
+            e.preventDefault();
+            $("#wrapper").toggleClass("active");
+        });
+
+        /*doctorTable tableSearch*/
+        var $rows = $('#doctorTable tr');
+        $('#search').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $rows.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+
+        /*doctorTable TableSorting*/
+        function doctorTable(n) {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("doctorTable");
+            switching = true;
+            dir = "asc";
+
+            while (switching) {
+                switching = false;
+                rows = table.getElementsByTagName("TR");
+
+                for (i = 1; i < (rows.length - 1); i++) {
+
+                    shouldSwitch = false;
+
+                    x = rows[i].getElementsByTagName("TD")[n];
+                    y = rows[i + 1].getElementsByTagName("TD")[n];
+
+                    if (dir == "asc") {
+                        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (dir == "desc") {
+                        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+                if (shouldSwitch) {
+
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+
+                    switchcount++;
+                } else {
+
+                    if (switchcount == 0 && dir == "asc") {
+                        dir = "desc";
+                        switching = true;
+                    }
+                }
+            }
+        }
+
+        $(function () {
+            $('.go_back').click(function (e) {
+                e.preventDefault();
+                history.go(-1);
+            });
+        });
+
+    </script>
+}

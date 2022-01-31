@@ -1,0 +1,361 @@
+﻿@model HaloCareCore.Models.Management.CoMormidConditions
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "AddCondition";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<comment>
+    <!--
+        06 August 2019 -- HCare-758(Generel - Redirect to tab functionality)
+        Using jquery to add localStorage in order to redirect to the last tab that the user was on and a Submit/Save Button clicked. This will take you back to the origin tab.
+
+        30 December 2019 -- HCare-894(Co-Morbidities Patient Clinical / patient history)
+        The user will not be able to select the same CoMorbid from the dropdown list unless there is an end date for existing comorbid. ie. If the member has a history of comorbid, the Add/Edit comorbid view will exclude the all historic comorbids from the dropdown list unless an end date
+        has been recorded for that comorbid. The dropdown in the Edit view is disabled unless the option selected is a Follow up in the dropdown. This will allow the user to change in the event that a follow up was selected from the Questionnaire. The Questionnaire's dropdown for the comorbids
+        will follow the same logic.
+
+        06 March 2020 -- HCare-894(Co-Morbidities Patient Clinical / patient history)
+        Adjustments made to the process regarding the CoMorbids. The manual addition of the comorbid condition and its ICD-10 has been split that the user can only add the condition if the condition has not been added before and will then be required to select an ICD-10 which is populated based 
+        on the condition selected. Additionally, date overlap validation has been added to the Create and Edit function. If the entry has an end-date added to it, this will allow the user to add the condition again. In order to avoid any duplication, the effective and end-date field will be a required
+        field should it have an effective and end-date already added. ie. When you access an entry to edit, and either the start or end-date is populated, the user will not be able to remove this date.
+
+    -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .field-validation-error:before {
+        font-family: FontAwesome;
+        content: "\f06a\00a0";
+        animation: pulse 2s ease infinite;
+    }
+
+    .select2-container--default .select2-selection--single {
+        display: block !important;
+        max-width: 500px !important;
+        width: 100% !important;
+        max-height: 100px !important;
+        height: 30px !important;
+        margin-top: 5px !important;
+        margin-left: 10px !important;
+        padding: 6px 6px !important;
+        line-height: 1.428571429 !important;
+        color: #003366 !important;
+        border-radius: 0px !important;
+        border: none !important;
+        border-bottom: 1px solid #e8e6e6 !important;
+        background-color: transparent !important;
+        font-family: 'Century Gothic' !important;
+        -webkit-box-shadow: none !important;
+        box-shadow: none !important;
+    }
+
+        .select2-container--default .select2-selection--single:focus {
+            outline: none !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__placeholder {
+            color: white !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow b {
+            margin-top: -0px !important;
+        }
+
+    #datecheck:before,
+    #effdatecheck:before {
+        font-family: FontAwesome;
+        content: "\f06a\00a0";
+        animation: pulse 2s ease infinite;
+    }
+</style>
+<javascript>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet" />
+</javascript>
+
+<!----------------------------------------------------------------------------- html-top-navigation-panel  ---------------------------------------------------------------------------->
+<nav id="global-nav" class="nav">
+    <div class="pull-left title">
+        <h1 class="site-title_patientProfile">
+            <span><i class="fas fa-notes-medical"></i></span>&emsp; CoMorbid conditions
+        </h1>
+    </div>
+    <div class="pull-right title">
+        <h1 class="site-title_userID pull-right">
+            <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+        </h1>
+        <h1 class="site-title_userID pull-right">
+            @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+            {
+                <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+            }
+        </h1>
+        <h1 class="site-waffleIcon pull-right">
+            <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+        </h1>
+    </div>
+</nav>
+
+<!-------------------------------------------------------------------------------------- html-body ------------------------------------------------------------------------------------>
+<div class="dashboardContainer zero-padding">
+    <div class="patientDashboard_View">
+        <!--breadCrumbs-->
+        <ul class="breadcrumbs_patientDashboard">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+            <li><a class="go_back">Patient</a></li>
+            <li><a href="#">Co-Morbid</a></li>
+        </ul>
+
+        <!--Left navSlider -->
+        @Html.Partial("_navSlider_blank", new { })
+
+        <!--navCollection-->
+        <div class="navCollection_patientDashboard">
+            @Html.Partial("_navCollection")
+        </div>
+
+        <!--profileInformation-->
+        <div class="profileBar">
+            @Html.Action("_profileBar_edit", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })
+        </div>
+    </div>
+    <div class="profilebar-spacer-assignment"></div>
+    <!------------------------------------------------------------------------------------ form ----------------------------------------------------------------------------------->
+    <div class="row patientDashboard_container">
+        <h4 class="tableHeading">Add CoMorbid</h4>
+        <hr class="fancyruler">
+        <br />
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+
+            <div class="form-horizontal editForm">
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                @Html.Hidden("DependantID", (object)ViewBag.DependantID)
+                <!-- condition -->
+                <div>
+                    <div id="warning_required_condition" class="hidden">
+                        <i class="fas fa-exclamation-circle pulser
+                           -warning-single"></i>
+                    </div>
+                    <div class="form-group">
+                        @Html.Label(null,"Condition", htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-9">
+                            @Html.DropDownList("comorb", null, "select", htmlAttributes: new { @class = "", @required = "required", @onchange = "FillICD()" })
+                            <br />@Html.ValidationMessage("comorb", "", new { @class = "text-danger", @style = "font-size: 110%;margin-left: 1%" })
+                        </div>
+                    </div>
+                </div>
+                <!-- icd-10 -->
+                <div>
+                    <div id="warning_required_condition" class="hidden">
+                        <i class="fas fa-exclamation-circle pulser asterisk-warning-single"></i>
+                    </div>
+                    <div class="form-group">
+                        @Html.Label(null,"ICD-10", htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-9">
+                            @Html.DropDownList("icd10", new SelectList(Enumerable.Empty<SelectListItem>(), "icd10", "icd10"), "select", htmlAttributes: new { @class = "", @required = "required" })
+                            <i class="fas fa-question-circle information-icon icon-move" data-toggle="tooltip" data-original-title="This field is dependant on the condition selected"></i>
+                            <br />@Html.ValidationMessage("icd10", "", new { @class = "text-danger", @style = "font-size: 110%;margin-left: 1%" })
+                        </div>
+                    </div>
+                </div>
+                <!-- effective-date -->
+                <div class="form-group">
+                    @Html.LabelFor(model => model.effectiveDate, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-9">
+                        <input class="form-control-new startDate" data-val="true" id="effectiveDate" name="effectiveDate" type="date" aria-required="true" aria-invalid="true" min="1900-01-01" max="@DateTime.Now.ToString("yyyy-MM-dd")">
+                        @Html.ValidationMessageFor(model => model.effectiveDate, "", new { @class = "text-danger", @style = "font-size: 110%;margin-left: 1%" })
+                        <div id="effdatecheck" class="text-danger hidden" style="font-size: 95%;margin-left: 1%; margin-top: -1%"></div>
+                    </div>
+                </div>
+                <!-- end-date -->
+                <div class="form-group">
+                    @Html.LabelFor(model => model.treatementEndDate, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-9">
+                        <input class="form-control-new endDate" data-val="true" id="treatementEndDate" name="treatementEndDate" type="date" aria-required="true" aria-invalid="true" min="1900-01-01">
+                        @Html.ValidationMessageFor(model => model.treatementEndDate, "", new { @class = "text-danger", @style = "font-size: 110%;margin-left: 1%" })
+                        <div id="datecheck" class="text-danger hidden" style="font-size: 95%;margin-left: 1%; margin-top: -1%"></div>
+                    </div>
+                </div>
+                <!-- comment -->
+                <div id="anchor_clinComment">
+                    <div id="warning_required_comment" class="hidden">
+                        <i class="fas fa-exclamation-circle pulser asterisk-warning-single"></i>
+                    </div>
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.generalComments, htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-9">
+                            <div class="">
+                                @Html.TextAreaFor(model => model.generalComments, new { @placeholder = "comment", @class = "form-control-new" })
+                                @Html.ValidationMessageFor(model => model.generalComments, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- submit -->
+                <div class="fixedBack" style="margin-left: 40%">
+                    <input value="Back" class="btn buttonRound_formBack go_back" onclick="backKey()" style="width: 15%!important" />
+                    <input type="submit" value="Create" class="btn buttonRound_formCreate patientClinical" onclick="storageKey()" id="submit" style="width: 15%!important" />
+                </div>
+            </div>
+        }
+    </div>
+
+</div>
+
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+
+    @if (ViewBag.Message != null)
+    {
+        <script type="text/javascript">
+
+        window.onload = function () {
+            toastr.options.positionClass = 'toast-bottom-right';
+            toastr.options.timeOut = 10000;
+
+            toastr.error("@ViewBag.Message");
+
+        }
+        </script>
+    }
+
+    <!--Select dropdowns-->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function () { $("#comorb").select2({ multiple: false }); });
+        $(document).ready(function () { $("#icd10").select2({ multiple: false }); });
+    </script>
+
+    <script>
+        //condition
+        $(document).ready(function () {
+            setInterval(function () {
+                if ($("#comorb").val() == "" || $("#comorb").val() == null || $("#comorb").val().toLowerCase() == "follow up") {
+                    $("#warning_required_condition").removeClass('hidden');
+                }
+                else {
+                    $("#warning_required_condition").addClass('hidden');
+                }
+            }, 0);
+        });
+    </script>
+    <!-- local-storage-redirect -->
+    <script>
+        function backKey() {
+            localStorage.setItem("back_comorbid", Date.now());
+        }
+        function storageKey() {
+            localStorage.setItem("create_comorbid", Date.now());
+        }
+    </script>
+    <!-- icd-10 fill -->
+    <script>
+        function FillICD() {
+            var stateId = $('#comorb').val();
+            var depID = $('#DependantID').val();
+            $.ajax({
+                url: '/Member/FillICD10_Add',
+                type: "GET",
+                dataType: "JSON",
+                data: { condition: stateId, dependantID: depID },
+                success: function (options) {
+                    $("#icd10").html(""); // clear before appending new list
+                    $.each(options, function (i, option) {
+                        $("#icd10").append(
+                            $('<option></option>').val(option.id).html(option.icd10));
+                    });
+                }
+            });
+        }
+    </script>
+    <!-- tooltip -->
+    <script>
+        $(document).ready(function () {
+            $('[data-toggle="tooltip"]').tooltip({
+                placement: 'top'
+            });
+        });
+    </script>
+    <!-- date-validation -->
+    <script>
+        $(".startDate").change(function () {
+            var start = $("#effectiveDate").val();
+            var end = $("#treatementEndDate").val();
+
+            if (end == "") { }
+            else {
+                if (end < start) {
+                    $('#datecheck').removeClass('hidden');
+                    $("#datecheck").html('Treatment end date cannot precede Effective date.');
+                    return false;
+                }
+                else {
+                    $('#datecheck').addClass('hidden');
+                }
+            }
+
+            // start-date null check
+            //if (end == "") {
+            //}
+            //else {
+            //    if (start == "") {
+            //        $("[name='effectiveDate']").attr("required", true);
+            //        $('#effdatecheck').removeClass('hidden');
+            //        $("#effdatecheck").html('Effective date is required if Treatement end date is populated.');
+            //        return false;
+            //    }
+            //    else {
+            //        $('#effdatecheck').addClass('hidden');
+            //        $("[name='effectiveDate']").attr("required", false);
+            //    }
+            //}
+
+        });
+
+        $(".endDate").change(function () {
+            var start = $("#effectiveDate").val();
+            var end = $("#treatementEndDate").val();
+
+            if (end == "") { }
+            else {
+                if (end < start) {
+                    $('#datecheck').removeClass('hidden');
+                    $("#datecheck").html('Treatment end date cannot precede Effective date.');
+                    return false;
+                }
+                else {
+                    $('#datecheck').addClass('hidden');
+                }
+            }
+
+            // start-date null check
+            //if (end == "") {
+            //}
+            //else {
+            //    if (start == "") {
+            //        $("[name='effectiveDate']").attr("required", true);
+            //        $('#effdatecheck').removeClass('hidden');
+            //        $("#effdatecheck").html('Effective date is required if Treatement end date is populated.');
+            //        return false;
+            //    }
+            //    else {
+            //        $('#effdatecheck').addClass('hidden');
+            //        $("[name='effectiveDate']").attr("required", false);
+            //    }
+            //}
+
+        });
+    </script>
+
+
+
+}

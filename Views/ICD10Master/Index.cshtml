@@ -1,0 +1,176 @@
+﻿@model IEnumerable<HaloCareCore.Models.Script.ICD10Master>
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+<javascript>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <script src="https://www.jqueryscript.net/demo/jQuery-Plugin-For-Sortable-Bootstrap-Tables-Bootstrap-Sortable/Scripts/bootstrap-sortable.js"></script>
+</javascript>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+</style>
+<style>
+    .table td, .table th {
+        font-size: 10px;
+    }
+</style>
+<body>
+    <div class="fullScreen_container zero-padding">
+        <!--pageHeader-->
+        <nav id="global-nav" class="nav">
+            <div class="pull-left title">
+                <h1 class="site-title_patientProfile">
+                    <span><i class="fas fa-disease"></i></span>&emsp; ICD-10 Master
+                </h1>
+            </div>
+            <div class="pull-right title">
+                <h1 class="site-title_userID pull-right">
+                    <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+                </h1>
+                <h1 class="site-title_userID pull-right">
+                    @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                    {
+                        <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                    }
+                </h1>
+                <h1 class="site-waffleIcon pull-right">
+                    <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+                </h1>
+            </div>
+        </nav>
+        <!--breadCrumbs-->
+        <ul class="breadcrumbs_fullScreens">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+            <li><a href="@Url.Action("Index", "Administration", new {})">Settings</a></li>
+            <li><a href="#">ICD10 Master</a></li>
+        </ul>
+        <!--navCollection-->
+        <div class="navCollection_fullScreens">
+            @Html.Partial("_navCollection")
+        </div>
+        <div style="margin-bottom: 1%"></div>
+        @using (Html.BeginForm())
+        {
+            <div class="row productContentBlock">
+                <h4 class="tableHeading">ICD-10 search</h4>
+                <hr class="fancyruler">
+                <br />
+                <br />
+                <div class="form-group">
+                    <div class="form-horizontal createForm">
+                        <div class="form-group">
+                            @Html.Label(null,"ICD-10 code", htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-10">
+                                @Html.Editor("icd10Code", new { htmlAttributes = new { @class = "allergyTextbox", @placeholder = "example: Z27.0", autocomplete = "off" } })
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            @Html.Label(null,"Description", htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-10">
+                                @Html.Editor("icd10CodeDescription", new { htmlAttributes = new { @class = "allergyTextbox", @placeholder = "example: Cholera", autocomplete = "off" } })
+                            </div>
+                        </div>
+                    </div>
+                    <br />
+                    <br />
+                    <div class="form-group">
+                        <div class="actionButton" style="margin-left: 43.5%; margin-bottom: -1.5%">
+                            <input type="submit" value="Search" class="btn questionnaireButton" style="width: 25%!important" />
+                        </div>
+                    </div>
+                    <br />
+                </div>
+            </div>
+        }
+        <div style="margin-top: 0.5%"></div>
+        <div class="row productContentBlock">
+            <!--------------------------------------------------------------------------- new/search -------------------------------------------------------------------------->
+            <div class="col-md-12 row">
+                <div class="col-md-6">
+                    <h4 class="subHeading">
+                        ICD-10 list
+                    </h4>
+                </div>
+                <!--------------------------------------------------------------------------- jq-search -------------------------------------------------------------------------->
+                <div class="col-md-6">
+                    <div class="input-wrapper-new-search">
+                        <input type="text" class="form-control-new-search" id="search" onkeyup="myFunction()" placeholder="Search..." />
+                    </div>
+                </div>
+            </div>
+            <div id="panel"></div>
+            <table class="table settings-table sortable" id="productTable" style="width: 100%; height:auto;">
+                <thead>
+                    <tr>
+                        <th style="text-align: left !important;width: 100px;">@Html.DisplayNameFor(model => model.ICD10Code) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                        <th style="text-align: left!important;width: 280px;">@Html.DisplayNameFor(model => model.ICD10Description) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                        <th style="text-align: left !important;width: 100px;">@Html.DisplayNameFor(model => model.ValidPrimary) </th>
+                        <th style="text-align: left!important; width: 100px;">@Html.DisplayNameFor(model => model.ValidClinical) </th>
+                        <th style="text-align: left!important; width: 100px;">@Html.DisplayNameFor(model => model.ValidAsterisk) </th>
+                        <th style="text-align: left!important;width: 100px;">@Html.DisplayNameFor(model => model.ValidDagger) </th>
+                        <th style="text-align: center!important; width: 100px;">@Html.DisplayNameFor(model => model.ValidSequelae)</i></th>
+                        <th style="text-align: center!important; width: 100px;">@Html.DisplayNameFor(model => model.Active)</i></th>
+                        <th style="text-align: center!important; width: 100px">@Html.DisplayName("Action") <i class="fa fa-fw"></i></th>
+                    </tr>
+                </thead>
+                @if (Model != null)
+                {
+                    if (Model.Count() == 0)
+                    {
+                        <tr><td colspan="8" style="text-align: center!important; color: rgba(128, 128, 128, 0.50)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="color: rgba(128, 128, 128, 0.50)"></i></span> no records found</td></tr>
+                    }
+                    else
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tbody id="Icd10-search" class="">
+                                <tr class="dname" data-assigned-id="@item.ICD10Code" style="text-indent: 5px">
+                                    <td class="text-left"><span class="@(item.Active == true? "" : "active-false") "> @Html.DisplayFor(Modelitem => item.ICD10Code)</span></td>
+                                    <td class="text-left"><span class="@(item.Active == true? "" : "active-false") ">@Html.DisplayFor(Modelitem => item.ICD10Description)</span></td>
+                                    <td class="text-center"><span class="@(item.Active == true? "" : "active-false") ">@Html.DisplayFor(Modelitem => item.ValidPrimary)</span></td>
+                                    <td class="text-center"><span class="@(item.Active == true? "" : "active-false") ">@Html.DisplayFor(Modelitem => item.ValidClinical)</span></td>
+                                    <td class="text-center"><span class="@(item.Active == true? "" : "active-false") ">@Html.DisplayFor(Modelitem => item.ValidAsterisk)</span></td>
+                                    <td class="text-center"><span class="@(item.Active == true? "" : "active-false") ">@Html.DisplayFor(Modelitem => item.ValidDagger)</span></td>
+                                    <td class="text-center"><span class="@(item.Active == true? "" : "active-false") ">@Html.DisplayFor(Modelitem => item.ValidSequelae)</span></td>
+                                    <td class="text-center"><span class="@(item.Active == true ? "chk-yes fas fa-circle" : "chk-no fas fa-circle")"></span></td>
+                                    <td class="text-center">
+                                        <input type="submit" class="link-button" value="Details" onclick="location.href='@Url.Action("Details", "ICD10Master", new { ICD10Code = item.ICD10Code })'" />
+                                    </td>
+                                </tr>
+                            </tbody>
+                        }
+                    }
+                }
+            </table>
+            <div class="form-group">
+                <div class="actionButton" style="margin-left: 46.5%; margin-bottom: 0.5%; margin-top: 10%">
+                    <input value="Back" class="btn buttonRound_formBack " onclick="MainbackBtn();" style="width: 15%!important" />
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+@section scripts{
+    <script>
+        // icd-10 -list-search
+        $(document).ready(function () {
+            $("#search").on("keyup", function () {
+                var value = $(this).val().toLowerCase();
+                $("#Icd10-search tr").filter(function () {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+            });
+        });
+        // go-back
+         function MainbackBtn() {
+            window.location.href = '@Url.Action("Index", "Administration")';
+        }
+    </script>
+}

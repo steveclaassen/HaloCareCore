@@ -1,0 +1,156 @@
+﻿@model HaloCareCore.Models.Admin.DisclaimerQuestions
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Disclaimer questions";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+
+<comment>
+    <!--
+    03 December 2019 -- HCare-905(LINKED TO HCARE-134: Module 2 - Create an Scheme Option master screen)
+    Created settings functionality for Scheme options allowing user to Create, Read, Update and Delete scheme options as well link these options to the schemes.
+    The validation will limit you from adding more than 10 characters to the code and will validate against previously used names as well as codes.
+    The user will access the Scheme Options/Plans via the Settings page / Medical scheme icon and the second tab is linked to the Scheme options.
+        -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+</style>
+<javascript>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="https://www.jqueryscript.net/demo/jQuery-Plugin-For-Sortable-Bootstrap-Tables-Bootstrap-Sortable/Scripts/bootstrap-sortable.js"></script>
+    <script src="js/jquery.tablesorter.min.js"></script>
+</javascript>
+
+<div class="fullScreen_container">
+    <!----------------------------------------------------------------------------- html-top-navigation-panel  ---------------------------------------------------------------------------->
+    <navigation>
+        <nav id="global-nav" class="nav">
+            <div class="pull-left title">
+                <h1 class="site-title_patientProfile">
+                    <span><img src="~/Content/Images/_2020/icons/banner-icon/disclaimer-white.png" /></span>&emsp; Disclaimer
+                </h1>
+            </div>
+            <div class="pull-right title">
+                <div class="site-title_userID pull-right">
+                    <div class="halocareLogoX"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+                </div>
+                <h1 class="site-title_userID pull-right">
+                    @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                    {
+                        <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                    }
+                </h1>
+                <h1 class="site-waffleIcon pull-right">
+                    <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+                </h1>
+            </div>
+        </nav>
+        <ul class="breadcrumbs_fullScreens">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+            <li><a href="@Url.Action("Index", "Administration", new {})">Settings</a></li>
+            <li><a href="#">@ViewBag.Title</a></li>
+        </ul>
+        <div class="navCollection_fullScreens">
+            @Html.Partial("_navCollection")
+        </div>
+
+        <div style="margin-bottom: 3%"></div>
+    </navigation>
+    <!-------------------------------------------------------------------------------------- html-body ------------------------------------------------------------------------------------>
+    <div class="container-tab">
+        <div class="row">
+            <!--------------------------------------------------------------------------- new/search -------------------------------------------------------------------------->
+            <div class="col-md-12 row">
+                <div class="heading-spacer"></div>
+                <div class="col-md-6"><div class="page-heading">Disclaimer questions detail</div></div>
+                <hr class="heading-ruler">
+            </div>
+            <!------------------------------------------------------------------------ question-details ---------------------------------------------------------------------->
+            <table class="table details-table" id="question-details">
+                <tbody>
+                    <tr>
+                        <td class="row-heading" style="width: 15%">Title</td>
+                        <td class="row-information">@Html.DisplayFor(model => model.Title)</td>
+                    </tr>
+                    <tr>
+                        <td class="row-heading" style="width: 15%">Description</td>
+                        <td class="row-information">@Html.DisplayFor(model => model.Description)</td>
+                    </tr>
+                    <tr>
+                        <td class="row-heading" style="width: 15%">English</td>
+                        <td class="row-information">@Html.DisplayFor(model => model.EnglishQuestion)</td>
+                    </tr>
+                    <tr>
+                        <td class="row-heading" style="width: 15%">Afrikaans</td>
+                        <td class="row-information">@Html.DisplayFor(model => model.AfrikaansQuestion)</td>
+                    </tr>
+                    <tr>
+                        <td class="row-heading" style="width: 15%">Created date</td>
+                        <td class="row-information">@Html.DisplayFor(model => model.CreatedDate)</td>
+                    </tr>
+                    <tr>
+                        <td class="row-heading" style="width: 15%">Created by</td>
+                        <td class="row-information">@Html.DisplayFor(model => model.CreatedBy)</td>
+                    </tr>
+                    @if (Model.ModifiedDate != null)
+                    {
+                        <tr>
+                            <td class="row-heading" style="width: 15%">Modified date</td>
+                            <td class="row-information">@Html.DisplayFor(model => model.ModifiedDate)</td>
+                        </tr>
+                        <tr>
+                            <td class="row-heading" style="width: 15%">Modified by</td>
+                            <td class="row-information">@Html.DisplayFor(model => model.ModifiedBy)</td>
+                        </tr>
+                    }
+                    <tr>
+                        <td class="row-heading" style="width: 15%">Active</td>
+                        <td class="row-information"><span class="@(Model.Active == true ? "check-yes far fa-check-circle" : "check-no far fa-times-circle")"></span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="fixed-btn">
+        <input type="submit" value="Edit" class="btn edit-button-large" style="width: 12%" onclick="location.href='@Url.Action("DisclaimerQ_Edit", "Administration", new { id = Model.Id }, null)'" /><br />
+        <input type="text" value="Back" class="btn reset-button" onclick="MainbackBtn();" />
+    </div>
+</div>
+
+<script src="js/jquery.tablesorter.min.js"></script>
+
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <!-- general -->
+    <script>
+        //go-back
+            function MainbackBtn() {
+            window.location.href = '@Url.Action("Index", "Administration")';
+        }
+    </script>
+    <!-- table-search -->
+    <script type="text/javascript">
+        var $rows = $('#disclaimer-question-search tr');
+        $('#search').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $rows.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+    </script>
+
+}
+

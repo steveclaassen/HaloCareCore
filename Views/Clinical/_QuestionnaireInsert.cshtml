@@ -1,0 +1,151 @@
+﻿@model HaloCareCore.Models.DoctorQuestionnaireViewModel
+@{
+    ViewBag.Title = "Questionnaire";
+    Layout = "~/Views/Shared/_LayoutModal.cshtml";
+}
+
+<div class="doctorQuestionnaire_Modal">
+    @using (Ajax.BeginForm("_DoctorQuestionnaire", "Clinical", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "divPath", OnSuccess = "hideModal(); alert('Saved');" }))
+    {
+        @Html.Hidden("taskId", (object)ViewBag.task)
+        @Html.Hidden("DependantID", (object)ViewBag.DependantID)
+        @Html.Hidden("id", (object)ViewBag.id)
+        @Html.Hidden("template", (object)ViewBag.templateID)
+        @Html.AntiForgeryToken()
+
+        <div class="modal-header modal-header-primary">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true" id="assignmentModalClose">×</button>
+            <h2>Clinical History</h2>
+        </div>
+
+        <br />
+        <br />
+        <div class="form-horizontal" style="margin-left: 2%">
+
+            <!--Diagnosis-->
+            <h3 style="margin-left: 2%">Patient History</h3>
+            <hr class="questionnaire_Ruler" />
+            <br />
+            <div class="form-group">
+                <div class="col-md-3" style="margin-left: 1%; text-align: right">
+                    @Html.Label(null,"HIV Diagnosis Date: ", htmlAttributes: new { @class = "control-label" })
+                </div>
+                <div class="col-md-8">
+                    @Html.EditorFor(model => model.clinicalexam.effectiveDate, new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire" } })
+                </div>
+            </div>
+            <br />
+            <br />
+
+            <!--ARV History-->
+            <h3 style="margin-left: 2%">ARV History</h3>
+            <hr class="questionnaire_Ruler" />
+            <br />
+            <div class="form-group">
+                <div class="col-md-3" style="margin-left: 1%; text-align: right">
+                    @Html.Label(null,"Date HAART first initiated: ", htmlAttributes: new { @class = "control-label" })
+                </div>
+                <div class="col-md-8">
+                    @Html.EditorFor(model => model.MedicationHistory.startDate, new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire" } })
+                </div>
+            </div>
+            <br />
+            <div class="form-group">
+                <div class="col-md-3" style="margin-left: 3%">
+                    <h4>Treatement Name</h4>
+                </div>
+                <div class="col-md-8" style="margin-left: 3%">
+                    <h4>Reason for Change</h4>
+                </div>
+            </div>
+
+            <!--ajaxForm-->
+            <form id="arvHistory">
+                <div class="form-group">
+                    <div class="col-md-3" style="margin-left: 3.5%">
+                        @Html.EditorFor(model => model.MedicationHistory.productName, new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire", @placeholder = "Product Name" } })
+                    </div>
+                    <div class="col-md-8">
+                        @Html.EditorFor(model => model.MedicationHistory.comment, new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire", @placeholder = "Comment" } })
+                    </div>
+                    <input type="button" value="+" class="btn btn-primary" id="btnSubmit" style="font-size: 10px; margin-top: 2px; margin-left: -10px;" />
+
+                </div>
+
+            </form>
+            <!--ajaxForm-->
+
+
+        </div>
+
+        <!--formButton-->
+        <div class="form-group">
+            <div class="actionButton" style="margin-top: 5%; margin-left: 40%">
+                <input type="submit" value="Save" class="btn buttonRound_authorize" style="width: 15%!important" />
+                <button type="button" class="btn buttonRound_close" data-dismiss="modal" style="width: 15%!important;">Close</button>
+            </div>
+        </div>
+        <br />
+        <br />
+        <!--formButton-->
+    }
+</div>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+
+@section Scripts {
+    <script src="~/bundles/jqueryval"></script>
+    <script>
+
+        $('input[type=checkbox]').removeAttr('checked');
+
+
+        $(document).ready(function () {
+            var dateNewFormat, onlyDate, today = new Date();
+
+            dateNewFormat = today.getFullYear() + '-';
+            if (today.getMonth().length == 2) {
+
+                dateNewFormat += (today.getMonth() + 1);
+            }
+            else {
+                dateNewFormat += '0' + (today.getMonth() + 1);
+            }
+
+            onlyDate = today.getDate();
+            if (onlyDate.toString().length == 2) {
+
+                dateNewFormat += "-" + onlyDate;
+            }
+            else {
+                dateNewFormat += '-0' + onlyDate;
+            }
+
+            $('#createDate').val(dateNewFormat);
+            $('#modifiedDate').val(dateNewFormat);
+
+
+        });
+
+
+        //ajaxPost_arvHistory
+        $(document).ready(function () {
+            $("#btnSubmit").click(function () {
+                var data = $("arvHistory").serialize();
+
+                $.ajax({
+                    type: "POST",
+                    url: "/Clinical/_InsertARVHistory",
+                    data: data,
+
+                })
+            })
+        })
+
+
+
+
+
+    </script>
+}

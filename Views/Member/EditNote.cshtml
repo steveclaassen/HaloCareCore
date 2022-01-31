@@ -1,0 +1,242 @@
+﻿@model HaloCareCore.Models.Communications.Notes
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "EditNote";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .input-group-addon {
+        visibility: hidden;
+    }
+
+    .editEffectiveNote {
+        width: 70% !important;
+        padding: 6px 6px !important;
+        line-height: 1.428571429 !important;
+        color: black !important;
+        font-size: 14px !important;
+        margin-left: 2% !important;
+        border: 1px solid rgba(244, 244, 244, 0.20) !important;
+        border-radius: 2px !important;
+        -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.020) !important;
+        box-shadow: 1px 1px 1px 0px rgba(0,0,0,0.10) !important;
+        -webkit-transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s !important;
+        transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s !important;
+        background-color: transparent !important;
+    }
+
+    .editEffectiveDate {
+        width: 70% !important;
+        padding: 6px 6px !important;
+        line-height: 1.428571429 !important;
+        color: black !important;
+        font-size: 14px !important;
+        margin-left: 2% !important;
+        border: 1px solid rgba(244, 244, 244, 0.20) !important;
+        border-radius: 2px !important;
+        -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.020) !important;
+        box-shadow: 1px 1px 1px 0px rgba(0,0,0,0.10) !important;
+        -webkit-transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s !important;
+        transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s !important;
+        background-color: transparent !important;
+        margin-bottom: 5px !important;
+    }
+
+    .editExpiryDate {
+        max-width: 500px !important;
+        width: 70% !important;
+        padding: 6px 6px !important;
+        line-height: 1.428571429 !important;
+        color: black !important;
+        font-size: 14px !important;
+        margin-left: 2% !important;
+        border: 1px solid rgba(244, 244, 244, 0.20) !important;
+        border-radius: 2px !important;
+        -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.020) !important;
+        box-shadow: 1px 1px 1px 0px rgba(0,0,0,0.10) !important;
+        -webkit-transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s !important;
+        transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s !important;
+        background-color: transparent !important;
+    }
+
+    textarea#note {
+        max-width: 500px !important;
+        width: 70% !important;
+        padding: 6px 6px !important;
+        line-height: 1.428571429 !important;
+        color: black !important;
+        font-size: 14px !important;
+        margin-left: 2% !important;
+        border: 1px solid rgba(244, 244, 244, 0.20) !important;
+        border-radius: 2px !important;
+        -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.020) !important;
+        box-shadow: 1px 1px 1px 0px rgba(0,0,0,0.10) !important;
+        -webkit-transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s !important;
+        transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s !important;
+        background-color: transparent !important;
+        margin-bottom: 5px !important;
+    }
+</style>
+
+<div class="fullPanel_Container">
+    <div class="profilePanel_pathology">
+        <!--breadCrumbs-->
+        <ul class="breadcrumbs" style="margin-top: -1%; margin-bottom: 2%; margin-left: -1%">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+            <li><a class="go_back">Patient</a></li>
+            <li><a href="#">Notes</a></li>
+        </ul>
+
+        <!--navCollection-->
+        <div class="navButtons">
+            @Html.Partial("_navCollection")
+        </div>
+
+        <!--profileInformation-->
+        <div>
+            @Html.Action("_profileBar_edit", "Member", new { DependentID = Model.dependentID, pro = Context.Request.Query["pro"] })
+        </div>
+    </div>
+    <!--pageHeader-->
+    <nav id="global-nav" class="nav">
+        <div class="pull-left title">
+            <h1 class="site-title_patientProfile">
+                <span><i class="fas fa-sticky-note"></i></span>&emsp;Notes
+            </h1>
+        </div>
+        <div class="pull-right title">
+            <h1 class="site-title_userID pull-right">
+                <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+            </h1>
+            <h1 class="site-title_userID pull-right">
+                @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                {
+                    <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                }
+            </h1>
+            <h1 class="site-waffleIcon pull-right">
+                <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+            </h1>
+        </div>
+    </nav>
+
+    <div class="assignmentOverview_container">
+        <h4 class="tableHeading">Edit a note</h4>
+        <hr class="fancyruler">
+        <br />
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+
+            <div class="form-horizontal editForm">
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                @Html.HiddenFor(model => model.noteID)
+                @Html.HiddenFor(model => model.dependentID)
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.noteType, htmlAttributes: new { @class = "control-label col-md-2 drop" })
+                    <div class="col-md-10">
+                        @Html.DropDownList("NoteType", null, htmlAttributes: new { @class = "editEffectiveNote" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.note, htmlAttributes: new { @class = "control-label col-md-2 drop" })
+                    <div class="col-md-10">
+                        @Html.TextAreaFor(model => model.note, new { htmlAttributes = new { @class = "" } })
+                        @Html.ValidationMessageFor(model => model.note, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.effectiveDate, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        <!-- Datepicker as text field -->
+                        <div class="input-group date pickerBox">
+                            @Html.TextBoxFor(model => model.effectiveDate, "{0:dd MMM yyyy}", new { @class = "editEffectiveDate", @autocomplete = "off", @placeholder = "example: 01 Jan 2000" })
+                            <div class="input-group-addon">
+                                <span class="glyphicon glyphicon-th"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.expiryDate, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        <!-- Datepicker as text field -->
+                        <div class="input-group date pickerBox">
+                            @Html.TextBoxFor(model => model.expiryDate, "{0:dd MMM yyyy}", new { @class = "editExpiryDate", @autocomplete = "off", @placeholder = "example: 01 Jan 2000" })
+                            <div class="input-group-addon">
+                                <span class="glyphicon glyphicon-th"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Active, htmlAttributes: new { @class = "control-label col-md-2 " })
+                    <div class="col-md-10">
+                        <div class="checkbox">
+                            @Html.EditorFor(model => model.Active)
+                            @Html.ValidationMessageFor(model => model.Active, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.special, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        <div class="checkbox">
+                            @Html.EditorFor(model => model.special)
+                            @Html.ValidationMessageFor(model => model.special, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+                <br />
+                <br />
+                <div class="form-group" style="text-align: center!important">
+                    <input value="Back" class="btn buttonRound_formBack go_back" style="width: 8%!important" />
+                    <input type="submit" value="Save" class="btn buttonRound_formCreate addNote" style="width: 8%!important" />
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<script src="js/jquery.tablesorter.min.js"></script>
+
+<!-- Search -->
+@section scripts{
+    <script src="~/bundles/jqueryui"></script>
+    <style src="~/Content/themes/base/css" )
+
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.7.1/js/bootstrap-datepicker.min.js"></script>
+
+    <!--Page redirect-->
+    <script>
+        $(document).ready(function () {
+            $(".addNote").on("click", function () {
+                localStorage.setItem("addNote", "clicked");
+            });
+        });
+    </script>
+    <script>
+        $(function () {
+
+            $('.input-group.date').datepicker({
+                format: "dd M yyyy",
+                showButtonPanel: true,
+                autoclose: true,
+            });
+        });
+    </script>
+
+}
+
+
+

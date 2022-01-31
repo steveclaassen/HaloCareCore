@@ -1,0 +1,343 @@
+﻿@model HaloCareCore.Models.AuthorisationViewModel
+
+@{
+    ViewBag.Title = "AuthoriseScript";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<style>
+    .container {
+        max-width: 1600px !important;
+        width: 1400px !important;
+        margin: auto;
+        display: block;
+        padding: 0;
+    }
+
+    .table {
+        table-layout: fixed;
+    }
+
+    * {
+        color: #003366;
+    }
+
+    .table tr th {
+        color: black !important;
+        font-family: 'Century Gothic' !important;
+        font-weight: 600 !important;
+        text-align: left !important;
+        font-size: 14px !important;
+    }
+
+    .table tr td {
+        text-align: left !important;
+        font-family: 'Century Gothic' !important;
+        color: #003366 !important;
+        font-size: 14px !important;
+    }
+
+    ::-webkit-input-placeholder { /* Chrome */
+        color: rgba(128, 128, 128, 0.50);
+        transition: opacity 250ms ease-in-out;
+    }
+
+    :focus::-webkit-input-placeholder {
+        opacity: 0.5;
+    }
+
+    th {
+        cursor: pointer;
+    }
+
+    td {
+        cursor: pointer;
+    }
+
+
+
+    /*breadCrumbs*/
+
+    ul.breadcrumb {
+        padding: 10px 16px;
+        list-style: none;
+        background-color: transparent;
+    }
+
+        ul.breadcrumb li {
+            display: inline;
+            font-size: 10px;
+        }
+
+            ul.breadcrumb li + li:before {
+                padding: 8px;
+                color: #808080;
+                font-size: 10px;
+                content: "/\00a0";
+            }
+
+            ul.breadcrumb li a {
+                color: #808080;
+                text-decoration: none;
+                font-size: 10px;
+            }
+
+                ul.breadcrumb li a:hover {
+                    color: #eea236;
+                }
+
+    * {
+        color: #003366;
+    }
+
+    .contentBlock {
+        width: 105% !important;
+        margin-left: -2.5% !important;
+    }
+
+    .fullWidth_table {
+        max-width: 1450px !important;
+        width: 1450px !important;
+        margin: auto;
+        margin-bottom: 2% !important;
+        font-size: 10px;
+        margin-left: 0.5% !important;
+    }
+
+        .fullWidth_table input {
+            margin-left: 15px !important;
+        }
+</style>
+
+<div class="container zero-padding">
+
+    <!--breadCrumbs-->
+    <ul class="breadcrumb" style="margin-top: -2.2%; margin-bottom: 3%; position: fixed; z-index: 5">
+        <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+        <li><a class="go_back">Authorisation</a></li>
+        <li><a href="#">Script</a></li>
+    </ul>
+    <!--breadCrumbs-->
+    <!--FAB-->
+    <div class="zoom">
+        <a class="zoom-fab zoom-btn-md zoom-btn-white" id="zoomBtn"><i class="glyphicon glyphicon-th-large" style="font-size: 12px; color: ghostwhite"></i></a>
+        <ul class="zoom-menu">
+            <li><a href="@Url.Action("Index", "Home", new { })" class="zoom-fab zoom-btn-sm zoom-btn-white scale-transition scale-out"><i class="fa fa-home" style="font-size: 14px; color: ghostwhite"></i></a></li>
+            <li><a href="@Url.Action("Index", "Administration", new { })" class="zoom-fab zoom-btn-sm zoom-btn-white scale-transition scale-out" title="Settings"><i class="fa fa-gear" style="font-size: 14px; color: ghostwhite"></i></a></li>
+            <li><a href="javascript:;" class="zoom-fab zoom-btn-sm zoom-btn-white scale-transition scale-out" title="Add Member"><i class="fa fa-plus" style="font-size: 14px; color: ghostwhite"></i></a></li>
+            <li><a href="@Url.Action("searchManagement", "patientManagement", new { })" class="zoom-fab zoom-btn-sm zoom-btn-white scale-transition scale-out" title="Advanced Search"><i class="fa fa-search" style="font-size: 14px; color: ghostwhite"></i></a></li>
+        </ul>
+    </div>
+    <!--FAB_End-->
+    <!--pageHeader-->
+    <div class="container zero-padding">
+        <div class="topBar_reports img-responsive">
+            <h2>Authorise Script</h2>
+            <img src="~/Content/Images/memberProfile/topBar Icons/Authorization.png" style="width: 2.5%; margin-top: 0%;" />
+            <img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" style="width: 8%; float: right; margin-right: 100px; margin-top: 3px" />
+        </div>
+    </div>
+
+    <!--profileInformation-->
+
+    <div class="container" style="margin-top: -2%; margin-left: -7%">
+        @Html.Action("_ProfileInformation", "Member", new { DependentID = Model.script.dependentID })
+    </div>
+
+    <div style="margin-bottom: 3%"></div>
+
+    <!--profileInformation-->
+    <!--pageHeader-->
+
+
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+        <br />
+        <br />
+        <br />
+        <br />
+
+        <div class="row contentBlock">
+            <div class="form-horizontal">
+                <h4 style="color: #003366; margin-top: 0%; margin-left: 2%; margin-bottom: 0%!important; font-size: 25px; font-family: 'Century Gothic'; font-weight: 300; font-style: normal;">Authorise Script</h4>
+                <hr class="fancyruler">
+                <br />
+                <div class="row blockbcksubsm">
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="col-sm-1">
+                                &nbsp;
+                            </div>
+
+                            <div class="col-md-4 contentBlock_authScript">
+                                <h6 style="text-align: center">
+                                    Script Reference Number: @Html.DisplayFor(model => model.script.scriptID) @Html.HiddenFor(model => model.script.scriptID)
+                                    @Html.HiddenFor(model => model.script.dependentID)
+                                </h6>
+                                <hr class="fancyruler" />
+                                <div class="col-md-6">Script Classification: </div>
+                                <div class="col-md-6">@Html.DisplayFor(model => model.script.repeats) @Html.HiddenFor(model => model.script.repeats)</div>
+                                <div class="col-md-6">Effective date: </div>
+                                <div class="col-md-6">@Html.DisplayFor(model => model.script.effectiveDate) @Html.HiddenFor(model => model.script.effectiveDate)</div>
+                                <div class="col-md-6">Number of Repeats: </div>
+                                <div class="col-md-6">@Html.DisplayFor(model => model.script.repeats)</div>
+                                <div class="col-md-6">Script Status: </div>
+                                <div class="col-md-6">@Html.DisplayFor(model => model.script.active)</div>
+                                <div class="col-md-6">&nbsp;</div>
+                                <div class="col-md-6">&nbsp;</div>
+
+
+                                @Html.HiddenFor(model => model.script.doctorID)
+
+                            </div>
+                            <div class="col-md-5 contentBlock_authLine">
+                                <h6 style="text-align: center">Script Category</h6>
+                                <hr class="fancyruler" />
+                                <div class="form-group scriptCategory">
+                                    <div class="col-md-6">First Line</div>
+                                    <div class="col-md-6 authLine">@Html.CheckBoxFor(model => model.script.firstLine)</div>
+                                    <br />
+                                    <div class="col-md-6">Second Line</div>
+                                    <div class="col-md-6 authLine">@Html.CheckBoxFor(model => model.script.secondLine)</div>
+                                    <br />
+                                    <div class="col-md-6">Salvage Therapy</div>
+                                    <div class="col-md-6 authLine">@Html.CheckBoxFor(model => model.script.salvageTherapy)</div>
+                                    <br />
+                                    <div class="col-md-6">Resistance test</div>
+                                    <div class="col-md-6 authLine">@Html.CheckBoxFor(model => model.script.resistanceTest)</div>
+                                    <div class="col-md-6">&nbsp;</div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <br />
+                    <br />
+                    <br />
+                    <br />
+                    <div class="row">
+                        <div class="col-md-offset-1 col-md-12" style="margin-left: 0%">
+                            <table class="table fullWidth_table">
+                                <tr>
+                                    <th></th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.scriptItems[0].nappiCode)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.scriptItems[0].productName)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.scriptItems[0].strength)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.scriptItems[0].quantity)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.scriptItems[0].directions)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.scriptItems[0].itemStatus)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.scriptItems[0].fromDate)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.scriptItems[0].toDate)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.scriptItems[0].benefitType)
+                                    </th>
+                                    <th></th>
+                                </tr>
+                                @if (Model.scriptItems.Count() == 0)
+                                {
+                                    <tr><td>No records available</td></tr>
+                                }
+                                else
+                                {
+                                    for (var x = 0; x < Model.scriptItems.Count; x++)
+                                    {
+                                        <tr>
+                                            <td>
+                                                @Html.CheckBoxFor(model => Model.scriptItems[x].authItem)
+                                                @Html.HiddenFor(model => Model.scriptItems[x].itemNo)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(model => Model.scriptItems[x].nappiCode)
+                                                @Html.HiddenFor(model => Model.scriptItems[x].nappiCode)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(model => Model.scriptItems[x].productName)
+                                                @Html.HiddenFor(model => Model.scriptItems[x].productName)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(model => Model.scriptItems[x].strength)
+                                                @Html.HiddenFor(model => Model.scriptItems[x].strength)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(model => Model.scriptItems[x].quantity)
+                                                @Html.HiddenFor(model => Model.scriptItems[x].quantity)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(model => Model.scriptItems[x].directions)
+                                                @Html.HiddenFor(model => Model.scriptItems[x].directions)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(model => Model.scriptItems[x].itemStatus)
+                                                @Html.HiddenFor(model => Model.scriptItems[x].itemStatus)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(model => Model.scriptItems[x].fromDate)
+                                                @Html.HiddenFor(model => Model.scriptItems[x].fromDate)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(model => Model.scriptItems[x].toDate)
+                                                @Html.HiddenFor(model => Model.scriptItems[x].toDate)
+                                                @Html.HiddenFor(model => Model.scriptItems[x].itemRepeats)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(model => Model.scriptItems[x].benefitType)
+                                                @Html.HiddenFor(model => Model.scriptItems[x].benefitType)
+                                            </td>
+                                            <td>
+                                                @Html.ActionLink("Edit", "EditScriptItem", new { itemId = Model.scriptItems[x].itemNo })
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+
+                            </table>
+                        </div>
+                    </div>
+                    <br />
+                </div>
+            </div>
+            <br />
+            <br />
+
+            <div class="form-group">
+                <div class="actionButton" style="margin-left: 47.5%">
+                    <input type="submit" value="Authorise" class="btn buttonRound_approve" style="width: 15%!important" />
+                </div>
+            </div>
+            <br />
+        </div>
+
+
+    }
+</div>
+<br />
+
+<div class="backButton">
+    <a class="go_back" style="left: 15px;bottom: 10px; position: fixed; padding: 2px 2px 2px 2px; z-index: 5">
+        Back
+    </a>
+</div>
+
+@section Scripts {
+    <script src="~/bundles/jqueryval"></script>
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+}

@@ -1,0 +1,342 @@
+﻿@using HaloCareCore.Extensions
+@using HaloCareCore.Helpers
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<comment>
+    <!--
+        13 September 2019 -- HCare-805 (System settings ~ Index views)
+        Updated index tables to group the Active entries on top and Inactive entries at the bottom. The inactive entries will also gray out to show that there is a difference.
+    -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .indexnav {
+        margin-top: 100px;
+    }
+
+    .fullScreen_container {
+        background-image: url('../../Content/Images/Backgrounds/homePage/homePage_one.png');
+        background-size: 120%;
+    }
+
+    .container {
+        margin: auto;
+        display: block;
+        max-width: 1920px;
+        width: 1400px;
+    }
+</style>
+<javascript>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</javascript>
+
+<div class="fullScreen_container">
+    <!--pageHeader-->
+    <nav id="global-nav" class="nav">
+        <div class="pull-left title">
+            <h1 class="site-title_patientProfile">
+                <span><i class="fas fa-cog"></i>&emsp; Settings</span>
+            </h1>
+        </div>
+        <div class="pull-right title">
+            <h1 class="site-title_userID pull-right">
+                <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+            </h1>
+            <h1 class="site-title_userID pull-right">
+                @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                {
+                    <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                }
+            </h1>
+            <h1 class="site-waffleIcon pull-right">
+                <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+            </h1>
+        </div>
+    </nav>
+    <!--breadCrumbs-->
+    <ul class="breadcrumbs_fullScreens">
+        <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+        <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+        <li><a href="#">Settings</a></li>
+    </ul>
+    <!--navCollection-->
+    @if (User.Identity.IsAuthenticated)
+    {
+        if (User.HasRole("6. Global user") || (User.HasRole("5. Super user")))
+        {
+            <div class="navCollection_fullScreens">
+                <div class="buttonCollection">
+                    <div class="col-md-12">
+                        <div class="col-md-4"></div>
+                        <div class="col-md-4">
+                            <div class="col-md-2">
+                                <a href="@Url.Action("Index", "Home", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Home"><span style="font-size: 15px" class="sub_icon fas fa-home"></span></a>
+                            </div>
+
+                            <div class="col-md-2">
+                                <a href="@Url.Action("OpenAssignments", "Clinical", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Assignments"><span style="font-size: 15px" class="sub_icon fas fa-bell"></span></a>
+                            </div>
+                            <div class="col-md-2">
+                                <a href="@Url.Action("Search", "Member", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Patient"><span style="font-size: 15px" class="sub_icon fas fa-user-circle"></span></a>
+                            </div>
+
+
+                            <!--<div class="col-md-2">
+                                <a href="@Url.Action("OutstandingAuthorise", "Scripts", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Authorisation"><span style="font-size: 15px" class="sub_icon fas fa-check-circle"></span></a>
+                            </div>-->
+
+                            <div class="col-md-2">
+                                <a href="@Url.Action("searchManagement", "patientManagement", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Search"><span style="font-size: 15px" class="sub_icon fas fa-search"></span></a>
+                            </div>
+
+                            <div class="col-md-2">
+                                <span style="font-size: 15px; background: -webkit-linear-gradient(#e80a89, #f15b2a);-webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow (10px 10px 1px rgba(34, 34, 34, 0.50))" title="Settings" class="sub_icon fas fa-cog"></span>
+                            </div>
+
+                        </div>
+                        <div class="col-md-4"></div>
+
+                    </div>
+                </div>
+            </div>
+        }
+        else if (User.HasRole("4. Advisor"))
+        {
+            <div class="navCollection_fullScreens">
+                <div class="buttonCollection">
+                    <div class="col-md-12">
+                        <div class="col-md-4"></div>
+                        <div class="col-md-4">
+                            <div class="col-md-1"></div>
+                            <div class="col-md-2">
+                            </div>
+                            <div class="col-md-2">
+                            </div>
+                            <div class="col-md-2">
+                            </div>
+                            <div class="col-md-2">
+                            </div>
+                            <div class="col-md-2">
+                            </div>
+                            <div class="col-md-1"></div>
+                        </div>
+                        <div class="col-md-4"></div>
+
+                    </div>
+                </div>
+            </div>
+        }
+        else if (User.HasRole("1. Consultant") || (User.HasRole("2. Case manager") || (User.HasRole("3. Specialist"))))
+        {
+            <div class="navCollection_fullScreens">
+                <div class="buttonCollection">
+                    <div class="col-md-12">
+                        <div class="col-md-4"></div>
+                        <div class="col-md-4">
+                            <div class="col-md-2"></div>
+                            <div class="col-md-2">
+                            </div>
+                            <div class="col-md-2">
+                            </div>
+                            <div class="col-md-2">
+                            </div>
+                            <div class="col-md-2">
+                            </div>
+                            <div class="col-md-2"></div>
+                        </div>
+                        <div class="col-md-4"></div>
+
+                    </div>
+                </div>
+            </div>
+        }
+    }
+
+    <div class="container_Home">
+        <div class="menuIcons row">
+            <div class="col-md-12" style="margin-top: 8%; margin-bottom: 2%">
+                <div class="col-md-1"></div>
+                <!-- accounts -->
+                <div class="col-md-2">
+                    <a href="@Url.Action("Index", "Account", null )">
+                        <i class="fa fa-bars" aria-hidden="true"></i>
+                        <p>Accounts</p>
+                    </a>
+                </div>
+                <!-- assignments -->
+                <div class="col-md-2">
+                    <a href="@Url.Action("Index_AssignmentType", "Tasks", new {  })">
+                        <i class="fa fa-clone"></i>
+                        <p>Assignments</p>
+                    </a>
+                </div>
+                <!-- condition + icd10 -->
+                <div class="col-md-2">
+                    <a href="@Url.Action("Index", "Comorbids", new {  })">
+                        <i class="fa fa-universal-access"></i>
+                        <p>Condition & ICD-10 </p>
+                    </a>
+                </div>
+                <!-- condition nappi -->
+                <div class="col-md-2">
+                    <a href="@Url.Action("ChronicMedicationIndex", "Administration", new { })">
+                        <i class="fa fa-gg-circle"></i>
+                        <p>Condition NAPPI</p>
+                    </a>
+                </div>
+                <!-- doctors -->
+                <div class="col-md-2">
+                    <a href="@Url.Action("Index", "Doctor", new {  })">
+                        <i class="fa fa-user-md"></i>
+                        <p>Doctors</p>
+                    </a>
+                </div>
+                <div class="col-md-1"></div>
+            </div>
+            <div class="col-md-12" style="margin-top: 10%; margin-bottom: 2%">
+                <div class="col-md-1"></div>
+                <!-- management-status -->
+                <div class="col-md-2">
+                    <a href="@Url.Action("Index", "ManagementStatus", new {  })">
+                        <i class="fa fa-heartbeat"></i>
+                        <p>Management status</p>
+                    </a>
+                </div>
+                <!-- scheme + options -->
+                <div class="col-md-2">
+                    <a href="@Url.Action("IndexVM", "MedicalAids", new { })">
+                        <i class="far fa-plus-square"></i>
+                        <p>Medical schemes</p>
+                    </a>
+                </div>
+                <!-- products -->
+                <div class="col-md-2">
+                    <a href="@Url.Action("Index", "Product", new {  })">
+                        <i class="fab fa-product-hunt"></i>
+                        <p>Products</p>
+                    </a>
+                </div>
+                <!-- programs -->
+                <div class="col-md-2">
+                    <a href="@Url.Action("Program_Index", "Administration", new {  })">
+                        <i class="fab fa-digital-ocean fa-rotate-90"></i>
+                        <p>Programs</p>
+                    </a>
+                </div>
+                <!-- rules -->
+                <div class="col-md-2">
+                    <a href="@Url.Action("Index", "Rules", new {})">
+                        <i class="fa fa-exclamation-triangle"></i>
+                        <p>Rules</p>
+                    </a>
+                </div>
+
+                <div class="col-md-1"></div>
+            </div>
+
+            <div class="col-md-12" style="margin-top: 10%; margin-bottom: 2%">
+                <div class="col-md-1"></div>
+                @*<div class="col-md-10">*@
+                @*<div class="col-md-2"></div>*@
+                <!-- templates -->
+                <div class="col-md-2 ">
+                    <a href="@Url.Action("Index", "ICD10Master", new { })">
+                        <i class="fa fa-disease"></i>
+                        <p>ICD-10 Master</p><i class="fas fa-disease"></i>
+                    </a>
+                </div>
+                <!-- Modal -->
+                <div class="modal fade" id="myModal5-5" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                    <div class="">
+                        <div class="">
+
+                            <div class="modal-body">
+                                @Html.Action("ImportComminication", "Communication", new { })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                @*<a href="@Url.Action("Index", "Template", new { })">
+                        <i class="fa fa-upload"></i>
+                        <p>Communication Upload</p>
+                    </a>*@
+
+                <!-- templates -->
+                <div class="col-md-2">
+                    <a href="@Url.Action("Index", "Template", new { })">
+                        <i class="fa fa-comments"></i>
+                        <p>Templates</p>
+                    </a>
+                </div>
+                <!-- users + roles -->
+                <div class="col-md-2">
+                    <a href="@Url.Action("User_Index", "Account", null)">
+                        <i class="material-icons" style="font-size: 68px!important; padding-bottom: 10px!important; margin-top: -7%!important">supervised_user_circle</i>
+                        <p>Users</p>
+                    </a>
+                </div>
+                <!-- workflow -->
+                <div class="col-md-2">
+                    <a href="@Url.Action("Settings", "WorkFlow", null)">
+                        <i class="fa fa-check-square"></i>
+                        <p>Workflow</p>
+                    </a>
+                </div>
+                <!-- other -->
+                <div class="col-md-2">
+                    <a href="@Url.Action("Index", "Other", new { })">
+                        <i class="fa fa-square"></i>
+                        <p>Other</p>
+                    </a>
+                </div>
+                <div class="col-md-2"></div>
+
+                <div class="col-md-1"></div>
+            </div>
+
+            <div class="col-md-12" style="margin-top: 4%; margin-bottom: 2%">
+                <div class="col-md-1"></div>
+                <!-- ICD-10 Master -->
+                <div class="col-md-2 col-md-offset-4">
+
+                    <a data-toggle="modal" href="#myModal5-5" class="" style="margin-left: 5px!important; width: 10%">
+                        <i class="fa fa-upload"></i>
+                        <p>Communication Upload</p>
+                    </a>
+
+
+                </div>
+
+
+
+
+            </div>
+
+
+        </div>
+    </div>
+
+</div>
+
+
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script src="~/bundles/jqueryval"></script>
+
+@section Scripts {
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+
+}

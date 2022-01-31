@@ -1,0 +1,267 @@
+﻿@model HaloCareCore.Models.Management.ClinicalHistoryQuestionaire
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Details_socialRecord";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+</style>
+
+<!--pageHeader-->
+<nav id="global-nav" class="nav">
+    <div class="pull-left title">
+        <h1 class="site-title_patientProfile">
+            <span><img src="~/Content/Images/memberProfile/topBar Icons/clincalHistory.png" /></span>&emsp; Social history
+        </h1>
+    </div>
+    <div class="pull-right title">
+        <h1 class="site-title_userID pull-right">
+            <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+        </h1>
+        <h1 class="site-title_userID pull-right">
+            @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+            {
+                <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+            }
+        </h1>
+        <h1 class="site-waffleIcon pull-right">
+            <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+        </h1>
+    </div>
+</nav>
+
+<div class="dashboardContainer zero-padding">
+    <div class="patientDashboard_View">
+        <!--breadCrumbs-->
+        <ul class="breadcrumbs_patientDashboard">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+            <li><a class="go_back">Patient</a></li>
+            <li><a href="#">Social history</a></li>
+        </ul>
+        <!--Left navSlider -->
+        @Html.Partial("_navSlider_blank", new { })
+        <!--navCollection-->
+        <div class="navCollection_patientDashboard">
+            @Html.Partial("_navCollection")
+        </div>
+        <!--profileInformation-->
+        <div class="profileBar">
+            @Html.Action("_profileBar_edit", "Member", new { DependentID = Model.dependentID })
+        </div>
+    </div>
+
+    <div class="profilebar-spacer-assignment"></div>
+
+    <div class="patientDashboard_container">
+
+        <h4 class="summaryHeading">Social history detail</h4>
+        <hr class="fancyruler">
+        <br />
+        <br />
+        <div style="margin-left: 2%">
+            <dl class="dl-horizontal editForm">
+                <dt>
+                    @Html.DisplayName("Smoker?")
+                </dt>
+
+                <dd class="detailsYESNO">
+                    @if (Model.smoker == true)
+                    {
+                        <span style="font-size: 16px; color: forestgreen; text-align: center!important"><i class="far fa-check-circle"></i></span>
+                    }
+                    else
+                    {
+                        <span style="font-size: 16px; color: darkred; text-align: center!important"><i class="far fa-times-circle"></i></span>
+
+                    }
+                </dd>
+
+                <dt>
+                    @Html.DisplayName("Daily amount?")
+                </dt>
+
+                <dd>
+                    @if (Model.NoCigs == null)
+                    {
+                        <p> - </p>
+                    }
+                    else
+                    {
+                        @Html.DisplayFor(model => model.NoCigs)
+                    }
+                </dd>
+
+                <dt>
+                    @Html.DisplayName("How many years?")
+                </dt>
+
+                <dd>
+                    @if (Model.smokingYears == null)
+                    {
+                        <p> - </p>
+                    }
+                    else
+                    {
+                        @Html.DisplayFor(model => model.smokingYears)
+                    }
+                </dd>
+
+                <br />
+                <hr class="fancyruler" />
+
+                <dt>
+                    @Html.DisplayName("Drinker?")
+                </dt>
+
+                <dd class="detailsYESNO">
+                    @if (Model.drinker == true)
+                    {
+                        <span style="font-size: 16px; color: forestgreen; text-align: center!important"><i class="far fa-check-circle"></i></span>
+                    }
+                    else
+                    {
+                        <span style="font-size: 16px; color: darkred; text-align: center!important"><i class="far fa-times-circle"></i></span>
+
+                    }
+                </dd>
+
+                <dt>
+                    @Html.DisplayName("Amount?")
+                </dt>
+
+                <dd>
+                    @if (Model.NrDrinks == null)
+                    {
+                        <p> - </p>
+                    }
+                    else
+                    {
+                        @Html.DisplayFor(model => model.NrDrinks)
+                    }
+                </dd>
+
+                <br />
+                <hr class="fancyruler" />
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.createdBy)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.createdBy)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.createdDate)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.createdDate)
+                </dd>
+
+                @if (Model.modifiedBy != null)
+                {
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.modifiedBy)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.modifiedBy)
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.modifieddate)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.modifieddate)
+                    </dd>
+
+                    <br />
+                    <hr class="fancyruler" />
+
+                }
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.programType)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.programType)
+                </dd>
+
+                <br />
+                <hr class="fancyruler" />
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.socialComment)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.socialComment)
+                </dd>
+
+                <br />
+                <hr class="fancyruler" />
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.followUp)
+                </dt>
+
+                <dd class="detailsCheck">
+                    @if (Model.followUp == true)
+                    {
+                        <span style="font-size: 16px; color: forestgreen; text-align: center!important"><i class="far fa-check-circle"></i></span>
+                    }
+                    else
+                    {
+                        <span style="font-size: 16px; color: darkred; text-align: center!important"><i class="far fa-times-circle"></i></span>
+
+                    }
+                </dd>
+
+
+                <br />
+                <hr class="fancyruler" />
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.active)
+                </dt>
+
+                <dd class="detailsCheck">
+                    @if (Model.active == true)
+                    {
+                        <span style="font-size: 16px; color: forestgreen; text-align: center!important"><i class="far fa-check-circle"></i></span>
+                    }
+                    else
+                    {
+                        <span style="font-size: 16px; color: darkred; text-align: center!important"><i class="far fa-times-circle"></i></span>
+
+                    }
+                </dd>
+
+            </dl>
+        </div>
+        <div class="fixedBack" style="margin-left: 40%">
+            <input value="Back" class="btn buttonRound_formBack go_back" style="width: 15%!important" onclick="backKey()" />
+            <a href="@Url.Action("Edit_socialRecord", "Member", new { id = Model.id, pro=Context.Request.Query["pro"]})" value="Edit" class="btn buttonRound_formEdit" style="width: 15%!important">Edit</a>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <script>
+        function backKey() {
+            localStorage.setItem("back_socialRecord", Date.now());
+        }
+    </script>
+}

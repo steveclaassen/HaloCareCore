@@ -1,0 +1,194 @@
+﻿@model HaloCareCore.Models.Management.PatientProgramHistory
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "AddProgram";
+    Layout = "~/Views/Shared/_LayoutMember.cshtml";
+}
+<comment>
+    <!--
+        xx October 2019 -- HCare-865 (No program display - Remove the End Date from all screens of the "Program")
+        Removed the endDate from the Index, Create and Edit views as well as adjusting the methods in the controller.
+        Additionally, added Select dropdown list to Create view for both program and icd10 as well as an autodate to today's date and datelimit.
+    -->
+</comment>
+
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__arrow b {
+        top: 38% !important
+    }
+
+
+    .select2-container--default .select2-selection--single {
+        border: 1px solid #f4f4f4 !important;
+    }
+
+    .input-group-addon {
+        visibility: hidden;
+    }
+
+    .field-validation-error:before {
+        font-family: FontAwesome;
+        content: "\f06a\00a0";
+        animation: pulse 2s ease infinite;
+    }
+</style>
+
+<!--pageHeader-->
+<nav id="global-nav" class="nav">
+    <div class="pull-left title">
+        <h1 class="site-title_patientProfile">
+            <span><img src="~/Content/Images/memberProfile/topBar Icons/medicalStatus.png" /></span>&emsp; Program
+        </h1>
+    </div>
+    <div class="pull-right title">
+        <h1 class="site-title_userID pull-right">
+            <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+        </h1>
+        <h1 class="site-title_userID pull-right">
+            @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+            {
+                <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+            }
+        </h1>
+        <h1 class="site-waffleIcon pull-right">
+            <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+        </h1>
+    </div>
+</nav>
+
+<div class="dashboardContainer zero-padding">
+    <div class="patientDashboard_Program_View">
+
+        <!--breadCrumbs-->
+        <ul class="breadcrumbs_patientDashboard_Program">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Administration", new {})">Settings</a></li>
+            <li><a href="@Url.Action("patientDashboard", "Member", new { DependentID = Context.Request.Query["DependentID"]})">Patient</a></li>
+            <li><a href="#">Program</a></li>
+        </ul>
+
+        <!--Left navSlider -->
+        @Html.Partial("_navSlider", new { DependentID = Context.Request.Query["DependentID"] })
+
+        <!--navCollection-->
+        <div class="navCollection_patientDashboard_Program">
+            @Html.Partial("_navCollection")
+        </div>
+
+        <!--profileInformation-->
+        <div>
+            @Html.Action("_profileBar_edit", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })
+        </div>
+    </div>
+
+
+    <div style="margin-bottom: 11.5%"></div>
+
+
+    <div class="patientDashboard_Program_Container">
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+
+            <div class="form-horizontal editForm">
+                <h4 class="tableHeading">Select a program</h4>
+                <hr class="fancyruler">
+                <br />
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                @Html.HiddenFor(model => model.dependantId)
+                <div class="form-group">
+                    @Html.LabelFor(model => model.programCode, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.DropDownList("program", null, "**Select**", htmlAttributes: new { @class = "infoBox_editMember", @onchange = "FillIcd10()" })
+                        @Html.ValidationMessageFor(model => model.programCode, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.icd10Code, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.DropDownList("icd10code", new SelectList(Enumerable.Empty<SelectListItem>(), "icd10CodeID", "icd10CodeID"), "**Select**", htmlAttributes: new { @class = "infoBox_editMember" })
+                        @Html.ValidationMessage("icd10code", "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.effectiveDate, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.effectiveDate, null, new { htmlAttributes = new { @class = "infoBox_editMember dateLimit" } })
+                        @Html.ValidationMessageFor(model => model.effectiveDate, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 12.5%"></div>
+
+                <div class="form-group">
+                    <div class="actionButton" style="margin-left: 39%; margin-bottom: 1%">
+                        <input value="Back" class="btn buttonRound_formBack go_back" style="width: 15%!important" />
+                        <input type="submit" value="Create" class="btn buttonRound_formCreate" style="width: 15%!important" />
+                    </div>
+                </div>
+            </div>
+
+        }
+    </div>
+
+</div>
+
+@section scripts{
+    <script src="~/bundles/jqueryval"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+    <!--Select dropdown menus-->
+    <script>
+        $(document).ready(function () { $("#program").select2({ multiple: false }); });
+        $(document).ready(function () { $("#icd10code").select2({ multiple: false }); });
+    </script>
+    <!--ICD10 Fill-->
+    <script>
+        function FillIcd10() {
+            var stateId = $('#program').val();
+            $.ajax({
+                url: '/Member/FillIcd10',
+                type: "GET",
+                dataType: "JSON",
+                data: { code: stateId },
+                success: function (options) {
+                    $("#icd10code").html(""); // clear before appending new list
+                    $.each(options, function (i, option) {
+                        $("#icd10code").append(
+                            $('<option></option>').val(option.icd10CodeID).html(option.icd10CodeID));
+                    });
+                }
+            });
+        }
+    </script>
+    <!--DateLimit-->
+    <script>
+        var dateControler = {
+            currentDate: null
+        }
+
+        $(document).on("change", ".dateLimit", function (event, ui) {
+            var now = new Date();
+            var selectedDate = new Date($(this).val());
+
+            if (selectedDate > now) {
+                $(this).val(dateControler.currentDate)
+            } else {
+                dateControler.currentDate = $(this).val();
+            }
+        });
+
+    </script>
+    <!--AutoDate-->
+    <script>
+        var date = new Date(new Date().getTime() + 24 * 60 * 60 * 1000);
+        document.querySelector("#effectiveDate").valueAsDate = date;
+    </script>
+}

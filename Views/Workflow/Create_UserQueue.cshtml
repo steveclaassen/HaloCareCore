@@ -1,0 +1,434 @@
+﻿@model HaloCareCore.Models.ViewModels.wfSettingsVM
+@using HaloCareCore.Extensions
+
+@{
+    ViewBag.Title = "Queue";
+    Layout = "~/Views/Shared/_layout-view-x.cshtml";
+}
+
+<comment>
+    <!--
+
+    -->
+</comment>
+<javascript>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+    <script src="https://www.jqueryscript.net/demo/jQuery-Plugin-For-Sortable-Bootstrap-Tables-Bootstrap-Sortable/Scripts/bootstrap-sortable.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/js/standalone/selectize.js"></script>
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.default.css">
+</javascript>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .textbox-control-date {
+        display: block !important;
+        max-width: 600px !important;
+        width: 450px;
+        max-height: 100px;
+        height: 30px;
+        margin-left: 10px;
+        padding: 6px 6px;
+        line-height: 1.428571429;
+        color: #003366;
+        border-radius: 0px !important;
+        border: none !important;
+        border-bottom: 1px solid #e8e6e6 !important;
+        background-color: transparent !important;
+        -webkit-box-shadow: none !important;
+        box-shadow: none !important;
+    }
+
+    .tooltip-inner {
+        width: 120px;
+        background: rgba(0,0,0,0.80);
+        color: #fff;
+        font-size: 10px;
+        font-weight: 100;
+        text-align: center;
+        border-radius: 6px;
+        padding: 5px 0;
+        z-index: 0;
+        -webkit-transition: opacity 0.5s;
+        transition: opacity 1.2s;
+    }
+
+    .tooltip-arrow {
+        border-bottom-color: rgba(0,0,0,0.80) !important;
+    }
+
+    /*MULTIPLE Pill for SELECT2*/
+    .select2-container--default .select2-selection--multiple {
+        display: block !important;
+        max-width: 500px !important;
+        width: 450px !important;
+        max-height: 100px;
+        height: auto;
+        margin-left: 10px;
+        padding: 6px 6px;
+        line-height: 1.428571429;
+        color: #003366;
+        border-radius: 0px !important;
+        border: none !important;
+        border-bottom: 1px solid #e8e6e6 !important;
+        background-color: transparent !important;
+        -webkit-box-shadow: none !important;
+        box-shadow: none !important;
+    }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice {
+            background-color: #0081b3 !important;
+            color: white !important;
+            border: 1px solid transparent !important;
+            border-radius: 5px;
+            cursor: default;
+            float: left;
+            margin-right: 5px;
+            margin-top: 0px !important;
+            padding: 5px 6px 5px 6px !important;
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+            color: white !important;
+            cursor: pointer;
+            display: inline-block;
+            font-weight: bold;
+            margin-right: 2px;
+        }
+
+    .select2-container--open .select2-dropdown {
+        left: 10px !important;
+    }
+
+    .heading-detail {
+        font-family: 'Century Gothic' !important;
+        font-size: 14px;
+        font-weight: bold;
+        color: dimgray;
+        margin-left: 3% !important;
+    }
+
+    .label-detail {
+        font-family: 'Century Gothic' !important;
+        font-size: 14px;
+        font-weight: bold;
+        color: dimgray;
+        margin-left: 10% !important;
+    }
+
+    .paragraph-detail {
+        font-family: 'Century Gothic' !important;
+        font-size: 12px;
+        color: dimgray;
+        margin-left: 3% !important;
+    }
+
+    .paragraph-label-detail {
+        font-family: 'Century Gothic' !important;
+        font-size: 10px;
+        color: dimgray;
+        margin-left: 10% !important;
+    }
+
+    .text-divider {
+        margin: 0 0;
+        line-height: 0;
+        text-align: center;
+    }
+
+        .text-divider span {
+            background-color: rgba(254, 254, 254, 1);
+            padding-left: 1em;
+            padding-right: 1em;
+        }
+
+        .text-divider:before {
+            content: " ";
+            display: block;
+            border-top: 1px solid rgba(204, 204, 204, 0.50);
+            border-bottom: 1px solid transparent;
+            width: 96%;
+            margin-left: 1.5%;
+        }
+
+    .select2-container--default .select2-selection--single:focus {
+        outline: none !important;
+    }
+
+    .error-alert {
+        width: 100%;
+        margin: 0 auto;
+        background-color: rgba(217, 83, 79, 0.1);
+        padding: 10px;
+        border-left-color: #d9534f !important;
+        border: 1px solid transparent;
+        border-left-width: 5px;
+        border-radius: 3px;
+        margin: 0 auto;
+        font-family: 'Open Sans', sans-serif;
+        font-size: 12px;
+        margin: 0 0 5px 0;
+        margin-top: -10px;
+        margin-bottom: 20px;
+    }
+
+        .error-alert span {
+            color: #d9534f;
+            text-align: center;
+        }
+</style>
+
+<div class="collapse in">
+    <div class="card card-body">
+        <div class="collapse-body">
+            <div class="search-information-data-panel">
+                <!-------------------------------------------------------------------------- bread-crumbs ------------------------------------------------------------------------->
+                <ul class="bread-crumbs-full-screen" style="color: #808080 !important;">
+                    <li style="font-size: 10px; font-weight: 600">You are here:</li>
+                    <li><a href="@Url.Action("Index", "Home" , new { })">Home</a></li>
+                    <li><a href="@Url.Action("searchManagement", "PatientManagement" , new { })">Workflow</a></li>
+                    <li><a href="#">@ViewBag.Title</a></li>
+                </ul>
+                @if (User.Identity.IsAuthenticated)
+                {
+                    if (User.HasRole("6. Global user") || (User.HasRole("5. Super user")))
+                    {
+                        <div class="navCollection_fullScreens">
+                            <div class="buttonCollection">
+                                <div class="col-md-12">
+                                    <div class="col-md-4"></div>
+                                    <div class="col-md-4">
+                                        <div class="col-md-2">
+                                            <a href="@Url.Action("Index", "Home" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Home"><span style="font-size: 12px" class="sub_icon fas fa-home"></span></a>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <a href="@Url.Action("OpenAssignments", "Clinical" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Assignments"><span style="font-size: 12px" class="sub_icon fas fa-bell"></span></a>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <a href="@Url.Action("Search", "Member" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Patient"><span style="font-size: 12px" class="sub_icon fas fa-user-circle"></span></a>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <a href="@Url.Action("OutstandingAuthorise", "Scripts" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Authorisation"><span style="font-size: 12px" class="sub_icon fas fa-check-circle"></span></a>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <a href="@Url.Action("searchManagement", "patientManagement" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Search"><span style="font-size: 12px" class="sub_icon fas fa-search"></span></a>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <a href="@Url.Action("Index", "Administration" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Settings"><span style="font-size: 12px" class="sub_icon fas fa-cog"></span></a>
+                                        </div>
+
+                                    </div>
+                                    <div class="col-md-4"></div>
+
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else if (User.HasRole("4. Advisor"))
+                    {
+                        <div class="navCollection_fullScreens">
+                            <div class="buttonCollection">
+                                <div class="col-md-12">
+                                    <div class="col-md-4"></div>
+                                    <div class="col-md-4">
+                                        <div class="col-md-1"></div>
+                                        <div class="col-md-2">
+                                            <a href="@Url.Action("Index", "Home" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Home"><span style="font-size: 12px" class="sub_icon fas fa-home"></span></a>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <a href="@Url.Action("OpenAssignments", "Clinical" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Assignments"><span style="font-size: 12px" class="sub_icon fas fa-bell"></span></a>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <a href="@Url.Action("Search", "Member" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Patient"><span style="font-size: 12px" class="sub_icon fas fa-user-circle"></span></a>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <a href="@Url.Action("OutstandingAuthorise", "Scripts" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Authorisation"><span style="font-size: 12px" class="sub_icon fas fa-check-circle"></span></a>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <a href="@Url.Action("searchManagement", "patientManagement" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Search"><span style="font-size: 12px" class="sub_icon fas fa-search"></span></a>
+                                        </div>
+                                        <div class="col-md-1"></div>
+                                    </div>
+                                    <div class="col-md-4"></div>
+
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else if (User.HasRole("1. Consultant") || (User.HasRole("2. Case manager") || (User.HasRole("3. Specialist"))))
+                    {
+                        <div class="navCollection_fullScreens">
+                            <div class="buttonCollection">
+                                <div class="col-md-12">
+                                    <div class="col-md-4"></div>
+                                    <div class="col-md-4">
+                                        <div class="col-md-2"></div>
+                                        <div class="col-md-2">
+                                            <a href="@Url.Action("Index", "Home" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Home"><span style="font-size: 12px" class="sub_icon fas fa-home"></span></a>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <a href="@Url.Action("OpenAssignments", "Clinical" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Assignments"><span style="font-size: 12px" class="sub_icon fas fa-bell"></span></a>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <a href="@Url.Action("Search", "Member" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Patient"><span style="font-size: 12px" class="sub_icon fas fa-user-circle"></span></a>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <a href="@Url.Action("searchManagement", "patientManagement" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Search"><span style="font-size: 12px" class="sub_icon fas fa-search"></span></a>
+                                        </div>
+                                        <div class="col-md-2"></div>
+                                    </div>
+                                    <div class="col-md-4"></div>
+
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+
+                @using (Html.BeginForm())
+                {
+                    @Html.AntiForgeryToken()
+                    <input id="Error" value="@ViewBag.Error" style="display:none" />
+                    <div class="row">
+                        @*<h4 class="tableHeading">Create new</h4>
+                            <hr class="fancyruler">*@
+
+                        <div class="form-horizontal createForm">
+                            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                            <input type="hidden" name="error-medicalaid" id="error-medicalaid" value="@ViewBag.MedicalAidError" />
+                            <input type="hidden" name="error-program" id="error-program" value="@ViewBag.ProgramError" />
+                            <input type="hidden" name="error-assignment" id="error-assignment" value="@ViewBag.AssignmentError" />
+                            <input type="hidden" name="user-id" id="user-id" value="@ViewBag.UserID" />
+                            <input type="hidden" name="error-user" id="error-user" value="@ViewBag.User" />
+                            <input type="hidden" name="error-queue" id="error-queue" value="@ViewBag.Queue" />
+                            <br />
+                            <h class="heading-detail">Queue setup</h>
+                            <p class="paragraph-detail">Below you will allocate a user to a workflow queue.</p>
+                            <h4 class="tableDivider-heading text-divider"></h4>
+                            <br />
+                            <div class="col-md-12"><div id="error-medicalaid-message" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; User is not linked to Medical aid: @ViewBag.MedicalAidError!</span></div></div></div>
+                            <div class="col-md-12"><div id="error-program-message" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; User is not linked to Program: @ViewBag.ProgramError!</span></div></div></div>
+                            <div class="col-md-12"><div id="error-assignment-message" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; User is not linked to Assignment: @ViewBag.AssignmentError!</span></div></div></div>
+                            <div class="col-md-12"><div id="error-duplicate-message" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; @ViewBag.User is already linked to @ViewBag.Queue!</span></div></div></div>
+                            <div class="form-group">
+                                <div class="col-md-12">
+                                    <div class="col-md-2">
+                                        <h class="label-detail">Case manager <sup style="font-size: 5px; top: -8px;"><i class="fas fa-asterisk pulser"></i></sup></h>
+                                        <p class="paragraph-label-detail">Case managers are linked to the user list.</p>
+                                    </div>
+                                    <div class="col-md-10">
+                                        @Html.DropDownListFor(model => model.SelectedUser, new SelectList(Model.Users, "userID", "userFullName"), "Select", new { @class = "", @onchange = "FillScheme(); FillAssignments();", @required = "required" })
+                                        @Html.ValidationMessageFor(model => model.SelectedUser, "", new { @class = "text-danger", @style = "font-size: 75%;margin-left: 2%" })
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h4 class="tableDivider-heading text-divider"></h4>
+                            <br />
+                            <div class="form-group">
+                                <div class="col-md-12">
+                                    <div class="col-md-2">
+                                        <h class="label-detail">Queue <sup style="font-size: 5px; top: -8px;"><i class="fas fa-asterisk pulser"></i></sup></h>
+                                        <p class="paragraph-label-detail"></p>
+                                    </div>
+                                    <div class="col-md-10">
+                                        @Html.DropDownListFor(model => model.SelectedQueues, new SelectList(Model.Queues, "QueueID", "QueueName"), "Select", new { @class = "", @required = "required" })
+                                        @Html.ValidationMessageFor(model => model.SelectedMedicalAids, "", new { @class = "text-danger", @style = "font-size: 75%;margin-left: 2%" })
+                                    </div>
+                                </div>
+                            </div>
+                            <br />
+                            <br />
+                            <div class="centered-btn">
+                                <input id="submit" type="submit" value="Submit" class="btn create-button" style="width: 15%" onclick="FCheck();" /><br />
+                                <input type="text" value="Back" class="btn reset-button go_back" />
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/js/standalone/selectize.js"></script>
+    <!-- selectize dropdown menus -->
+    <script>
+        initSelectize();
+        function initSelectize() {
+            $('#SelectedUser').selectize({
+                persist: true,
+                preload: true,
+                maxItems: 1,
+                delimiter: ',',
+                valueField: 'id',
+                labelField: 'name',
+                searchField: ['name'],
+                //create: true,
+                hideSelected: true,
+                plugins: ['remove_button'],
+                render: {
+                    option: function (item, escape) {
+                        return '<span class="name">' + escape(item.name) + '</span>';
+
+                    }
+                }
+            }),
+                $('#SelectedQueues').selectize({
+                    persist: true,
+                    preload: true,
+                    maxItems: 1,
+                    delimiter: ',',
+                    valueField: 'id',
+                    labelField: 'name',
+                    searchField: ['name'],
+                    //create: true,
+                    hideSelected: true,
+                    plugins: ['remove_button'],
+                    render: {
+                        option: function (item, escape) {
+                            return '<span class="name">' + escape(item.name) + '</span>';
+
+                        }
+                    }
+                })
+        }
+    </script>
+    <!-- select-dropdown -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+    <!-- error-program -->
+    <script>
+        $(document).ready(function () {
+            var ma = $('#error-medicalaid').val();
+            if (ma.length > 0) {
+                $("#error-medicalaid-message").removeClass("hidden");
+            }
+        });
+        $(document).ready(function () {
+            var p = $('#error-program').val();
+            if (p.length > 0) {
+                $("#error-program-message").removeClass("hidden");
+            }
+        });
+        $(document).ready(function () {
+            var a = $('#error-assignment').val();
+            if (a.length > 0) {
+                $("#error-assignment-message").removeClass("hidden");
+            }
+        });
+        $(document).ready(function () {
+            var d = $('#error-queue').val();
+            if (d.length > 0) {
+                $("#error-duplicate-message").removeClass("hidden");
+            }
+        });
+    </script>
+}

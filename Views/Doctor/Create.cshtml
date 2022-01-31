@@ -1,0 +1,274 @@
+﻿@model HaloCareCore.Models.DoctorViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Create";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+</style>
+
+<div class="fullScreen_container zero-padding">
+
+    <!--pageHeader-->
+    <nav id="global-nav" class="nav">
+        <div class="pull-left title">
+            <h1 class="site-title_patientProfile">
+                <span><i class="fas fa-user-md"></i>&emsp; Doctors</span>
+            </h1>
+        </div>
+        <div class="pull-right title">
+            <h1 class="site-title_userID pull-right">
+                <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+            </h1>
+            <h1 class="site-title_userID pull-right">
+                @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                {
+                    <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                }
+            </h1>
+            <h1 class="site-waffleIcon pull-right">
+                <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+            </h1>
+        </div>
+    </nav>
+
+    <!--breadCrumbs-->
+    <ul class="breadcrumbs_fullScreens">
+        <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+        <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+        <li><a href="@Url.Action("Index", "Doctor", new {})">Doctors</a></li>
+        <li><a href="#">Create</a></li>
+    </ul>
+
+    <!--navCollection-->
+    <div class="navCollection_fullScreens">
+        @Html.Partial("_navCollection")
+        <!--HCARE-684 Removed create button-->
+    </div>
+
+    <div style="margin-bottom: 2%"></div>
+
+    @using (Html.BeginForm("SearchDoctor", "Doctor", FormMethod.Post))
+    {
+        <div class="row productContentBlock">
+            <h4 class="tableHeading">Find a doctor</h4>
+            <hr class="fancyruler">
+            <br />
+            <div class="form-horizontal editForm">
+                @Html.Hidden("depenID", Context.Request.Query["DependentID"])
+
+                <div class="form-group" style="margin-left: -8%">
+                    @Html.Label(null, "Practice #", htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-4">
+                        @Html.Editor("PracticeNo", new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                    </div>
+                </div>
+            </div>
+            <br />
+            <div class="form-group">
+                <div class="actionButton" style="margin-left: 44.5%; margin-bottom: -1.5%">
+                    <input type="submit" value="Find Doctor" class="btn buttonRound_formCreate" style="width: 15%!important" />
+                </div>
+            </div>
+            <br />
+            <br />
+
+        </div>
+    }
+    <br />
+
+    @using (Html.BeginForm("Create", "Doctor", FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="row productContentBlock">
+            <h4 class="tableHeading">Create a new doctor</h4>
+            <hr class="fancyruler">
+            <br />
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+            @Html.Hidden("dependentID", Context.Request.Query["DependentID"])
+            @Html.HiddenFor(model => model.depID)
+            <div class="form-horizontal editForm">
+                <div class="form-group" style="margin-left: -8%">
+                    @Html.LabelFor(model => model.practices.practiceNo, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-4">
+                        @Html.EditorFor(model => model.practices.practiceNo, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                        @Html.ValidationMessageFor(model => model.practices.practiceNo, "", new { @class = "text-danger" })
+                    </div>
+                    @Html.LabelFor(model => model.practices.practiceName, htmlAttributes: new { @class = "control-label col-md-2 pull" })
+                    <div class="col-md-4">
+                        @Html.EditorFor(model => model.practices.practiceName, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                        @Html.ValidationMessageFor(model => model.practices.practiceName, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="form-group" style="margin-left: -8%">
+                    @Html.LabelFor(model => model.practices.councilNo, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-4">
+                        @Html.EditorFor(model => model.practices.councilNo, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                        @Html.ValidationMessageFor(model => model.practices.councilNo, "", new { @class = "text-danger" })
+                    </div>
+                    @Html.LabelFor(model => model.practices.decipline, htmlAttributes: new { @class = "control-label col-md-2 pull" })
+                    <div class="col-md-4">
+                        @Html.EditorFor(model => model.practices.decipline, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                        @Html.ValidationMessageFor(model => model.practices.decipline, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <br />
+                <hr class="fancyruler">
+                <br />
+                <br />
+                <div class="form-group" style="margin-left: -8%">
+                    @Html.LabelFor(model => model.doctor.drFirstName, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-4">
+                        @Html.EditorFor(model => model.doctor.drFirstName, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                        @Html.ValidationMessageFor(model => model.doctor.drFirstName, "", new { @class = "text-danger" })
+                    </div>
+                    @Html.LabelFor(model => model.doctor.drLastName, htmlAttributes: new { @class = "control-label col-md-2 pull" })
+                    <div class="col-md-4">
+                        @Html.EditorFor(model => model.doctor.drLastName, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                        @Html.ValidationMessageFor(model => model.doctor.drLastName, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="form-group" style="margin-left: -8%">
+                    @Html.LabelFor(model => model.doctor.title, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-4">
+                        @Html.EditorFor(model => model.doctor.title, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                        @Html.ValidationMessageFor(model => model.doctor.title, "", new { @class = "text-danger" })
+                    </div>
+                    @Html.LabelFor(model => model.doctor.sex, htmlAttributes: new { @class = "control-label col-md-2 pull" })
+                    <div class="col-md-4">
+                        @Html.DropDownList("Gender", null, "**Select**", htmlAttributes: new { @class = "infoBox_editMember" })
+                    </div>
+                </div>
+                <div class="form-group" style="margin-left: -8%">
+                    @Html.LabelFor(model => model.doctor.position, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-4">
+                        @Html.EditorFor(model => model.doctor.position, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                        @Html.ValidationMessageFor(model => model.doctor.position, "", new { @class = "text-danger" })
+                    </div>
+                    @Html.LabelFor(model => model.doctor.idNo, htmlAttributes: new { @class = "control-label col-md-2 pull" })
+                    <div class="col-md-4">
+                        @Html.EditorFor(model => model.doctor.idNo, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                        @Html.ValidationMessageFor(model => model.doctor.idNo, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-left: -8%">
+                    @Html.Label(null, "Doctor type", htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-4">
+                        @Html.DropDownList("DoctorType", null, "**Select**", htmlAttributes: new { @class = "infoBox_editMember" })
+                    </div>
+
+                    @Html.LabelFor(model => model.doctor.language, htmlAttributes: new { @class = "control-label col-md-2 pull" })
+                    <div class="col-md-4">
+                        @Html.DropDownList("language", null, "**Select**", htmlAttributes: new { @class = "infoBox_editMember" })
+                        @Html.ValidationMessageFor(model => model.doctor.language, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <br />
+                <hr class="fancyruler">
+                <br />
+                <br />
+                <div class="form-group" style="margin-left: -8%">
+                    @Html.LabelFor(model => model.contact.contactName, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-4">
+                        @Html.EditorFor(model => model.contact.contactName, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                        @Html.ValidationMessageFor(model => model.contact.contactName, "", new { @class = "text-danger" })
+                    </div>
+                    @Html.LabelFor(model => model.contact.email, htmlAttributes: new { @class = "control-label col-md-2 pull" })
+                    <div class="col-md-4">
+                        @Html.EditorFor(model => model.contact.email, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                        @Html.ValidationMessageFor(model => model.contact.email, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-left: -8%">
+                    @Html.LabelFor(model => model.contact.workNo, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-4">
+                        @Html.EditorFor(model => model.contact.workNo, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                        @Html.ValidationMessageFor(model => model.contact.workNo, "", new { @class = "text-danger" })
+                    </div>
+                    @Html.LabelFor(model => model.contact.fax, htmlAttributes: new { @class = "control-label col-md-2 pull" })
+                    <div class="col-md-4">
+                        @Html.EditorFor(model => model.contact.fax, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                        @Html.ValidationMessageFor(model => model.contact.fax, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-left: -8%">
+                    @Html.LabelFor(model => model.contact.cell, htmlAttributes: new { @class = "control-label col-md-2 " })
+                    <div class="col-md-4">
+                        @Html.EditorFor(model => model.contact.cell, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                        @Html.ValidationMessageFor(model => model.contact.cell, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <br />
+                <hr class="fancyruler">
+                <br />
+                <div class="form-group" style="margin-left: -8%">
+                    @Html.LabelFor(model => model.address.line1, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-4">
+                        @Html.EditorFor(model => model.address.line1, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                        @Html.ValidationMessageFor(model => model.address.line1, "", new { @class = "text-danger" })
+                    </div>
+                    @Html.LabelFor(model => model.address.line2, htmlAttributes: new { @class = "control-label col-md-2 pull" })
+                    <div class="col-md-4">
+                        @Html.EditorFor(model => model.address.line2, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                        @Html.ValidationMessageFor(model => model.address.line2, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-left: -8%">
+                    @Html.LabelFor(model => model.address.line3, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-4">
+                        @Html.EditorFor(model => model.address.line3, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                        @Html.ValidationMessageFor(model => model.address.line3, "", new { @class = "text-danger" })
+                    </div>
+                    @Html.LabelFor(model => model.address.city, htmlAttributes: new { @class = "control-label col-md-2 pull" })
+                    <div class="col-md-4">
+                        @Html.EditorFor(model => model.address.city, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                        @Html.ValidationMessageFor(model => model.address.city, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-left: -8%">
+                    @Html.LabelFor(model => model.address.province, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-4">
+                        @Html.EditorFor(model => model.address.province, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                        @Html.ValidationMessageFor(model => model.address.province, "", new { @class = "text-danger" })
+                    </div>
+                    @Html.LabelFor(model => model.address.zip, htmlAttributes: new { @class = "control-label col-md-2 pull" })
+                    <div class="col-md-4">
+                        @Html.EditorFor(model => model.address.zip, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                        @Html.ValidationMessageFor(model => model.address.zip, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <br />
+            </div>
+            <br />
+            <div class="form-group">
+                <div class="actionButton" style="margin-left: 39%; margin-bottom: -1.5%">
+                    <input value="Back" class="btn buttonRound_formBack go_back" style="width: 15%!important" />
+                    <input type="submit" value="Create" class="btn buttonRound_formCreate" style="width: 15%!important" />
+                </div>
+            </div>
+            <br />
+        </div>
+
+
+    }
+</div>
+
+
+<script src="js/jquery.tablesorter.min.js"></script>
+
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+}
+

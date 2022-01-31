@@ -1,0 +1,426 @@
+﻿@using HaloCareCore.Models
+@model HaloCareCore.Models.EnrolmentViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Enrol";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+<comment>
+    <!--
+        27 January 2020 -- HCare-934 (Patient Enrollment - DM enrollment management status)
+        If an enrollment takes place, the user must select a program. The program dropdown will determine the management status which is systematically selected. This will only apply to HIV and Diabetes until further notice.
+        i.e. If Diabetes is selected as the program from the enrollment screen, the management status "Enrollment Diabetes" will be set as well as the assignment "New Registration - Diabetes".
+        If HIV is selected, the managment status will be "Enrollment HIV" and the assignment "New Registration - HIV"
+
+    -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .select2-container--default .select2-selection--single {
+        display: block;
+        max-width: 500px !important;
+        width: 400px;
+        max-height: 40px;
+        height: 30px;
+        margin-left: 10px;
+        padding: 6px 6px;
+        line-height: 1.428571429;
+        border: 1px solid #f4f4f4 !important;
+        border-radius: 4px;
+        -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+        box-shadow: 1px 1px 1px 0px rgba(0,0,0,0.20);
+        -webkit-transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+        transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+        background-color: transparent !important;
+    }
+
+    .select2-container--default .select2-selection--single {
+        width: 320px !important
+    }
+
+        .select2-container--default .select2-selection--single .select2-selection__placeholder {
+            color: white !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow b {
+            margin-top: -5px !important;
+        }
+</style>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet" />
+
+<div class="fullScreen_container zero-padding">
+    <!--pageHeader-->
+    <nav id="global-nav" class="nav">
+        <div class="pull-left title">
+            <h1 class="site-title_patientProfile">
+                <span><i class="fas fa-user-circle"></i>&emsp; New patient</span>
+            </h1>
+        </div>
+        <div class="pull-right title">
+            <h1 class="site-title_userID pull-right">
+                <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+            </h1>
+            <h1 class="site-title_userID pull-right">
+                @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                {
+                    <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                }
+            </h1>
+            <h1 class="site-waffleIcon pull-right">
+                <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+            </h1>
+        </div>
+    </nav>
+
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(model => model.member.createdBy)
+        @Html.HiddenFor(model => model.dependent.createdBy)
+        @Html.HiddenFor(model => model.dependent.demographic)
+        @Html.Hidden("id", (object)ViewBag.id)
+
+
+        <div class="">
+            <!--breadCrumbs-->
+            <ul class="breadcrumbs_fullScreens">
+                <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+                <li><a href="@Url.Action("Index", "Home", new { })">Home</a></li>
+                <li><a href="#">New</a></li>
+            </ul>
+
+            <!--navCollection-->
+            <div class="navCollection_fullScreens">
+                @Html.Partial("_navCollection")
+            </div>
+
+            <div style="margin-bottom: 2%"></div>
+
+            <h4 class="summaryHeading">New profile</h4>
+            <hr class="fancyruler">
+            <br />
+            <div class="form-group">
+                <div class="form-horizontal createForm">
+                    <div class="text-danger">@Html.ValidationSummary()</div>
+
+                    <div class="form-group">
+                        <div class="col-md-12">
+                            <div class="col-md-6">
+                                @Html.LabelFor(model => model.member.membershipNo, htmlAttributes: new { @class = "control-label col-md-3 push " })
+                                <div class="col-md-5">
+                                    @Html.EditorFor(model => model.member.membershipNo, new { htmlAttributes = new { @class = "enrolForm_infoBox" } })
+                                    @Html.ValidationMessageFor(model => model.member.membershipNo, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                @Html.LabelFor(model => model.dependent.dependentCode, htmlAttributes: new { @class = "control-label col-md-3 pull" })
+                                <div class="col-md-5">
+                                    @Html.EditorFor(model => model.dependent.dependentCode, new { htmlAttributes = new { @class = "enrolForm_infoBox", @onkeypress = "return isNumber(event)" } })
+                                    @Html.ValidationMessageFor(model => model.dependent.dependentCode, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-12">
+                            <div class="col-md-6">
+                                @Html.Label(null,"Scheme", htmlAttributes: new { @class = "control-label col-md-3 push" })
+                                <div class="col-md-5">
+                                    @Html.DropDownListFor(n => n.member.medicalAidID, new SelectList(Model.MedicalAids.Where(x => x.clCarrier != true).Where(x => x.Active == true), "medicalAidID", "Name"), "**Select**", htmlAttributes: new { @class = "enrolForm_infoBox", @onchange = "FillScheme()" })
+                                    @Html.ValidationMessageFor(model => model.member.medicalAidID, "", new { @class = "text-danger" })
+
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                @Html.Label(null,"Scheme option", htmlAttributes: new { @class = "control-label col-md-3 pull" })
+                                <div class="col-md-5">
+                                    @Html.DropDownList("schemeOption", new SelectList(Enumerable.Empty<SelectListItem>(), "Id", "Name"), "**Select**", htmlAttributes: new { @class = "enrolForm_infoBox mySelect2", @onchange = "FillRest()" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-12">
+                            <div class="col-md-6">
+                                @Html.Label(null,"Principle", htmlAttributes: new { @class = "control-label col-md-3 push" })
+                                <div class="col-md-5 checkbox check-box_PrincipleMember">
+                                    @Html.CheckBoxFor(model => model.dependent.isPrinciple, new { htmlAttributes = new { @class = "enrolForm_infoBox" } })
+                                    @Html.ValidationMessageFor(model => model.dependent.isPrinciple, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                @Html.Label(null,"Dependant type", htmlAttributes: new { @class = "control-label col-md-3 pull" })
+                                <div class="col-md-5">
+                                    @Html.DropDownListFor(m => m.dependent.dependentType, new SelectList(Model.dependentType, "dependentTypeCode", "dependentType"), "**Select**", htmlAttributes: new { @class = "enrolForm_infoBox" })
+                                    @Html.ValidationMessageFor(model => model.dependent.dependentType, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-12">
+                            <div class="col-md-6">
+                                @Html.LabelFor(model => model.dependent.originationId, htmlAttributes: new { @class = "control-label col-md-3 push" })
+                                <div class="col-md-5">
+                                    @Html.DropDownListFor(model => model.dependent.originationId, new SelectList(Model.Origins, "OriginID", "originName"), "**Select**", htmlAttributes: new { @class = "enrolForm_infoBox" })
+                                    @Html.ValidationMessageFor(model => model.dependent.originationId, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-12">
+
+
+                            <div class="col-md-6">
+                                @Html.LabelFor(model => model.program.programCode, htmlAttributes: new { @class = "control-label col-md-3 push" })
+                                <div class="col-md-5">
+                                    @Html.DropDownList("program", null, "**Select**", htmlAttributes: new { @class = "enrolForm_infoBox" })
+                                    @Html.ValidationMessageFor(model => model.program.programCode, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br />
+            <hr class="fancyruler" />
+            <br />
+            <div class="form-horizontal createForm">
+                <div class="form-group">
+                    <div class="col-md-12">
+                        <div class="col-md-6">
+                            @Html.LabelFor(model => model.dependent.firstName, htmlAttributes: new { @class = "control-label col-md-3 push" })
+                            <div class="col-md-5">
+                                @Html.EditorFor(model => model.dependent.firstName, new { htmlAttributes = new { @class = "enrolForm_infoBox" } })
+                                @Html.ValidationMessageFor(model => model.dependent.firstName, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            @Html.LabelFor(model => model.dependent.lastName, htmlAttributes: new { @class = "control-label col-md-3 pull" })
+                            <div class="col-md-5">
+                                @Html.EditorFor(model => model.dependent.lastName, new { htmlAttributes = new { @class = "enrolForm_infoBox" } })
+                                @Html.ValidationMessageFor(model => model.dependent.lastName, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-horizontal createForm">
+                <div class="form-group">
+                    <div class="col-md-12">
+                        <div class="col-md-6">
+                            @Html.LabelFor(model => model.dependent.initials, htmlAttributes: new { @class = "control-label col-md-3 push" })
+                            <div class="col-md-5">
+                                @Html.EditorFor(model => model.dependent.initials, new { htmlAttributes = new { @class = "enrolForm_infoBox" } })
+                                @Html.ValidationMessageFor(model => model.dependent.initials, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            @Html.LabelFor(model => model.dependent.title, htmlAttributes: new { @class = "control-label col-md-3 pull" })
+                            <div class="col-md-5">
+                                @Html.EditorFor(model => model.dependent.title, new { htmlAttributes = new { @class = "enrolForm_infoBox", @onchange = "fillBirthdate()" } })
+                                @Html.ValidationMessageFor(model => model.dependent.title, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-horizontal createForm">
+                    <div class="form-group">
+                        <div class="col-md-12">
+                            <div class="col-md-6">
+                                @Html.LabelFor(model => model.dependent.idNumber, htmlAttributes: new { @class = "control-label col-md-3 push" })
+                                <div class="col-md-5">
+                                    @Html.EditorFor(model => model.dependent.idNumber, new { htmlAttributes = new { @class = "enrolForm_infoBox", @onchange = "fillBirthdate()" } })
+                                    @Html.ValidationMessageFor(model => model.dependent.idNumber, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                @Html.LabelFor(model => model.dependent.sex, htmlAttributes: new { @class = "control-label col-md-3 pull" })
+                                <div class="col-md-5">
+                                    @Html.DropDownListFor(m => m.dependent.sex, new SelectList(Model.gender, "sex", "sexName"), "**Select**", htmlAttributes: new { @class = "enrolForm_infoBox" })
+                                    @Html.ValidationMessageFor(model => model.dependent.sex, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-horizontal createForm">
+                        <div class="form-group">
+                            <div class="col-md-12">
+                                <div class="col-md-6">
+                                    @Html.LabelFor(model => model.dependent.birthDate, htmlAttributes: new { @class = "control-label col-md-3 push" })
+                                    <div class="col-md-5">
+                                        @Html.EditorFor(model => model.dependent.birthDate, new { htmlAttributes = new { @class = "enrolForm_infoBox datepicker" } })
+                                        @Html.ValidationMessageFor(model => model.dependent.birthDate, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    @Html.Label(null,"Language", htmlAttributes: new { @class = "control-label col-md-3 pull" })
+                                    <div class="col-md-5">
+                                        @Html.DropDownListFor(model => model.dependent.languageCode, new SelectList(Model.languages, "languageName", "languageCode"), "**Select**", htmlAttributes: new { @class = "enrolForm_infoBox" })
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="col-md-12">
+                            <div class="col-md-2" style="text-align: right; margin-left: 1.2%!important; font-family: 'Century Gothic'; font-weight: bold; color: #003366">
+                                @System.Web.Configuration.WebConfigurationManager.AppSettings["Citizen"]
+                                <div class="col-md-5 checkbox check-box_Enrolment">
+                                    @Html.CheckBoxFor(model => model.dependent.isSACitizen, new { htmlAttributes = new { @class = "enrolForm_infoBox" } })
+                                    @Html.ValidationMessageFor(model => model.dependent.isSACitizen, "", new { @class = "text-danger" })
+
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="col-md-5">
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <br />
+            <div class="row">
+                <br />
+                <br />
+                <div class="form-group">
+                    <div class="actionButton" style="margin-left: 38%; z-index: 100">
+                        <input value="Back" class="btn buttonRound_formBack go_back" style="width: 15%!important" />
+                        <input type="submit" value="Create" class="btn buttonRound_formCreate" style="width: 15%!important" />
+                    </div>
+                </div>
+                <br />
+                <div style="margin-bottom: 0.5%!important"></div>
+            </div>
+        </div>
+
+
+    }
+</div>
+
+@section Scripts {
+    <script src="~/bundles/jqueryval"></script>
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+
+    @if (ViewBag.Message != null)
+    {
+
+        <script type="text/javascript">
+
+        window.onload = function () {
+            toastr.options.positionClass = 'toast-bottom-right';
+            toastr.options.timeOut = 5000;
+
+            toastr.error("@ViewBag.Message");
+        }
+        </script>
+    }
+
+    @*<script src="js/jquery-1.11.0.min.js" type="text/javascript"></script>
+        <script type="text/javascript">
+            $(document).ready(function () {
+                PrepareCheckbox();
+            });
+            function PrepareCheckbox() {
+                document.getElementById("dependent_isSACitizen").checked = true;
+            }
+        </script>*@
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+
+    <script>
+        $(document).ready(function () { $("#program").select2({ multiple: false, placeholder: "- Select -", allowClear: true }); });
+        $(document).ready(function () { $("#dependent_dependentType").select2({ multiple: false, placeholder: "- Select -", allowClear: true }); });
+        $(document).ready(function () { $("#member_medicalAidID").select2({ multiple: false, placeholder: "- Select -", allowClear: true }); });
+        $(document).ready(function () { $("#dependent_originationId").select2({ multiple: false, placeholder: "- Select -", allowClear: true }); });
+        $(document).ready(function () { $("#schemeOption").select2({ multiple: false, placeholder: "- Select -", allowClear: true }); });
+        $(document).ready(function () { $("#dependent_sex").select2({ multiple: false, placeholder: "- Select -", allowClear: true }); });
+        $(document).ready(function () { $("#dependent_languageCode").select2({ multiple: false, placeholder: "- Select -", allowClear: true }); });
+        $(document).ready(function () { $("#dependent_dispensingProvider").select2({ multiple: false, placeholder: "- Select -", allowClear: true }); });
+        $(document).ready(function () { $("#amputationReason").select2({ multiple: true, placeholder: "- Select -", allowClear: true }); });
+
+    </script>
+
+    <script type="text/javascript">
+        function isNumber(evt) {
+            evt = (evt) ? evt : window.event;
+            var charCode = (evt.which) ? evt.which : evt.keyCode;
+            if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+                return false;
+            }
+            return true;
+        }
+        function FillScheme() {
+            var stateId = $('#member_medicalAidID').val();
+            $.ajax({
+                url: '/Member/FillScheme',
+                type: "GET",
+                dataType: "JSON",
+                data: { medId: stateId },
+                success: function (options) {
+                    $("#schemeOption").html(""); // clear before appending new list
+                    $.each(options, function (i, option) {
+                        $("#schemeOption").append(
+                            $('<option></option>').val(option.Id).html(option.Name));
+                    });
+                }
+            });
+        }
+        function FillRest() {
+            var stateId = $('#member_medicalAidID').val();
+            var option = $('#schemeOption').val();
+            var member = $('#member_membershipNo').val();
+            var dep = $('#dependent_dependentCode').val();
+            $.ajax({
+                url: '/Member/FillRest',
+                type: "GET",
+                dataType: "JSON",
+                data: { medId: stateId, opt: option, mem: member, depcode: dep },
+                success: function (dependant) {
+                    $('#dependent_firstName').val(dependant.firstName);
+                    $('#dependent_lastName').val(dependant.lastName);
+                    $('#dependent_initials').val(dependant.initials);
+                    $('#dependent_idNumber').val(dependant.idNumber);
+                    $('div.dependent_sex select').val(dependant.sex);
+                    $('#dependent_title').val(dependant.title);
+                    $('div.dependent_languageCode select').val(dependant.languageCode);
+                    $('#dependent_birthDate').val(dependant.birthDate);
+                }
+            });
+        }
+        function fillBirthdate() {
+            var stateId = $('#dependent_idNumber').val();
+            if (stateId.length > 5) {
+                var decade = '19';
+                if (stateId.substring(0, 2) < 19) {
+                    decade = '20';
+                }
+
+                $('#dependent_birthDate').val(decade + $('#dependent_idNumber').val().substring(0, 2) + '-' + $('#dependent_idNumber').val().substring(2, 4) + '-' + $('#dependent_idNumber').val().substring(4, 6));
+            }
+        }
+
+    </script>
+
+}
+
+

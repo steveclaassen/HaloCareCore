@@ -1,0 +1,518 @@
+﻿@model IEnumerable<HaloCareCore.Models.EnquiriesSearch>
+@using HaloCareCore.Extensions
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "SearchQueries";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+<comment>
+    <!--
+        08 April 2019 -- HCare-680(Enquiry search enhanced)
+        Added Medical scheme, Management status, priority and query status to the search parameters of the Enquiry search - BM
+        Added new export to excel function that pulls the data as per the additional fields
+
+        16 April 2019 -- HCare-619(Search Management: Enquiries (Remove 'inactive' schemes from the Open enquiry view))
+        A telephone conversation with Adele confirmed that we should remove the following statuses from the open enquiry search view:
+        - Deceased
+        - Deactivated
+        - Patient Resigned
+        - PEP Complete
+        - PrEP Complete
+        Request was failed because you were able to search for these statuses as well. We have removed based on the failure.
+
+        16 April 2019 -- HCare-623(Open Enquiry search view)
+        Customise the view of the columns as per the SR in front end as well as the Excel spreadsheet
+
+        02 May 2019 -- HCare-619(Search Management: Enquiries (Remove 'inactive' schemes from the Open enquiry view))
+        SR was Failed on account that the inactive schemes are still reflecting in the view. We have removed from the frontend view as well as the excel exports as well.
+
+    -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+</style>
+
+<!--dateSort_JQ-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js"></script>
+<script src="https://www.jqueryscript.net/demo/jQuery-Plugin-For-Sortable-Bootstrap-Tables-Bootstrap-Sortable/Scripts/bootstrap-sortable.js"></script>
+
+<div class="fullScreen_container zero-padding">
+
+    <!--pageHeader-->
+    <nav id="global-nav" class="nav">
+        <div class="pull-left title">
+            <h1 class="site-title_patientProfile">
+                <span><i class="fas fa-question-circle"></i></span>&emsp; Enquiries
+            </h1>
+        </div>
+        <div class="pull-right title">
+            <h1 class="site-title_userID pull-right">
+                <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+            </h1>
+            <h1 class="site-title_userID pull-right">
+                @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                {
+                    <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                }
+            </h1>
+            <h1 class="site-waffleIcon pull-right">
+                <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+            </h1>
+        </div>
+    </nav>
+
+    <!--breadCrumbs-->
+    <ul class="breadcrumbs_fullScreens">
+        <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+        <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+        <li><a href="@Url.Action("SearchQueries", "PatientManagement", new {})">Enquiries</a></li>
+    </ul>
+
+    <!--navCollection-->
+    @if (User.Identity.IsAuthenticated)
+    {
+        if (User.HasRole("6. Global user") || (User.HasRole("5. Super user")))
+        {
+            <div class="navCollection_fullScreens">
+                <div class="buttonCollection">
+                    <div class="col-md-12">
+                        <div class="col-md-4"></div>
+                        <div class="col-md-4">
+                            <div class="col-md-2">
+                                <a href="@Url.Action("Index", "Home", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Home"><span style="font-size: 15px" class="sub_icon fas fa-home"></span></a>
+                            </div>
+                            <div class="col-md-2">
+                                <a href="@Url.Action("OpenAssignments", "Clinical", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Assignments"><span style="font-size: 15px" class="sub_icon fas fa-bell"></span></a>
+                            </div>
+                            <div class="col-md-2">
+                                <a href="@Url.Action("Search", "Member", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Patient"><span style="font-size: 15px" class="sub_icon fas fa-user-circle"></span></a>
+                            </div>
+                            <div class="col-md-2">
+                                <a href="@Url.Action("OutstandingAuthorise", "Scripts", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Authorisation"><span style="font-size: 15px" class="sub_icon fas fa-check-circle"></span></a>
+                            </div>
+                            <div class="col-md-2">
+                                <span style="font-size: 15px; background: -webkit-linear-gradient(#e80a89, #f15b2a);-webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow (10px 10px 1px rgba(34, 34, 34, 0.50))" title="Search" class="sub_icon fas fa-search"></span>
+                            </div>
+                            <div class="col-md-2">
+                                <a href="@Url.Action("Index", "Administration", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Settings"><span style="font-size: 15px" class="sub_icon fas fa-cog"></span></a>
+                            </div>
+
+                        </div>
+                        <div class="col-md-4"></div>
+
+                    </div>
+                </div>
+            </div>
+        }
+        else if (User.HasRole("4. Advisor"))
+        {
+            <div class="navCollection_fullScreens">
+                <div class="buttonCollection">
+                    <div class="col-md-12">
+                        <div class="col-md-4"></div>
+                        <div class="col-md-4">
+                            <div class="col-md-1"></div>
+                            <div class="col-md-2">
+                                <a href="@Url.Action("Index", "Home", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Home"><span style="font-size: 15px" class="sub_icon fas fa-home"></span></a>
+                            </div>
+                            <div class="col-md-2">
+                                <a href="@Url.Action("OpenAssignments", "Clinical", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Assignments"><span style="font-size: 15px" class="sub_icon fas fa-bell"></span></a>
+                            </div>
+                            <div class="col-md-2">
+                                <a href="@Url.Action("Search", "Member", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Patient"><span style="font-size: 15px" class="sub_icon fas fa-user-circle"></span></a>
+                            </div>
+                            <div class="col-md-2">
+                                <a href="@Url.Action("OutstandingAuthorise", "Scripts", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Authorisation"><span style="font-size: 15px" class="sub_icon fas fa-check-circle"></span></a>
+                            </div>
+                            <div class="col-md-2">
+                                <span style="font-size: 15px; background: -webkit-linear-gradient(#e80a89, #f15b2a);-webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow (10px 10px 1px rgba(34, 34, 34, 0.50))" title="Search" class="sub_icon fas fa-search"></span>
+                            </div>
+                            <div class="col-md-1"></div>
+                        </div>
+                        <div class="col-md-4"></div>
+
+                    </div>
+                </div>
+            </div>
+        }
+        else if (User.HasRole("1. Consultant") || (User.HasRole("2. Case manager") || (User.HasRole("3. Specialist"))))
+        {
+            <div class="navCollection_fullScreens">
+                <div class="buttonCollection">
+                    <div class="col-md-12">
+                        <div class="col-md-4"></div>
+                        <div class="col-md-4">
+                            <div class="col-md-2"></div>
+                            <div class="col-md-2">
+                                <a href="@Url.Action("Index", "Home", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Home"><span style="font-size: 15px" class="sub_icon fas fa-home"></span></a>
+                            </div>
+                            <div class="col-md-2">
+                                <a href="@Url.Action("OpenAssignments", "Clinical", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Assignments"><span style="font-size: 15px" class="sub_icon fas fa-bell"></span></a>
+                            </div>
+                            <div class="col-md-2">
+                                <a href="@Url.Action("Search", "Member", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Patient"><span style="font-size: 15px" class="sub_icon fas fa-user-circle"></span></a>
+                            </div>
+                            <div class="col-md-2">
+                                <span style="font-size: 15px; background: -webkit-linear-gradient(#e80a89, #f15b2a);-webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow (10px 10px 1px rgba(34, 34, 34, 0.50))" title="Search" class="sub_icon fas fa-search"></span>
+                            </div>
+                            <div class="col-md-2"></div>
+                        </div>
+                        <div class="col-md-4"></div>
+
+                    </div>
+                </div>
+            </div>
+        }
+    }
+
+    <div style="margin-bottom: 1%"></div>
+
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+        <div class="row summaryContentBlock">
+            <h4 class="tableHeading">Enquiry search</h4>
+            <hr class="fancyruler">
+            <br />
+            <br />
+            <div class="form-group editForm">
+                <div class="form-horizontal">
+
+                    <div class="form-group">
+                        <div class="col-md-12">
+                            <div class="col-md-6">
+                                <div class="col-md-3">
+                                    @Html.Label(null,"Query type", htmlAttributes: new { @class = "control-label" })
+                                </div>
+                                <div class="col-md-9">
+                                    @Html.DropDownList("queryType", null, "* Select *", htmlAttributes: new { @class = "infoBox_Enrollment" })
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="col-md-3">
+                                    @Html.Label(null,"Member #:", htmlAttributes: new { @class = "control-label" })
+                                </div>
+                                <div class="col-md-9 statusPill">
+                                    @Html.Editor("membershipno", new { htmlAttributes = new { @class = "infoBox_Enrollment" } })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="col-md-12">
+                            <div class="col-md-6">
+                                <div class="col-md-3">
+                                    @Html.Label(null,"Medical scheme:", htmlAttributes: new { @class = "control-label" })
+                                </div>
+                                <div class="col-md-9">
+                                    @Html.DropDownList("medicalAid", null, "* Select *", htmlAttributes: new { @class = "infoBox_Enrollment" })
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="col-md-3">
+                                    @Html.Label(null,"Management status:", htmlAttributes: new { @class = "control-label" })
+                                </div>
+                                <div class="col-md-9 statusPill">
+                                    @Html.DropDownList("memberStatus", null, "* Select *", htmlAttributes: new { @class = "infoBox_Enrollment" })
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="col-md-12">
+                            <div class="col-md-6">
+                                <div class="col-md-3">
+                                    @Html.Label(null,"Priority:", htmlAttributes: new { @class = "control-label" })
+                                </div>
+                                <div class="col-md-9">
+                                    @Html.DropDownList("queryPriority", null, "* Select *", htmlAttributes: new { @class = "infoBox_Enrollment" })
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="col-md-3">
+                                    @Html.Label(null,"Query status:", htmlAttributes: new { @class = "control-label" })
+                                </div>
+                                <div class="col-md-9 statusPill">
+                                    @Html.DropDownList("queryStatus", new List<SelectListItem>
+                                   {
+                                        new SelectListItem() { Text = "Follow up", Value = "1"},
+                                        new SelectListItem() { Text = "Closed", Value = "0"},
+
+                                    }, "* Select *", new { @class = "infoBox_Enrollment" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+                </div>
+            </div>
+            <br />
+            <div class="form-group">
+                <div class="actionButton" style="margin-left: 45%;">
+                    <input type="submit" value="Search" class="btn buttonRound_formCreate" style="width: 15%!important" />
+                </div>
+            </div>
+
+
+        </div>
+    }
+
+    <br />
+
+    <div class="row summaryContentBlock">
+        <h4 class="tableHeading" style="margin-bottom: -2%">Enquiry results</h4>
+        <!--Search-->
+        <div class="row tableSearch_advancedSearch">
+            <div class="col-md-6 pull-right">
+                <ul class="input-group" id="adv-search">
+
+                    <ul class="nav navbar-nav navbar-right">
+                        <li class="focus">
+                            <input type="text" class="form-control-patientSearch" id="search" onkeyup="myFunction()" placeholder="Search..." />
+                        </li>
+                        <div class="btn-group" role="group">
+                            <button type="submit" class="btn btn-search" style="height: 29px"><span class="glyphicon glyphicon-search" aria-hidden="true" title="Search"></span></button>
+                        </div>
+                    </ul>
+                </ul>
+            </div>
+        </div>
+
+        <!--excelExport-->
+        <!--HCare-680-->
+        @using (Html.BeginForm("ExportQueriesToExcel", "PatientManagement", FormMethod.Post))
+        {
+            if (Request.Form["queryType"] != null)
+            {
+                if (Request.Form["queryType"].ToString() != null)
+                {
+                    @Html.Hidden("queryType", Request.Form["queryType"].ToString())
+                }
+                if (Request.Form["membershipno"].ToString() != null)
+                {
+                    @Html.Hidden("membershipno", Request.Form["membershipno"].ToString())
+                }
+                if (Request.Form["medicalAid"].ToString() != null)
+                {
+                    @Html.Hidden("medicalAid", Request.Form["medicalAid"].ToString())
+                }
+                if (Request.Form["queryPriority"].ToString() != null)
+                {
+                    @Html.Hidden("queryPriority", Request.Form["queryPriority"].ToString())
+                }
+                if (Request.Form["memberStatus"].ToString() != null)
+                {
+                    @Html.Hidden("memberStatus", Request.Form["memberStatus"].ToString())
+                }
+                if (Request.Form["queryStatus"].ToString() != null)
+                {
+                    @Html.Hidden("queryStatus", Request.Form["queryStatus"].ToString())
+                }
+            }
+            <div class="form-group advancedSearchExcel">
+                <input type="image" src="~/Content/Images/memberProfile/patientProfile/excel.png" title="Export" alt="Submit" style="width: 100%">
+            </div>
+        }
+
+        <div style="margin-bottom: 2%"></div>
+        <br />
+        <table class="table riskRatingTable sortable" id="table">
+            <thead>
+                <tr>
+                    <th style="width: 20px"></th>
+                    <th onclick="sortTable(0)" style="width: 8%">
+                        @Html.DisplayName("Scheme") <i class="fa fa-fw fa-sort"></i>
+                    </th>
+                    <th onclick="sortTable(1)" style="width: 7%">
+                        @Html.DisplayName("Member #") <i class="fa fa-fw fa-sort"></i>
+                    </th>
+                    <th onclick="sortTable(2)" style="width: 5%">
+                        @Html.DisplayName("Dep") <i class="fa fa-fw fa-sort"></i>
+                    </th>
+                    <th onclick="sortTable(3)" style="width: 8%">
+                        @Html.DisplayName("Reference #") <i class="fa fa-fw fa-sort"></i>
+                    </th>
+                    <th onclick="sortTable(4)">
+                        @Html.DisplayName("Patient") <i class="fa fa-fw fa-sort"></i>
+                    </th>
+                    <th onclick="sortTable(5)">
+                        @Html.DisplayName("Query type") <i class="fa fa-fw fa-sort"></i>
+                    </th>
+                    <th onclick="sortTable(7)" style="width: 10%; text-align: center!important">
+                        @Html.DisplayName("Created")
+                    </th>
+                    <th onclick="sortTable(9)" style="width: 7%">
+                        @Html.DisplayName("Priority") <i class="fa fa-fw fa-sort"></i>
+                    </th>
+                    <th onclick="sortTable(10)" style="width: 11%">
+                        @Html.DisplayName("Management status") <i class="fa fa-fw fa-sort"></i>
+                    </th>
+                    <th onclick="sortTable(11)" style="width: 8%">
+                        @Html.DisplayName("Age") <i class="fa fa-fw fa-sort"></i>
+                    </th>
+                    <th onclick="sortTable(12)" style="width: 8%; text-align: center!important">
+                        @Html.DisplayName("Query status") <i class="fa fa-fw fa-sort"></i>
+                    </th>
+
+                    <th style="text-align: center!important">
+                        Action
+                    </th>
+                </tr>
+            </thead>
+            @if (Model != null)
+            {
+                foreach (var item in Model)
+                {
+                    <tbody>
+                        <tr>
+                            <td class="indexStatus_Active">
+                                @if (item.EnquiryStatus.ToString() == "Follow up")
+                                {
+                                    <span class="followUpStatus" title="follow up">
+                                    </span>
+                                }
+                                else if (item.EnquiryStatus.ToString() == "Closed")
+                                {
+                                    <span class="ClosedStatus" title="closed">
+                                    </span>
+
+                                }
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.medicalAid)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.membershipNo)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.dependantCode)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.queryReference)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.memberName)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.queryDescription)
+                            </td>
+                            <td>
+                                <span class="avatar-createdby" title="@Html.DisplayFor(modelItem => item.createdBy)" style="color: gray!important; font-size: 11px; text-align: center!important">@Html.DisplayFor(modelItem => item.userInitial)</span> @Html.DisplayFor(modelItem => item.createdDate)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.queryPriority)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.memberStatus)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Time)
+                            </td>
+                            <td style="text-align: center!important; width: 100px">
+                                @if (item.EnquiryStatus.ToString() == "Follow up")
+                                {
+                                    <span class="followUp_Badge" title="follow up">follow up</span>
+                                }
+                                else if (item.EnquiryStatus.ToString() == "Closed")
+                                {
+                                    <span class="redBadge" title="closed">closed</span>
+                                }
+                                else
+                                {
+                                    @Html.DisplayFor(modelItem => item.EnquiryStatus)
+                                }
+                            </td>
+
+                            <td class="linkNav" style="text-align: center!important">
+                                @Html.ActionLink("View", "patientDashboard", "Member", new { DependentID = item.dependantId, pro = item.programID }, null)
+                            </td>
+                        </tr>
+                    </tbody>
+                }
+            }
+
+        </table>
+        <div class="fixedBack">
+            <input value="Back" class="btn buttonRound_formBack go_back" style="width: 15%" />
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <script>
+        var $rows = $('#table tr');
+        $('#search').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $rows.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+
+
+        function sortTable(n) {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("table");
+            switching = true;
+            dir = "asc";
+
+            while (switching) {
+                switching = false;
+                rows = table.getElementsByTagName("TR");
+
+                for (i = 1; i < (rows.length - 1); i++) {
+
+                    shouldSwitch = false;
+
+                    x = rows[i].getElementsByTagName("TD")[n];
+                    y = rows[i + 1].getElementsByTagName("TD")[n];
+
+                    if (dir == "asc") {
+                        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                            //if so, mark as a switch and break the loop:
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (dir == "desc") {
+                        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                            //if so, mark as a switch and break the loop:
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+                if (shouldSwitch) {
+                    /*If a switch has been marked, make the switch
+                    and mark that a switch has been done:*/
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                    //Each time a switch is done, increase this count by 1:
+                    switchcount++;
+                } else {
+                    /*If no switching has been done AND the direction is "asc",
+                    set the direction to "desc" and run the while loop again.*/
+                    if (switchcount == 0 && dir == "asc") {
+                        dir = "desc";
+                        switching = true;
+                    }
+                }
+            }
+        }
+
+
+    </script>
+}

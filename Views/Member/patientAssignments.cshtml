@@ -1,0 +1,454 @@
+﻿@model HaloCareCore.Models.AssignmentsView
+@using HaloCareCore.Extensions
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Patient assignments";
+    Layout = "~/Views/Shared/_LayoutMember.cshtml";
+}
+<comment>
+    <!--
+        19 February 2019 -- HCare-660 (Nuutste assignment moet bo le)
+        Added OrderByDescending(x=>x.createdDate) to the Active assignments tab. Edited MemberRepository.cs => GetActivePatientAssignments Query - BM
+
+        01 March 2019 -- HCare-660 (Nuutste assignment moet bo le)
+        Added OrderByDescending(x=>x.createdDate) to the Closed assignments tab. Edited MemberRepository.cs => GetClosedPatientAssignments Query - BM
+
+        17 April 2019 -- HCare-708 (Submit button - duplicate post entries)
+        Duplicate entries do get entered if you click too quickly on the submit button. I have added JS to disable the submit button after the first click. (Create new assignments)
+
+        06 May 2019 -- HCare-699 (Assignments - Restrictions)
+        Added restriction based on the user role to the Assignment creation. Users that are not Superuser or Advisor are not able to create the assignment called "New Registration - Diabetes Take on".
+        The restriction required a new query to exclude the specific AssignmentItemType and then include the user roles in an IF statement.
+
+        06 May 2019 -- HCare-728 (Questionnaire - Submit button freeze -- Related to HCare-708)
+        A secondary affect of the duplicate click check for HCare-708 resulted in the Submit button for the Questionnaire to freeze should a user neglect to complete a required field. This would push the user back to the section that has not been answered but freeze the button in the process.
+        I have relooked at the code linked to HCare-708 as well as the submit button in the questionnaire which has resolved the issue.
+
+        19 June 2020 -- HCare-950(Patient Assignments)
+        Create a new layout for the updated tabs where the New/Active and Closed tabs are available on the initial view. I have then added a modal to create a new assignment which can be accessed by clicking the “create new” button.
+        Designed the new input for the create new assignment which then creates the assignment as normal.
+
+        -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .select2-container--default .select2-selection--single {
+        display: block !important;
+        max-width: 500px !important;
+        width: 100% !important;
+        max-height: 100px !important;
+        height: 30px !important;
+        margin-top: 5px !important;
+        margin-left: 10px !important;
+        padding: 6px 6px !important;
+        line-height: 1.428571429 !important;
+        color: #003366 !important;
+        border-radius: 0px !important;
+        border: none !important;
+        border-bottom: 1px solid #e8e6e6 !important;
+        background-color: transparent !important;
+        font-family: 'Century Gothic' !important;
+        -webkit-box-shadow: none !important;
+        box-shadow: none !important;
+    }
+
+        .select2-container--default .select2-selection--single:focus {
+            outline: none !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__placeholder {
+            color: white !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow b {
+            margin-top: -0px !important;
+        }
+
+    .field-validation-error:before {
+        font-family: FontAwesome;
+        content: "\f06a\00a0";
+        animation: pulse 2s ease infinite;
+    }
+</style>
+
+<!------------------------------------------------------------------------------------ jQ-dateSort  ----------------------------------------------------------------------------------->
+<javascript>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js"></script>
+    <script src="https://www.jqueryscript.net/demo/jQuery-Plugin-For-Sortable-Bootstrap-Tables-Bootstrap-Sortable/Scripts/bootstrap-sortable.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+</javascript>
+
+<!----------------------------------------------------------------------------- html-top-navigation-panel  ---------------------------------------------------------------------------->
+<nav id="global-nav" class="nav" style="z-index: 41">
+    <div class="pull-left title">
+        <h1 class="site-title_patientProfile">
+            <span><i class="fas fa-bell"></i>&emsp; Patient assignments</span>
+        </h1>
+    </div>
+    <div class="pull-right title">
+        <h1 class="site-title_userID pull-right">
+            <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+        </h1>
+        <h1 class="site-title_userID pull-right">
+            @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+            {
+                <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+            }
+        </h1>
+        <h1 class="site-waffleIcon pull-right">
+            <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+        </h1>
+    </div>
+</nav>
+
+<!-------------------------------------------------------------------------------------- html-body ------------------------------------------------------------------------------------>
+<div class="dashboardContainer zero-padding">
+    <div class="patientDashboard_View">
+        <!-- breadcrumbs -->
+        <ul class="breadcrumbs_patientDashboard">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+            <li><a href="@Url.Action("patientDashboard", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"]})">Patient</a></li>
+            <li><a href="#">@ViewBag.Title</a></li>
+        </ul>
+        <!-- navigation-collection -->
+        <div class="navCollection_patientDashboard">
+            @Html.Partial("_navCollection")
+        </div>
+        <!-- left-navigation-panel -->
+        @Html.Partial("_navSlider", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })
+        <!--profile-information-->
+        <div class="profileBar">
+            @Html.Action("_profileBar_edit", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })
+        </div>
+    </div>
+
+    <div class="profilebar-spacer"></div>
+
+    <div class="patientDashboard_container">
+        <h4 class="summaryHeading">Patient assignments</h4>
+        <hr class="patientProfile_Ruler" />
+        <div class="container-tab">
+            <div class="row">
+                <div class="span12">
+                    <div class="container-tab">
+                        <!------------------------------------------------------------------------------------ tab-navigation ----------------------------------------------------------------------------------->
+                        <ul class="nav nav-pills nav-justified" role="tablist">
+                            <li role="presentation" class="tab-clinical active"><a href="#active_assignments" aria-controls="active_assignments" class="tab-label" data-toggle="tab" id="active_assignments_tab">New/Active assignments</a></li>
+                            <li role="presentation" class="tab-clinical"><a href="#closed_assignments" aria-controls="closed_assignments" class="tab-label" role="tab" data-toggle="tab" id="closed_assignments_tab">Closed assignments</a></li>
+                        </ul>
+                        <!-------------------------------------------------------------------------------------- tab-panels ------------------------------------------------------------------------------------->
+                        <div class="tab-content">
+                            <!---------------------------------------------------------------------------- tab-active-assignments ---------------------------------------------------------------------------->
+                            <div role="tabpanel" class="tab-pane active" id="active_assignments">
+                                <div class="row">
+                                    <br />
+                                    <div class="row">
+                                        <h4 class="subHeading">
+                                            New/Active assignments
+                                            <a class="create-new" href="#assignmentModal" data-toggle="modal" style="font-size: 14px">Create new <span><i class="fa fa-plus-circle" style="font-size: 12px"></i></span></a>
+                                        </h4>
+                                        <hr class="patientProfile_Ruler" />
+                                    </div>
+                                    <div class="clinical-summary">
+                                        <div class="row">
+                                            @if (Model.activeAssignments.Count() != 0)
+                                            {
+                                                <table class="table patient-assignment-table sortable" id="active-assignments">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width: 10%">@Html.DisplayNameFor(model => model.activeAssignments[0].effectiveDate) <i class="fa fa-fw fa-sort"></i></th>
+                                                            <th style="width: 20%">@Html.DisplayNameFor(model => model.activeAssignments[0].assignmentType) <i class="fa fa-fw fa-sort"></i></th>
+                                                            <th style="width: 20%">@Html.DisplayNameFor(model => model.assignmentItemType) <i class="fa fa-fw fa-sort"></i></th>
+                                                            <th style="width: 15%">@Html.DisplayNameFor(model => model.activeAssignments[0].createdBy) <i class="fa fa-fw fa-sort"></i></th>
+                                                            <th style="width: 20%">@Html.DisplayNameFor(model => model.activeAssignments[0].Instruction) <i class="fa fa-fw fa-sort"></i></th>
+                                                            <th style="text-align: center!important; width: 10%">Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    @foreach (var item in Model.activeAssignments)
+                                                    {
+                                                        <tbody>
+                                                            <tr ondblclick="location.href='@Url.Action("AssignmentDetails", "Clinical", new { id = item.assignmentID, pro = Context.Request.Query["pro"] }, null)'">
+                                                                <td data-dateformat="DD-MM-YYYY">@Html.DisplayFor(modelItem => item.effectiveDate)</td>
+                                                                <td>@Html.DisplayFor(modelItem => item.assignmentType)</td>
+                                                                <td>@Html.DisplayFor(modelItem => item.AssignmentItemType)</td>
+                                                                <td>@Html.DisplayFor(modelItem => item.createdBy)</td>
+                                                                <td>@Html.DisplayFor(modelItem => item.Instruction)</td>
+                                                                @*<td style="text-align: center!important; width: 100px">
+                                                                        @if (item.effectiveDate > DateTime.Now)
+                                                                        {
+                                                                            <span class="futureBadge">future</span>
+                                                                        }
+                                                                        else if (item.effectiveDate <= DateTime.Now.AddDays(-2))
+                                                                        {
+                                                                            <span class="redBadge">overdue</span>
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            <span class="newBadge">new</span>
+                                                                        }
+
+                                                                    </td>*@
+                                                                <td class="linkNav" style="text-align: center!important">@Html.ActionLink("View", "AssignmentDetails", "Clinical", new { id = item.assignmentID, pro = Context.Request.Query["pro"] }, null)</td>
+                                                            </tr>
+                                                        </tbody>
+                                                    }
+                                                </table>
+                                            }
+                                            else
+                                            {
+                                                <div style=" margin-right: 15px;">
+                                                    <div class="no-records-assignments">
+                                                        <img src="~/Content/Images/_2020/tables/noRecords.png" />
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <div class="fixed-btn">
+                                                        <a href="#assignmentModal" class="btn assignment-create-button" data-target-color="blue" data-toggle="modal">Create new</a><br />
+                                                        <button class="btn reset-button go_back" type="submit" style="width: 8%">Back</button>
+                                                    </div>
+                                                </div>
+                                            }
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!---------------------------------------------------------------------------- tab-closed-assignments ---------------------------------------------------------------------------->
+                            <div role="tabpanel" class="tab-pane" id="closed_assignments">
+                                <div class="row">
+                                    <br />
+                                    <div class="row">
+                                        <h4 class="subHeading">
+                                            Closed assignments
+                                            <a class="create-new" href="#assignmentModal" data-toggle="modal" style="font-size: 14px">Create new <span><i class="fa fa-plus-circle" style="font-size: 12px"></i></span></a>
+                                        </h4>
+                                        <hr class="patientProfile_Ruler" />
+                                        <div class="clinical-summary">
+                                            <div class="row">
+                                                @if (Model.closedAssignments.Count() != 0)
+                                                {
+                                                    <table class="table patient-assignment-table sortable" id="active-assignments">
+                                                        <thead>
+                                                            <tr>
+                                                                <th style="width: 10%">@Html.DisplayNameFor(model => model.closedAssignments[0].effectiveDate) <i class="fa fa-fw fa-sort"></i></th>
+                                                                <th style="width: 20%">@Html.DisplayNameFor(model => model.closedAssignments[0].assignmentType) <i class="fa fa-fw fa-sort"></i></th>
+                                                                <th style="width: 20%">@Html.DisplayNameFor(model => model.assignmentItemType) <i class="fa fa-fw fa-sort"></i></th>
+                                                                <th style="width: 15%">@Html.DisplayNameFor(model => model.closedAssignments[0].createdBy) <i class="fa fa-fw fa-sort"></i></th>
+                                                                <th style="width: 20%">@Html.DisplayNameFor(model => model.closedAssignments[0].Instruction) <i class="fa fa-fw fa-sort"></i></th>
+                                                                <th style="text-align: center!important; width: 10%">Action</th>
+                                                            </tr>
+                                                        </thead>
+                                                        @foreach (var item in Model.closedAssignments)
+                                                        {
+                                                            <tbody>
+                                                                <tr ondblclick="location.href='@Url.Action("AssignmentDetails", "Clinical", new { id = item.assignmentID, pro = Context.Request.Query["pro"] }, null)'">
+                                                                    <td data-dateformat="DD-MM-YYYY">@Html.DisplayFor(modelItem => item.effectiveDate)</td>
+                                                                    <td>@Html.DisplayFor(modelItem => item.assignmentType)</td>
+                                                                    <td>@Html.DisplayFor(modelItem => item.AssignmentItemType)</td>
+                                                                    <td>@Html.DisplayFor(modelItem => item.createdBy)</td>
+                                                                    <td>@Html.DisplayFor(modelItem => item.Instruction)</td>
+                                                                    <td class="linkNav" style="text-align: center!important">@Html.ActionLink("View", "AssignmentDetails", "Clinical", new { id = item.assignmentID, pro = Context.Request.Query["pro"] }, null)</td>
+                                                                </tr>
+                                                            </tbody>
+                                                        }
+
+                                                    </table>
+                                                }
+                                                else
+                                                {
+                                                    <div style=" margin-right: 15px;margin-top: 15px">
+                                                        <div class="no-records-assignments">
+                                                            <img src="~/Content/Images/_2020/tables/noRecords.png" />
+                                                        </div>
+                                                        <h4 class="no-results-assignments">No results found</h4>
+
+                                                    </div>
+                                                }
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!---------------------------------------------------------------------------------- assignment-modal ---------------------------------------------------------------------------------->
+<div class="modal fade" id="assignmentModal" role="dialog" aria-labelledby="assignmentModal" aria-hidden="true">
+    @using (Html.BeginForm("AddAssignment", "Member", FormMethod.Post, new { id = "createAssignment" }))
+    {
+        <div class="modal-content-assignment">
+            <div class="modal-dialog-assignment">
+                <div class="modal-header-assignment">
+                    <div class="col-md-4"><h5 class="modal-title" id="modal-email"><img src="~/Content/Images/_2020/icons/create-new-assignment.png" class="logo-modal" /></h5></div>
+                    <div class="col-md-4 div-center"><p class="div-header">New Assignment</p></div>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                </div>
+                <div class="modal-body" style="margin-left: -20px; margin-top: 10px;">
+                    <div class="form-horizontal">
+
+                        @Html.AntiForgeryToken()
+                        @Html.HiddenFor(model => model.newAssignment.dependentID)
+                        @Html.Hidden("pro", (object)ViewBag.programId)
+                        <div class="form-horizontal createForm">
+
+                            <div class="form-group assignment-type">
+                                @Html.Label(null,"Assignment type", htmlAttributes: new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.DropDownList("AssignmentType", null, "Select", new { @class = "form-control-assignment-dropdown", @required = "required" }) <br />
+                                    @Html.ValidationMessage("AssignmentType", "", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 3%", @id = "type-error" })
+                                </div>
+                            </div>
+                            <div class="form-group assignment-item">
+                                <div class="col-md-12">
+                                    @if (User.Identity.IsAuthenticated)
+                                    {
+                                        if (User.HasRole("6. Global user") || (User.HasRole("5. Super user")) || (User.HasRole("4. Advisor")))
+                                        {
+                                            <div class="form-group">
+                                                @Html.Label(null,"Assignment item", htmlAttributes: new { @class = "control-label col-md-4" })
+                                                <div class="col-md-8">
+                                                    @Html.DropDownList("AssignmentItemType", null, "Select", new { @class = "form-control-assignment-dropdown", @required = "required" }) <br />
+                                                    @Html.ValidationMessage("AssignmentItemType", "", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 3%", @id = "item-error" })
+                                                </div>
+                                            </div>
+                                        }
+                                        else if (User.HasRole("1. Consultant") || (User.HasRole("2. Case manager")) || (User.HasRole("3. Specialist")))
+                                        {
+                                            <div class="form-group">
+                                                @Html.Label(null,"Assignment item", htmlAttributes: new { @class = "control-label col-md-4" })
+                                                <div class="col-md-8">
+                                                    @Html.DropDownList("AssignmentItemType_agent", null, "Select", new { @class = "form-control-assignment-dropdown", @required = "required" }) <br />
+                                                    @Html.ValidationMessage("AssignmentItemType_agent", "", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 3%", @id = "item-error" })
+                                                </div>
+                                            </div>
+                                        }
+                                    }
+                                </div>
+                            </div>
+                            <div class="form-group assignment-instruction">
+                                @Html.Label(null,"Instruction", htmlAttributes: new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.TextAreaFor(model => model.newAssignment.Instruction, htmlAttributes: new { @class = "form-control-assignment-textarea" })
+                                    @Html.ValidationMessageFor(model => model.newAssignment.Instruction, "", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 3%" })
+                                </div>
+                            </div>
+                            <div class="form-group assignment-effective-date">
+                                @Html.Label(null,"Effective date", htmlAttributes: new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    <input class="text-box single-line input-validation-error form-control-assignment-dropdown" data-val="true" data-val-date="The field must be a date." id="newAssignment.effectiveDate" name="newAssignment.effectiveDate" type="date" value="@DateTime.Now.ToString("yyyy-MM-dd")" min="@DateTime.Now.ToString("1900-01-01")" max="" aria-required="true" aria-describedby="DOB-error" aria-invalid="true" placeholder="" required>
+                                    @Html.ValidationMessage("newAssignment.effectiveDate", "", new { @class = "text-danger", @style = "font-size: 90%; margin-left: 3%" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer-assignment">
+                    <input id="cancel-assignment" type="button" value="Cancel" class="btn modal-button" style="width: 15%" data-dismiss="modal" />
+                    <input id="submit-assignment" type="submit" value="Submit" class="btn modal-button" style="width: 15%" />
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+<script src="js/jquery.tablesorter.min.js"></script>
+
+<script src="~/bundles/jqueryval"></script>
+@section scripts{
+
+    <!-- general -->
+    <script>
+        //left-navigation-slider
+        $("#menu-toggle").click(function (e) {
+            e.preventDefault();
+            $("#wrapper").toggleClass("active");
+        });
+        //waffle-navigation-script-open
+        $("#patientMenu-toggle").click(function (e) {
+            e.preventDefault();
+            $("#patientWrapper").toggleClass("active");
+        });
+        //waffle-navigation-script-close
+        $("#exit-toggle").click(function (e) {
+            e.preventDefault();
+            $("#patientWrapper").toggleClass("active");
+        });
+        //special-note
+        $("#alert-toggle").click(function (e) {
+            e.preventDefault();
+            $("#alertWrapper").toggleClass("active");
+        });
+        //program-popup
+        $("#program-toggle").click(function (e) {
+            e.preventDefault();
+            $("#programWrapper").toggleClass("active");
+        });
+        //go-back
+        $(function () {
+            $('.go_back').click(function (e) {
+                e.preventDefault();
+                history.go(-1);
+            });
+        });
+    </script>
+    <!-- select-dropdowns -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function () { $("#AssignmentType").select2({ multiple: false }); });
+        $(document).ready(function () { $("#AssignmentItemType").select2({ multiple: false }); });
+        $(document).ready(function () { $("#AssignmentItemType_agent").select2({ multiple: false }); });
+    </script>
+    <!-- disable submit on click - hcare-728 -->
+    <script type="text/javascript">
+        $('form').submit(function () {
+            var button = $('#submit-assignment');
+            var oldValue = button.value;
+            var isDisabled = true;
+
+            $(this).find('#submit-assignment').prop('disabled', true);
+
+            setTimeout(function () {
+                button.value = oldValue;
+                button.attr('disabled', !isDisabled);
+            }, 4000)
+        });
+
+    </script>
+    <!-- validation-errors -->
+    <script>
+        $('#AssignmentType').change(function () {
+            if ($(this).val() != 'Select') {
+                $("#type-error").hide();
+            }
+        });
+
+        $('#AssignmentItemType').change(function () {
+            if ($(this).val() != 'Select') {
+                $("#item-error").hide();
+            }
+        });
+
+        $('#AssignmentItemType_agent').change(function () {
+            if ($(this).val() != 'Select') {
+                $("#item-error").hide();
+            }
+        });
+
+    </script>
+
+}

@@ -1,0 +1,251 @@
+﻿@model HaloCareCore.Models.Communications.Queries
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Enquiries";
+    Layout = "~/Views/Shared/_LayoutMember.cshtml";
+}
+
+<comment>
+    <!--
+        17 August 2019 -- HCare-1147 (Enquiry - Source must be a mandatory selection)
+    -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .field-validation-error:before {
+        font-family: FontAwesome;
+        content: "\f06a\00a0";
+        animation: pulse 2s ease infinite;
+    }
+</style>
+
+
+<!--pageHeader-->
+<nav id="global-nav" class="nav">
+    <div class="pull-left title">
+        <h1 class="site-title_patientProfile">
+            <span><i class="fas fa-question-circle"></i></span>&emsp; Enquiries
+        </h1>
+    </div>
+    <div class="pull-right title">
+        <h1 class="site-title_userID pull-right">
+            <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+        </h1>
+        <h1 class="site-title_userID pull-right">
+            @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+            {
+                <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+            }
+        </h1>
+        <h1 class="site-waffleIcon pull-right">
+            <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+        </h1>
+    </div>
+</nav>
+
+<div class="dashboardContainer zero-padding">
+    <div class="patientDashboard_View">
+        <!--breadCrumbs-->
+        <ul class="breadcrumbs_patientDashboard">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+            <li><a href="@Url.Action("patientDashboard", "Member", new {DependentID = Context.Request.Query["DependentID"] })">Patient</a></li>
+            <li><a href="#">Add enquiry</a></li>
+        </ul>
+        <!--Left navSlider -->
+        @Html.Partial("_navSlider", new { DependentID = Context.Request.Query["DependentID"] })
+        <!--navCollection-->
+        <div class="navCollection_patientDashboard">
+            @Html.Partial("_navCollection")
+        </div>
+        <!--profileInformation-->
+        <div class="profileBar">
+            @Html.Action("_profileBar_edit", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })
+        </div>
+    </div>
+
+    <div class="profilebar-spacer"></div>
+
+    <div class="patientDashboard_container">
+        <h4 class="tableHeading">Add enquiry</h4>
+        <hr class="fancyruler">
+
+        <div style="margin-left: 5%">
+            @using (Html.BeginForm("Enquiries", "Member", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(model => model.dependentID)
+                @Html.Hidden("pro", Context.Request.Query["pro"])
+                <div class="form-horizontal editForm">
+
+                    <div class="row">
+                        <div class="row contentBlock_Text">Enquiry Source <sup style="font-size: 8px"><i class="fas fa-asterisk pulser"></i></sup></div>
+                        <div class="radioButtons">
+                            <label class="radio-inline">
+                                <input type="radio" name="radEnquiry" id="radEnquiryEmail" value="email" /> Email
+                            </label>
+                            <label class="radio-inline">
+                                <input type="radio" name="radEnquiry" id="radEnquiryText" value="text" /> Text
+                            </label>
+                            <label class="radio-inline">
+                                <input type="radio" name="radEnquiry" id="radEnquiryTel" value="tel" /> Telephone
+                            </label>
+                            <br />
+                            <span>@Html.ValidationMessage("radEnquiry", "", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 2%" })</span>
+                        </div>
+                        <br />
+                        <div class="row contentBlock_Text">Enquiry By</div>
+                        <div class="form-group">
+                            <div class="col-md-6" style="margin-left: 0">
+                                @Html.DropDownList("EnquiryType", null, "**Select**", htmlAttributes: new { @class = "infoBox_Enrollment", @onchange = "FillType()", @required = "required" })
+                                <span>@Html.ValidationMessage("EnquiryType", "", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 2%" })</span>
+                            </div>
+                        </div>
+                        <div class="row contentBlock_Text">Link Assignment</div>
+                        <div class="form-group">
+                            <div class="col-md-6" style="margin-left: 0">
+                                @Html.DropDownList("Assignments", null, "**Select**", htmlAttributes: new { @class = "infoBox_Enrollment", @onchange = "FillType()" })
+                                <span>@Html.ValidationMessage("Assignments", "", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 2%" })</span>
+                            </div>
+                        </div>
+
+                        <div class="row contentBlock_Text">Enquiry Type</div>
+                        <div class="form-group">
+                            <div class="col-md-6">
+                                @Html.DropDownList("QueryT", new SelectList(Enumerable.Empty<SelectListItem>(), "enquiryType", "enquiryName"), "**Select**", htmlAttributes: new { @class = "infoBox_Enrollment" })
+                                <span>@Html.ValidationMessage("QueryT", "", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 2%" })</span>
+                            </div>
+                        </div>
+
+                        <div class="row contentBlock_Text">Priority</div>
+                        <div class="form-group">
+                            <div class="col-md-6">
+                                @Html.DropDownList("Priority", null, "**Select**", htmlAttributes: new { @class = "infoBox_Enrollment" })
+                            </div>
+                            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                        </div>
+
+                        <div class="row contentBlock_Text">Owner</div>
+                        <div class="form-group">
+                            <div class="col-md-6">
+                                @Html.DropDownList("owner", null, "**Select**", htmlAttributes: new { @class = "infoBox_Enrollment" })
+                            </div>
+                            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                        </div>
+
+                        <div class="row contentBlock_Text">
+                            Message <sup style="font-size: 8px"><i class="fas fa-asterisk pulser"></i></sup>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-6" style="margin-left:-0.5%">
+                                @Html.TextAreaFor(model => model.query, htmlAttributes: new { @class = "contentBlock_messageBox" })
+                                <span>@Html.ValidationMessageFor(model => model.query, "", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 4%" })</span>
+                            </div>
+                        </div>
+                        <br />
+                        <div class="form-group enquiryCheck">
+                            <div class="col-md-1 contentBlock_Text">Follow up </div>
+                            <div class="col-md-6" style="margin-top: -0.7%!important; margin-left: -2%!important">
+                                @Html.CheckBoxFor(model => model.queryStatus)
+                            </div>
+                            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                        </div>
+                        <br />
+                        <div class="row contentBlock_Text">
+                            Follow up Date
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-6">
+                                @Html.EditorFor(model => model.followUpDate, new { htmlAttributes = new { @class = "infoBox_Enrollment_datepicker", @id = "followUpDate" } })
+                            </div>
+                            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                        </div>
+                        <br />
+                        <br />
+                        <br />
+                        <br />
+                        <div class="form-group" style="margin-left:39%">
+                            <input value="Back" class="btn buttonRound_formBack go_back" style="width: 15%!important" />
+                            <input type="submit" value="Submit" class="btn buttonRound_formCreate" style="width: 15%" />
+                        </div>
+                    </div>
+                </div>
+
+            }
+        </div>
+    </div>
+</div>
+
+
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script src="~/bundles/jqueryval"></script>
+
+<!-- Search -->
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <script>
+        $('input[name ="radEnquiry"]').prop('required', true);
+    </script>
+    <script>
+        $(document).ready(function () {
+            $("#EnquiryType").change(function () {
+                var radioValue = $("input[name='radEnquiry']:checked").val();
+                if (radioValue) { }
+                else {
+                    alert('Please note that the Enquiry source is required!');
+                }
+            });
+        });
+    </script>
+    <script>
+        function FillType() {
+            var stateId = $('#EnquiryType').val();
+            $.ajax({
+                url: '/Member/FillType',
+                type: "GET",
+                dataType: "JSON",
+                data: { queryType: stateId },
+                success: function (options) {
+                    $("#QueryT").html(""); // clear before appending new list
+                    $.each(options, function (i, option) {
+                        $("#QueryT").append(
+                            $('<option></option>').val(option.enquiryType).html(option.enquiryName));
+                    });
+                }
+            });
+        }
+
+        //AutoDate_FollowUp
+        $(document).ready(function () {
+            var date = new Date();
+
+            var day = date.getDate();
+            var month = date.getMonth() + 1;
+            var year = date.getFullYear();
+
+            if (month < 10) month = "0" + month;
+            if (day < 10) day = "0" + day;
+
+            var today = year + "-" + month + "-" + day;
+            $("#followUpDate").attr("value", today);
+        });
+    </script>
+    <script>
+
+        $(function () {
+            //var username = @HttpContextAccessor.HttpContext.Session.GetString("fullName").ToString();
+
+            $('[name=owner] option').filter(function () {
+                return ($(this).text() == '@HttpContextAccessor.HttpContext.Session.GetString("fullName").ToString()' );
+            }).prop('selected', true);
+        })
+
+    </script>
+
+}

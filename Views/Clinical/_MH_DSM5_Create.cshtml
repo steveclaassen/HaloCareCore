@@ -1,0 +1,633 @@
+﻿@model HaloCareCore.Models.Questionnaire.MH_DSM5Response
+@{
+    ViewBag.Title = "_MH_DSM5_Create";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .field-validation-error:before {
+        font-family: FontAwesome;
+        content: "\f06a\00a0";
+    }
+
+    .overlay {
+        height: 100%;
+        width: 0;
+        position: fixed;
+        z-index: 501;
+        top: 0;
+        left: 0;
+        background-color: rgb(0,0,0);
+        background-color: rgba(0,0,0, 0.5);
+        overflow-x: hidden;
+    }
+
+    .warning {
+        display: none;
+        background: #fff;
+        color: #FFFFFF;
+        border: none;
+        border-radius: 10px;
+        position: fixed;
+        width: 500px;
+        left: 50%;
+        top: 12%;
+        margin-left: -258px;
+        padding: 0px;
+        box-sizing: border-box;
+        z-index: 502;
+    }
+
+    .assignment-header {
+        background: #E74D4F;
+        text-align: center;
+        padding: 10px 20px 10px 10px;
+        margin-top: 0px;
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;
+        border: 5px solid #E74D4F;
+    }
+
+    .assignment-logo {
+        color: white;
+        text-align: center;
+        font-size: 50px;
+    }
+
+    .assignment-heading {
+        padding: 10px;
+        font-family: Comfortaa;
+        color: rgb(0,0,0);
+        text-align: center;
+        font-size: 25px;
+        font-weight: bold;
+    }
+
+    .assignment-message {
+        color: rgb(0,0,0);
+        text-align: center;
+        padding: 10px 10px 10px 10px;
+    }
+
+    .error-notice {
+        margin: 5px 5px; /* Making sure to keep some distance from all side */
+    }
+
+    .error {
+        width: 100%;
+        margin: 0 auto;
+        background-color: #FFFFFF;
+        padding: 10px;
+        border: 1px solid #eee;
+        border-left-width: 5px;
+        border-radius: 3px;
+        margin: 0 auto;
+        font-family: 'Open Sans', sans-serif;
+        font-size: 12px;
+    }
+
+    .danger {
+        border-left-color: #d9534f; /* Left side border color */
+        background-color: rgba(217, 83, 79, 0.1); /* Same color as the left border with reduced alpha to 0.1 */
+    }
+
+        .danger span {
+            color: #d9534f;
+            text-align: center;
+        }
+</style>
+<javascript>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+</javascript>
+<div class="dashboardContainer zero-padding">
+    <div id="myNav" class="overlay"></div>
+
+    @*<div class="patientDashboard_View">
+            <ul class="breadcrumbs_patientDashboard">
+                <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+                <li><a href="@Url.Action("Index", "Home", new { })">Home</a></li>
+                <li><a href="@Url.Action("patientClinical", "Member", new { DependentID = Context.Request.Query["DependentID"] })">Patient</a></li>
+                <li><a href="#">@ViewBag.Title</a></li>
+            </ul>
+
+            @Html.Partial("_navSlider_blank", new { DependentID = Context.Request.Query["DependentID"] })
+
+            <div class="navCollection_patientDashboard">
+                @Html.Partial("_navCollection")
+            </div>
+
+            <div class="profileBar">
+                @Html.Action("_profileBar_edit", "Member", new { DependentID = Model.DependantID })
+            </div>
+        </div>
+        <br />
+        <div class="profilebar-spacer"></div>*@
+
+    <div id="general-pregnant-panel" class="patientDashboard_container">
+        <div class="col-md-12 row">
+            <div class="heading-spacer"></div>
+        </div>
+
+        @using (Html.BeginForm("MH_DSM5_Create", "Member", FormMethod.Post, new { id = "dsm5c-questionnaire" }))
+        {
+            <div class="hidden-fields">
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                @Html.HiddenFor(model => model.DependantID)
+                @Html.Hidden("pro", (object)ViewBag.program)
+                @Html.HiddenFor(model => model.AssignmentID)
+                @Html.HiddenFor(model => model.TaskID)
+            </div>
+            <div class="form-horizontal">
+                <div class="col-md-12">
+                    <div class="error-notice hidden">
+                        <div class="error danger"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; Substance abuse!</span></div>
+                    </div>
+                </div>
+                <table id="dsm5-table" class="table mental-health-table">
+                    <tr>
+                        <td style="width: 5%; text-align:center!important">Q1</td>
+                        <td style="width: 80%">Are you currently using drugs or abusing alcohol?</td>
+                        <td style="width: 2.5%">
+                            <div class="col-md-4 disclaimer-checkbox">
+                                @Html.CheckBox("abuse-yes") <label for="abuse-yes" title="yes"><span id="abuse-yes" class="grey"><i class="fas fa-circle question-button"></i></span></label>
+                            </div>
+                        </td>
+                        <td style="width: 2.5%">
+                            <div class="col-md-4 disclaimer-checkbox">
+                                @Html.CheckBox("abuse-no") <label for="abuse-no" title="no"><span id="abuse-no" class="grey"><i class="fas fa-circle question-button"></i></span></label>
+                            </div>
+                        </td>
+                        <td style="width: 2%">
+                            @Html.ValidationMessage("abuse-yes", " ", new { @class = "text-danger", @style = "font-size: 80%;margin-left: 2%", @id = "abuse-yes-error" })
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 5%; text-align:center!important">Q2</td>
+                        <td style="width: 80%">Feel depressed/Had a depressed mood most of the day, nearly every day.</td>
+                        <td style="width: 2.5%">
+                            <div class="col-md-4 disclaimer-checkbox">
+                                @Html.CheckBox("depression-yes") <label for="depression-yes" title="yes"><span id="depression-yes" class="grey"><i class="fas fa-circle question-button"></i></span></label>
+                            </div>
+                        </td>
+                        <td style="width: 2.5%">
+                            <div class="col-md-4 disclaimer-checkbox">
+                                @Html.CheckBox("depression-no") <label for="depression-no" title="no"><span id="depression-no" class="grey"><i class="fas fa-circle question-button"></i></span></label>
+                            </div>
+                        </td>
+                        <td style="width: 2%">
+                            @Html.ValidationMessage("depression-yes", " ", new { @class = "text-danger", @style = "font-size: 80%;margin-left: 2%", @id = "depression-yes-error" })
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 5%; text-align:center!important">Q3</td>
+                        <td style="width: 80%">Markedly diminished interest or pleasure in all, or almost all, activities most of the day, nearly every day.</td>
+                        <td style="width: 2.5%">
+                            <div class="col-md-4 disclaimer-checkbox">
+                                @Html.CheckBox("interest-yes") <label for="interest-yes" title="yes"><span id="interest-yes" class="grey"><i class="fas fa-circle question-button"></i></span></label>
+                            </div>
+                        </td>
+                        <td style="width: 2.5%">
+                            <div class="col-md-4 disclaimer-checkbox">
+                                @Html.CheckBox("interest-no") <label for="interest-no" title="no"><span id="interest-no" class="grey"><i class="fas fa-circle question-button"></i></span></label>
+                            </div>
+                        </td>
+                        <td style="width: 2%">
+                            @Html.ValidationMessage("interest-yes", " ", new { @class = "text-danger", @style = "font-size: 80%;margin-left: 2%", @id = "interest-yes-error" })
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 5%; text-align:center!important">Q4</td>
+                        <td style="width: 80%">Have significant weight loss when not dieting or weight gain; or decrease or increase in appetite nearly every day.</td>
+                        <td style="width: 2.5%">
+                            <div class="col-md-4 disclaimer-checkbox">
+                                @Html.CheckBox("weightloss-yes") <label for="weightloss-yes" title="yes"><span id="weightloss-yes" class="grey"><i class="fas fa-circle question-button"></i></span></label>
+                            </div>
+                        </td>
+                        <td style="width: 2.5%">
+                            <div class="col-md-4 disclaimer-checkbox">
+                                @Html.CheckBox("weightloss-no") <label for="weightloss-no" title="no"><span id="weightloss-no" class="grey"><i class="fas fa-circle question-button"></i></span></label>
+                            </div>
+                        </td>
+                        <td style="width: 2%">
+                            @Html.ValidationMessage("weightloss-yes", " ", new { @class = "text-danger", @style = "font-size: 80%;margin-left: 2%", @id = "weightloss-yes-error" })
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 5%; text-align:center!important">Q5</td>
+                        <td style="width: 80%">A slowing down of thought and a reduction of physical movement (observable by others, not merely subjective feelings of restlessness or being slowed down).</td>
+                        <td style="width: 2.5%">
+                            <div class="col-md-4 disclaimer-checkbox">
+                                @Html.CheckBox("psychomotor-yes") <label for="psychomotor-yes" title="yes"><span id="psychomotor-yes" class="grey"><i class="fas fa-circle question-button"></i></span></label>
+                            </div>
+                        </td>
+                        <td style="width: 2.5%">
+                            <div class="col-md-4 disclaimer-checkbox">
+                                @Html.CheckBox("psychomotor-no") <label for="psychomotor-no" title="no"><span id="psychomotor-no" class="grey"><i class="fas fa-circle question-button"></i></span></label>
+                            </div>
+                        </td>
+                        <td style="width: 2%">
+                            @Html.ValidationMessage("psychomotor-yes", " ", new { @class = "text-danger", @style = "font-size: 80%;margin-left: 2%", @id = "psychomotor-yes-error" })
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 5%; text-align:center!important">Q6</td>
+                        <td style="width: 80%">Feel tired, fatigue or loss of energy nearly every day; insomnia or hypersomnia nearly every day.</td>
+                        <td style="width: 2.5%">
+                            <div class="col-md-4 disclaimer-checkbox">
+                                @Html.CheckBox("tiredness-yes") <label for="tiredness-yes" title="yes"><span id="tiredness-yes" class="grey"><i class="fas fa-circle question-button"></i></span></label>
+                            </div>
+                        </td>
+                        <td style="width: 2.5%">
+                            <div class="col-md-4 disclaimer-checkbox">
+                                @Html.CheckBox("tiredness-no") <label for="tiredness-no" title="no"><span id="tiredness-no" class="grey"><i class="fas fa-circle question-button"></i></span></label>
+                            </div>
+                        </td>
+                        <td style="width: 2%">
+                            @Html.ValidationMessage("tiredness-yes", " ", new { @class = "text-danger", @style = "font-size: 80%;margin-left: 2%", @id = "tiredness-yes-error" })
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 5%; text-align:center!important">Q7</td>
+                        <td style="width: 80%">Feelings of worthlessness or excessive or inappropriate guilt nearly every day.</td>
+                        <td style="width: 2.5%">
+                            <div class="col-md-4 disclaimer-checkbox">
+                                @Html.CheckBox("selfworth-yes") <label for="selfworth-yes" title="yes"><span id="selfworth-yes" class="grey"><i class="fas fa-circle question-button"></i></span></label>
+                            </div>
+                        </td>
+                        <td style="width: 2.5%">
+                            <div class="col-md-4 disclaimer-checkbox">
+                                @Html.CheckBox("selfworth-no") <label for="selfworth-no" title="no"><span id="selfworth-no" class="grey"><i class="fas fa-circle question-button"></i></span></label>
+                            </div>
+                        </td>
+                        <td style="width: 2%">
+                            @Html.ValidationMessage("selfworth-yes", " ", new { @class = "text-danger", @style = "font-size: 80%;margin-left: 2%", @id = "selfworth-yes-error" })
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 5%; text-align:center!important">Q8</td>
+                        <td style="width: 80%">Diminished ability to think or concentrate, or indecisiveness, nearly every day.</td>
+                        <td style="width: 2.5%">
+                            <div class="col-md-4 disclaimer-checkbox">
+                                @Html.CheckBox("concentration-yes") <label for="concentration-yes" title="yes"><span id="concentration-yes" class="grey"><i class="fas fa-circle question-button"></i></span></label>
+                            </div>
+                        </td>
+                        <td style="width: 2.5%">
+                            <div class="col-md-4 disclaimer-checkbox">
+                                @Html.CheckBox("concentration-no") <label for="concentration-no" title="no"><span id="concentration-no" class="grey"><i class="fas fa-circle question-button"></i></span></label>
+                            </div>
+                        </td>
+                        <td style="width: 2%">
+                            @Html.ValidationMessage("concentration-yes", " ", new { @class = "text-danger", @style = "font-size: 80%;margin-left: 2%", @id = "concentration-yes-error" })
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 5%; text-align:center!important">Q9</td>
+                        <td style="width: 80%">Recurrent thoughts of death, recurrent suicidal ideation without a specific plan, or a suicide attempt or a specific plan for committing suicide.</td>
+                        <td style="width: 2.5%">
+                            <div class="col-md-4 disclaimer-checkbox">
+                                @Html.CheckBox("suicidal-yes") <label for="suicidal-yes" title="yes"><span id="suicidal-yes" class="grey"><i class="fas fa-circle question-button"></i></span></label>
+                            </div>
+                        </td>
+                        <td style="width: 2.5%">
+                            <div class="col-md-4 disclaimer-checkbox">
+                                @Html.CheckBox("suicidal-no") <label for="suicidal-no" title="no"><span id="suicidal-no" class="grey"><i class="fas fa-circle question-button"></i></span></label>
+                            </div>
+                        </td>
+                        <td style="width: 2%">
+                            @Html.ValidationMessage("suicidal-yes", " ", new { @class = "text-danger", @style = "font-size: 80%;margin-left: 2%", @id = "suicidal-yes-error" })
+                        </td>
+                    </tr>
+                </table>
+
+                <div class="form-group">
+                    <div style="text-align: center!important">
+                        <input id="submit" type="submit" value="Save" class="btn create-button" onclick="storageKey()" style="width: 15%" /><br />
+                        <input id="back" value="Back" class="btn reset-button go_back" onclick="backKey()" style="width: 15%!important" />
+                    </div>
+                </div>
+            </div>
+        }
+
+        <div class="warning" id="abuse-warning">
+            <button type="button" class="warning-close yes" id="abuse-warning-close"><span aria-hidden="true">&times;</span></button>
+            <div class="assignment-header">
+                <div class="assignment-logo"><i class="fas fa-exclamation-triangle"></i></div>
+            </div>
+            <div class="assignment-heading">WARNING!</div>
+            <div class="assignment-message"><b>Substance abuse</b> may influence the symptoms that the member may experience and thus the answer should take this into consideration.</div>
+            <div class="assignment-footer" style="text-align:center!important"><input id="submit" value="OK" class="btn alert-button yes" /></div>
+        </div>
+        <div class="warning" id="assignment-warning">
+            <button type="button" class="warning-close yes" id="assignment-warning-close"><span aria-hidden="true">&times;</span></button>
+            <div class="assignment-header">
+                <div class="assignment-logo"><i class="fas fa-exclamation-triangle"></i></div>
+            </div>
+            <div class="assignment-heading">ALERT!</div>
+            <div class="assignment-message"><b>Suicide alert: </b>Doctor referral assignment will be required!</div>
+            <div class="assignment-footer" style="text-align:center!important"><input id="submit" value="OK" class="btn alert-button yes" /></div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/bundles/jqueryval"></script>
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <script>
+        function openNav() {
+            document.getElementById("myNav").style.width = "100%";
+        }
+
+        function closeNav() {
+            document.getElementById("myNav").style.width = "0%";
+        }
+    </script>
+    <script>
+        $('input[type=checkbox]').prop("required", true);
+    </script>
+    <script>
+        $('#abuse-yes').change(function () {
+            if (this.checked)
+                functionAlert(),
+                    openNav(),
+                    $('#abuse-yes .fas').addClass('question-yes'),
+                    $('#abuse-no .fas').removeClass('question-no'),
+                    document.getElementById("abuse-no").checked = false,
+                    document.getElementById("abuse-no").removeAttribute("required", true);
+            else
+                $('#abuse-yes .fas').removeClass('question-yes'),
+                    $(".error-notice").addClass("hidden"),
+                    document.getElementById("abuse-no").attr("required", true);
+
+        });
+        $('#abuse-no').change(function () {
+            if (this.checked)
+                $('#abuse-no .fas').addClass('question-no'),
+                    $('#abuse-yes .fas').removeClass('question-yes'),
+                    document.getElementById("abuse-yes").checked = false,
+                    document.getElementById("abuse-yes").removeAttribute("required", true),
+                    $(".error-notice").addClass("hidden"),
+                    $("#abuse-yes-error").hide();
+
+            else
+                $('#abuse-no .fas').removeClass('question-no'),
+                    document.getElementById("abuse-yes").attr("required", true);
+
+        });
+
+        $('#depression-yes').change(function () {
+            if (this.checked)
+                $('#depression-yes .fas').addClass('question-yes'),
+                    $('#depression-no .fas').removeClass('question-no'),
+                    document.getElementById("depression-no").checked = false,
+                    document.getElementById("depression-no").removeAttribute("required", true);
+            else
+                $('#depression-yes .fas').removeClass('question-yes'),
+                    document.getElementById("depression-no").attr("required", true);
+
+        });
+        $('#depression-no').change(function () {
+            if (this.checked)
+                $('#depression-no .fas').addClass('question-no'),
+                    $('#depression-yes .fas').removeClass('question-yes'),
+                    document.getElementById("depression-yes").checked = false,
+                    document.getElementById("depression-yes").removeAttribute("required", true),
+                    $("#depression-yes-error").hide();
+
+            else
+                $('#depression-no .fas').removeClass('question-no'),
+                    document.getElementById("depression-yes").attr("required", true);
+
+        });
+
+        $('#interest-yes').change(function () {
+            if (this.checked)
+                $('#interest-yes .fas').addClass('question-yes'),
+                    $('#interest-no .fas').removeClass('question-no'),
+                    document.getElementById("interest-no").checked = false,
+                    document.getElementById("interest-no").removeAttribute("required", true);
+            else
+                $('#interest-yes .fas').removeClass('question-yes'),
+                    document.getElementById("interest-no").attr("required", true);
+
+        });
+        $('#interest-no').change(function () {
+            if (this.checked)
+                $('#interest-no .fas').addClass('question-no'),
+                    $('#interest-yes .fas').removeClass('question-yes'),
+                    document.getElementById("interest-yes").checked = false,
+                    document.getElementById("interest-yes").removeAttribute("required", true),
+                    $("#interest-yes-error").hide();
+
+
+            else
+                $('#interest-no .fas').removeClass('question-no'),
+                    document.getElementById("interest-yes").attr("required", true);
+
+        });
+
+        $('#weightloss-yes').change(function () {
+            if (this.checked)
+                $('#weightloss-yes .fas').addClass('question-yes'),
+                    $('#weightloss-no .fas').removeClass('question-no'),
+                    document.getElementById("weightloss-no").checked = false,
+                    document.getElementById("weightloss-no").removeAttribute("required", true);
+            else
+                $('#weightloss-yes .fas').removeClass('question-yes'),
+                    document.getElementById("weightloss-no").attr("required", true);
+
+        });
+        $('#weightloss-no').change(function () {
+            if (this.checked)
+                $('#weightloss-no .fas').addClass('question-no'),
+                    $('#weightloss-yes .fas').removeClass('question-yes'),
+                    document.getElementById("weightloss-yes").checked = false,
+                    document.getElementById("weightloss-yes").removeAttribute("required", true),
+                    $("#weightloss-yes-error").hide();
+
+
+            else
+                $('#weightloss-no .fas').removeClass('question-no'),
+                    document.getElementById("weightloss-yes").attr("required", true);
+
+        });
+
+        $('#psychomotor-yes').change(function () {
+            if (this.checked)
+                $('#psychomotor-yes .fas').addClass('question-yes'),
+                    $('#psychomotor-no .fas').removeClass('question-no'),
+                    document.getElementById("psychomotor-no").checked = false,
+                    document.getElementById("psychomotor-no").removeAttribute("required", true);
+            else
+                $('#psychomotor-yes .fas').removeClass('question-yes'),
+                    document.getElementById("psychomotor-no").attr("required", true);
+
+        });
+        $('#psychomotor-no').change(function () {
+            if (this.checked)
+                $('#psychomotor-no .fas').addClass('question-no'),
+                    $('#psychomotor-yes .fas').removeClass('question-yes'),
+                    document.getElementById("psychomotor-yes").checked = false,
+                    document.getElementById("psychomotor-yes").removeAttribute("required", true),
+                    $("#psychomotor-yes-error").hide();
+
+
+            else
+                $('#psychomotor-no .fas').removeClass('question-no'),
+                    document.getElementById("psychomotor-yes").attr("required", true);
+
+        });
+
+        $('#tiredness-yes').change(function () {
+            if (this.checked)
+                $('#tiredness-yes .fas').addClass('question-yes'),
+                    $('#tiredness-no .fas').removeClass('question-no'),
+                    document.getElementById("tiredness-no").checked = false,
+                    document.getElementById("tiredness-no").removeAttribute("required", true);
+            else
+                $('#tiredness-yes .fas').removeClass('question-yes'),
+                    document.getElementById("tiredness-no").attr("required", true);
+
+        });
+        $('#tiredness-no').change(function () {
+            if (this.checked)
+                $('#tiredness-no .fas').addClass('question-no'),
+                    $('#tiredness-yes .fas').removeClass('question-yes'),
+                    document.getElementById("tiredness-yes").checked = false,
+                    document.getElementById("tiredness-yes").removeAttribute("required", true),
+                    $("#tiredness-yes-error").hide();
+
+
+            else
+                $('#tiredness-no .fas').removeClass('question-no'),
+                    document.getElementById("tiredness-yes").attr("required", true);
+
+        });
+
+        $('#selfworth-yes').change(function () {
+            if (this.checked)
+                $('#selfworth-yes .fas').addClass('question-yes'),
+                    $('#selfworth-no .fas').removeClass('question-no'),
+                    document.getElementById("selfworth-no").checked = false,
+                    document.getElementById("selfworth-no").removeAttribute("required", true);
+            else
+                $('#selfworth-yes .fas').removeClass('question-yes'),
+                    document.getElementById("selfworth-no").attr("required", true);
+
+        });
+        $('#selfworth-no').change(function () {
+            if (this.checked)
+                $('#selfworth-no .fas').addClass('question-no'),
+                    $('#selfworth-yes .fas').removeClass('question-yes'),
+                    document.getElementById("selfworth-yes").checked = false,
+                    document.getElementById("selfworth-yes").removeAttribute("required", true),
+                    $("#selfworth-yes-error").hide();
+
+
+            else
+                $('#selfworth-no .fas').removeClass('question-no'),
+                    document.getElementById("selfworth-yes").attr("required", true);
+
+        });
+
+        $('#concentration-yes').change(function () {
+            if (this.checked)
+                $('#concentration-yes .fas').addClass('question-yes'),
+                    $('#concentration-no .fas').removeClass('question-no'),
+                    document.getElementById("concentration-no").checked = false,
+                    document.getElementById("concentration-no").removeAttribute("required", true);
+            else
+                $('#concentration-yes .fas').removeClass('question-yes'),
+                    document.getElementById("concentration-no").attr("required", true);
+
+        });
+        $('#concentration-no').change(function () {
+            if (this.checked)
+                $('#concentration-no .fas').addClass('question-no'),
+                    $('#concentration-yes .fas').removeClass('question-yes'),
+                    document.getElementById("concentration-yes").checked = false,
+                    document.getElementById("concentration-yes").removeAttribute("required", true),
+                    $("#concentration-yes-error").hide();
+
+
+            else
+                $('#concentration-no .fas').removeClass('question-no'),
+                    document.getElementById("concentration-yes").attr("required", true);
+
+        });
+
+        $('#suicidal-yes').change(function () {
+            if (this.checked)
+                functionWarning(),
+                    openNav(),
+                    $('#suicidal-yes .fas').addClass('question-yes'),
+                    $('#suicidal-no .fas').removeClass('question-no'),
+                    document.getElementById("suicidal-no").checked = false,
+                    document.getElementById("suicidal-no").removeAttribute("required", true);
+            else
+                $('#suicidal-yes .fas').removeClass('question-yes'),
+                    document.getElementById("suicidal-no").attr("required", true);
+
+        });
+        $('#suicidal-no').change(function () {
+            if (this.checked)
+                $('#suicidal-no .fas').addClass('question-no'),
+                    $('#suicidal-yes .fas').removeClass('question-yes'),
+                    document.getElementById("suicidal-yes").checked = false,
+                    document.getElementById("suicidal-yes").removeAttribute("required", true),
+                    $("#suicidal-yes-error").hide();
+
+
+            else
+                $('#suicidal-no .fas').removeClass('question-no'),
+                    document.getElementById("suicidal-yes").attr("required", true);
+
+        });
+    </script>
+    <script>
+        function functionAlert(msg, myYes) {
+            var confirmBox = $("#abuse-warning");
+            confirmBox.find(".message").text(msg);
+            confirmBox.find(".yes").unbind().click(function () {
+                confirmBox.hide(),
+                    closeNav(),
+                    $(".error-notice").removeClass("hidden");
+            });
+            confirmBox.find(".yes").click(myYes);
+            confirmBox.show();
+            $("#abuse-warning-close").focus();
+
+        }
+    </script>
+    <script>
+        function functionWarning(msg, myYes) {
+            var confirmBox = $("#assignment-warning");
+            confirmBox.find(".message").text(msg);
+            confirmBox.find(".yes").unbind().click(function () {
+                confirmBox.hide(),
+                    closeNav();
+            });
+            confirmBox.find(".yes").click(myYes);
+            confirmBox.show();
+            $("#assignment-warning-close").focus();
+
+        }
+    </script>
+    <script>
+        function backKey() {
+            localStorage.clear();
+            localStorage.removeItem("back_dsm5");
+            localStorage.setItem("back_dsm5", Date.now());
+        }
+        function storageKey() {
+            localStorage.setItem("create_dsm5", Date.now());
+        }
+    </script>
+
+}

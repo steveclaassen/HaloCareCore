@@ -1,0 +1,522 @@
+﻿@model HaloCareCore.Models.Management.ClinicalHistoryQuestionaire
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Edit_SocialRecord";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+<comment>
+    <!--
+        07 May 2019 -- HCare-724(Update Social drop-down in patient history menu)
+        Request is to remove the Diagnosis date from this page.
+
+        05 June 2019 -- HCare722(Change "Follow up" to red on patient history drop-down menus)
+        Inside the edit views related to the patient clinical questionnaire data, I have added an alert marker to show that there is a follow up on the page. The data field will also be represented in Red Bold letters
+        should the word follow up be saved there.
+
+        12 June 2019 -- HCare-722 (Change "Follow up" to red on patient history drop-down menus)
+        I have added alert badges that draw the users attention to the fields that are either marked with a follow up or that are empty/null.
+
+        06 August 2019 -- HCare-758(Generel - Redirect to tab functionality)
+        Using jquery to add localStorage in order to redirect to the last tab that the user was on and a Submit/Save Button clicked. This will take you back to the origin tab.
+    -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .input-group-addon {
+        visibility: hidden;
+    }
+
+    textarea#socialComment {
+        display: block;
+        width: 400px;
+        max-width: 1500px !important;
+        height: 100px;
+        max-height: 250px;
+        padding: 6px 6px;
+        line-height: 1.428571429;
+        color: #003366;
+        vertical-align: middle;
+        border: 1px solid #f4f4f4;
+        background-color: transparent;
+        border-radius: 2px;
+        margin-left: -5%;
+        -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+        box-shadow: 1px 1px 1px 0px rgba(0,0,0,0.20);
+        -webkit-transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+        transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+        outline: none !important;
+        font-family: 'Century Gothic';
+        font-size: 100%;
+        font-weight: 200;
+        margin-top: -10%;
+    }
+
+    .field-validation-error:before {
+        font-family: FontAwesome;
+        content: "\f06a\00a0";
+        animation: pulse 2s ease infinite;
+    }
+</style>
+
+<!--pageHeader-->
+<nav id="global-nav" class="nav">
+    <div class="pull-left title">
+        <h1 class="site-title_patientProfile">
+            <span><img src="~/Content/Images/memberProfile/topBar Icons/clincalHistory.png" /></span>&emsp; Social history
+        </h1>
+    </div>
+    <div class="pull-right title">
+        <h1 class="site-title_userID pull-right">
+            <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+        </h1>
+        <h1 class="site-title_userID pull-right">
+            @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+            {
+                <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+            }
+        </h1>
+        <h1 class="site-waffleIcon pull-right">
+            <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+        </h1>
+    </div>
+</nav>
+
+<div class="dashboardContainer zero-padding">
+    <div class="patientDashboard_View">
+        <!--breadCrumbs-->
+        <ul class="breadcrumbs_patientDashboard">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+            <li><a class="go_back">Patient</a></li>
+            <li><a href="#">Social history</a></li>
+        </ul>
+        <!--Left navSlider -->
+        @Html.Partial("_navSlider_blank", new { })
+        <!--navCollection-->
+        <div class="navCollection_patientDashboard">
+            @Html.Partial("_navCollection")
+        </div>
+        <!--profileInformation-->
+        <div class="profileBar">
+            @Html.Action("_profileBar_edit", "Member", new { DependentID = Model.dependentID })
+        </div>
+    </div>
+
+    <div class="profilebar-spacer-assignment"></div>
+
+    <div class="patientDashboard_container">
+        <h4 class="summaryHeading">Edit social record</h4>
+        <hr class="fancyruler">
+        <br />
+        <br />
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+
+            <div class="form-horizontal editForm" style="margin-bottom: 2.5%">
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                @Html.HiddenFor(model => model.dependentID)
+                @Html.HiddenFor(model => model.programType)
+
+                @if (Model.followUp == true)
+                {
+                    <div id="warning_anchor">
+                        <a id="followUpLink" href="#element_target">
+                            <i class="fas fa-exclamation-triangle pulse anchor_warning" title="follow up"></i>
+                        </a>
+                    </div>
+                }
+                @if (Model.NrDrinks == "" || Model.NrDrinks == "0" || Model.NrDrinks == null)
+                {
+                    <div id="dailyDrink_anchor">
+                        <a id="drinkerLink" href="#element_target">
+                            <i class="fas fa-exclamation-triangle pulse anchor_warning" title="No of drinks"></i>
+                        </a>
+                    </div>
+                }
+                @if (Model.smokingYears < 1 || Model.smokingYears == null)
+                {
+                    <div id="smokingYears_anchor">
+                        <a id="yearsLink" href="#element_target">
+                            <i class="fas fa-exclamation-triangle pulse anchor_warning" title="No of years"></i>
+                        </a>
+                    </div>
+                }
+                @if (Model.NoCigs < 1 || Model.NoCigs == null)
+                {
+                    <div id="dailyCig_anchor">
+                        <a id="smokerLink" href="#element_target">
+                            <i class="fas fa-exclamation-triangle pulse anchor_warning" title="No of cigarettes"></i>
+                        </a>
+                    </div>
+                }
+
+
+
+                <div class="form-group">
+                    @Html.Label(null,"Smoker?", htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-8">
+                        <div class="questionRadio" style="color: black; margin-left: 2.5%">
+                            @Html.RadioButtonFor(model => model.smoker, true, new { @id = "smoker-true" }) Yes
+                            @Html.RadioButtonFor(model => model.smoker, false, new { @id = "smoker-false" }) No
+
+                            @Html.ValidationMessageFor(model => model.smoker, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <div id="warning_NoCigs" class="hidden">
+                        <a id="linkNoCigs" href="#NoCigs">
+                            <i class="fas fa-exclamation-triangle pulse followUp_alert" title="follow up"></i>
+                        </a>
+                    </div>
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.NoCigs, htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-10">
+                            @Html.EditorFor(model => model.NoCigs, new { htmlAttributes = new { @class = "infoBox_editMember", @style = "max-width: 800px!important; width: 400px; margin-left: 1%", @placeholder = "example: 20" } })
+
+                            @Html.ValidationMessageFor(model => model.NoCigs, "", new { @class = "text-danger", @style = "font-size: 110%; margin-left: 1.5%" })
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <div id="warning_NoYears" class="hidden">
+                        <a id="linkYears" href="#NoCigs">
+                            <i class="fas fa-exclamation-triangle pulse followUp_alert" title="follow up"></i>
+                        </a>
+                    </div>
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.smokingYears, htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-10">
+                            @Html.EditorFor(model => model.smokingYears, new { htmlAttributes = new { @class = "infoBox_editMember", @style = "max-width: 800px!important; width: 400px; margin-left: 1%", @placeholder = "example: 10" } })
+
+                            @Html.ValidationMessageFor(model => model.smokingYears, "", new { @class = "text-danger", @style = "font-size: 110%; margin-left: 1.5%" })
+                        </div>
+                    </div>
+                </div>
+
+                <br />
+                <hr class="fancyruler" />
+
+                <div class="form-group">
+                    @Html.Label(null,"Drinker?", htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-8">
+                        <div class="questionRadio" style="color: black; margin-left: 2.5%">
+                            @Html.RadioButtonFor(model => model.drinker, true, new { @id = "drinker-true" }) Yes
+                            @Html.RadioButtonFor(model => model.drinker, false, new { @id = "drinker-false" }) No
+
+                            @Html.ValidationMessageFor(model => model.drinker, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <div id="warning_NoDrinks" class="hidden">
+                        <a id="linkYears" href="#NoCigs">
+                            <i class="fas fa-exclamation-triangle pulse followUp_alert" title="follow up"></i>
+                        </a>
+                    </div>
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.NrDrinks, htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-10">
+                            @Html.EditorFor(model => model.NrDrinks, new { htmlAttributes = new { @class = "infoBox_editMember", @style = "max-width: 800px!important; width: 400px; margin-left: 1%" } })
+                            @Html.ValidationMessageFor(model => model.NrDrinks, "", new { @class = "text-danger", @style = "font-size: 110%; margin-left: 1.5%" })
+                        </div>
+                    </div>
+                </div>
+                <br />
+                <hr class="fancyruler" />
+
+                @*<div class="form-group">
+                        @Html.LabelFor(model => model.programType, htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-10">
+                            @Html.DropDownListFor(model => model.programType, null, "--Select--", new { @class = "questionDrop" })
+                            @Html.ValidationMessageFor(model => model.programType, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <br />
+                    <hr class="fancyruler" />*@
+
+                <div id="">
+                    @if (Model.socialComment == "" || Model.socialComment == null || Model.socialComment == "Follow up" || Model.socialComment == "follow up" || Model.socialComment == "Follow Up" || Model.socialComment == "FOLLOW UP")
+                    {
+                        <div id="warning_comment">
+                            <i class="fas fa-exclamation-triangle pulse followUp_alert"></i>
+                        </div>
+                    }
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.socialComment, htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-10">
+                            <div class="checkbox">
+                                @Html.TextAreaFor(model => model.socialComment, new { @placeholder = "comment" })
+                                @Html.ValidationMessageFor(model => model.socialComment, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <br />
+                <hr class="fancyruler" />
+
+                <div id="element_target">
+                    @if (Model.followUp == true)
+                    {
+                        <div id="warning_socialRecord">
+                            <i class="fas fa-exclamation-triangle pulse followUp_warning" id="followUp_alert"></i>
+                        </div>
+                    }
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.followUp, htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-10">
+                            <div class="checkbox questionnaireEdit">
+                                @Html.EditorFor(model => model.followUp)
+                                @Html.ValidationMessageFor(model => model.followUp, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <br />
+                <hr class="fancyruler" />
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.active, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        <div class="checkbox questionnaireEdit">
+                            @Html.EditorFor(model => model.active)
+                            @Html.ValidationMessageFor(model => model.active, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="fixedBack" style="margin-left: 40%">
+                    <input value="Back" class="btn newBackButton go_back" onclick="backKey()" />
+                    <input type="submit" value="Save" class="btn newSubmitButton patientClinical" onclick="storageKey()" />
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/bundles/jqueryui"></script>
+    <style src="~/Content/themes/base/css" )
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.7.1/js/bootstrap-datepicker.min.js"></script>
+    <!--General-->
+    <script>
+        /*Date*/
+        $(function () {
+
+            $('.input-group.date').datepicker({
+                format: "dd M yyyy",
+                showButtonPanel: true,
+                autoclose: true,
+            });
+        });
+    </script>
+    <!--Alerts-->
+    <script>
+        //followUp checkBox warning
+        $('#followUp').change(function () {
+            if (this.checked)
+                $('#warning_socialRecord').removeClass('hidden'),
+                    $('#warning_anchor').removeClass('hidden');
+
+            else
+                $('#warning_socialRecord').addClass('hidden'),
+                    $('#warning_anchor').addClass('hidden');
+
+        });
+
+        //anchor
+        $("#link").click(function () {
+            $('html, body').animate({
+                scrollTop: $("#element_target").offset().top
+            }, 500);
+        });
+
+    </script>
+
+    <script>
+        //Smoker field YES
+        $(document).ready(function () {
+            setInterval(function () {
+                $('#smoker-true').change(function () {
+                    if (this.checked)
+                        $("[name='NoCigs']").attr("required", true),
+                            $("[name='smokingYears']").attr("required", true),
+                            $('#warning_NoCigs').removeClass('hidden'),
+                            $('#warning_NoYears').removeClass('hidden');
+
+                });
+            }, 0);
+        });
+
+        $(document).ready(function () {
+            setInterval(function () {
+                if ($("#NoCigs").val() == "0") {
+                    $("#NoCigs").addClass('warningFont'),
+                        $('#dailyCig_anchor').removeClass('hidden');
+                }
+                else if ($("#NoCigs").val() == "0.00") {
+                    $("#NoCigs").addClass('warningFont'),
+                        $('#dailyCig_anchor').removeClass('hidden');
+                }
+                else if ($("#NoCigs").val() == "") {
+                    $("#NoCigs").removeClass('warningFont'),
+                        $('#dailyCig_anchor').removeClass('hidden');
+                }
+                else if ($("#NoCigs").val() == null) {
+                    $("#NoCigs").removeClass('warningFont'),
+                        $('#dailyCig_anchor').removeClass('hidden');
+                }
+                else {
+                    $("#NoCigs").removeClass('warningFont'),
+                        $('#NoCigs').addClass('fontUpdate'),
+                        $('#dailyCig_anchor').addClass('houdini');
+
+
+                }
+            }, 0);
+        });
+
+        $(document).ready(function () {
+            setInterval(function () {
+                if ($("#smokingYears").val() == "0") {
+                    $("#smokingYears").addClass('warningFont'),
+                        $('#smokingYears_anchor').removeClass('hidden');
+                }
+                else if ($("#smokingYears").val() == "0.00") {
+                    $("#smokingYears").addClass('warningFont'),
+                        $('#smokingYears_anchor').removeClass('hidden');
+                }
+                else if ($("#smokingYears").val() == "") {
+                    $("#smokingYears").removeClass('warningFont'),
+                        $('#smokingYears_anchor').removeClass('hidden');
+                }
+                else {
+                    $("#smokingYears").removeClass('warningFont'),
+                        $('#smokingYears').addClass('fontUpdate'),
+                        $('#smokingYears_anchor').addClass('houdini');
+
+
+                }
+            }, 0);
+        });
+
+        $(document).ready(function () {
+            setInterval(function () {
+                if ($("#NrDrinks").val() == "0") {
+                    $("#NrDrinks").addClass('warningFont'),
+                        $('#dailyDrink_anchor').removeClass('hidden');
+                }
+                else if ($("#NrDrinks").val() == "0.00") {
+                    $("#NrDrinks").addClass('warningFont'),
+                        $('#dailyDrink_anchor').removeClass('hidden');
+                }
+                else if ($("#NrDrinks").val() == "") {
+                    $("#NrDrinks").removeClass('warningFont'),
+                        $('#dailyDrink_anchor').removeClass('hidden');
+                }
+                else {
+                    $("#NrDrinks").removeClass('warningFont'),
+                        $('#NrDrinks').addClass('fontUpdate'),
+                        $('#dailyDrink_anchor').addClass('houdini');
+
+
+                }
+            }, 0);
+        });
+
+        //Smoker field NO
+        $(document).ready(function () {
+            setInterval(function () {
+                $('#smoker-false').change(function () {
+                    if (this.checked)
+                        $("[name='NoCigs']").attr("required", false),
+                            $("[name='smokingYears']").attr("required", false),
+                            $('#warning_NoCigs').addClass('hidden'),
+                            $("[name='NoCigs']").val(''),
+                            $('#warning_NoYears').addClass('hidden'),
+                            $("[name='smokingYears']").val('');
+
+                });
+            }, 0);
+        });
+
+        //Drinker field YES
+        $(document).ready(function () {
+            setInterval(function () {
+                $('#drinker-true').change(function () {
+                    if (this.checked)
+                        $("[name='NrDrinks']").attr("required", true),
+                            $('#warning_NoDrinks').removeClass('hidden');
+
+                });
+            }, 0);
+        });
+
+        //Drinker field NO
+        $(document).ready(function () {
+            setInterval(function () {
+                $('#drinker-false').change(function () {
+                    if (this.checked)
+                        $("[name='NrDrinks']").removeAttr("required", true),
+                            $('#warning_NoDrinks').addClass('hidden'),
+                            $("[name='NrDrinks']").val('');
+
+                });
+            }, 0);
+        });
+
+        //followUp comments field
+        $(document).ready(function () {
+            setInterval(function () {
+                if ($("#socialComment").val().toLowerCase() == "follow up") {
+                    $("#socialComment").addClass('warningFont'),
+                        $('#warning_comment').removeClass('houdini'),
+                        $('#comment_anchor').removeClass('houdini');
+                }
+                else if ($("#socialComment").val().toLowerCase() == "") {
+                    $('#warning_comment').removeClass('houdini'),
+                        $('#comment_anchor').removeClass('houdini');
+                }
+                else if ($("#socialComment").val().toLowerCase() == null) {
+                    $('#warning_comment').removeClass('houdini'),
+                        $('#comment_anchor').removeClass('houdini');
+                }
+                else {
+                    $("#socialComment").removeClass('warningFont'),
+                        $('#socialComment').addClass('fontUpdate'),
+                        $('#warning_comment').addClass('houdini'),
+                        $('#comment_anchor').addClass('houdini');
+
+
+                }
+            }, 0);
+        });
+
+
+
+    </script>
+    <!-- local-storage-redirect -->
+    <script>
+        function backKey() {
+            localStorage.setItem("back_socialRecord", Date.now());
+        }
+        function storageKey() {
+            localStorage.setItem("edit_socialRecord", Date.now());
+        }
+    </script>
+
+
+}

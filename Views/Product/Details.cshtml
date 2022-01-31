@@ -1,0 +1,145 @@
+﻿@model HaloCareCore.Models.Script.Products
+@{
+    ViewBag.Title = "Details";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+</style>
+
+<div class="fullScreen_container zero-padding">
+
+    <!--pageHeader-->
+    <nav id="global-nav" class="nav">
+        <div class="pull-left title">
+            <h1 class="site-title_patientProfile">
+                <span><i class="fas fa-plus-square"></i>&emsp; Product</span>
+            </h1>
+        </div>
+        <div class="pull-right title">
+            <h1 class="site-title_userID pull-right">
+                <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+            </h1>
+            <h1 class="site-title_userID pull-right">
+                @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                {
+                    <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                }
+            </h1>
+            <h1 class="site-waffleIcon pull-right">
+                <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+            </h1>
+        </div>
+    </nav>
+
+    <!--breadCrumbs-->
+    <ul class="breadcrumbs_fullScreens">
+        <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+        <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+        <li><a href="@Url.Action("Index", "Product", new {})">Product</a></li>
+        <li><a href="#">Detail</a></li>
+    </ul>
+
+    <!--navCollection-->
+    <div class="navCollection_fullScreens">
+        @Html.Partial("_navCollection")
+    </div>
+
+    <div style="margin-bottom: 1%"></div>
+
+    <div class="row">
+        <h4 class="tableHeading">product details</h4>
+        <hr class="fancyruler">
+        <br />
+        <br />
+        <div style="margin-left: 5%">
+            <dl class="dl-horizontal editForm">
+                <dt>
+                    @Html.DisplayNameFor(model => model.atcCode)
+                </dt>
+                <dd>
+                    @Html.DisplayFor(model => model.atcCode)
+                </dd>
+                <dt>
+                    @Html.DisplayNameFor(model => model.therapeuticClass6Desc)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.therapeuticClass6Desc)
+                </dd>
+
+                <dt>
+                    @Html.DisplayName("MIMS Class number 2")
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.therapeuticClass6)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.mmapIndicator)
+                </dt>
+                <dd>
+                    @Html.DisplayFor(model => model.mmapIndicator)
+                </dd>
+                <dt>
+                    @Html.DisplayNameFor(model => model.mrpIndicator)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.mrpIndicator)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.genericIndicator)
+                </dt>
+                <dd>
+                    @Html.DisplayFor(model => model.genericIndicator)
+                </dd>
+                <dt>
+                    @Html.DisplayNameFor(model => model.packSize)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.packSize)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.createdDate)
+                </dt>
+                <dd>
+                    @Html.DisplayFor(model => model.createdDate)
+                </dd>
+                <dt>
+                    @Html.DisplayNameFor(model => model.modifiedDate)
+                </dt>
+                <dd>
+                    @Html.DisplayFor(model => model.modifiedDate)
+                </dd>
+                <dt>
+                    @Html.DisplayNameFor(model => model.Active)
+                </dt>
+
+                <dd class="detailsCheck">
+                    @Html.DisplayFor(model => model.Active)
+                </dd>
+
+
+
+            </dl>
+        </div>
+
+        <div class="fixedBack">
+            <input value="Back" class="btn buttonRound_formBack go_back" style="width: 15%!important" />
+        </div>
+
+    </div>
+</div>
+
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+}

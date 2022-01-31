@@ -1,0 +1,449 @@
+﻿<!--ViewMember-->
+
+@model HaloCareCore.Models.EnrolmentViewModel
+
+
+@{
+    ViewBag.Title = "ViewMember";
+    Layout = "~/Views/Shared/_LayoutMember.cshtml";
+}
+
+
+<style>
+    .container_memberView {
+        max-width: 1500px;
+        width: 1400px;
+        margin-left: 0%;
+    }
+
+    .editButton:hover {
+        filter: drop-shadow(3px 3px 3px rgba(34, 34, 40, 0.50));
+    }
+
+    .modal {
+        display: none;
+        / Hidden by default / position: fixed;
+        / Stay in place front is invalid - may break your css so removed / padding-top: 100px; /* Location of the box - don't know what this does?  If it is to move your modal down by 100px, then just change top below to 100px and remove this*/
+        left: 0;
+        right: 0;
+        / Full width (left and right 0) / top: 0;
+        bottom: 0;
+        / Full height top and bottom 0 / overflow: auto;
+        / Enable scroll if needed / background-color: rgb(0,0,0);
+        / Fallback color / background-color: rgba(0,0,0,0.4);
+        / Black w/ opacity / z-index: 9999; /* Sit on top - higher than any other z-index in your site*/
+    }
+
+</style>
+
+
+<link href="~/Content/css/select2.min.css" rel="stylesheet" />
+
+
+<div class="container" style="max-width:1600px; width: 1550px!important; background-color:white; margin-top: -60px!important; margin-left: -10px!important; position: fixed; z-index: 2; background-color: #ffffff!important; padding-bottom: 16px!important; padding-top: 60px!important; padding-left: 5px; padding-right: 230px ">
+
+    <!--profilePicture-->
+    @Html.HiddenFor(model => model.hasSteps)
+
+    <div class="profileImage">
+
+        @if (Model.dependent.sex == "M" && (DateTime.Now.Year - Model.dependent.birthDate.Year > 13))
+            {
+            <a class="editButton" href="@Url.Action("EditMember", "Member", new { DependentID = Model.dependent.DependantID }, null)" title="Edit Patient">
+                <img src="~/Content/Images/memberProfile/Page Icons/memberView_Profile.png" />
+            </a>
+        }
+
+        else if (Model.dependent.sex == "F" && (DateTime.Now.Year - Model.dependent.birthDate.Year > 13))
+        {
+            <a class="editButton" href="@Url.Action("EditMember", "Member", new { DependentID = Model.dependent.DependantID }, null)" title="Edit Patient">
+                <img src="~/Content/Images/memberProfile/Page Icons/memberView_ProfileAF.png" />
+            </a>
+        }
+
+        else if (Model.dependent.sex == "M" && (DateTime.Now.Year - Model.dependent.birthDate.Year < 13))
+        {
+            <a class="editButton" href="@Url.Action("EditMember", "Member", new { DependentID = Model.dependent.DependantID }, null)" title="Edit Patient">
+                <img src="~/Content/Images/memberProfile/Page Icons/memberView_ProfileIM.png" />
+            </a>
+        }
+
+        else if (Model.dependent.sex == "F" && (DateTime.Now.Year - Model.dependent.birthDate.Year < 13))
+        {
+            <a class="editButton" href="@Url.Action("EditMember", "Member", new { DependentID = Model.dependent.DependantID }, null)" title="Edit Patient">
+                <img src="~/Content/Images/memberProfile/Page Icons/memberView_ProfileIF.png" />
+            </a>
+        }
+
+        else
+        {
+            <a class="editButton" href="@Url.Action("EditMember", "Member", new { DependentID = Model.dependent.DependantID }, null)" title="Edit Patient">
+                <img src="~/Content/Images/memberProfile/Page Icons/memberView_Profile.png" />
+            </a>
+        }
+
+    </div>
+
+
+    <div class="container_memberView">
+
+        <!--profilePicture-->
+
+        <div class="col-md-12" style="margin-top: -8%; margin-bottom: -1%;font-size: 11px; z-index: 5">
+
+            <div class="memberInformation">
+                <div class="row memberInformation_fullName">
+
+                    @Html.DisplayFor(model => model.dependent.firstName)
+                    @Html.DisplayFor(model => model.dependent.lastName),
+                    @Html.DisplayFor(model => model.dependent.initials)
+                </div>
+                <hr class="dashBoard_Ruler" style="margin-left: 1%; width: 1250px!important; margin-top: 0.5%">
+                <div class="row col-md-9">
+                    <div class="col-md-3">
+                        <div class="memberInformation_membershipNumber">
+                            @Html.Label(null,"Member #: ", htmlAttributes: new { @class = "control-label-member_view" })
+                            @Html.DisplayFor(model => model.member.membershipNo)
+                        </div>
+                        <div class="memberInformation_IDNumber">
+                            @Html.Label(null,"ID #: ", htmlAttributes: new { @class = "control-label-member_view" })
+                            @Html.DisplayFor(model => model.dependent.idNumber)
+                        </div>
+                        <div class="memberInformation_IDNumber">
+                            @Html.Label(null,"Status: ", htmlAttributes: new { @class = "control-label-member_view" })
+                            <b style="color: darkred">
+                                @if (Model.statuss.Count > 0)
+                                {@Html.DisplayFor(model => model.statuss[0].managementStatusCode)}
+                            </b>
+                        </div>
+                        <div class="memberInformation_Age">
+                            @Html.Label(null,"Age: ", htmlAttributes: new { @class = "control-label-member_view" })
+                            @Html.DisplayFor(model => model.dependent.dependantAge)
+                        </div>
+
+                    </div>
+                    <div class="col-md-2" style="width: 250px!important">
+                        <div class="memberInformation_dependantCode">
+                            @Html.Label(null,"Dependant Code: ", htmlAttributes: new { @class = "control-label-member_view" })
+                            @Html.DisplayFor(model => model.dependent.dependentCode)
+                        </div>
+                        <div class="memberInformation_dependantCode">
+                            @Html.Label(null,"Program: ", htmlAttributes: new { @class = "control-label-member_view" })
+
+                            @if (Model.programs.Count > 0)
+                            {
+                                @Html.DisplayFor(model => model.programs[0].programCode)
+                            }
+                            @if (Model.programs.Count > 1)
+                            {
+                                @Html.DisplayFor(model => model.programs[1].programCode)
+                            }
+
+                        </div>
+                        <div class="memberInformation_dependantCode">
+                            @Html.Label(null,"Case Manager: ", htmlAttributes: new { @class = "control-label-member_view" })
+                            @Html.DisplayFor(model => model.CaseManagers.caseManagerId)
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="memberInformation_dependantCode">
+                            @Html.Label(null,"Scheme: ", htmlAttributes: new { @class = "control-label-member_view" })
+                            @Html.DisplayFor(model => model.MedicalAids[0].Name)
+                        </div>
+                        <div class="memberInformation_dependantCode">
+                            @Html.Label(null,"Option: ", htmlAttributes: new { @class = "control-label-member_view" })
+                            @Html.DisplayFor(model => model.plan)
+                        </div>
+                        <div class="memberInformation_dependantCode">
+                            @Html.Label(null,"Employer Group: ", htmlAttributes: new { @class = "control-label-member_view" })
+                            @if (Model.paypoint != null)
+                            {
+                                @Html.DisplayFor(model => model.paypoint)
+                            }
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="memberInformation_dependantCode">
+                            @Html.Label(null,"Doctor Detail: ", htmlAttributes: new { @class = "control-label-member_view" })
+                            @Html.DisplayFor(model => model.doctor.drFirstName) @Html.DisplayFor(model => model.doctor.drLastName)
+                        </div>
+                        <div class="memberInformation_dependantCode">
+                            @Html.Label(null,"Practice #: ", htmlAttributes: new { @class = "control-label-member_view" })
+                            @Html.DisplayFor(model => model.doctor.practiceNo)
+                        </div>
+                        <div class="memberInformation_pharmacy">
+                            @Html.Label(null,"Pharmacy: ", htmlAttributes: new { @class = "control-label-member_view" })
+                            @if (Model.DProvider != null)
+                            {
+                                @Html.DisplayFor(model => model.DProvider.dispensingName)
+                            }
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="col-md-2">
+                    <div class="memberInformation_specialNote">
+                        @Html.Label(null,"Special Note: ", htmlAttributes: new { @class = "control-label-member_view" })
+                    </div>
+                    <div class="memberInformation_specialNote">
+                        @Html.DisplayFor(model => model.Notes.note)
+                    </div>
+                    @if (Model.Notes == null)
+                    {
+                        <div class="memberInformation_specialNoteAdd">
+                            @Html.ActionLink("Add", "AddNote", new { DependentID = Model.dependent.DependantID }, null)
+                        </div>
+                    }
+                    @if (Model.Notes != null)
+                    {
+                        <div class="memberInformation_specialNoteAdd">
+                            @Html.ActionLink("Edit", "EditNote", "Member", new { NoteId = Model.Notes.noteID }, null)
+                        </div>
+                    }
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div style="margin-bottom: 8%"></div>
+
+
+
+    <!--sideNavigation Bar-->
+    <div id="tabs">
+        <div class="nav-side-menu memberNav pull-left" style="display: block">
+            <div class="blank">&nbsp;</div>
+            <div class="blank">&nbsp;</div>
+            <div class="blank">&nbsp;</div>
+            <div class="blank">&nbsp;</div>
+            <div class="blank">&nbsp;</div>
+
+
+            <div class="menu-list">
+
+                <ul id="menu-content" class="menu-content collapse out active navbar-tabs">
+
+                    <li>
+                        <a href="#dash"><i><img src="~/Content/Images/memberProfile/passportIcon_member.png" style="width: 12%; margin-left: 0%; margin-right: 1%" /></i>Dashboard</a>
+                    </li>
+                    <li>
+                        <a href="#ass"><i><img src="~/Content/Images/memberProfile/topBar Icons/openAssignments.png" style="width: 12%; margin-left: 0%; margin-right: 1%" /></i>Assignments</a>
+                    </li>
+                    <li>
+                        <a href="#coms"><i><img src="~/Content/Images/memberProfile/topBar Icons/communicationIcon_White.png" style="width: 12%; margin-left: 0%; margin-right: 1%" /></i>Communication</a>
+                    </li>
+                    <li>
+                        <a href="#clin"><i><img src="~/Content/Images/memberProfile/clinicalIcon_member.png" style="width: 12%; margin-left: 0%; margin-right: 1%" /></i>Patient Clinical</a>
+                    </li>
+                    <li>
+                        <a href="#prof"><i><img src="~/Content/Images/memberProfile/patientIcon_member.png" style="width: 12%; margin-left: 0%; margin-right: 1%" /></i>Patient Profile</a>
+                    </li>
+
+
+                </ul>
+            </div>
+        </div>
+
+
+        <div class="modal fade" id="statusModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog" role="document" style="left: 0%; right: 0%; padding-top: 40px; ">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel" style="font-size: 150%; text-align: center"><span style="font-family: 'Eras ITC'!important">Outstanding Documents</span></h4>
+                    </div>
+                    <div class="modal-body">
+                        @{Html.RenderAction("_StepsRequired", "Member", new { DependentID = Model.dependent.DependantID }); }
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn buttonRound_cancel" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-content sideNav-Container">
+            <div class="tab-pane active" id="dash">@Html.Action("loadDashboard", "Member", new { DependentID = Model.dependent.DependantID })</div>
+            <div class="tab-pane active" id="coms">@Html.Action("LoadComsPartial", "Member", new { DependentID = Model.dependent.DependantID })</div>
+            <div class="tab-pane active" id="prof">@Html.Action("LoadProfilePartial", "Member", new { DependentID = Model.dependent.DependantID })</div>
+            <div class="tab-pane active" id="clin">@Html.Action("LoadClinicalPartial", "Member", new { DependentID = Model.dependent.DependantID })</div>
+            <div class="tab-pane active" id="ass">@Html.Action("LoadAssignmentsPartial", "Member", new { DependentID = Model.dependent.DependantID })</div>
+        </div>
+
+    </div>
+
+    @section Scripts {
+        <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+        <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+        <script src="~/bundles/jqueryval"></script>
+        <script src="~/Scripts/select2.min.js"></script>
+
+        <script>
+            $(document).ready(function () {
+                $(".mySelect2").select2();
+            });
+
+            $(document).ready(function () {
+                $('.js-example-basic-multiple').select2();
+            });
+
+        </script>
+
+        <script type="text/javascript">
+
+
+
+            $(function () {
+                $("#datepicker").datepicker({
+                    numberOfMonths: 3,
+                    showButtonPanel: true
+                });
+            });
+            $(function () {
+                $("#tabs").tabs({
+                    beforeLoad: function (event, ui) {
+                        ui.jqXHR.fail(function () {
+                            ui.panel.html(
+                                "Couldn't load this tab. We'll try to fix this as soon as possible. " +
+                                "tabs load fine");
+                        });
+                    }
+                });
+            });
+            $(function () {
+                $("#tabs2").tabs({
+                    beforeLoad: function (event, ui) {
+                        ui.jqXHR.fail(function () {
+                            ui.panel.html(
+                                "Couldn't load this tab. We'll try to fix this as soon as possible. " +
+                                "tabs load fine");
+                        });
+                    }
+                });
+            });
+            $(function () {
+                $("#tabs3").tabs({
+                    beforeLoad: function (event, ui) {
+                        ui.jqXHR.fail(function () {
+                            ui.panel.html(
+                                "Couldn't load this tab. We'll try to fix this as soon as possible. " +
+                                "tabs load fine");
+                        });
+                    }
+                });
+            });
+            $(function () {
+                $("#tabs4").tabs({
+                    beforeLoad: function (event, ui) {
+                        ui.jqXHR.fail(function () {
+                            ui.panel.html(
+                                "Couldn't load this tab. We'll try to fix this as soon as possible. " +
+                                "tabs load fine");
+                        });
+                    }
+                });
+            });
+            $(function () {
+                $("#tab").tabs({
+                    beforeLoad: function (event, ui) {
+                        ui.jqXHR.fail(function () {
+                            ui.panel.html(
+                                "Couldn't load this tab. We'll try to fix this as soon as possible. " +
+                                "tabs load fine");
+                        });
+                    }
+                });
+            });
+            $(function () {
+                $("#tabs6").tabs({
+                    beforeLoad: function (event, ui) {
+                        ui.jqXHR.fail(function () {
+                            ui.panel.html(
+                                "Couldn't load this tab. We'll try to fix this as soon as possible. " +
+                                "tabs load fine");
+                        });
+                    }
+                });
+            });
+
+            $(document).ready(function () {
+                event.preventDefault();
+                jQuery.noConflict();
+                if ($('#hasSteps').val() == 'True') {
+                    $('#statusModal').modal('show');
+                }
+                $('select[name="templates"]').change(function () {
+                    $("#smsMessages_message").val($('select[name="templates"] option:selected').text());
+                }
+                );
+            });
+
+            function FillType() {
+                var stateId = $('#EnquiryType').val();
+                $.ajax({
+                    url: '/Member/FillType',
+                    type: "GET",
+                    dataType: "JSON",
+                    data: { queryType: stateId },
+                    success: function (options) {
+                        $("#QueryT").html(""); // clear before appending new list
+                        $.each(options, function (i, option) {
+                            $("#QueryT").append(
+                                $('<option></option>').val(option.enquiryType).html(option.enquiryName));
+                        });
+                    }
+                });
+            }
+
+            var $rows = $('#table tr');
+            $('#search').keyup(function () {
+                var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+                $rows.show().filter(function () {
+                    var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                    return !~text.indexOf(val);
+                }).hide();
+            });
+
+            $(function () {
+                $('.go_back').click(function (e) {
+                    e.preventDefault();
+                    history.go(-1);
+                });
+            });
+
+            $('#zoomBtn').click(function () {
+                $('.zoom-btn-sm').toggleClass('scale-out');
+                if (!$('.zoom-card').hasClass('scale-out')) {
+                    $('.zoom-card').toggleClass('scale-out');
+                }
+            });
+
+            $('.zoom-btn-sm').click(function () {
+                var btn = $(this);
+                var card = $('.zoom-card');
+                if ($('.zoom-card').hasClass('scale-out')) {
+                    $('.zoom-card').toggleClass('scale-out');
+                }
+                if (btn.hasClass('zoom-btn-person')) {
+                    card.css('background-color', '#d32f2f');
+                } else if (btn.hasClass('zoom-btn-doc')) {
+                    card.css('background-color', '#fbc02d');
+                } else if (btn.hasClass('zoom-btn-tangram')) {
+                    card.css('background-color', '#388e3c');
+                } else if (btn.hasClass('zoom-btn-report')) {
+                    card.css('background-color', '#1976d2');
+                } else {
+                    card.css('background-color', '#7b1fa2');
+                }
+            });
+
+        </script>
+    }

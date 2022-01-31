@@ -1,0 +1,243 @@
+﻿@model List<HaloCareCore.Models.Validation.QuestionnaireTemplate>
+
+@{
+    ViewBag.Title = "Patient Questionnaire";
+    Layout = "~/Views/Shared/_LayoutModal.cshtml";
+}
+
+<!--CheckAll checkbox-->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+
+<div class="patientQuestionnaire_Modal">
+    @using (Ajax.BeginForm("_PatientQuestionnaire", "Clinical", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "divPath", OnSuccess = "hideModal(); alert('Saved');" }))
+    {
+        @Html.AntiForgeryToken()
+        <div class="form-horizontal">
+            <div class="modal-header modal-header-primary">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true" id="assignmentModalClose">×</button>
+                <h2 class="modalHeading">Disclaimer</h2>
+            </div>
+            <br />
+
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+            @Html.Hidden("taskId", (object)ViewBag.task)
+            @Html.Hidden("DependantID", (object)ViewBag.DependantID)
+            @Html.Hidden("id", (object)ViewBag.id)
+            @Html.Hidden("template", (object)ViewBag.templateID)
+
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+            <table class="table disclaimerTable">
+                <tr>
+                    <th style="text-align: center!important">
+                        @Html.DisplayName("No")
+                    </th>
+                    <th>
+                        @Html.DisplayName("Action")
+                    </th>
+                    <th style="width:110px!important">
+
+                    </th>
+                    <th id="confirmationCheckHeader" class="hidden">
+                        @Html.DisplayName("Confirmation")
+                    </th>
+
+                </tr>
+                @foreach (var item in Model)
+                {
+                <tr>
+                    <td style="text-align: center!important">
+                        @Html.DisplayFor(modelItem => item.QuestionNo)
+                    </td>
+                    <td style="text-indent: 0px!important">
+                        @Html.DisplayFor(modelItem => item.Question)
+                    </td>
+
+                    @if (item.Answer)
+                    {
+                        <td class="questionnarieRadio" id="answerFollow">
+                            @Html.RadioButton(item.QuestionnaireTemplateID.ToString(), true, new { @id = item.QuestionnaireTemplateID, @style = "margin-left: 10px", @required = "required", @class="stuff" }) Yes
+                            @Html.RadioButton(item.QuestionnaireTemplateID.ToString(), false, new { @id = item.QuestionnaireTemplateID }) No
+
+                            @Html.ValidationMessage(item.QuestionnaireTemplateID.ToString(), "", new { @class = "text-danger" })
+                        </td>
+                    }
+                    else
+                    {
+                        <td></td>
+                    }
+
+                    @*<td class="questionnaireCheck" id="checkCheck" style="width: 150px">
+            <input type="checkbox" class="checkbox" checked="" id="@item.QuestionnaireTemplateID" name="@item.QuestionnaireTemplateID" />
+        </td>*@
+
+
+
+                </tr>
+                }
+
+            </table>
+
+
+            <table class="disclaimerAcknowledgement">
+                <tr>
+                    <td style="width:1120px!important; border-top:none!important">
+                        <p>I hearby acknowledge that I have heard and understood the responsibilities and requirements as per the Halocare disclaimer which has been discussed telephonically with me!</p>
+                    </td>
+                    <td style="margin: auto!important; border-top:none!important">
+                        <input type="checkbox" id="select_all" name="disclaimerCheckbox" value="true" class="checkYes" required />
+                        @Html.ValidationMessage("select_all", "", new { @class = "text-danger" })
+
+                    </td>
+                </tr>
+            </table>
+
+            <br />
+
+            <div class="form-group">
+                <div class="actionButton" style="margin-left: 45%">
+                    <input type="submit" id="submit" value="Save" class="btn buttonRound_formCreate" style="width: 15%!important" />
+                    @*<button type="button" class="btn buttonRound_formClose" data-dismiss="modal" style="width: 15%!important;">Close</button>*@
+                </div>
+            </div>
+            <br />
+        </div>
+    }
+
+</div>
+
+@section Scripts {
+    <script src="~/bundles/jqueryval"></script>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+
+    @if (ViewBag.Message != null)
+    {
+
+        <script type="text/javascript">
+
+        window.onload = function () {
+            toastr.options.positionClass = 'toast-bottom-right';
+            toastr.options.timeOut = 5000;
+
+            toastr.error("@ViewBag.Message");
+
+            //toastr.options = {
+            //    "closeButton": true,
+            //    "debug": false,
+            //    "newestOnTop": false,
+            //    "progressBar": false,
+            //    "positionClass": "toast-bottom-right",
+            //    "preventDuplicates": false,
+            //    "onclick": null,
+            //    "showDuration": "500",
+            //    "hideDuration": "1000",
+            //    "timeOut": "5000",
+            //    "extendedTimeOut": "1000",
+            //    "showEasing": "swing",
+            //    "hideEasing": "linear",
+            //    "showMethod": "fadeIn",
+            //    "hideMethod": "fadeOut"
+            //};
+
+        }
+        </script>
+    }
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            $("#submit").click(function () {
+                var chkinput = document.getElementById("select_all");
+                if (chkinput.checked) {
+                    alert("Success");
+                }
+                else {
+                    alert("Disclaimer acknowledgment required");
+                }
+            });
+        });
+
+        $(document).ready(function () {
+            $('#select_all').on('click', function () {
+                if (this.checked) {
+                    $('.checkbox').each(function () {
+                        this.checked = true;
+                    });
+                    $('.checkNo').each(function () {
+                        this.checked = false;
+                    });
+
+                } else {
+                    $('.checkbox').each(function () {
+                        this.checked = false;
+                    });
+                }
+            });
+
+            $('.checkbox').on('click', function () {
+                if ($('.checkbox:checked').length == $('.checkbox').length) {
+                    $('#select_all').prop('checked', true);
+                } else {
+                    $('#select_all').prop('checked', false);
+                }
+            });
+        });
+
+        //When checkBox is checked, yes/no questions default to YES
+        //$(document).ready(function () {
+        //    $('#select_all').on('click', function () {
+        //        if (this.checked) {
+        //            $('.stuff').each(function () {
+        //                this.checked = true;
+        //            });
+        //        } else {
+        //            $('.stuff').each(function () {
+        //                this.checked = false;
+        //            });
+        //        }
+        //    });
+
+        //});
+
+    </script>
+
+
+
+
+    <script>
+
+        $('input[type=checkbox]').removeAttr('checked');
+
+
+        $(document).ready(function () {
+            var dateNewFormat, onlyDate, today = new Date();
+
+            dateNewFormat = today.getFullYear() + '-';
+            if (today.getMonth().length == 2) {
+
+                dateNewFormat += (today.getMonth() + 1);
+            }
+            else {
+                dateNewFormat += '0' + (today.getMonth() + 1);
+            }
+
+            onlyDate = today.getDate();
+            if (onlyDate.toString().length == 2) {
+
+                dateNewFormat += "-" + onlyDate;
+            }
+            else {
+                dateNewFormat += '-0' + onlyDate;
+            }
+
+            $('#createDate').val(dateNewFormat);
+            $('#modifiedDate').val(dateNewFormat);
+
+
+        });
+
+
+    </script>
+
+}

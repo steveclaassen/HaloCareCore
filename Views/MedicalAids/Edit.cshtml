@@ -1,0 +1,661 @@
+﻿@model HaloCareCore.Models.MedicalAidViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Edit";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<comment>
+    <!--
+        27 May 2020 -- HCare-1044(Confidentiality field & usage of field to be checked and removed (Medical scheme screen))
+        Removed confidential checkbox as per SR - followed the create and edit methods to see if checkbox triggers any backend functions. Did not find anything.
+
+        16 July 2020 -- HCare-1105(Medical Aid Account)
+        Added the Medical Aid account to assist seperation of the production reports. Discussion with Margo - This is to be managed by the development team as the information linked to the account is
+        too crucial.
+    -->
+</comment>
+<javascript>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet" />
+    <link href='http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.min.css' rel='stylesheet' type='text/css'>
+</javascript>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .field-validation-error:before {
+        font-family: FontAwesome;
+        content: "\f06a\00a0";
+        animation: pulse 2s ease infinite;
+    }
+
+    .field-validation-valid {
+        display: none;
+    }
+
+    .validation-summary-valid {
+        display: none;
+    }
+
+    .error-alert {
+        width: 100%;
+        margin: 0 auto;
+        background-color: rgba(217, 83, 79, 0.1);
+        padding: 10px;
+        border-left-color: #d9534f !important;
+        border: 1px solid transparent;
+        border-left-width: 5px;
+        border-radius: 3px;
+        margin: 0 auto;
+        font-family: 'Open Sans', sans-serif;
+        font-size: 12px;
+        margin: 0 0 5px 0;
+        margin-top: -10px;
+        margin-bottom: 20px;
+    }
+
+        .error-alert span {
+            color: #d9534f;
+            text-align: center;
+        }
+
+    .heading-detail {
+        font-family: 'Century Gothic' !important;
+        font-size: 14px;
+        font-weight: bold;
+        color: dimgray;
+        margin-left: 3% !important;
+    }
+
+    .label-detail {
+        font-family: 'Century Gothic' !important;
+        font-size: 14px;
+        font-weight: bold;
+        color: dimgray;
+        margin-left: 10% !important;
+    }
+
+    .paragraph-detail {
+        font-family: 'Century Gothic' !important;
+        font-size: 12px;
+        color: dimgray;
+        margin-left: 3% !important;
+    }
+
+    .paragraph-label-detail {
+        font-family: 'Century Gothic' !important;
+        font-size: 10px;
+        color: dimgray;
+        margin-left: 10% !important;
+    }
+
+    .text-divider {
+        margin: 0 0;
+        line-height: 0;
+        text-align: center;
+    }
+
+        .text-divider span {
+            background-color: rgba(254, 254, 254, 1);
+            padding-left: 1em;
+            padding-right: 1em;
+        }
+
+        .text-divider:before {
+            content: " ";
+            display: block;
+            border-top: 1px solid rgba(204, 204, 204, 0.50);
+            border-bottom: 1px solid transparent;
+            width: 96%;
+            margin-left: 1.5%;
+        }
+</style>
+
+<div class="fullScreen_container zero-padding">
+    <!--pageHeader-->
+    <nav id="global-nav" class="nav">
+        <div class="pull-left title">
+            <h1 class="site-title_patientProfile">
+                <span><i class="fas fa-plus-square"></i>&emsp; Medical scheme</span>
+            </h1>
+        </div>
+        <div class="pull-right title">
+            <h1 class="site-title_userID pull-right">
+                <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+            </h1>
+            <h1 class="site-title_userID pull-right">
+                @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                {
+                    <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                }
+            </h1>
+            <h1 class="site-waffleIcon pull-right">
+                <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+            </h1>
+        </div>
+    </nav>
+    <!--breadCrumbs-->
+    <ul class="breadcrumbs_fullScreens">
+        <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+        <li><a href="@Url.Action("Index", "Home", new { })">Home</a></li>
+        <li><a href="@Url.Action("Index", "MedicalAids", new { })">Medical scheme</a></li>
+        <li><a href="#">Edit</a></li>
+    </ul>
+    <!--navCollection-->
+    <div class="navCollection_fullScreens">
+        @Html.Partial("_navCollection")
+    </div>
+    <div style="margin-bottom: 1%"></div>
+
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(model => model.medicalAidSettings.Active);
+        @Html.HiddenFor(model => model.medicalAid.MedicalAidID);
+        @Html.HiddenFor(model => model.medicalAidSettings.medicalAidId);
+        @Html.HiddenFor(model => model.medicalAid.AccountCode);
+        @Html.HiddenFor(model => model.MedicalAidClaimCodes.id);
+        @Html.HiddenFor(model => model.MedicalAidClaimCodes.createdBy);
+        <input id="Error" value="@ViewBag.Error" style="display:none" />
+        <input id="m-accountcode" name="m-accountcode" value="@Model.medicalAid.medicalAidCode" type="hidden" />
+
+        <div class="form-horizontal editForm">
+
+            <div class="row">
+                <h4 class="tableHeading">Edit a medical scheme</h4>
+                <hr class="fancyruler">
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                <input type="hidden" name="code-validation" id="code-validation" />
+                <input type="hidden" name="description-validation" id="description-validation" />
+                <input type="hidden" name="carrier-validation" id="carrier-validation" />
+                <div class="col-md-12"><div id="duplicate-code-notice" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; Medical scheme code already exists!</span></div></div></div>
+                <div class="col-md-12"><div id="duplicate-description-notice" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; Medical scheme name already exists!</span></div></div></div>
+                <div class="col-md-12"><div id="account-length-notice" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; Account is restricted to 15 characters!</span></div></div></div>
+                <div class="col-md-12"><div id="carrier-length-notice" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; Carrier is restricted to 10 characters!</span></div></div></div>
+                <div class="col-md-12"><div id="carrier-validation-notice" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; Carrier already exist! </span></div></div></div>
+                <br />
+                <br />
+                <div class="form-group">
+                    @Html.LabelFor(model => model.medicalAid.Name, htmlAttributes: new { @class = "control-label col-md-2 pushx" })
+                    <div class="col-md-3">
+                        @Html.EditorFor(model => model.medicalAid.Name, new { htmlAttributes = new { @class = "infoBox_editMember", @onblur = "CheckName();" } })
+                        @Html.ValidationMessageFor(model => model.medicalAid.Name, "", new { @class = "text-danger" })
+                    </div>
+                    @Html.LabelFor(model => model.medicalAidSettings.overduePathologySms, htmlAttributes: new { @class = "control-label col-md-2 pushx" })
+                    <div class="col-md-3">
+                        @Html.EditorFor(model => model.medicalAidSettings.overduePathologySms, new { htmlAttributes = new { @class = "infoBox_editMember", data_val = "false" } })
+
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.medicalAid.medicalAidCode, htmlAttributes: new { @class = "control-label col-md-2 pushx" })
+                    <div class="col-md-3">
+                        @Html.EditorFor(model => model.medicalAid.medicalAidCode, new { htmlAttributes = new { @class = "infoBox_editMember", @onblur = "CheckCode();" } })
+                        @Html.ValidationMessageFor(model => model.medicalAid.medicalAidCode, "", new { @class = "text-danger" })<br /><br />
+                    </div>
+                    @Html.LabelFor(model => model.medicalAidSettings.overdueScriptSms, htmlAttributes: new { @class = "control-label col-md-2 pushx", @style = "margin-top: 10px;" })
+                    <div class="col-md-3">
+                        @Html.EditorFor(model => model.medicalAidSettings.overdueScriptSms, new { htmlAttributes = new { @class = "infoBox_editMember", @style = "margin-top: 10px;", data_val = "false" } })
+
+                    </div>
+                    @Html.LabelFor(model => model.MedicalAidClaimCodes.claimCode, htmlAttributes: new { @class = "control-label col-md-2 pushx" })
+                    <div class="col-md-3">
+                        @*HCare-1086*@
+                        @Html.EditorFor(model => model.MedicalAidClaimCodes.claimCode, new { htmlAttributes = new { @class = "infoBox_editMember", @style = "margin-top: 10px;", @onblur = "CheckCarrier();", @disabled = "disabled", @readonly = "readonly" } }) @*HCare-1216*@
+                        @Html.ValidationMessageFor(model => model.MedicalAidClaimCodes.claimCode, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.medicalAidSettings.daysForPathology, htmlAttributes: new { @class = "control-label col-md-2 pushx" })
+                    <div class="col-md-3">
+                        @Html.EditorFor(model => model.medicalAidSettings.daysForPathology, new { htmlAttributes = new { @class = "infoBox_editMember", data_val = "false" } })
+
+                    </div>
+                    @Html.Label(null,"HIV pre-approval", htmlAttributes: new { @class = "control-label col-md-2 pushx" })
+                    <div class="col-md-3 check-box_medAid">
+                        @Html.CheckBoxFor(model => model.medicalAidSettings.hivPreAppovalRequired, new { htmlAttributes = new { @class = "infoBox_editMember", data_val = "false" } })
+
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.medicalAidSettings.daysForCommunicationHiv, htmlAttributes: new { @class = "control-label col-md-2 pushx" })
+                    <div class="col-md-3">
+                        @Html.EditorFor(model => model.medicalAidSettings.daysForCommunicationHiv, new { htmlAttributes = new { @class = "infoBox_editMember", data_val = "false" } })
+
+                    </div>
+                    @Html.Label(null,"Authorisation req", htmlAttributes: new { @class = "control-label col-md-2 pushx" })
+                    <div class="col-md-3 check-box_medAid">
+                        @Html.CheckBoxFor(model => model.medicalAidSettings.authRequired, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.Label(null,"G/Chronic communication", htmlAttributes: new { @class = "control-label col-md-2 pushx" })
+                    <div class="col-md-3">
+                        @Html.EditorFor(model => model.medicalAidSettings.daysForCommunicationGen, new { htmlAttributes = new { @class = "infoBox_editMember", data_val = "false" } })
+
+                    </div>
+                    @Html.LabelFor(model => model.medicalAid.titleSync, htmlAttributes: new { @class = "control-label col-md-2 pushx" })
+                    <div class="col-md-3 check-box_medAid">
+                        @Html.CheckBoxFor(model => model.medicalAid.titleSync, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+
+                    </div>
+
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.medicalAid.clCarrier, htmlAttributes: new { @class = "control-label col-md-2 pushx" })
+                    <div class="col-md-3 check-box_Active">
+                        @Html.CheckBoxFor(model => model.medicalAid.clCarrier, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                    </div>
+                    @Html.LabelFor(model => model.medicalAid.sync, htmlAttributes: new { @class = "control-label col-md-2 pushx" })
+                    <div class="col-md-3 check-box_medAid">
+                        @Html.CheckBoxFor(model => model.medicalAid.sync, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+
+                    </div>
+                </div>
+                <!---------------------------------HCare-1193   =---->
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.medicalAidSettings.email, htmlAttributes: new { @class = "control-label col-md-2 pushx" })
+                    <div class="col-md-3">
+                        @Html.EditorFor(model => model.medicalAidSettings.email, new { htmlAttributes = new { @class = "infoBox_editMember", @style = "margin-top: 10px;", @type = "email", @required = "required" } })
+                        @Html.ValidationMessageFor(model => model.medicalAidSettings.email, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <!---------------------------------HCare-1197   =---->
+                <div class="form-group">
+                    @Html.LabelFor(model => model.medicalAidSettings.schemeSubject, htmlAttributes: new { @class = "control-label col-md-2 pushx" })
+                    <div class="col-md-3">
+                        @Html.DropDownListFor(model => model.medicalAidSettings.schemeSubject, new List<SelectListItem>
+                                {
+                                 new SelectListItem() { Text = "HaloCare", Value = "HaloCare"},
+                                 new SelectListItem() { Text = "Prosperity", Value = "Prosperity"}
+                 }, "", new { @class = "infoBox_editMember", @id = "schemeSubject", @required = "required" })
+                        @Html.ValidationMessageFor(model => model.medicalAidSettings.schemeSubject, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <!-----Hcare-1175-->
+                <div class="form-group">
+                    @Html.Label(null,"Referral(s) to:", htmlAttributes: new { @class = "control-label col-md-2 pushx" })
+                    <div class="col-md-3">
+                        @Html.ListBox("selectedReferals", ViewBag.referalID as MultiSelectList, new { @class = "infoBox_editMember" })
+                        @*@Html.DropDownList("Agents", new SelectList(ViewBag.Agents, "referral", "referral", 2))*@
+                    </div>
+                </div>
+                <br />
+                <div class="form-group">
+                    @Html.LabelFor(model => model.medicalAid.Active, htmlAttributes: new { @class = "control-label col-md-2 pushx" })
+                    <div class="col-md-3 check-box_Active">
+                        @Html.CheckBoxFor(model => model.medicalAid.Active, new { htmlAttributes = new { @class = "infoBox_editMember", data_val = "false" } })
+                        @Html.ValidationMessageFor(model => model.medicalAid.Active, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.medicalAid.riskRules, htmlAttributes: new { @class = "control-label col-md-2 pushx" })
+                    <div class="col-md-3 check-box_Active">
+                        @Html.CheckBoxFor(model => model.medicalAid.riskRules, new { htmlAttributes = new { @class = "infoBox_editMember", data_val = "false" } })
+
+                    </div>
+                </div>
+                <!--HCare-937-->
+                @*<div class="form-group">
+                        @Html.LabelFor(model => model.medicalAid.reporting, htmlAttributes: new { @class = "control-label col-md-2 pushx" })
+                        <div class="col-md-3 check-box_Active">
+                            @Html.CheckBoxFor(model => model.medicalAid.reporting, new { htmlAttributes = new { @class = "infoBox_editMember", data_val = "false" } })
+
+                        </div>
+                    </div>*@
+                <!--HCare-864-->
+                <div class="form-group">
+                    @Html.LabelFor(model => model.medicalAid.disclaimer, htmlAttributes: new { @class = "control-label col-md-2 pushx" })
+                    <div class="col-md-3 check-box_Active">
+                        @Html.CheckBoxFor(model => model.medicalAid.disclaimer, new { htmlAttributes = new { @class = "infoBox_editMember", data_val = "false" } })
+                    </div>
+                </div>
+
+                <br />
+                <br />
+                <h class="heading-detail">Reporting setup</h>
+                <h4 class="tableDivider-heading text-divider"></h4>
+                <br />
+                <div class="form-group">
+                    <div class="col-md-12">
+                        <div class="col-md-2">
+                            <h class="label-detail">Production</h>
+                            <p class="paragraph-label-detail">Daily, weekly, monthly production reports.</p>
+                        </div>
+                        <div class="col-md-3 check-box_medAid">
+                            @Html.CheckBoxFor(model => model.medicalAid.Production, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-12">
+                        <div class="col-md-2">
+                            <h class="label-detail">Extracts</h>
+                            <p class="paragraph-label-detail">Monthly patient extract.</p>
+                        </div>
+                        <div class="col-md-3 check-box_medAid">
+                            @Html.CheckBoxFor(model => model.medicalAid.Extracts, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-12">
+                        <div class="col-md-2">
+                            <h class="label-detail">Imports</h>
+                            <p class="paragraph-label-detail">Data imported via CL importer</p>
+                        </div>
+                        <div class="col-md-3 check-box_medAid">
+                            @Html.CheckBoxFor(model => model.medicalAid.Imports, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-12">
+                        <div class="col-md-2">
+                            <h class="label-detail">Exports</h>
+                            <p class="paragraph-label-detail">Risk rating, Notes etc.</p>
+                        </div>
+                        <div class="col-md-3 check-box_medAid">
+                            @Html.CheckBoxFor(model => model.medicalAid.Exports, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-12">
+                        <div class="col-md-2">
+                            <h class="label-detail">Advanced search</h>
+                            <p class="paragraph-label-detail">Advanced search bi-monthly report.</p>
+                        </div>
+                        <div class="col-md-3 check-box_medAid">
+                            @Html.CheckBoxFor(model => model.medicalAid.AdvancedSearch, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+            <br />
+            <br />
+
+            <table class="table riskRatingTable sortable" id="aTable">
+                <tr>
+                    <th style="text-align: center!important">
+                        @Html.DisplayNameFor(model => Model.Programs[0].Active)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => Model.Programs[0].program)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => Model.Programs[0].codeType)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => Model.Programs[0].referralFrom)
+                    </th>
+                </tr>
+
+                @for (int i = 0; i < Model.Programs.Count(); i++)
+                {
+                    <tr>
+                        @Html.HiddenFor(model => Model.Programs[i].medicalAidId)
+                        @Html.HiddenFor(model => Model.Programs[i].id)
+                        @Html.HiddenFor(model => Model.Programs[i].program)
+                        @Html.HiddenFor(model => Model.Programs[i].codeType)
+
+
+                        <td class="accountCheck">
+                            @Html.EditorFor(model => Model.Programs[i].Active)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(model => Model.Programs[i].program)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(model => Model.Programs[i].codeType)
+                        </td>
+                        <td class="accountCheck">
+                            @if (Model.Programs[i].referralFrom != null)
+                            {
+                                @Html.ListBoxFor(x => x.Programs[i].referralFrom, new MultiSelectList(Model.referralFrom, "referral", "referral", Model.Programs[i].referralFrom.Split(',')), new { @class = "js-select2" })
+                            }
+                            else
+                            {
+                                @Html.ListBoxFor(x => x.Programs[i].referralFrom, new MultiSelectList(Model.referralFrom, "referral", "referral"), new { @class = "js-select2" })
+
+                            }
+                        </td>
+                    </tr>
+                }
+
+            </table>
+
+            <br />
+            <div class="centered-btn">
+                <input id="submit" type="submit" value="Submit" class="btn create-button" style="width: 15%" onclick="claimingCodeValidation();" /><br />
+                <input type="text" value="Back" class="btn reset-button go_back" />
+            </div>
+
+
+            @*<div class="fixedBack">
+                    <input value="Back" class="btn buttonRound_formBack go_back" style="width: 15%!important" />
+                    <input id="submit" type="submit" value="Save" class="btn buttonRound_formCreate" style="width: 15%!important" />
+                </div>*@
+
+        </div>
+    }
+
+</div>
+
+<script src="js/jquery.tablesorter.min.js"></script>
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+
+@section scripts{
+    <script type="text/javascript">
+        var message = document.getElementById("Error").value;
+        if (message != '') {
+            window.onload = function () {
+                toastr.options.positionClass = 'toast-bottom-right';
+                toastr.options.timeOut = 5000;
+                toastr.error(message);
+            }
+        }
+        $(function () {
+            $('.go_back').click(function (e) {
+                window.location.href = "@Url.Action("IndexVM", "MedicalAids")";
+            });
+        });
+    </script>
+    <script>
+        function CheckCode() {
+            var id = $('#medicalAid_MedicalAidID').val();
+            id = id.trim();
+            var code = $('#medicalAid_medicalAidCode').val();
+            code = code.trim();
+            $("#code-validation").val("");
+            $("#duplicate-code-notice").addClass("hidden");
+            $(':input[type="submit"]').prop('disabled', false); //hcare-1292
+
+            var count = $("#medicalAid_medicalAidCode").val().length;
+            if (count > 15) {
+                $("#account-length-notice").removeClass("hidden");
+            }
+            else {
+                $("#account-length-notice").addClass("hidden");
+                $('span[data-valmsg-for="medicalAid.medicalAidCode"]').html('');
+            }
+
+            $.ajax({
+                url: '/MedicalAids/MedicalAidCodeCheck',
+                type: "POST",
+                dataType: "JSON",
+                data: { code: code },
+                success: function (result) {
+                    var cod3 = result.medicalAidCode;
+                    var mid = result.MedicalAidID;
+                    if (mid + '-' + cod3.toLowerCase() == id + '-' + code.toLowerCase()) { }
+                    if (cod3.toLowerCase() == code.toLowerCase() && mid != id) {
+                        $("#duplicate-code-notice").removeClass("hidden");
+                        $('span[data-valmsg-for="medicalAid.medicalAidCode"]').html('<span style="font-size: 12px"><i class="fas fa-exclamation-circle"></i> </span>Code already exists!');
+                        $("#code-validation").val(cod3);
+                        $(':input[type="submit"]').prop('disabled', true);
+                    }
+                },
+                error: function (result) {
+                    $("#duplicate-code-notice").addClass("hidden");
+                    $(':input[type="submit"]').prop('disabled', false);
+                    //$('span[data-valmsg-for="medicalAid.medicalAidCode"]').html('');
+                }
+            });
+        }
+
+        $("#submit").click(function () {
+            if ($("#code-validation").val().length > 0) {
+                $("#medicalAid_medicalAidCode").focus();
+                $(window).scrollTop(0);
+                return false;
+            }
+        });
+    </script>
+    <script>
+        function CheckName() {
+            var id = $('#medicalAid_MedicalAidID').val();
+            id = id.trim();
+            var name = $('#medicalAid_Name').val();
+            name = name.trim();
+            $("#description-validation").val("");
+            $("#duplicate-description-notice").addClass("hidden");
+
+            $.ajax({
+                url: '/MedicalAids/MedicalAidNameCheck',
+                type: "POST",
+                dataType: "JSON",
+                data: { name: name },
+                success: function (result) {
+                    var description = result.Name;
+                    var mid = result.MedicalAidID;
+                    if (mid + '-' + description.toLowerCase() == id + '-' + name.toLowerCase()) { }
+                    if (description.toLowerCase() == name.toLowerCase() && mid != id) {
+                        $("#duplicate-description-notice").removeClass("hidden");
+                        $('span[data-valmsg-for="medicalAid.Name"]').html('<span style="font-size: 12px"><i class="fas fa-exclamation-circle"></i> </span>Description already exists!');
+                        $("#description-validation").val(description);
+                        $(':input[type="submit"]').prop('disabled', true);
+                    }
+                },
+                error: function (result) {
+                    $('span[data-valmsg-for="medicalAid.Name"]').html('');
+                    $("#duplicate-description-notice").addClass("hidden");
+                    $(':input[type="submit"]').prop('disabled', false);
+                }
+            });
+        }
+
+        $("#submit").click(function () {
+            if ($("#description-validation").val().length > 0) {
+                $("#medicalAid_Name").focus();
+                $(window).scrollTop(0);
+
+                return false;
+            }
+        });
+    </script>
+    <script>
+        // hcare-1216 // hcare-1298
+        function CheckCarrier() {
+
+            var count = $("#MedicalAidClaimCodes_claimCode").val().length;
+            if (count > 10) {
+                $("#carrier-length-notice").removeClass("hidden");
+            }
+            else {
+                $("#carrier-length-notice").addClass("hidden");
+            }
+            var name = $('#MedicalAidClaimCodes_claimCode').val();
+            name = name.trim();
+            var m_code = $('#m-accountcode').val();
+            m_code = m_code.trim();
+
+            $("#carrier-validation").val("");
+
+            $.ajax({
+                url: '/MedicalAids/CarrierCodeCheck',
+                type: "POST",
+                dataType: "JSON",
+                data: { name: name },
+                success: function (result) {
+
+                    var description = result.claimCode;
+                    var code = result.medicalAidCode;
+
+                    if (description.toLowerCase() == name.toLowerCase() && code != m_code) {
+                        $("#carrier-validation-notice").removeClass("hidden");
+                        $('span[data-valmsg-for="MedicalAidClaimCodes.claimCode"]').html('<span style="font-size: 12px"><i class="fas fa-exclamation-circle"></i> </span>Carrier code already exists!');
+                        $("#carrier-validation").val(description);
+                        $(':input[type="submit"]').prop('disabled', true);
+                    }
+                    else {
+                        $('span[data-valmsg-for="MedicalAidClaimCodes.claimCode"]').html('');
+                        $("#carrier-validation-notice").addClass("hidden");
+                        $(':input[type="submit"]').prop('disabled', false);
+                    }
+                },
+                error: function (result) {
+                    console.log(result.claimCode);
+                    $('span[data-valmsg-for="MedicalAidClaimCodes.claimCode"]').html('');
+                    $("#carrier-validation-notice").addClass("hidden");
+                    $(':input[type="submit"]').prop('disabled', false);
+                }
+            });
+        }
+
+        $("#submit").click(function () {
+            if ($("#carrier-validation").val().length > 0) {
+                $("#MedicalAidClaimCodes_claimCode").focus();
+                return false;
+            }
+        });
+
+    </script>
+
+    @*<script>
+            function CheckCarrier() {
+
+                var count = $("#MedicalAidClaimCodes_claimCode").val().length;
+                if (count > 10) {
+                    $("#carrier-length-notice").removeClass("hidden");
+                }
+                else {
+                    $("#carrier-length-notice").addClass("hidden");
+                }
+            }
+
+        </script>*@
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            //$('#referalID').find(':selected');
+            $("#referalID").select2({ multiple: true, allowClear: true });
+            $("#selectedReferals").select2({ multiple: true, allowClear: true });
+            $(document).ready(function () { $("#schemeSubject").select2({ placeholder: "--Select--", allowClear: true }); });
+            $(document).ready(function () { $("#referralFrom").select2({ multiple: true, placeholder: "--Select--", allowClear: false }); });
+
+            $('.js-select2').select2({ multiple: true, allowClear: true });
+        });
+    </script>
+}
+

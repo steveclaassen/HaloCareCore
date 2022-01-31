@@ -1,0 +1,345 @@
+﻿@model HaloCareCore.Models.ViewModels.SchemeOptionViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<comment>
+    <!--
+    03 December 2019 -- HCare-905(LINKED TO HCARE-134: Module 2 - Create an Scheme Option master screen)
+    Created settings functionality for Scheme options allowing user to Create, Read, Update and Delete scheme options as well link these options to the schemes.
+    The validation will limit you from adding more than 10 characters to the code and will validate against previously used names as well as codes.
+    The user will access the Scheme Options/Plans via the Settings page / Medical scheme icon and the second tab is linked to the Scheme options.
+        -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+</style>
+<javascript>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js"></script>
+    <script src="https://www.jqueryscript.net/demo/jQuery-Plugin-For-Sortable-Bootstrap-Tables-Bootstrap-Sortable/Scripts/bootstrap-sortable.js"></script>
+</javascript>
+
+<div class="fullScreen_container">
+    <!----------------------------------------------------------------------------- html-top-navigation-panel  ---------------------------------------------------------------------------->
+    <navigation>
+        <nav id="global-nav" class="nav">
+            <div class="pull-left title">
+                <h1 class="site-title_patientProfile">
+                    <span><i class="fas fa-plus-square"></i>&emsp; Medical scheme</span>
+                </h1>
+            </div>
+            <div class="pull-right title">
+                <div class="site-title_userID pull-right">
+                    <div class="halocareLogoX"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+                </div>
+                <h1 class="site-title_userID pull-right">
+                    @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                    {
+                        <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                    }
+                </h1>
+                <h1 class="site-waffleIcon pull-right">
+                    <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+                </h1>
+            </div>
+        </nav>
+        <ul class="breadcrumbs_fullScreens">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+            <li><a href="@Url.Action("Index", "Administration", new {})">Settings</a></li>
+            <li><a href="#">Medical scheme</a></li>
+        </ul>
+        <div class="navCollection_fullScreens">
+            @Html.Partial("_navCollection")
+        </div>
+
+        <div style="margin-bottom: 3%"></div>
+    </navigation>
+    <!-------------------------------------------------------------------------------------- html-body ------------------------------------------------------------------------------------>
+    <div class="container-tab">
+        <div class="row">
+            <div class="span12">
+                <div class="container-tab">
+                    <!------------------------------------------------------------------------------------ tab-navigation ----------------------------------------------------------------------------------->
+                    <ul class="nav nav-pills nav-justified" role="tablist">
+                        <li role="presentation" class="tab-clinical active"><a href="#medicalAid" aria-controls="medicalAid" class="tab-label" data-toggle="tab" id="medical_aid">Medical schemes</a></li>
+                        <li role="presentation" class="tab-clinical"><a href="#medicalPlan" aria-controls="medicalPlan" class="tab-label" role="tab" data-toggle="tab" id="medical_plan">Medical scheme plans</a></li>
+                    </ul>
+                    <!-------------------------------------------------------------------------------------- tab-panels ------------------------------------------------------------------------------------->
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="medicalAid">
+                            <div class="row">
+                                <br />
+                                <!--------------------------------------------------------------------------- new/search -------------------------------------------------------------------------->
+                                <div class="col-md-12 row">
+                                    <div class="col-md-6">
+                                        <h4 class="subHeading">
+                                            Medical scheme overview
+                                            <a class="create-new" href="@Url.Action("Create", "MedicalAids", new { })" style="font-size: 14px">Create new <span><i class="fa fa-plus-circle" style="font-size: 12px"></i></span></a>
+                                        </h4>
+                                    </div>
+                                    <!--------------------------------------------------------------------------- jq-search -------------------------------------------------------------------------->
+                                    <div class="col-md-6">
+                                        <div class="input-wrapper-new-search">
+                                            <input type="text" class="form-control-new-search" id="aitSearch" onkeyup="myFunction()" placeholder="Search..." />
+                                        </div>
+                                    </div>
+                                </div>
+                                <!------------------------------------------------------------------------ medical-aid-table ---------------------------------------------------------------------->
+                                <table class="table settings-table sortable" id="aitemTable">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 2.5%; background-color: transparent; border-left: none; border-right: none; border-bottom: none"></th>
+                                            <th style="width: 10%">@Html.DisplayNameFor(model => model.MedicalAidList[0].MedicalAidCode) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="width: 55%">@Html.DisplayNameFor(model => model.MedicalAidList[0].MedicalAidName) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="text-align: center!important; width: 8%">@Html.DisplayNameFor(model => model.MedicalAidList[0].CLCarrier)</th>
+                                            <th style="text-align: center!important; width: 8%">@Html.DisplayNameFor(model => model.MedicalAidList[0].Active)</th>
+                                            <th style="text-align: center!important; width: 8%">Action</th>
+                                        </tr>
+                                    </thead>
+
+                                    @foreach (var item in Model.MedicalAidList)
+                                    {
+                                        <tbody id="medical-aid-search">
+                                            <tr>
+                                                <td class="row-information" style="border-left: none; border-right: none; border-top: none; border-bottom: none"><span style="font-size: 6px" class="@(item.UserAccess == true ? "chk-followup fas fa-circle" : "chk-null fas fa-circle")"></span></td>
+                                                <td class="text-left"><span class="@(item.Active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.MedicalAidCode)</span></td>
+                                                <td class="text-left"><span class="@(item.Active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.MedicalAidName)</span></td>
+                                                <td class="row-information text-center"><span class="@(item.CLCarrier == true ? "chk-yes fas fa-circle" : "chk-null fas fa-circle")"></span></td>
+                                                <td class="row-information text-center"><span class="@(item.Active == true ? "chk-yes fas fa-circle" : "chk-no fas fa-circle")"></span></td>
+                                                <td class="text-center">
+                                                    <input type="submit" class="link-button" value="View" onclick="location.href='@Url.Action("Details", "MedicalAids", new { id = item.MedicalAidId})'" /> /
+                                                    <input type="submit" class="link-button" value="Edit" onclick="location.href='@Url.Action("Edit", "MedicalAids", new { id = item.MedicalAidId})'" />
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    }
+
+                                </table>
+                            </div>
+                        </div>
+                        <div role="tabpanel" class="tab-pane" id="medicalPlan">
+                            <div class="row">
+                                <br />
+                                <!--------------------------------------------------------------------------- new/search -------------------------------------------------------------------------->
+                                <div class="col-md-12 row">
+                                    <div class="col-md-6">
+                                        <h4 class="subHeading">
+                                            Medical scheme plan overview
+                                            <a class="create-new" href="@Url.Action("SchemeOption_Create", "MedicalAids", new { })" style="font-size: 14px">Create new <span><i class="fa fa-plus-circle" style="font-size: 12px"></i></span></a>
+                                        </h4>
+                                    </div>
+                                    <!--------------------------------------------------------------------------- jq-search -------------------------------------------------------------------------->
+                                    <div class="col-md-6">
+                                        <div class="input-wrapper-new-search">
+                                            <input type="text" class="form-control-new-search" id="search" onkeyup="myFunction()" placeholder="Search..." />
+                                        </div>
+                                    </div>
+                                </div>
+                                <!------------------------------------------------------------------------ medical-plan-table ---------------------------------------------------------------------->
+                                <table class="table settings-table sortable" id="emTable">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 10%">@Html.DisplayNameFor(model => model.medicalAidVM.MedicalAidName) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="width: 10%">@Html.DisplayNameFor(model => model.medicalAidVM.PlanCode) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="width: 50%">@Html.DisplayNameFor(model => model.medicalAidVM.PlanName) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="text-align: center!important; width: 8%">@Html.DisplayNameFor(model => model.medicalAidVM.Active) </th>
+                                            <th style="text-align: center!important; width: 8%">Action</th>
+                                        </tr>
+                                    </thead>
+
+                                    @foreach (var item in Model.medicalAidVMs)
+                                    {
+                                        <tbody id="medical-aid-plan-search">
+                                            <tr>
+                                                <td class="text-left"><span class="@(item.Active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.MedicalAidName)</span></td>
+                                                <td class="text-left"><span class="@(item.Active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.PlanCode)</span></td>
+                                                <td class="text-left"><span class="@(item.Active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.PlanName)</span></td>
+                                                <td class="row-information text-center"><span class="@(item.Active == true ? "chk-yes fas fa-circle" : "chk-no fas fa-circle")"></span></td>
+                                                <td class="text-center">
+                                                    <input type="submit" class="link-button" value="View" onclick="location.href='@Url.Action("SchemeOption_Details", "MedicalAids", new { id = item.Id })'" /> /
+                                                    <input type="submit" class="link-button" value="Edit" onclick="location.href='@Url.Action("SchemeOption_Edit", "MedicalAids", new { id = item.Id})'" />
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    }
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixedBack">
+        <input value="Back" class="btn buttonRound_formBack " onclick="MainbackBtn();" style="width: 15%" />
+    </div>
+</div>
+
+<script src="js/jquery.tablesorter.min.js"></script>
+
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <script>
+        /*goBack*/
+            function MainbackBtn() {
+            window.location.href = '@Url.Action("Index", "Administration")';
+        }
+
+        /*medical-aid-search*/
+        $(document).ready(function () {
+            $("#aitSearch").on("keyup", function () {
+                var value = $(this).val().toLowerCase();
+                $("#medical-aid-search tr").filter(function () {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+            });
+        });
+    </script>
+    <script>
+        function maTable(n) {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("maTable");
+            switching = true;
+            dir = "asc";
+
+            while (switching) {
+                switching = false;
+                rows = table.getElementsByTagName("TR");
+
+                for (i = 1; i < (rows.length - 1); i++) {
+
+                    shouldSwitch = false;
+
+                    x = rows[i].getElementsByTagName("TD")[n];
+                    y = rows[i + 1].getElementsByTagName("TD")[n];
+
+                    if (dir == "asc") {
+                        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                            //if so, mark as a switch and break the loop:
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (dir == "desc") {
+                        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                            //if so, mark as a switch and break the loop:
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+                if (shouldSwitch) {
+                    /*If a switch has been marked, make the switch
+                    and mark that a switch has been done:*/
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                    //Each time a switch is done, increase this count by 1:
+                    switchcount++;
+                } else {
+                    /*If no switching has been done AND the direction is "asc",
+                    set the direction to "desc" and run the while loop again.*/
+                    if (switchcount == 0 && dir == "asc") {
+                        dir = "desc";
+                        switching = true;
+                    }
+                }
+            }
+        }
+    </script>
+    <script type="text/javascript">
+        /*openTable tableSearch*/
+        var $rows = $('#medical-aid-plan-search tr');
+        $('#search').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $rows.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+
+        /*openTable TableSorting*/
+        function emTable(n) {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("emTable");
+            switching = true;
+            dir = "asc";
+
+            while (switching) {
+                switching = false;
+                rows = table.getElementsByTagName("TR");
+
+                for (i = 1; i < (rows.length - 1); i++) {
+
+                    shouldSwitch = false;
+
+                    x = rows[i].getElementsByTagName("TD")[n];
+                    y = rows[i + 1].getElementsByTagName("TD")[n];
+
+                    if (dir == "asc") {
+                        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (dir == "desc") {
+                        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+                if (shouldSwitch) {
+
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+
+                    switchcount++;
+                } else {
+
+                    if (switchcount == 0 && dir == "asc") {
+                        dir = "desc";
+                        switching = true;
+                    }
+                }
+            }
+        }
+    </script>
+    <!--redirect-->
+    <script>
+        //create
+        $(document).ready(function () {
+            if (localStorage.key(0) == "create_medicalPlan") {
+                $("#medical_plan").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("create_medicalPlan");
+            }
+        });
+        //edit
+        $(document).ready(function () {
+            if (localStorage.key(0) == "edit_medicalPlan") {
+                $("#medical_plan").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("edit_medicalPlan");
+            }
+        });
+        //back
+        $(document).ready(function () {
+            if (localStorage.key(0) == "back_medicalPlan") {
+                $("#medical_plan").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("back_medicalPlan");
+            }
+        });
+
+    </script>
+}
+

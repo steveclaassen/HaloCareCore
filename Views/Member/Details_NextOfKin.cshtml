@@ -1,0 +1,132 @@
+﻿@model HaloCareCore.Models.Patient.NextOFKin
+@using HaloCareCore.Extensions
+
+@{
+    ViewBag.Title = "Next of kin";
+    Layout = "~/Views/Shared/_layout-view-x.cshtml";
+}
+
+<comment>
+    <!-- 12 Jul 2021 - hcare-1361 -->
+</comment>
+<style>
+    .field-validation-error:before {
+        font-family: FontAwesome;
+        content: "\f06a\00a0";
+        animation: pulse 2s ease infinite;
+    }
+</style>
+
+<div class="collapse in">
+    <div class="card card-body">
+        <div class="collapse-body">
+            <div class="search-information-data-panel">
+                <!---------------------------------------------------------------------------------- html-navigation ---------------------------------------------------------------------------------->
+                <navigation>
+                    <!-------------------------------------------------------------------------- bread-crumbs ------------------------------------------------------------------------->
+                    <ul class="bread-crumbs-full-screen" style="        color: #808080 !important;">
+                        <li style="font-size: 10px; font-weight: 600">You are here:</li>
+                        <li><a href="@Url.Action("Index", "Home" , new { })">Home</a></li>
+                        <li><a href="@Url.Action("patientCommunication", "Member", new { DependentID = Model.DependantID, pro = Model.ProgramID })">Patient</a></li>
+                        <li><a href="#">@ViewBag.Title</a></li>
+                    </ul>
+
+                    <!------------------------------------------------------------------------- nav-collection ------------------------------------------------------------------------>
+                    <div>
+                        @Html.Partial("_navCollection")
+                    </div>
+                </navigation>
+                <!-------------------------------------------------------------------------------------- html-body ------------------------------------------------------------------------------------>
+                <div class="container-tab">
+                    <div class="row">
+                        <br />
+                            <div class="hidden-fields">
+                                @Html.AntiForgeryToken()
+                                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                                @Html.HiddenFor(model => model.DependantID)
+                                @Html.HiddenFor(model => model.ProgramID)
+                                @Html.HiddenFor(model => model.CreatedDate)
+                                @Html.HiddenFor(model => model.CreatedBy)
+                            </div>
+                            <div class="col-md-12 row">
+                                <div class="heading-spacer"></div>
+                                <div class="col-md-6"><div class="page-heading">Details</div></div>
+                                <hr class="heading-ruler">
+                            </div>
+                            <div class="col-md-6 row"></div>
+                            <div class="col-md-12">
+                                <div class="row">
+                                    <table class="table details-table table-hover" id="dsm5-details">
+                                        <tbody>
+                                            <tr>
+                                                <td class="row-heading subject">@Html.DisplayNameFor(model => model.FirstName)</td>
+                                                <td class="row-information">@Html.DisplayFor(model => model.FirstName)</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="row-heading subject">@Html.DisplayNameFor(model => model.LastName)</td>
+                                                <td class="row-information">@Html.DisplayFor(model => model.LastName)</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="row-heading subject">@Html.DisplayNameFor(model => model.Telephone)</td>
+                                                <td class="row-information">@Html.DisplayFor(model => model.Telephone)</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="row-heading subject">@Html.DisplayNameFor(model => model.Email)</td>
+                                                <td class="row-information">@Html.DisplayFor(model => model.Email)</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="row-heading subject">@Html.DisplayNameFor(model => model.Relation)</td>
+                                                <td class="row-information">@Html.DisplayFor(model => model.Relation)</td>
+                                            </tr>
+
+                                            <tr>
+                                                <td class="row-heading subject">@Html.DisplayNameFor(model => model.CreatedDate)</td>
+                                                <td class="row-information">@Html.DisplayFor(model => model.CreatedDate)</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="row-heading subject">@Html.DisplayNameFor(model => model.CreatedBy)</td>
+                                                <td class="row-information">@Html.DisplayFor(model => model.CreatedBy)</td>
+                                            </tr>
+                                            @if (Model.ModifiedDate != null)
+                                            {
+                                                <tr>
+                                                    <td class="row-heading subject">@Html.DisplayNameFor(model => model.ModifiedDate)</td>
+                                                    <td class="row-information">@Html.DisplayFor(model => model.ModifiedDate)</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="row-heading subject">@Html.DisplayNameFor(model => model.ModifiedBy)</td>
+                                                    <td class="row-information">@Html.DisplayFor(model => model.ModifiedBy)</td>
+                                                </tr>
+                                            }
+                                            <tr>
+                                                <td class="row-heading subject">@Html.DisplayName("Program")</td>
+                                                <td class="row-information">@ViewBag.Program</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="row-heading subject">@Html.DisplayNameFor(model => model.Active)</td>
+                                                <td class="row-information"><span class="@(Model.Active == true ? "chk-yes fas fa-circle" : "chk-no fas fa-circle")"></span>&emsp;@((Model.Active == true) ? "Yes" : "No")</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div class="sf-footer">
+                                <input type="button" id="nok-back" value="Back" class="btn modal-button-previous" onclick="location.href = '@Url.Action("patientCommunication", "Member", new { DependentID = Model.DependantID, pro = Model.ProgramID})'; backKey()" />
+                                <input type="button" id="nok-edit" value="Edit" class="btn modal-button-next" onclick="location.href = '@Url.Action("Edit_NextOfKin", "Member", new { id = Model.Id})'" />
+                            </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script src="~/bundles/jqueryval"></script>
+    <script>
+        function backKey() {
+            localStorage.setItem("back_nok", Date.now());
+        }
+    </script>
+}

@@ -1,0 +1,625 @@
+﻿@model HaloCareCore.Models.DoctorQuestionnaireViewModel
+@{
+    ViewBag.Title = "New Born Questionnaire";
+    Layout = "~/Views/Shared/_LayoutModal.cshtml";
+}
+
+<comment>
+    <!-- 08 June 2020 -- HCare-968 -->
+    <!-- 21 October 2021 -- HCare-1451 -->
+</comment>
+<javascript>
+    <script src=https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js></script>
+
+    <script src=https://www.jqueryscript.net/demo/jQuery-Plugin-For-Sortable-Bootstrap-Tables-Bootstrap-Sortable/Scripts/bootstrap-sortable.js></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/js/standalone/selectize.js"></script>
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.default.css">
+</javascript>
+<style>
+    .form-control-new {
+        display: block;
+        max-width: 450px !important;
+        width: 100%;
+        max-height: 100px;
+        height: 30px;
+        margin-top: 5px;
+        margin-left: 10px;
+        padding: 6px 6px;
+        line-height: 1.428571429;
+        color: #003366;
+        border-radius: 0px;
+        border: none;
+        border-bottom: 1px solid #e8e6e6;
+        background-color: transparent !important;
+        font-family: 'Century Gothic' !important;
+    }
+
+        .form-control-new:hover {
+            border-bottom: 1px solid #b0afaf;
+        }
+
+        .form-control-new:focus {
+            border-bottom: 1px solid #b0afaf;
+        }
+
+    .textbox-control-date {
+        display: block !important;
+        max-width: 450px !important;
+        width: 100%;
+        max-height: 100px;
+        height: 30px;
+        margin-left: 10px;
+        padding: 6px 6px;
+        line-height: 1.428571429;
+        color: #003366;
+        border-radius: 0px !important;
+        border: none !important;
+        border-bottom: 1px solid #e8e6e6 !important;
+        background-color: transparent !important;
+        -webkit-box-shadow: none !important;
+        box-shadow: none !important;
+    }
+
+    .history-collapse {
+        color: #ccc;
+        margin-left: 10px;
+        margin-top: 5px;
+    }
+
+    .selectize-input {
+        display: block !important;
+        max-width: 450px !important;
+        width: 100% !important;
+        max-height: 250px;
+        height: auto;
+        margin-left: 10px;
+        margin-bottom: 10px;
+        padding: 6px 6px;
+        line-height: 1.428571429;
+        color: #003366;
+        border-radius: 0px !important;
+        border: none !important;
+        border-bottom: 1px solid #e8e6e6 !important;
+        background-color: transparent !important;
+        -webkit-box-shadow: none !important;
+        box-shadow: none !important;
+    }
+
+    .selectize-control.single .selectize-input > div {
+        cursor: pointer;
+        margin: 0 3px 3px 0;
+        padding: 11px 15px 11px 6px !important;
+        background: #1da7ee;
+        color: #ffffff;
+        border: 1px solid transparent !important;
+        height: auto !important;
+        min-width: 50px !important;
+        width: auto !important;
+        text-align: center !important;
+    }
+
+    .selectize-control.single .selectize-input [data-value] {
+        border-radius: 0 !important;
+    }
+
+    .table-setting {
+        max-width: 2200px;
+        width: 98%;
+        margin: auto;
+        margin-top: 0.5% !important;
+        margin-bottom: 2% !important;
+        margin-left: 1% !important;
+        position: relative;
+        z-index: 4;
+    }
+
+        .table-setting thead tr th {
+            border: 1px solid transparent;
+            color: white !important;
+            font-family: 'Century Gothic' !important;
+            font-weight: 600 !important;
+            text-align: left !important;
+            font-size: 13px !important;
+            background-color: #2c8e97;
+            cursor: pointer;
+            text-indent: 1px;
+        }
+
+        .table-setting tbody tr td {
+            text-align: left !important;
+            font-family: 'Century Gothic' !important;
+            color: #003366 !important;
+            font-size: 13px !important;
+            border: 1px solid transparent;
+            cursor: pointer;
+            background-color: transparent;
+            text-indent: 1px;
+            border-bottom: 1px solid transparent;
+            padding-top: 15px;
+            padding-bottom: 10px;
+        }
+
+        .table-setting tbody {
+            border: none !important;
+        }
+
+    .field-validation-error:before {
+        font-family: FontAwesome;
+        content: "\f06a\00a0";
+        animation: pulse 2s ease infinite;
+    }
+
+    #nb-concern-comment {
+        display: none;
+    }
+
+    #nb-breastfeeding-comment {
+        display: none;
+    }
+
+    #nb-medication-comment {
+        display: none;
+    }
+    #nb-hiv-test-comment {
+        display: none;
+    }
+    #nb-hiv-result-comment {
+        display: none;
+    }
+</style>
+
+<div class="modal-content-disclaimer">
+    @using (Ajax.BeginForm("_NewBornQuestionnaire", "Clinical", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "divPath", OnSuccess = "hideModal(); alert('Saved');" }, new { id = "questionnaire-new-born" }))
+    {
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+        <input name="nb-questionnaire-id" id="nb-questionnaire-id" value="@ViewBag.questionnaireID" hidden />
+        <input name="nb-dependant-id" id="nb-dependant-id" value="@ViewBag.dependantID" hidden />
+        <input name="nb-template-id" id="nb-template-id" value="@ViewBag.templateID" hidden />
+        <input name="nb-program-id" id="nb-program-id" value="@ViewBag.programID" hidden />
+        <input name="nb-unique-id" id="nb-unique-id" value="@ViewBag.uniqueID" hidden />
+        <input name="nb-task-id" id="nb-task-id" value="@ViewBag.taskID" hidden />
+
+        @Html.AntiForgeryToken()
+
+        <div class="modal-dialog-disclaimer">
+            <div class="modal-header-disclaimer">
+                <div class="col-md-4"><h5 class="modal-title" id="modal-email"><img src="~/Content/Images/_2020/icons/banner-icon/disclaimer-white.png" class="logo-modal" /></h5></div>
+                <div class="col-md-4 div-center"><p class="div-header">Questionnaire: New born</p></div>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            </div>
+
+            <div class="modal-body-mental-health" style="margin-left: 0px; margin-top: 10px;">
+                <div class="form-horizontal">
+                    <div class="col-md-12">
+                        <div id="expected-delivery-date-error" class="error-alert hidden" style="margin-bottom: 12px"></div>
+                    </div>
+
+                    @if (Model.NewBorns.Count() != 0)
+                    {
+                        <div class="management-status-history">
+                            <div>
+                                <p class="history-collapse" style=" font-weight: 100; ">History &nbsp;<i class="fas fa-sort-down" style="font-size: 15px; margin-left: 0px; margin-top: -5px"></i></p>
+                            </div>
+
+                            <div id="mshistory" class="form-group hidden">
+                                <div class="row">
+                                    <table class="table mh-table table-hover" style="margin-left: 1.6%">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 20%; text-align: center!important">@Html.DisplayNameFor(model => model.NewBorn.CreatedDate)</th>
+                                                <th style="width: 20%; text-align: center!important">@Html.DisplayNameFor(model => model.NewBorn.Concern)</th>
+                                                <th style="width: 20%; text-align: center!important">@Html.DisplayNameFor(model => model.NewBorn.Breastfeeding)</th>
+                                                <th style="width: 20%; text-align: center!important">@Html.DisplayNameFor(model => model.NewBorn.Medication)</th>
+                                                <th style="width: 20%; text-align: center!important">@Html.DisplayNameFor(model => model.NewBorn.HIVTestComment)</th>
+                                                <th style="width: 20%; text-align: center!important">@Html.DisplayNameFor(model => model.NewBorn.HIVResultsComment)</th>
+                                            </tr>
+                                        </thead>
+
+                                        @foreach (var item in Model.NewBorns)
+                                        {
+                                            <tbody>
+                                                <tr style="text-indent: 5px">
+                                                    <td style="text-align: center!important" data-dateformat="DD-MM-YYYY">@Html.DisplayFor(Modelitem => item.CreatedDate)</td>
+                                                    <td style="text-align:left!important"><span class="@(item.hasConcern == true ? "si-approved fas fa-circle" : "si-rejected fas fa-circle")"></span>&emsp;@(!String.IsNullOrEmpty(item.Concern) ? item.Concern : "-")</td>
+                                                    <td style="text-align:left!important"><span class="@(item.isBreastfeeding == true ? "si-approved fas fa-circle" : "si-rejected fas fa-circle")"></span>&emsp;@(!String.IsNullOrEmpty(item.Breastfeeding) ? item.Breastfeeding : "-")</td>
+                                                    <td style="text-align:left!important"><span class="@(item.isOnMedication == true ? "si-approved fas fa-circle" : "si-rejected fas fa-circle")"></span>&emsp;@(!String.IsNullOrEmpty(item.Medication) ? item.Medication : "-")</td>
+                                                    <td style="text-align:left!important"><span class="@(item.hivTest == true ? "si-approved fas fa-circle" : "si-rejected fas fa-circle")"></span>&emsp;@(!String.IsNullOrEmpty(item.HIVTestComment) ? item.HIVTestComment: "-")</td>
+                                                    <td style="text-align:left!important"><span class="@(item.hivResults == true ? "si-approved fas fa-circle" : "si-rejected fas fa-circle")"></span>&emsp;@(!String.IsNullOrEmpty(item.HIVResultsComment) ? item.HIVResultsComment: "-")</td>
+                                                </tr>
+                                            </tbody>
+                                        }
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    <table id="new-born-table" class="table table-setting">
+                        <tr>
+                            <td style="width: 4%"></td>
+                            <td style="width: 30%; vertical-align: middle!important; text-align: right!important">
+                                Do you or your doctor have any concerns regarding your baby? <sup style="font-size: 5px; top: -8px" id="required-concern"><i class="fas fa-asterisk pulser"></i></sup>
+                            </td>
+                            <td>
+                                <select id="nb-concern" name="nb-concern" required>
+                                    <option value="" selected>Select</option>
+                                    <option value="yes">Yes</option>
+                                    <option value="no">No</option>
+                                </select>
+                                <div id="nb-concern-validation" class="text-danger" style="font-size: 75%; margin-left: 1%"></div>
+                            </td>
+                        </tr>
+                        <tr id="nb-concern-comment">
+                            <td style="width: 5%"></td>
+                            <td style="width: 30%; vertical-align: middle!important; text-align: right!important">
+                                Comment
+                            </td>
+                            <td>
+                                <input id="newborn-concern" name="newborn-concern" class="form-control-new nb-one" />
+                                <div id="nb-concern-comment-validation" class="text-danger" style="font-size: 75%; margin-left: 1%"></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 5%"></td>
+                            <td style="width: 30%; vertical-align: middle!important; text-align: right!important">
+                                Are you currently breastfeeding? <sup style="font-size: 5px; top: -8px" id="required-description"><i class="fas fa-asterisk pulser"></i></sup>
+                            </td>
+                            <td>
+                                <select id="nb-breastfeeding" name="nb-breastfeeding" required>
+                                    <option value="" selected>Select</option>
+                                    <option value="yes">Yes</option>
+                                    <option value="no">No</option>
+                                </select>
+                                <div id="nb-breastfeeding-validation" class="text-danger" style="font-size: 75%; margin-left: 1%"></div>
+                            </td>
+                        </tr>
+                        <tr id="nb-breastfeeding-comment">
+                            <td style="width: 5%"></td>
+                            <td style="width: 30%; vertical-align: middle!important; text-align: right!important">
+                                Comment
+                            </td>
+                            <td>
+                                <input id="newborn-breastfeeding" name="newborn-breastfeeding" class="form-control-new nb-two" />
+                                <div id="nb-breastfeeding-comment-validation" class="text-danger" style="font-size: 75%; margin-left: 1%"></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 5%"></td>
+                            <td style="width: 30%; vertical-align: middle!important; text-align: right!important">
+                                Is your baby taking any medication? <sup style="font-size: 5px; top: -8px" id="required-medication"><i class="fas fa-asterisk pulser"></i></sup>
+                            </td>
+                            <td>
+                                <select id="nb-medication" name="nb-medication" required>
+                                    <option value="" selected>Select</option>
+                                    <option value="yes">Yes</option>
+                                    <option value="no">No</option>
+                                </select>
+                                <div id="nb-medication-validation" class="text-danger" style="font-size: 75%; margin-left: 1%"></div>
+                            </td>
+                        </tr>
+                        <tr id="nb-medication-comment">
+                            <td style="width: 5%"></td>
+                            <td style="width: 30%; vertical-align: middle!important; text-align: right!important">
+                                Comment
+                            </td>
+                            <td>
+                                <input id="newborn-medication" name="newborn-medication" class="form-control-new nb-three" />
+                                <div id="nb-medication-comment-validation" class="text-danger" style="font-size: 75%; margin-left: 1%"></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 5%"></td>
+                            <td style="width: 30%; vertical-align: middle!important; text-align: right!important">
+                                New-born HIV testing done after birth? <sup style="font-size: 5px; top: -8px" id="required-hiv-test"><i class="fas fa-asterisk pulser"></i></sup>
+                            </td>
+                            <td>
+                                <select id="nb-hiv-test" name="nb-hiv-test" required>
+                                    <option value="" selected>Select</option>
+                                    <option value="yes">Yes</option>
+                                    <option value="no">No</option>
+                                </select>
+                                <div id="nb-hiv-test-validation" class="text-danger" style="font-size: 75%; margin-left: 1%"></div>
+                            </td>
+                        </tr>
+                        <tr id="nb-hiv-test-comment">
+                            <td style="width: 5%"></td>
+                            <td style="width: 30%; vertical-align: middle!important; text-align: right!important">
+                                Comment
+                            </td>
+                            <td>
+                                <input id="newborn-hiv-test" name="newborn-hiv-test" class="form-control-new nb-three" />
+                                <div id="nb-hiv-test-comment-validation" class="text-danger" style="font-size: 75%; margin-left: 1%"></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 5%"></td>
+                            <td style="width: 30%; vertical-align: middle!important; text-align: right!important">
+                                Positive baby result? <sup style="font-size: 5px; top: -8px" id="required-hiv-result"><i class="fas fa-asterisk pulser"></i></sup>
+                            </td>
+                            <td>
+                                <select id="nb-hiv-result" name="nb-hiv-result" required>
+                                    <option value="" selected>Select</option>
+                                    <option value="yes">Yes</option>
+                                    <option value="no">No</option>
+                                </select>
+                                <div id="nb-hiv-result-validation" class="text-danger" style="font-size: 75%; margin-left: 1%"></div>
+                            </td>
+                        </tr>
+                        <tr id="nb-hiv-result-comment">
+                            <td style="width: 5%"></td>
+                            <td style="width: 30%; vertical-align: middle!important; text-align: right!important">
+                                Comment
+                            </td>
+                            <td>
+                                <input id="newborn-hiv-result" name="newborn-hiv-result" class="form-control-new nb-three" />
+                                <div id="nb-hiv-result-comment-validation" class="text-danger" style="font-size: 75%; margin-left: 1%"></div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer-disclaimer">
+                <input id="cancel-pregnant" type="button" value="Cancel" class="btn modal-button" style="width: 10%" data-dismiss="modal" aria-label="Close" />
+                <input id="submit-pregnant" type="submit" value="Submit" class="btn modal-button" style="width: 10%" onclick="Submit();" />
+            </div>
+        </div>
+    }
+</div>
+
+<script>
+</script>
+
+@section Scripts {
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/js/standalone/selectize.js"></script>
+    <script>
+        initSelectize();
+        function initSelectize() {
+            $('#nb-concern').selectize({
+                persist: true,
+                preload: true,
+                maxItems: 1,
+                delimiter: ',',
+                valueField: 'id',
+                labelField: 'name',
+                searchField: ['name'],
+                hideSelected: true,
+                plugins: ['remove_button'],
+                render: {
+                    option: function (item, escape) {
+                        return '<span class="name">' + escape(item.name) + '</span>';
+                    }
+                },
+                onChange: function () {
+                    $('#nb-concern-validation').html('');
+                    $('#nb-concern-comment-validation').html('');
+                    var concern = $("#nb-concern").val();
+                    if (concern == 'yes') {
+                        $('#nb-concern-comment').fadeIn(40);
+                        $("input#newborn-concern").prop('required', true);
+                    }
+                    else {
+                        $('#nb-concern-comment').fadeOut(40);
+                        $("input#newborn-concern").prop('required', false);
+                        $('input#newborn-concern').val('');
+                    }
+                }
+            }),
+                $('#nb-breastfeeding').selectize({
+                    persist: true,
+                    preload: true,
+                    maxItems: 1,
+                    delimiter: ',',
+                    valueField: 'id',
+                    labelField: 'name',
+                    searchField: ['name'],
+                    hideSelected: true,
+                    plugins: ['remove_button'],
+                    render: {
+                        option: function (item, escape) {
+                            return '<span class="name">' + escape(item.name) + '</span>';
+                        }
+                    },
+                    onChange: function () {
+                        $('#nb-breastfeeding-validation').html('');
+                        $('#nb-breastfeeding-comment-validation').html('');
+                        var bf = $("#nb-breastfeeding").val();
+                        if (bf == 'yes') {
+                            $('#nb-breastfeeding-comment').fadeIn(40);
+                            $("input#newborn-breastfeeding").prop('required', true);
+
+                        }
+                        else {
+                            $('#nb-breastfeeding-comment').fadeOut(40);
+                            $("input#newborn-breastfeeding").prop('required', false);
+                            $('input#newborn-breastfeeding').val('');
+                        }
+                    }
+                }),
+                $('#nb-medication').selectize({
+                    persist: true,
+                    preload: true,
+                    maxItems: 1,
+                    delimiter: ',',
+                    valueField: 'id',
+                    labelField: 'name',
+                    searchField: ['name'],
+                    hideSelected: true,
+                    plugins: ['remove_button'],
+                    render: {
+                        option: function (item, escape) {
+                            return '<span class="name">' + escape(item.name) + '</span>';
+                        }
+                    },
+                    onChange: function () {
+                        $('#nb-medication-validation').html('');
+                        $('#nb-medication-comment-validation').html('');
+                        var medication = $("#nb-medication").val();
+                        if (medication == 'yes') {
+                            $('#nb-medication-comment').fadeIn(40);
+                            $("input#newborn-medication").prop('required', true);
+                        }
+                        else {
+                            $('#nb-medication-comment').fadeOut(40);
+                            $("input#newborn-medication").prop('required', false);
+                            $('input#newborn-medication').val('');
+                        }
+                    }
+                }),
+                $('#nb-hiv-test').selectize({
+                    persist: true,
+                    preload: true,
+                    maxItems: 1,
+                    delimiter: ',',
+                    valueField: 'id',
+                    labelField: 'name',
+                    searchField: ['name'],
+                    hideSelected: true,
+                    plugins: ['remove_button'],
+                    render: {
+                        option: function (item, escape) {
+                            return '<span class="name">' + escape(item.name) + '</span>';
+                        }
+                    },
+                    onChange: function () {
+                        $('#nb-hiv-test-validation').html('');
+                        $('#nb-hiv-test-comment-validation').html('');
+                        var hivtest = $("#nb-hiv-test").val();
+                        if (hivtest == 'yes') {
+                            $('#nb-hiv-test-comment').fadeIn(40);
+                            $("input#newborn-hiv-test").prop('required', true);
+                        }
+                        else {
+                            $('#nb-hiv-test-comment').fadeOut(40);
+                            $("input#newborn-hiv-test").prop('required', false);
+                            $('input#newborn-hiv-test').val('');
+                        }
+                    }
+                }),
+                $('#nb-hiv-result').selectize({
+                    persist: true,
+                    preload: true,
+                    maxItems: 1,
+                    delimiter: ',',
+                    valueField: 'id',
+                    labelField: 'name',
+                    searchField: ['name'],
+                    hideSelected: true,
+                    plugins: ['remove_button'],
+                    render: {
+                        option: function (item, escape) {
+                            return '<span class="name">' + escape(item.name) + '</span>';
+                        }
+                    },
+                    onChange: function () {
+                        $('#nb-hiv-result-validation').html('');
+                        $('#nb-hiv-result-comment-validation').html('');
+                        var hivresult = $("#nb-hiv-result").val();
+                        if (hivresult == 'yes') {
+                            $('#nb-hiv-result-comment').fadeIn(40);
+                            $("input#newborn-hiv-result").prop('required', true);
+                        }
+                        else {
+                            $('#nb-hiv-result-comment').fadeOut(40);
+                            $("input#newborn-hiv-result").prop('required', false);
+                            $('input#newborn-hiv-result').val('');
+                        }
+                    }
+                })
+
+        }
+    </script>
+    <script>
+        function Submit() {
+            var concern = $("#nb-concern").val();
+            if (concern == null || concern == "") {
+                $('#nb-concern-validation').html('<span style="font-size: 12px"><i class="fas fa-exclamation-circle"></i> </span>This field is required.');
+                event.preventDefault();
+            }
+            if (concern == 'yes') {
+                var comment1 = $('input#newborn-concern').val();
+                if (comment1 == null || comment1 == "") {
+                    $('#nb-concern-comment-validation').html('<span style="font-size: 12px"><i class="fas fa-exclamation-circle"></i> </span>This field is required.');
+                    event.preventDefault();
+                }
+            }
+            var bf = $("#nb-breastfeeding").val();
+            if (bf == null || bf == "") {
+                $('#nb-breastfeeding-validation').html('<span style="font-size: 12px"><i class="fas fa-exclamation-circle"></i> </span>This field is required.');
+                event.preventDefault();
+            }
+            if (bf == 'yes') {
+                var comment2 = $('input#newborn-breastfeeding').val();
+                if (comment2 == null || comment2 == "") {
+                    $('#nb-breastfeeding-comment-validation').html('<span style="font-size: 12px"><i class="fas fa-exclamation-circle"></i> </span>This field is required.');
+                    event.preventDefault();
+                }
+            }
+            var medication = $("#nb-medication").val();
+            if (medication == null || medication == "") {
+                $('#nb-medication-validation').html('<span style="font-size: 12px"><i class="fas fa-exclamation-circle"></i> </span>This field is required.');
+                event.preventDefault();
+            }
+            if (medication == 'yes') {
+                var comment3 = $('input#newborn-medication').val();
+                if (comment3 == null || comment3 == "") {
+                    $('#nb-medication-comment-validation').html('<span style="font-size: 12px"><i class="fas fa-exclamation-circle"></i> </span>This field is required.');
+                    event.preventDefault();
+                }
+            }
+            var hivtest = $("#nb-hiv-test").val();
+            if (hivtest == null || hivtest == "") {
+                $('#nb-hiv-test-validation').html('<span style="font-size: 12px"><i class="fas fa-exclamation-circle"></i> </span>This field is required.');
+                event.preventDefault();
+            }
+            if (hivtest == 'yes') {
+                var comment4 = $('input#newborn-hiv-test').val();
+                if (comment4 == null || comment4 == "") {
+                    $('#nb-hiv-test-comment-validation').html('<span style="font-size: 12px"><i class="fas fa-exclamation-circle"></i> </span>This field is required.');
+                    event.preventDefault();
+                }
+            }
+            var hivresult = $("#nb-hiv-result").val();
+            if (hivresult == null || hivresult == "") {
+                $('#nb-hiv-result-validation').html('<span style="font-size: 12px"><i class="fas fa-exclamation-circle"></i> </span>This field is required.');
+                event.preventDefault();
+            }
+            if (hivresult == 'yes') {
+                var comment5 = $('input#newborn-hiv-result').val();
+                if (comment5 == null || comment5 == "") {
+                    $('#nb-hiv-result-comment-validation').html('<span style="font-size: 12px"><i class="fas fa-exclamation-circle"></i> </span>This field is required.');
+                    event.preventDefault();
+                }
+            }
+        }
+    </script>
+    <script>
+        $(function () {
+            $('input#newborn-concern').on('keyup change blur', function () {
+                $('#nb-concern-comment-validation').html('');
+            });
+            $('input#newborn-breastfeeding').on('keyup change blur', function () {
+                $('#nb-breastfeeding-comment-validation').html('');
+            });
+            $('input#newborn-medication').on('keyup change blur', function () {
+                $('#nb-medication-comment-validation').html('');
+            });
+            $('input#newborn-hiv-test').on('keyup change blur', function () {
+                $('#nb-hiv-test-comment-validation').html('');
+            });
+            $('input#newborn-hiv-result').on('keyup change blur', function () {
+                $('#nb-hiv-result-comment-validation').html('');
+            });
+        })
+    </script>
+    <script>
+        $(document).ready(function () {
+            $(".history-collapse").on("click", function () {
+                $("#mshistory").fadeIn("slow").toggleClass("hidden");
+            });
+        });
+    </script>
+}
+

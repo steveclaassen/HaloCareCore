@@ -1,0 +1,564 @@
+﻿@model HaloCareCore.Models.ViewModels.AccountSetupViewModel
+@using HaloCareCore.Extensions
+@{
+    ViewBag.Title = "Accounts";
+    Layout = "~/Views/Shared/_layout-view-x.cshtml";
+}
+
+<comment>
+    <!-- 4 June 2021 -- HCare-1338 -->
+</comment>
+<javascript>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+    <script src="https://www.jqueryscript.net/demo/jQuery-Plugin-For-Sortable-Bootstrap-Tables-Bootstrap-Sortable/Scripts/bootstrap-sortable.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/js/standalone/selectize.js"></script>
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.default.css">
+</javascript>
+<style>
+    .error-alert {
+        background-color: rgba(217, 48, 78, 0.2);
+        padding: 10px 12px 10px 12px;
+        border: 1px solid transparent;
+        border-radius: 0px;
+        font: 100 12px 'Open Sans', sans-serif;
+        color: rgb(217, 48, 78);
+        margin: 0 0 0 0;
+        margin-top: -10px;
+        margin-bottom: -10px;
+        margin-left: -15px;
+        width: 102%;
+        vertical-align: middle;
+    }
+
+        .error-alert span a {
+            color: rgb(217, 48, 78);
+            margin-top: -5px;
+        }
+
+    .account-options-alert {
+        display: inline-block;
+        min-width: 10px;
+        padding: 8px 12px 8px 0px;
+        font: 100 12px 'Open Sans', sans-serif;
+        color: rgb(217, 48, 78);
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: middle;
+        background-color: rgba(217, 48, 78, 0.2);
+        border-radius: 3px;
+        margin-left: 15px;
+        margin-bottom: 15px;
+    }
+
+        .account-options-alert span a {
+            color: rgb(217, 48, 78);
+        }
+
+    .select2-container--default .select2-selection--multiple {
+        display: block !important;
+        max-width: 1500px !important;
+        width: 111% !important;
+        max-height: 100px;
+        height: auto;
+        margin-left: 5px;
+        padding: 6px 0px;
+        line-height: 1.428571429;
+        color: #003366;
+        border-radius: 0px !important;
+        border: none !important;
+        border-bottom: 1px solid #e8e6e6 !important;
+        background-color: transparent !important;
+        -webkit-box-shadow: none !important;
+        box-shadow: none !important;
+    }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice {
+            background-color: #0081b3 !important;
+            color: white !important;
+            border: 1px solid transparent !important;
+            border-radius: 5px;
+            cursor: default;
+            float: left;
+            margin-right: 5px;
+            margin-top: 0px !important;
+            padding: 5px 6px 5px 0px !important;
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+            color: white !important;
+            cursor: pointer;
+            display: inline-block;
+            font-weight: bold;
+            margin-right: 2px;
+        }
+
+    .select2-container--open .select2-dropdown {
+        left: 10px !important;
+    }
+</style>
+
+<div id="instruction-wrapper">
+    <div class="instruction-panel">
+        <h class="account-step">Step 1</h>
+        <p class="account-step-instruction">Enter new account information.</p>
+        <ul style="padding: 0">
+            <li class="account-step-list asl-1 active-step"><span class="number-circle circle-1 active-circle">1</span>Account name</li>
+            <li class="account-step-list asl-2"><span class="number-circle circle-2">2</span>Account description</li>
+            <li class="account-step-list asl-3"><span class="number-circle circle-3">3</span>Scheme</li>
+            <li class="account-step-list asl-4"><span class="number-circle circle-4">4</span>Options</li>
+            <li class="account-step-list asl-5"><span class="number-circle circle-5">5</span>Programs</li>
+        </ul>
+    </div>
+</div>
+
+<div class="collapse in">
+    <div class="card card-body">
+        <div class="collapse-body">
+            <div class="new-account-panel">
+                @using (Html.BeginForm("Step1", "Account", FormMethod.Post, new { id = "account-step-1" }))
+                {
+                    <div class="col-md-12 row">
+                        <div class="account-heading">Account setup</div>
+                        <p class="account-sub-header-new">Enter the account information below and click next to continue.</p>
+                    </div>
+                    <hr class="fancyruler">
+                    <div id="account-option-error" class="error-alert hidden" style="margin-bottom: 12px">&emsp;Please review <span style="font-weight: bold"><a href="@Url.Action("IndexVM", "MedicalAids", new { })">medical scheme settings</a></span> as there are no options listed.</div>
+                    <div id="account-validation" class="error-alert hidden" style="margin-bottom: 12px"></div>
+                    <div id="account-details-error" class="account-options-alert hidden" style="margin-bottom: 12px"></div>
+                    <div style="margin-bottom: 10px"></div>
+
+                    <table class="table details-table" id="new-account">
+                        <tr>
+                            <td class="new-account-row-heading">@Html.DisplayName("Account name") <sup style="font-size: 5px; top: -8px" id="required-name"><i class="fas fa-asterisk pulser"></i></sup></td>
+                            <td class="row-information">
+                                @Html.EditorFor(model => model.name, new { htmlAttributes = new { @class = "new-account-row-insert", @placeholder = "example: HaloCare", @autocomplete = "off", @onblur = "Validation1()" } })
+
+                                <span id="account-name-error" class="text-danger" style="margin-left: 1%"></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="new-account-row-heading">@Html.DisplayName("Account Description") <sup style="font-size: 5px; top: -8px" id="required-description"><i class="fas fa-asterisk pulser"></i></sup></td>
+                            <td class="row-information">
+                                @Html.EditorFor(model => model.description, new { htmlAttributes = new { @class = "new-account-row-insert", @placeholder = "example: Disease management service", @autocomplete = "off", @onblur = "Validation2()" } })
+                                <span id="account-description-error" class="text-danger" style="margin-left: 1%"></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="new-account-row-heading">@Html.DisplayName("Scheme") <sup style="font-size: 5px; top: -8px" id="required-medical-aid"><i class="fas fa-asterisk pulser"></i></sup></td>
+                            <td class="row-information">
+                                @Html.DropDownListFor(m => m.selectedSchemes, new SelectList(Model.medicalAids, "MedicalAidID", "Name"), "Select", new { @class = "selectize-1", @onchange = "FillScheme(); Validation3()" })
+
+                                <span id="account-scheme-error" class="text-danger" style="margin-left: 1%"></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="new-account-row-heading">@Html.DisplayName("Option") <sup style="font-size: 5px; top: -8px" id="required-option"><i class="fas fa-asterisk pulser"></i></sup></td>
+                            <td class="row-information">
+                                @Html.DropDownListFor(m => m.selectedSchemeOptions, new SelectList(Model.schemePlans, "id", "Name"), new { @class = "selectize-2", @onchange = "Validation4()" })
+
+                                <br /><span id="account-options-error" class="text-danger" style="margin-left: 1%"></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="new-account-row-heading">@Html.DisplayName("Program") <sup style="font-size: 5px; top: -8px" id="required-option"><i class="fas fa-asterisk pulser"></i></sup></td>
+                            <td class="row-information">
+                                @Html.DropDownListFor(m => m.selectedPrograms, new MultiSelectList(Model.schemePrograms, "programID", "ProgramName"), "Select", new { @class = "selectize-3", @onchange = "Validation5()" })
+
+                                <span id="account-programs-error" class="text-danger" style="margin-left: 1%"></span>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <div class="sf-footer">
+                        <input type="button" id="account-back-one" value="Back" class="btn modal-button-previous" onclick="location.href='@Url.Action("Index", "Account", null)'" />
+                        <input type="submit" id="account-next-one" value="Next" class="btn modal-button-next" />
+                    </div>
+                    }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script src="~/bundles/jqueryval"></script>
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/js/standalone/selectize.js"></script>
+    <script>
+        initSelectize();
+        function initSelectize() {
+            $('#selectedSchemes').selectize({
+                persist: true,
+                preload: true,
+                maxItems: 1,
+                delimiter: ',',
+                valueField: 'id',
+                labelField: 'name',
+                searchField: ['name'],
+                hideSelected: true,
+                plugins: ['remove_button'],
+                render: {
+                    option: function (item, escape) {
+                        return '<span class="name">' + escape(item.name) + '</span>';
+
+                    }
+                },
+            }),
+                $('#selectedPrograms').selectize({
+                    persist: true,
+                    preload: true,
+                    maxItems: 10,
+                    delimiter: ',',
+                    valueField: 'id',
+                    labelField: 'name',
+                    searchField: ['name'],
+                    hideSelected: true,
+                    plugins: ['remove_button'],
+                    render: {
+                        option: function (item, escape) {
+                            return '<span class="name">' + escape(item.name) + '</span>';
+
+                        }
+                    }
+                })
+        }
+    </script>
+    <script>
+        function FillScheme() {
+            var medicalaid = $('#selectedSchemes').val();
+            $('#account-option-error').addClass("hidden");
+            $("#selectedSchemeOptions").html("");
+            $('.modal-button-next').attr('disabled', false);
+
+            $.ajax({
+                url: '/Account/FillScheme',
+                type: "POST",
+                dataType: "JSON",
+                data: { medId: medicalaid },
+                success: function (options) {
+                    //alert('success');
+                    if (options.length > 0) {
+                        $("#selectedSchemeOptions").html("");
+                        $.each(options, function (i, option) {
+                            $("#selectedSchemeOptions").append(
+                                $('<option></option>').val(option.Id).html(option.Name)
+                            );
+                        });
+                    }
+                    else {
+                        $('#account-option-error').removeClass("hidden");
+                        $('.modal-button-next').attr('disabled', true);
+                    }
+                },
+                error: function (option) {
+                    //alert('error');
+                }
+            });
+        }
+    </script>
+    <script>
+        function Validation1() {
+            $('#account-validation').addClass("hidden");
+            var name = $("#name").val();
+            if (name.length > 0) {
+                $("#required-name").addClass("hidden");
+                $('li').find('span.circle-1').text("✓");
+                $('li').find('span.circle-1').addClass("complete-circle");
+                $('#account-name-error').addClass("hidden");
+                $('.modal-button-next').attr('disabled', false);
+
+                $.ajax({
+                    url: '/Account/AccountNameValidation',
+                    type: "POST",
+                    dataType: "JSON",
+                    data: { name: name },
+                    success: function (result) {
+                        var description = result.name;
+                        if (description.toLowerCase() == name.toLowerCase()) {
+                            $('#account-name-error').html('<span style="font-size: 10px"><i class="fas fa-exclamation-circle"></i></span>&nbsp;Account name already exists!');
+                            $('#account-name-error').removeClass("hidden");
+                            $('#account-validation').html('&emsp;Account name already exists!');
+                            $('#account-validation').removeClass("hidden");
+                            $('.modal-button-next').attr('disabled', true);
+                        }
+                    },
+                    error: function (result) {
+                    }
+                });
+            }
+            else {
+                $("#required-name").removeClass("hidden");
+                $('li').find('span.circle-1').text("1");
+                $('li').find('span.circle-1').removeClass("complete-circle");
+                $('.modal-button-next').attr('disabled', false);
+                $('#account-name-error').html('');
+            }
+        }
+        function Validation2() {
+            $('#account-details-error').addClass("hidden");
+            var description = $("#description").val();
+            if (description.length > 0) {
+                $("#required-description").addClass("hidden");
+                $('li').find('span.circle-2').text("✓");
+                $('li').find('span.circle-2').addClass("complete-circle");
+                $('#account-description-error').addClass("hidden");
+
+            }
+            else {
+                $("#required-description").removeClass("hidden");
+                $('li').find('span.circle-2').text("2");
+                $('li').find('span.circle-2').removeClass("complete-circle");
+            }
+        }
+        function Validation3() {
+            $('#error-description').val();
+            if ($.trim($('#selectedSchemes').val()) != '') {
+                $("#required-medical-aid").addClass("hidden");
+                $('li').find('span.circle-3').text("✓");
+                $('li').find('span.circle-3').addClass("complete-circle");
+                $('#account-scheme-error').addClass("hidden");
+            }
+            else {
+                $("#required-medical-aid").removeClass("hidden");
+                $('li').find('span.circle-3').text("3");
+                $('li').find('span.circle-3').removeClass("complete-circle");
+            }
+        }
+        function Validation4() {
+            $('#error-description').val();
+            if ($.trim($('#selectedSchemeOptions').val()) != '') {
+                $("#required-option").addClass("hidden");
+                $('li').find('span.circle-4').text("✓");
+                $('li').find('span.circle-4').addClass("complete-circle");
+                $('#account-options-error').addClass("hidden");
+            }
+            else {
+                $("#required-option").removeClass("hidden");
+                $('li').find('span.circle-4').text("4");
+                $('li').find('span.circle-4').removeClass("complete-circle");
+            }
+        }
+        function Validation5() {
+            $('#error-description').val();
+            if ($.trim($('#selectedPrograms').val()) != '') {
+                $("#required-program").addClass("hidden");
+                $('li').find('span.circle-5').text("✓");
+                $('li').find('span.circle-5').addClass("complete-circle");
+                $('#account-programs-error').addClass("hidden");
+            }
+            else {
+                $("#required-program").removeClass("hidden");
+                $('li').find('span.circle-5').text("5");
+                $('li').find('span.circle-5').removeClass("complete-circle");
+            }
+        }
+    </script>
+    <script>
+        $(function () {
+            $("#name").focus();
+            $('li.asl-1').click(function () {
+                $("#name").focus();
+                $('li.asl-1').addClass("active-step");
+                $('li span.circle-1').addClass("active-circle");
+                $('li.asl-2').removeClass("active-step");
+                $('li span.circle-2').removeClass("active-circle");
+                $('li.asl-3').removeClass("active-step");
+                $('li span.circle-3').removeClass("active-circle");
+                $('li.asl-4').removeClass("active-step");
+                $('li span.circle-4').removeClass("active-circle");
+                $('li.asl-5').removeClass("active-step");
+                $('li span.circle-5').removeClass("active-circle");
+            });
+            $('li.asl-2').click(function () {
+                $("#description").focus();
+                $('li.asl-1').removeClass("active-step");
+                $('li span.circle-1').removeClass("active-circle");
+                $('li.asl-2').addClass("active-step");
+                $('li span.circle-2').addClass("active-circle");
+                $('li.asl-3').removeClass("active-step");
+                $('li span.circle-3').removeClass("active-circle");
+                $('li.asl-4').removeClass("active-step");
+                $('li span.circle-4').removeClass("active-circle");
+                $('li.asl-5').removeClass("active-step");
+                $('li span.circle-5').removeClass("active-circle");
+            });
+            $('li.asl-3').click(function () {
+                $('li.asl-1').removeClass("active-step");
+                $('li span.circle-1').removeClass("active-circle");
+                $('li.asl-2').removeClass("active-step");
+                $('li span.circle-2').removeClass("active-circle");
+                $('li.asl-3').addClass("active-step");
+                $('li span.circle-3').addClass("active-circle");
+                $('li.asl-4').removeClass("active-step");
+                $('li span.circle-4').removeClass("active-circle");
+                $('li.asl-5').removeClass("active-step");
+                $('li span.circle-5').removeClass("active-circle");
+            });
+            $('li.asl-4').click(function () {
+                $('li.asl-1').removeClass("active-step");
+                $('li span.circle-1').removeClass("active-circle");
+                $('li.asl-2').removeClass("active-step");
+                $('li span.circle-2').removeClass("active-circle");
+                $('li.asl-3').removeClass("active-step");
+                $('li span.circle-3').removeClass("active-circle");
+                $('li.asl-4').addClass("active-step");
+                $('li span.circle-4').addClass("active-circle");
+                $('li.asl-5').removeClass("active-step");
+                $('li span.circle-5').removeClass("active-circle");
+            });
+            $('li.asl-5').click(function () {
+                $('li.asl-1').removeClass("active-step");
+                $('li span.circle-1').removeClass("active-circle");
+                $('li.asl-2').removeClass("active-step");
+                $('li span.circle-2').removeClass("active-circle");
+                $('li.asl-3').removeClass("active-step");
+                $('li span.circle-3').removeClass("active-circle");
+                $('li.asl-4').removeClass("active-step");
+                $('li span.circle-4').removeClass("active-circle");
+                $('li.asl-5').addClass("active-step");
+                $('li span.circle-5').addClass("active-circle");
+            });
+
+            $('#name').focus(function () {
+                $('li.asl-1').addClass("active-step");
+                $('li span.circle-1').addClass("active-circle");
+                $('li.asl-2').removeClass("active-step");
+                $('li span.circle-2').removeClass("active-circle");
+                $('li.asl-3').removeClass("active-step");
+                $('li span.circle-3').removeClass("active-circle");
+                $('li.asl-4').removeClass("active-step");
+                $('li span.circle-4').removeClass("active-circle");
+                $('li.asl-5').removeClass("active-step");
+                $('li span.circle-5').removeClass("active-circle");
+            });
+            $('#description').focus(function () {
+                $('li.asl-1').removeClass("active-step");
+                $('li span.circle-1').removeClass("active-circle");
+                $('li.asl-2').addClass("active-step");
+                $('li span.circle-2').addClass("active-circle");
+                $('li.asl-3').removeClass("active-step");
+                $('li span.circle-3').removeClass("active-circle");
+                $('li.asl-4').removeClass("active-step");
+                $('li span.circle-4').removeClass("active-circle");
+                $('li.asl-5').removeClass("active-step");
+                $('li span.circle-5').removeClass("active-circle");
+            });
+            $(document).on('click', '.selectize-1 div.selectize-input.focus', function (e) {
+                $('li.asl-1').removeClass("active-step");
+                $('li span.circle-1').removeClass("active-circle");
+                $('li.asl-2').removeClass("active-step");
+                $('li span.circle-2').removeClass("active-circle");
+                $('li.asl-3').addClass("active-step");
+                $('li span.circle-3').addClass("active-circle");
+                $('li.asl-4').removeClass("active-step");
+                $('li span.circle-4').removeClass("active-circle");
+                $('li.asl-5').removeClass("active-step");
+                $('li span.circle-5').removeClass("active-circle");
+            });
+            $(document).on('click', '.selectize-2', function (e) {
+                $('li.asl-1').removeClass("active-step");
+                $('li span.circle-1').removeClass("active-circle");
+                $('li.asl-2').removeClass("active-step");
+                $('li span.circle-2').removeClass("active-circle");
+                $('li.asl-3').removeClass("active-step");
+                $('li span.circle-3').removeClass("active-circle");
+                $('li.asl-4').addClass("active-step");
+                $('li span.circle-4').addClass("active-circle");
+                $('li.asl-5').removeClass("active-step");
+                $('li span.circle-5').removeClass("active-circle");
+            });
+            $(document).on('click', '.selectize-3 div.selectize-input.focus', function (e) {
+                $('li.asl-1').removeClass("active-step");
+                $('li span.circle-1').removeClass("active-circle");
+                $('li.asl-2').removeClass("active-step");
+                $('li span.circle-2').removeClass("active-circle");
+                $('li.asl-3').removeClass("active-step");
+                $('li span.circle-3').removeClass("active-circle");
+                $('li.asl-4').removeClass("active-step");
+                $('li span.circle-4').removeClass("active-circle");
+                $('li.asl-5').addClass("active-step");
+                $('li span.circle-5').addClass("active-circle");
+            });
+        });
+    </script>
+    <script></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function () { $("#selectedSchemeOptions").select2({ multiple: true, placeholder: "Select", allowClear: true }); });
+    </script>
+    <script>
+        $(function () {
+            $("#account-next-one").click(function () {
+                var name = $('#name').val();
+                var description = $('#description').val();
+                var medicalaidID = $.trim($('#selectedSchemes').val());
+                var options = $.trim($('#selectedSchemeOptions').val());
+                var programs = $.trim($('#selectedPrograms').val());
+
+                if (name.length == 0) {
+                    $('#account-name-error').html('<span style="font-size: 10px"><i class="fas fa-exclamation-circle"></i></span>&nbsp;Account name is required!');
+                }
+                if (description.length == 0) {
+                    $('#account-description-error').html('<span style="font-size: 10px"><i class="fas fa-exclamation-circle"></i></span>&nbsp;Account description is required!');
+                }
+                if (medicalaidID == '') {
+                    $('#account-scheme-error').html('<span style="font-size: 10px"><i class="fas fa-exclamation-circle"></i></span>&nbsp;Medical scheme is required!');
+                }
+                if (options == '') {
+                    $('#account-options-error').html('<span style="font-size: 10px"><i class="fas fa-exclamation-circle"></i></span>&nbsp;Option is required!');
+                }
+                if (programs == '') {
+                    $('#account-programs-error').html('<span style="font-size: 10px"><i class="fas fa-exclamation-circle"></i></span>&nbsp;Program is required!');
+                }
+                if (name.length > 0 && description.length > 0 && medicalaidID != '' && options != '' && programs != '') {
+                    Step1Insert();
+                    $("#sf-one").addClass("hidden");
+                    $("#sf-two").removeClass("hidden");
+                    $('#account-details-error').addClass("hidden");
+                }
+            });
+
+            $("#account-next-two").click(function () {
+                $("#sf-two").addClass("hidden");
+                $("#sf-three").removeClass("hidden");
+            });
+
+            $("#account-next-three").click(function () {
+                $("#sf-three").addClass("hidden");
+                $("#sf-four").removeClass("hidden");
+            });
+
+            $("#account-next-four").click(function () {
+                $("#sf-four").addClass("hidden");
+                $("#sf-five").removeClass("hidden");
+            });
+
+        })
+        $(function () {
+            $("#account-previous-two").click(function () {
+                $("#sf-one").removeClass("hidden");
+                $("#sf-two").addClass("hidden");
+            });
+
+            $("#account-previous-three").click(function () {
+                $("#sf-two").removeClass("hidden");
+                $("#sf-three").addClass("hidden");
+            });
+
+            $("#account-previous-four").click(function () {
+                $("#sf-three").removeClass("hidden");
+                $("#sf-four").addClass("hidden");
+            });
+
+            $("#account-previous-five").click(function () {
+                $("#sf-four").removeClass("hidden");
+                $("#sf-five").addClass("hidden");
+            });
+        })
+    </script>
+    
+}

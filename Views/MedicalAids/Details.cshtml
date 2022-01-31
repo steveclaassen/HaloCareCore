@@ -1,0 +1,275 @@
+﻿@model HaloCareCore.Models.MedicalAidViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Details";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<comment>
+    <!--
+    27 May 2020 -- HCare-1044(Confidentiality field & usage of field to be checked and removed (Medical scheme screen))
+    Removed confidential checkbox as per SR - followed the create and edit methods to see if checkbox triggers any backend functions. Did not find anything.
+    -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+</style>
+
+<div class="fullScreen_container zero-padding">
+
+    <!--pageHeader-->
+    <nav id="global-nav" class="nav">
+        <div class="pull-left title">
+            <h1 class="site-title_patientProfile">
+                <span><i class="fas fa-plus-square"></i>&emsp; Medical scheme</span>
+            </h1>
+        </div>
+        <div class="pull-right title">
+            <h1 class="site-title_userID pull-right">
+                <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+            </h1>
+            <h1 class="site-title_userID pull-right">
+                @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                {
+                    <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                }
+            </h1>
+            <h1 class="site-waffleIcon pull-right">
+                <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+            </h1>
+        </div>
+    </nav>
+
+    <!--breadCrumbs-->
+    <ul class="breadcrumbs_fullScreens">
+        <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+        <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+        <li><a href="@Url.Action("Index", "MedicalAids", new {})">Medical scheme</a></li>
+        <li><a href="#">Detail</a></li>
+    </ul>
+
+    <!--navCollection-->
+    <div class="navCollection_fullScreens">
+        @Html.Partial("_navCollection")
+    </div>
+
+    <div style="margin-bottom: 1%"></div>
+
+    <div class="row">
+        <h4 class="tableHeading">Medical scheme details</h4>
+        <hr class="fancyruler">
+        <br />
+        <br />
+        <div style="margin-left: 5%">
+            <dl class="dl-horizontal editForm">
+                <dt>
+                    @Html.DisplayNameFor(model => model.medicalAid.AccountCode)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.medicalAid.AccountCode)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.medicalAid.Name)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.medicalAid.Name)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.medicalAid.medicalAidCode)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.medicalAid.medicalAidCode)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.MedicalAidClaimCodes.claimCode)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.MedicalAidClaimCodes.claimCode)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.medicalAidSettings.email)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.medicalAidSettings.email)
+                </dd>
+                <dt>
+                    @Html.DisplayNameFor(model => model.medicalAidSettings.schemeSubject)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.medicalAidSettings.schemeSubject)
+                </dd>
+                <dt>
+                    @Html.DisplayName("Referral")
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.medicalAid.Referral)
+                </dd>
+                <dt>
+                    @Html.DisplayNameFor(model => model.medicalAid.createdBy)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.medicalAid.createdBy)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.medicalAid.createdDate)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.medicalAid.createdDate)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.medicalAid.modifiedBy)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.medicalAid.modifiedBy)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.medicalAid.modifiedDate)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.medicalAid.modifiedDate)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.medicalAid.Active)
+                </dt>
+
+                <dd class="detailsCheck">
+                    @Html.DisplayFor(model => model.medicalAid.Active)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.medicalAidSettings.hivPreAppovalRequired)
+                </dt>
+
+                <dd class="detailsCheck">
+                    @Html.DisplayFor(model => model.medicalAidSettings.hivPreAppovalRequired)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.medicalAidSettings.daysForPathology)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.medicalAidSettings.daysForPathology)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.medicalAidSettings.authRequired)
+                </dt>
+
+                <dd class="detailsCheck">
+                    @Html.DisplayFor(model => model.medicalAidSettings.authRequired)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.medicalAidSettings.daysForCommunicationGen)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.medicalAidSettings.daysForCommunicationGen)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.medicalAidSettings.daysForCommunicationHiv)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.medicalAidSettings.daysForCommunicationHiv)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.medicalAidSettings.overdueScriptSms)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.medicalAidSettings.overdueScriptSms)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.medicalAid.clCarrier)
+                </dt>
+
+                <dd class="detailsCheck">
+                    @Html.DisplayFor(model => model.medicalAid.clCarrier)
+                </dd>
+                <dt>
+                    @Html.DisplayNameFor(model => model.medicalAid.riskRules)
+                </dt>
+
+                <dd class="detailsCheck">
+                    @Html.DisplayFor(model => model.medicalAid.riskRules)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.medicalAid.disclaimer)
+                </dt>
+                <dd class="detailsCheck">
+                    @Html.DisplayFor(model => model.medicalAid.disclaimer)
+                </dd>
+                <br />
+                <dt>
+                    @Html.DisplayNameFor(model => model.medicalAid.Production)
+                </dt>
+                <dd class="detailsCheck">
+                    @Html.DisplayFor(model => model.medicalAid.Production)
+                </dd>
+                <dt>
+                    @Html.DisplayNameFor(model => model.medicalAid.Extracts)
+                </dt>
+                <dd class="detailsCheck">
+                    @Html.DisplayFor(model => model.medicalAid.Extracts)
+                </dd>
+                <dt>
+                    @Html.DisplayNameFor(model => model.medicalAid.Imports)
+                </dt>
+                <dd class="detailsCheck">
+                    @Html.DisplayFor(model => model.medicalAid.Imports)
+                </dd>
+                <dt>
+                    @Html.DisplayNameFor(model => model.medicalAid.Exports)
+                </dt>
+                <dd class="detailsCheck">
+                    @Html.DisplayFor(model => model.medicalAid.Exports)
+                </dd>
+                <dt>
+                    @Html.DisplayNameFor(model => model.medicalAid.AdvancedSearch)
+                </dt>
+                <dd class="detailsCheck">
+                    @Html.DisplayFor(model => model.medicalAid.AdvancedSearch)
+                </dd>
+            </dl>
+        </div>
+
+        <div class="fixedBack">
+            <input value="Back" class="btn buttonRound_formBack go_back" style="width: 15%!important" />
+            <a href="@Url.Action("Edit", "MedicalAids", new { id = Model.medicalAid.MedicalAidID })" value="Edit" class="btn buttonRound_formEdit" style="width: 15%!important">Edit</a>
+        </div>
+
+    </div>
+</div>
+
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+}

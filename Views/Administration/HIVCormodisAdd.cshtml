@@ -1,0 +1,223 @@
+﻿@model HaloCareCore.Models.ViewModels.HIVCormodisViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Create";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .field-validation-error:before {
+        font-family: FontAwesome;
+        content: "\f06a\00a0";
+        animation: pulse 2s ease infinite;
+    }
+
+    .error-alert {
+        width: 100%;
+        margin: 0 auto;
+        background-color: rgba(217, 83, 79, 0.1);
+        padding: 10px;
+        border-left-color: #d9534f !important;
+        border: 1px solid transparent;
+        border-left-width: 5px;
+        border-radius: 3px;
+        margin: 0 auto;
+        font-family: 'Open Sans', sans-serif;
+        font-size: 12px;
+        margin: 0 0 5px 0;
+        margin-top: -10px;
+        margin-bottom: 20px;
+    }
+
+        .error-alert span {
+            color: #d9534f;
+            text-align: center;
+        }
+</style>
+
+<link href="~/Content/bootstrap-chosen.css" rel="stylesheet" />
+<!--Select dropdowns-->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+<div class="fullScreen_container zero-padding">
+
+    <!--pageHeader-->
+    <nav id="global-nav" class="nav">
+        <div class="pull-left title">
+            <h1 class="site-title_patientProfile">
+                <span><i class="fa fa-flag "></i>&emsp; Comorbid condition</span>
+            </h1>
+        </div>
+        <div class="pull-right title">
+            <h1 class="site-title_userID pull-right">
+                <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+            </h1>
+            <h1 class="site-title_userID pull-right">
+                @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                {
+                    <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                }
+            </h1>
+            <h1 class="site-waffleIcon pull-right">
+                <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+            </h1>
+        </div>
+    </nav>
+    <!--breadCrumbs-->
+    <ul class="breadcrumbs_fullScreens">
+        <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+        <li><a href="@Url.Action("Index", "Administration", new {})">Settings</a></li>
+        <li><a href="@Url.Action("HIVCormodisAdd", "Administration", new {})">HIV Cormodis form</a></li>
+        <li><a href="#">@ViewBag.Title</a></li>
+    </ul>
+    <!--navCollection-->
+    <div class="navCollection_fullScreens">
+        @Html.Partial("_navCollection")
+    </div>
+    <div style="margin-bottom: 1%"></div>
+
+    <div class="row">
+        <h4 class="tableHeading"> HIV Comorbid form</h4>
+        <hr class="fancyruler">
+
+        @using (Html.BeginForm("HIVCormodisSave", "Administration"))
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(m => m.HivcomorbidRules.Id)
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+            <br />
+            <br />
+            <div class="form-horizontal">
+
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                <input type="hidden" name="carrier-validation" id="carrier-validation" />
+                <div class="col-md-12"><div id="carrier-validation-notice" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; Comorbid condition Already  exists!</span></div></div></div>
+
+                <br />
+                <br />
+                <div class="form-group">
+                    @Html.LabelFor(model => model.HivcomorbidRules.stage, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.DropDownListFor(model => model.HivcomorbidRules.stage, new SelectList(Model.HIVStages, "Id", "Name"), "Select", htmlAttributes: new { @class = "", @required = "required" })<br>
+                        @Html.ValidationMessageFor(model => model.HivcomorbidRules.stage, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(m => m.HivcomorbidRules.Comorbid, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.DropDownListFor(m => m.HivcomorbidRules.Comorbid, new SelectList(Model.ComorbidConditionExclusions, "mappingDescription", "mappingDescription"), "", new { @class = "", @id = "Comobord", @onChange = "CheckComorbid();" })
+                        @*@Html.ValidationMessageFor(m => m.HivcomorbidRules.Comorbid)*@
+                    </div>
+                    @if (Model.HivcomorbidRules.Id != 0)
+                    {
+                        @Html.LabelFor(m => m.HivcomorbidRules.active, htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-10">
+                            @Html.CheckBoxFor(m => m.HivcomorbidRules.active, new { @class = "" })
+                            @Html.ValidationMessageFor(m => m.HivcomorbidRules.active)
+                        </div>
+                    }
+
+                    <div class="fixed-btn">
+                        <input id="submit" type="submit" value="Submit" class="btn create-button" onclick="storageKey()" style="width: 15%" /><br />
+                        <input type="text" value="Back" class="btn reset-button go_back" onclick="backKey()" />
+                    </div>
+
+                </div>
+            </div>
+        }
+
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+<script src="~/Scripts/chosen.jquery.js"></script>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.8/js/select2.min.js" defer></script>
+
+
+
+@section scripts{
+    <script src="~/bundles/jqueryval"></script>
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/js/standalone/selectize.js"></script>
+
+    <script>
+        function CheckComorbid() {
+
+
+            var name = $('#Comobord').val();
+            name = name.trim();
+            $("#carrier-validation").val("");
+
+            $.ajax({
+                url: '/Administration/CheckComorbid',
+                type: "POST",
+                dataType: "JSON",
+                data: { name: name },
+                success: function (result) {
+
+                    var description = result;
+                    if (description == name) {
+                        $("#carrier-validation-notice").removeClass("hidden");
+                        $('span[data-valmsg-for="HivcomorbidRules.Comorbid"]').html('<span style="font-size: 12px"><i class="fas fa-exclamation-circle"></i> </span>Comorbid condition Already exists!');
+                        $("#carrier-validation").val(description);
+                        $(':input[type="submit"]').prop('disabled', true);
+                    }
+                },
+                error: function (result) {
+                    console.log(result.claimCode);
+                    $('span[data-valmsg-for="HivcomorbidRules.Comorbid"]').html('');
+                    $("#carrier-validation-notice").addClass("hidden");
+                    $(':input[type="submit"]').prop('disabled', false);
+                }
+            });
+        }
+
+        $("#submit").click(function () {
+            if ($("#carrier-validation").val().length > 0) {
+                $("#HivcomorbidRules.Comorbid").focus();
+                return false;
+            }
+        });
+
+    </script>
+
+    <script>
+        $(function () {
+            $('.go_back').click(function (e) {
+            window.location.href = "@Url.Action("HIVCormodisAdd", "Administration")";
+
+            });
+        });
+    </script>
+    <script>
+        function backKey() {
+            localStorage.setItem("back_noncdl", Date.now());
+        }
+        function storageKey() {
+            localStorage.setItem("create_noncdl", Date.now());
+        }
+
+
+
+    </script>
+
+    <script>
+        $(document).ready(function () { $("#Comobord").select2({ multiple: false }); });
+
+    </script>
+}
+
+

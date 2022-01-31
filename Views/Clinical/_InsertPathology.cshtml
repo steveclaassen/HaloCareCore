@@ -1,0 +1,1258 @@
+﻿@model HaloCareCore.Models.Patient.Pathology
+@{
+    Layout = "~/Views/Shared/_LayoutModal.cshtml";
+}
+
+<comment>
+    <!--
+            17 April 2019 -- HCare-708 (Submit button - duplicate post entries)
+            Duplicate entries do get entered if you click too quickly on the submit button. I have added JS to disable the submit button after the first click.
+
+            18 April 2019 -- HCare-705 (Patient Clinical (Pathology create - Create a default list of Labs)
+            Created dropdown datalist for labs in the Create pathology view. You can select from the list of labs or Type in a lab name that does not reflect in the list. This was added to the member create, edit and the task.
+
+            18 April 2019 -- HCare-707 (Capturing pathology - change process)
+            Addition of the No Attachment check box which overrides the attachment requirement has been added. Further to this, we have moved the entire add attachment/No attachment to the top of the page for the user to view easier.
+
+            06 May 2019 -- HCare-728 (Questionnaire - Submit button freeze -- Related to HCare-708)
+            A secondary affect of the duplicate click check for HCare-708 resulted in the Submit button for the Questionnaire to freeze should a user neglect to complete a required field. This would push the user back to the section that has not been answered but freeze the button in the process.
+            I have relooked at the code linked to HCare-708 as well as the submit button in the questionnaire which has resolved the issue.
+
+            03 June 2019 -- HCare-742 (Pathology dates - limitations to be added)
+            Added a limitation on the datepicker as well as a validation message showing that the user should not use future dated effective dates. This has been set to all the date fields in the views
+
+            28 August 2019 -- HCare-772 (Pathology data - Mandatory dates)
+            If the pathology field is populated with a value, the date field associated with that field is changed to required. If for example the Haemoglobin field is populated with a value and the Effective date underneath it is removed by the user. The form will NOT submit and show the user
+            the required fields. This has been applied to the Create Pathology view when adding pathology from profile as well as in the InsertPathology Task
+
+            12 February 2020 -- HCare-964(BUG: hdm2 ERROR Pathology not saving)
+            The form was breaking on the laboratory validation by not adding the Id and Task ID to the form when refreshing on the validation error. Corrected the error by adding the Id and Task ID to the method where the validation is pushed.
+            Also corrected the form submit jquery which controlled the validation for the button disable and the page loader.
+
+            11 June 2020 -- HCare-1062(Pathology assignment)
+            Refactored the _InsertPathology() GET method and loaded the program guid to the view. Also corrected the POST method for _InsertPathology which was not redirecting with a Program Guid which corrected the error message.
+            The frontend - I added jquery to fix the dropdown menus which now allows free text in the lab dropdown.
+
+        -->
+</comment>
+<style>
+    .contentBlock_modal {
+        background-color: #fff;
+        border: 1px solid #ddd;
+        box-shadow: 2px 2px 1px 0px rgba(0,0,0,0.38);
+        position: relative;
+        margin: auto;
+        display: block;
+        padding: 0px;
+        border-radius: 5px;
+        margin-top: 5% !important;
+    }
+
+    .assignmentModal_PathologyNew {
+        width: 100% !important;
+        background-color: #fff;
+        border: none;
+        box-shadow: 2px 2px 1px 0px rgba(0,0,0,0.38);
+        position: relative;
+        margin: auto;
+        display: block;
+        padding: 0px;
+        border-radius: 5px;
+        margin-top: 0% !important;
+        z-index: 10 !important;
+    }
+
+    .input-group-addon {
+        visibility: hidden;
+    }
+
+    .text-divider {
+        margin: 1em 0;
+        line-height: 0;
+        text-align: center;
+    }
+
+        .text-divider span {
+            background-color: rgba(254, 254, 254, 1);
+            padding: 1em;
+        }
+
+        .text-divider:before {
+            content: " ";
+            display: block;
+            border-top: 1px solid rgba(204, 204, 204, 0.50);
+            border-bottom: 1px solid transparent;
+            width: 96%;
+            margin-left: 0%;
+        }
+
+    textarea#comment {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        width: 90%;
+        max-width: 1200px !important;
+        height: 120px;
+        padding: 6px 6px;
+        line-height: 1.428571429;
+        color: #003366 !important;
+        border: 1px solid #ede9e9;
+        border-radius: 2px;
+        -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+        box-shadow: 1px 1px 1px 0px rgba(0,0,0,0.20);
+        -webkit-transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+        transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+        outline: none !important;
+        font-size: 100%;
+        font-weight: 100;
+        resize: none !important;
+        margin-top: 10px;
+        text-align: left
+    }
+
+
+    #snackbar {
+        min-width: 250px;
+        margin-left: -125px;
+        background-color: #333;
+        color: #fff;
+        text-align: center;
+        border-radius: 2px;
+        padding: 16px;
+        position: fixed;
+        z-index: 1000;
+        left: 50%;
+        bottom: 30px;
+        font-size: 17px;
+    }
+
+    .select2-container--default .select2-selection--single {
+        display: block;
+        max-width: 500px !important;
+        width: 150px !important;
+        max-height: 50px;
+        height: 32px !important;
+        margin-left: 10px;
+        padding: 6px 6px;
+        line-height: 1.428571429;
+        border: 1px solid #f4f4f4 !important;
+        border-radius: 4px;
+        -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+        box-shadow: 1px 1px 1px 0px rgba(0,0,0,0.20);
+        -webkit-transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+        transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+        background-color: transparent !important;
+    }
+
+    span.select2-selection.select2-selection--single {
+        outline: none;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__placeholder {
+        color: white !important;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__arrow b {
+        margin-top: -5px !important;
+        margin-left: 20px !important;
+    }
+</style>
+
+<link href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet" />
+
+<div class="row assignmentModal_PathologyNew">
+    <div id="divPath" style="margin-top: -10px">
+        @using (Ajax.BeginForm("_InsertPathology", "Clinical", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "divPath", OnBegin = "someFunction", OnSuccess = "OnSuccess", OnFailure = "OnFailure" }, new { id = "insertPathology" }))
+        {
+            @Html.AntiForgeryToken()
+
+            <div class="form-group">
+                <div class="col-md-10">
+                    @Html.HiddenFor(model => model.dependentID)
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                    @Html.Hidden("taskId", (object)ViewBag.task)
+                    @Html.Hidden("id", (object)ViewBag.id)
+                    @Html.Hidden("logid", (object)ViewBag.logid)
+                    @Html.Hidden("pro", (object)ViewBag.programId)
+                </div>
+            </div>
+
+            <!--pageLoader-->
+            <div id="loadingscreen" class="hidden">
+                <div class="container-loader">
+                    <div></div><div></div><div></div><div></div>
+                </div>
+                <div id="loading" class="loading"></div>
+            </div>
+
+            <div class="form-horizontal">
+                <div class="editMember">
+                    <div class="modal-header modal-header-primary">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true" id="assignmentModalClose">×</button>
+                        <h2> New Pathology</h2>
+                    </div>
+                    <br />
+                    <br />
+                    <div class="form-horizontal editForm">
+                        <div class="row">
+                            <div class="form-horizontal">
+                                <br />
+                                <h4 class="tableDivider-heading text-divider"><span>administration</span></h4>
+                                <br />
+                                <div class="form-group" style="margin-left: 3%; width: 90%">
+                                    <div class="col-md-12">
+
+                                        <div class="col-md-3">
+                                            @Html.LabelFor(model => model.effectiveDate, htmlAttributes: new { @class = "control-label col-md-5 " })
+                                            <div class="col-md-7">
+                                                @Html.EditorFor(model => model.effectiveDate, new { htmlAttributes = new { @id = "task_Pathology", @class = "dateLimit" } })
+                                                @Html.ValidationMessageFor(model => model.effectiveDate, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-3">
+                                            @Html.LabelFor(model => model.labReferenceNo, htmlAttributes: new { @class = "control-label col-md-5" })
+                                            <div class="col-md-6">
+                                                @Html.EditorFor(model => model.labReferenceNo, new { htmlAttributes = new { @class = "infoBox_Pathology", @required = "required" } })
+                                                @Html.ValidationMessageFor(model => model.labReferenceNo, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-3">
+                                            @Html.LabelFor(model => model.labName, htmlAttributes: new { @class = "control-label col-md-5" })
+
+                                            <div class="col-md-6" style="margin-bottom: 0%!important">
+                                                @Html.DropDownList("laboratories", null, "", new { @class = "infoBox_Pathology", @required = "required", @autocomplete = "off", @id = "laboratories" })
+                                                @Html.ValidationMessage("laboratories", "", new { @class = "text-danger", @style = "font-size: 75%;margin-left: 2%" })
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-3">
+                                            @Html.LabelFor(model => model.pathologyType, htmlAttributes: new { @class = "control-label col-md-5" })
+                                            <div class="col-md-6">
+                                                @Html.DropDownList("pathologyType", null, "Select", new { @class = "infoBox_Pathology", @required = "required" })
+                                                @Html.ValidationMessage("pathologyType", "", new { @class = "text-danger", @style = "margin-left: 2%" })
+
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <br />
+                                <h4 class="tableDivider-heading text-divider"><span>categories</span></h4>
+                                <br />
+                                <br />
+                                <!--Line 1-->
+                                <div class="form-group">
+                                    <div class="col-md-12" style="margin-left: 7.5%!important">
+                                        <div class="col-md-3">
+                                            @Html.LabelFor(model => model.CD4Count, htmlAttributes: new { @class = "control-label col-md-5 " })
+                                            <div class="col-md-6">
+                                                @Html.EditorFor(model => model.CD4Count, new { htmlAttributes = new { @class = "infoBox_Pathology", placeholder = "0.00" } })
+                                                @Html.ValidationMessageFor(model => model.CD4Count, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            @Html.LabelFor(model => model.CD4Percentage, htmlAttributes: new { @class = "control-label col-md-5 " })
+                                            <div class="col-md-6">
+                                                @Html.EditorFor(model => model.CD4Percentage, new { htmlAttributes = new { @class = "infoBox_Pathology", placeholder = "0.00" } })
+                                                @Html.ValidationMessageFor(model => model.CD4Percentage, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            @Html.LabelFor(model => model.viralLoad, htmlAttributes: new { @class = "control-label col-md-5 " })
+                                            <div class="col-md-6">
+                                                @Html.EditorFor(model => model.viralLoad, new { htmlAttributes = new { @class = "infoBox_Pathology", placeholder = "0.00" } })
+                                                @Html.ValidationMessageFor(model => model.viralLoad, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-12" style="margin-left: 7.5%!important;margin-top: -1.5%">
+                                        <div class="col-md-3">
+                                            @Html.LabelFor(model => model.CD4CounteffectiveDate, htmlAttributes: new { @class = "control-label col-md-5" })
+                                            <div class="col-md-6">
+                                                @Html.EditorFor(model => model.CD4CounteffectiveDate, new { htmlAttributes = new { @class = "infoBox_Pathology dateLimit" } })
+                                                @Html.ValidationMessageFor(model => model.CD4CounteffectiveDate, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            @Html.LabelFor(model => model.CD4PercentageeffectiveDate, htmlAttributes: new { @class = "control-label col-md-5" })
+                                            <div class="col-md-6">
+                                                @Html.EditorFor(model => model.CD4PercentageeffectiveDate, new { htmlAttributes = new { @class = "infoBox_Pathology dateLimit" } })
+                                                @Html.ValidationMessageFor(model => model.CD4PercentageeffectiveDate, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            @Html.LabelFor(model => model.viralLoadeffectiveDate, htmlAttributes: new { @class = "control-label col-md-5" })
+                                            <div class="col-md-6">
+                                                @Html.EditorFor(model => model.viralLoadeffectiveDate, new { htmlAttributes = new { @class = "infoBox_Pathology dateLimit" } })
+                                                @Html.ValidationMessageFor(model => model.CD4PercentageeffectiveDate, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!--Line 2-->
+                                <div class="form-group">
+                                    <div class="col-md-12" style="margin-left: 7.5%!important">
+                                        <div class="col-md-3">
+                                            @Html.LabelFor(model => model.haemoglobin, htmlAttributes: new { @class = "control-label col-md-5 " })
+                                            <div class="col-md-6">
+                                                @Html.EditorFor(model => model.haemoglobin, new { htmlAttributes = new { @class = "infoBox_Pathology", placeholder = "0.00" } })
+                                                @Html.ValidationMessageFor(model => model.haemoglobin, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            @Html.LabelFor(model => model.bilirubin, htmlAttributes: new { @class = "control-label col-md-5 " })
+                                            <div class="col-md-6">
+                                                @Html.EditorFor(model => model.bilirubin, new { htmlAttributes = new { @class = "infoBox_Pathology", placeholder = "0.00" } })
+                                                @Html.ValidationMessageFor(model => model.bilirubin, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            @Html.LabelFor(model => model.totalCholestrol, htmlAttributes: new { @class = "control-label col-md-5 " })
+                                            <div class="col-md-6">
+                                                @Html.EditorFor(model => model.totalCholestrol, new { htmlAttributes = new { @class = "infoBox_Pathology", placeholder = "0.00" } })
+                                                @Html.ValidationMessageFor(model => model.totalCholestrol, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-12" style="margin-left: 7.5%!important;margin-top: -1.5%">
+                                        <div class="col-md-3">
+                                            @Html.LabelFor(model => model.haemoglobineffectiveDate, htmlAttributes: new { @class = "control-label col-md-5" })
+                                            <div class="col-md-6">
+                                                @Html.EditorFor(model => model.haemoglobineffectiveDate, new { htmlAttributes = new { @class = "infoBox_Pathology dateLimit" } })
+                                                @Html.ValidationMessageFor(model => model.haemoglobineffectiveDate, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            @Html.LabelFor(model => model.bilirubineffectiveDate, htmlAttributes: new { @class = "control-label col-md-5" })
+                                            <div class="col-md-6">
+                                                @Html.EditorFor(model => model.bilirubineffectiveDate, new { htmlAttributes = new { @class = "infoBox_Pathology dateLimit" } })
+                                                @Html.ValidationMessageFor(model => model.bilirubineffectiveDate, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            @Html.LabelFor(model => model.totalCholestroleffectiveDate, htmlAttributes: new { @class = "control-label col-md-5" })
+                                            <div class="col-md-6">
+                                                @Html.EditorFor(model => model.totalCholestroleffectiveDate, new { htmlAttributes = new { @class = "infoBox_Pathology dateLimit" } })
+                                                @Html.ValidationMessageFor(model => model.totalCholestroleffectiveDate, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!--Line 3-->
+                                <div class="form-group">
+                                    <div class="col-md-12" style="margin-left: 7.5%!important">
+                                        <div class="col-md-3">
+                                            @Html.LabelFor(model => model.hdl, htmlAttributes: new { @class = "control-label col-md-5 " })
+                                            <div class="col-md-6">
+                                                @Html.EditorFor(model => model.hdl, new { htmlAttributes = new { @class = "infoBox_Pathology", placeholder = "0.00" } })
+                                                @Html.ValidationMessageFor(model => model.hdl, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            @Html.LabelFor(model => model.ldl, htmlAttributes: new { @class = "control-label col-md-5 " })
+                                            <div class="col-md-6">
+                                                @Html.EditorFor(model => model.ldl, new { htmlAttributes = new { @class = "infoBox_Pathology", placeholder = "0.00" } })
+                                                @Html.ValidationMessageFor(model => model.ldl, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            @Html.LabelFor(model => model.triglycerides, htmlAttributes: new { @class = "control-label col-md-5 " })
+                                            <div class="col-md-6">
+                                                @Html.EditorFor(model => model.triglycerides, new { htmlAttributes = new { @class = "infoBox_Pathology", placeholder = "0.00" } })
+                                                @Html.ValidationMessageFor(model => model.triglycerides, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-12" style="margin-left: 7.5%!important;margin-top: -1.5%">
+                                        <div class="col-md-3">
+                                            @Html.LabelFor(model => model.hdleffectiveDate, htmlAttributes: new { @class = "control-label col-md-5" })
+                                            <div class="col-md-6">
+                                                @Html.EditorFor(model => model.hdleffectiveDate, new { htmlAttributes = new { @class = "infoBox_Pathology dateLimit" } })
+                                                @Html.ValidationMessageFor(model => model.hdleffectiveDate, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            @Html.LabelFor(model => model.ldleffectiveDate, htmlAttributes: new { @class = "control-label col-md-5" })
+                                            <div class="col-md-6">
+                                                @Html.EditorFor(model => model.ldleffectiveDate, new { htmlAttributes = new { @class = "infoBox_Pathology dateLimit" } })
+                                                @Html.ValidationMessageFor(model => model.ldleffectiveDate, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            @Html.LabelFor(model => model.triglycerideseffectiveDate, htmlAttributes: new { @class = "control-label col-md-5" })
+                                            <div class="col-md-6">
+                                                @Html.EditorFor(model => model.triglycerideseffectiveDate, new { htmlAttributes = new { @class = "infoBox_Pathology dateLimit" } })
+                                                @Html.ValidationMessageFor(model => model.triglycerideseffectiveDate, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!--Line 4-->
+                                <div class="form-group">
+                                    <div class="col-md-12" style="margin-left: 7.5%!important">
+                                        <div class="col-md-3">
+                                            @Html.LabelFor(model => model.glucose, htmlAttributes: new { @class = "control-label col-md-5 " })
+                                            <div class="col-md-6">
+                                                @Html.EditorFor(model => model.glucose, new { htmlAttributes = new { @class = "infoBox_Pathology", placeholder = "0.00" } })
+                                                @Html.ValidationMessageFor(model => model.glucose, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            @Html.LabelFor(model => model.hba1c, htmlAttributes: new { @class = "control-label col-md-5 " })
+                                            <div class="col-md-6">
+                                                @Html.EditorFor(model => model.hba1c, new { htmlAttributes = new { @class = "infoBox_Pathology", placeholder = "0.00" } })
+                                                @Html.ValidationMessageFor(model => model.hba1c, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            @Html.LabelFor(model => model.alt, htmlAttributes: new { @class = "control-label col-md-5 " })
+                                            <div class="col-md-6">
+                                                @Html.EditorFor(model => model.alt, new { htmlAttributes = new { @class = "infoBox_Pathology", placeholder = "0.00" } })
+                                                @Html.ValidationMessageFor(model => model.alt, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-12" style="margin-left: 7.5%!important;margin-top: -1.5%">
+                                        <div class="col-md-3">
+                                            @Html.LabelFor(model => model.glucoseeffectiveDate, htmlAttributes: new { @class = "control-label col-md-5" })
+                                            <div class="col-md-6">
+                                                @Html.EditorFor(model => model.glucoseeffectiveDate, new { htmlAttributes = new { @class = "infoBox_Pathology dateLimit" } })
+                                                @Html.ValidationMessageFor(model => model.glucoseeffectiveDate, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            @Html.LabelFor(model => model.hba1ceffectiveDate, htmlAttributes: new { @class = "control-label col-md-5" })
+                                            <div class="col-md-6">
+                                                @Html.EditorFor(model => model.hba1ceffectiveDate, new { htmlAttributes = new { @class = "infoBox_Pathology dateLimit" } })
+                                                @Html.ValidationMessageFor(model => model.hba1ceffectiveDate, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            @Html.LabelFor(model => model.alteffectiveDate, htmlAttributes: new { @class = "control-label col-md-5" })
+                                            <div class="col-md-6">
+                                                @Html.EditorFor(model => model.alteffectiveDate, new { htmlAttributes = new { @class = "infoBox_Pathology dateLimit" } })
+                                                @Html.ValidationMessageFor(model => model.alteffectiveDate, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!--Line 5-->
+                                <div class="form-group">
+                                    <div class="col-md-12" style="margin-left: 7.5%!important">
+                                        <div class="col-md-3">
+                                            @Html.LabelFor(model => model.ast, htmlAttributes: new { @class = "control-label col-md-5 " })
+                                            <div class="col-md-6">
+                                                @Html.EditorFor(model => model.ast, new { htmlAttributes = new { @class = "infoBox_Pathology", placeholder = "0.00" } })
+                                                @Html.ValidationMessageFor(model => model.ast, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            @Html.LabelFor(model => model.urea, htmlAttributes: new { @class = "control-label col-md-5 " })
+                                            <div class="col-md-6">
+                                                @Html.EditorFor(model => model.urea, new { htmlAttributes = new { @class = "infoBox_Pathology", placeholder = "0.00" } })
+                                                @Html.ValidationMessageFor(model => model.urea, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            @Html.LabelFor(model => model.creatinine, htmlAttributes: new { @class = "control-label col-md-5 " })
+                                            <div class="col-md-6">
+                                                @Html.EditorFor(model => model.creatinine, new { htmlAttributes = new { @class = "infoBox_Pathology", placeholder = "0.00" } })
+                                                @Html.ValidationMessageFor(model => model.creatinine, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-12" style="margin-left: 7.5%!important;margin-top: -1.5%">
+                                        <div class="col-md-3">
+                                            @Html.LabelFor(model => model.asteffectiveDate, htmlAttributes: new { @class = "control-label col-md-5" })
+                                            <div class="col-md-6">
+                                                @Html.EditorFor(model => model.asteffectiveDate, new { htmlAttributes = new { @class = "infoBox_Pathology dateLimit" } })
+                                                @Html.ValidationMessageFor(model => model.asteffectiveDate, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            @Html.LabelFor(model => model.ureaeffectiveDate, htmlAttributes: new { @class = "control-label col-md-5" })
+                                            <div class="col-md-6">
+                                                @Html.EditorFor(model => model.ureaeffectiveDate, new { htmlAttributes = new { @class = "infoBox_Pathology dateLimit" } })
+                                                @Html.ValidationMessageFor(model => model.ureaeffectiveDate, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            @Html.LabelFor(model => model.creatinineeffectiveDate, htmlAttributes: new { @class = "control-label col-md-5" })
+                                            <div class="col-md-6">
+                                                @Html.EditorFor(model => model.creatinineeffectiveDate, new { htmlAttributes = new { @class = "infoBox_Pathology dateLimit" } })
+                                                @Html.ValidationMessageFor(model => model.creatinineeffectiveDate, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!--Line 6-->
+                                <div class="form-group">
+                                    <div class="col-md-12" style="margin-left: 7.5%!important">
+                                        <div class="col-md-3">
+                                            @Html.LabelFor(model => model.eGfr, htmlAttributes: new { @class = "control-label col-md-5 " })
+                                            <div class="col-md-6">
+                                                @Html.EditorFor(model => model.eGfr, new { htmlAttributes = new { @class = "infoBox_Pathology", placeholder = "0.00" } })
+                                                @Html.ValidationMessageFor(model => model.eGfr, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            @Html.LabelFor(model => model.mauCreatRatio, htmlAttributes: new { @class = "control-label col-md-5 " })
+                                            <div class="col-md-6">
+                                                @Html.EditorFor(model => model.mauCreatRatio, new { htmlAttributes = new { @class = "infoBox_Pathology", placeholder = "0.00" } })
+                                                @Html.ValidationMessageFor(model => model.mauCreatRatio, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            @Html.LabelFor(model => model.FEV1, htmlAttributes: new { @class = "control-label col-md-5 " })
+                                            <div class="col-md-6">
+                                                @Html.EditorFor(model => model.FEV1, new { htmlAttributes = new { @class = "infoBox_Pathology", placeholder = "0.00" } })
+                                                @Html.ValidationMessageFor(model => model.FEV1, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-12" style="margin-left: 7.5%!important;margin-top: -1.5%">
+                                        <div class="col-md-3">
+                                            @Html.LabelFor(model => model.eGfreffectiveDate, htmlAttributes: new { @class = "control-label col-md-5" })
+                                            <div class="col-md-6">
+                                                @Html.EditorFor(model => model.eGfreffectiveDate, new { htmlAttributes = new { @class = "infoBox_Pathology dateLimit" } })
+                                                @Html.ValidationMessageFor(model => model.eGfreffectiveDate, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            @Html.LabelFor(model => model.mauCreatRatioeffectiveDate, htmlAttributes: new { @class = "control-label col-md-5" })
+                                            <div class="col-md-6">
+                                                @Html.EditorFor(model => model.mauCreatRatioeffectiveDate, new { htmlAttributes = new { @class = "infoBox_Pathology dateLimit" } })
+                                                @Html.ValidationMessageFor(model => model.mauCreatRatioeffectiveDate, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            @Html.LabelFor(model => model.FEV1effectiveDate, htmlAttributes: new { @class = "control-label col-md-5" })
+                                            <div class="col-md-6">
+                                                @Html.EditorFor(model => model.FEV1effectiveDate, new { htmlAttributes = new { @class = "infoBox_Pathology dateLimit" } })
+                                                @Html.ValidationMessageFor(model => model.FEV1effectiveDate, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!--Line 7-->
+                                <div class="form-group">
+                                    <div class="col-md-12" style="margin-left: 7.5%!important">
+                                        <div class="col-md-3">
+                                            @Html.LabelFor(model => model.Eosinophylia, htmlAttributes: new { @class = "control-label col-md-5 " })
+                                            <div class="col-md-6">
+                                                @Html.EditorFor(model => model.Eosinophylia, new { htmlAttributes = new { @class = "infoBox_Pathology", placeholder = "0.00" } })
+                                                @Html.ValidationMessageFor(model => model.Eosinophylia, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            @Html.LabelFor(model => model.hivEliza, htmlAttributes: new { @class = "control-label col-md-5 " })
+                                            <div class="col-md-6">
+                                                @Html.EditorFor(model => model.hivEliza, new { htmlAttributes = new { @class = "infoBox_Pathology", placeholder = "0.00" } })
+                                                @Html.ValidationMessageFor(model => model.hivEliza, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            @Html.LabelFor(model => model.ucreatinine, htmlAttributes: new { @class = "control-label col-md-5 " })
+                                            <div class="col-md-6">
+                                                @Html.EditorFor(model => model.ucreatinine, new { htmlAttributes = new { @class = "infoBox_Pathology", placeholder = "0.00" } })
+                                                @Html.ValidationMessageFor(model => model.ucreatinine, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-12" style="margin-left: 7.5%!important;margin-top: -1.5%">
+                                        <div class="col-md-3">
+                                            @Html.LabelFor(model => model.EosinophyliaeffectiveDate, htmlAttributes: new { @class = "control-label col-md-5" })
+                                            <div class="col-md-6">
+                                                @Html.EditorFor(model => model.EosinophyliaeffectiveDate, new { htmlAttributes = new { @class = "infoBox_Pathology dateLimit" } })
+                                                @Html.ValidationMessageFor(model => model.EosinophyliaeffectiveDate, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            @Html.LabelFor(model => model.hivElizaeffectiveDate, htmlAttributes: new { @class = "control-label col-md-5" })
+                                            <div class="col-md-6">
+                                                @Html.EditorFor(model => model.hivElizaeffectiveDate, new { htmlAttributes = new { @class = "infoBox_Pathology dateLimit" } })
+                                                @Html.ValidationMessageFor(model => model.hivElizaeffectiveDate, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            @Html.LabelFor(model => model.ucreatinineeffectiveDate, htmlAttributes: new { @class = "control-label col-md-5" })
+                                            <div class="col-md-6">
+                                                @Html.EditorFor(model => model.ucreatinineeffectiveDate, new { htmlAttributes = new { @class = "infoBox_Pathology dateLimit" } })
+                                                @Html.ValidationMessageFor(model => model.ucreatinineeffectiveDate, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!--Line 8-->
+                                <div class="form-group">
+                                    <div class="col-md-12" style="margin-left: 7.5%!important">
+                                        <div class="col-md-3">
+                                            @Html.LabelFor(model => model.normGtt, htmlAttributes: new { @class = "control-label col-md-5 " })
+                                            <div class="col-md-6">
+                                                @Html.EditorFor(model => model.normGtt, new { htmlAttributes = new { @class = "infoBox_Pathology", placeholder = "0.00" } })
+                                                @Html.ValidationMessageFor(model => model.normGtt, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            @Html.LabelFor(model => model.abnGtt, htmlAttributes: new { @class = "control-label col-md-5 " })
+                                            <div class="col-md-6">
+                                                @Html.EditorFor(model => model.abnGtt, new { htmlAttributes = new { @class = "infoBox_Pathology", placeholder = "0.00" } })
+                                                @Html.ValidationMessageFor(model => model.abnGtt, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            @Html.LabelFor(model => model.salbumin, htmlAttributes: new { @class = "control-label col-md-5 " })
+                                            <div class="col-md-6">
+                                                @Html.EditorFor(model => model.salbumin, new { htmlAttributes = new { @class = "infoBox_Pathology", placeholder = "0.00" } })
+                                                @Html.ValidationMessageFor(model => model.salbumin, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-12" style="margin-left: 7.5%!important;margin-top: -1.5%">
+                                        <div class="col-md-3">
+                                            @Html.LabelFor(model => model.normGtteffectiveDate, htmlAttributes: new { @class = "control-label col-md-5" })
+                                            <div class="col-md-6">
+                                                @Html.EditorFor(model => model.normGtteffectiveDate, new { htmlAttributes = new { @class = "infoBox_Pathology dateLimit" } })
+                                                @Html.ValidationMessageFor(model => model.normGtteffectiveDate, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            @Html.LabelFor(model => model.abnGtteffectiveDate, htmlAttributes: new { @class = "control-label col-md-5" })
+                                            <div class="col-md-6">
+                                                @Html.EditorFor(model => model.abnGtteffectiveDate, new { htmlAttributes = new { @class = "infoBox_Pathology dateLimit" } })
+                                                @Html.ValidationMessageFor(model => model.abnGtteffectiveDate, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            @Html.LabelFor(model => model.salbumineffectiveDate, htmlAttributes: new { @class = "control-label col-md-5" })
+                                            <div class="col-md-6">
+                                                @Html.EditorFor(model => model.salbumineffectiveDate, new { htmlAttributes = new { @class = "infoBox_Pathology dateLimit" } })
+                                                @Html.ValidationMessageFor(model => model.salbumineffectiveDate, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!--Line 9-->
+                                <div class="form-group">
+                                    <div class="col-md-12" style="margin-left: 7.5%!important">
+                                        <div class="col-md-3">
+                                            @Html.LabelFor(model => model.ualbuminuria, htmlAttributes: new { @class = "control-label col-md-5 " })
+                                            <div class="col-md-6">
+                                                @Html.EditorFor(model => model.ualbuminuria, new { htmlAttributes = new { @class = "infoBox_Pathology", placeholder = "0.00" } })
+                                                @Html.ValidationMessageFor(model => model.ualbuminuria, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-12" style="margin-left: 7.5%!important;margin-top: -1.5%">
+                                        <div class="col-md-3">
+                                            @Html.LabelFor(model => model.ualbuminuriaeffectiveDate, htmlAttributes: new { @class = "control-label col-md-5" })
+                                            <div class="col-md-6">
+                                                @Html.EditorFor(model => model.ualbuminuriaeffectiveDate, new { htmlAttributes = new { @class = "infoBox_Pathology dateLimit" } })
+                                                @Html.ValidationMessageFor(model => model.ualbuminuriaeffectiveDate, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!--Line 10-->
+                                <h4 class="tableDivider-heading text-divider"><span>blood pressure</span></h4>
+                                <br />
+                                <br />
+                                <div class="form-group">
+                                    <div class="col-md-12" style="margin-left: 7.5%!important">
+                                        <div class="col-md-3">
+                                            @Html.LabelFor(model => model.systolicBP, htmlAttributes: new { @class = "control-label col-md-5 " })
+                                            <div class="col-md-6">
+                                                @Html.EditorFor(model => model.systolicBP, new { htmlAttributes = new { @class = "infoBox_Pathology nodecimal", placeholder = "0", @onblur = "CheckDecimal1();" } })
+                                                @Html.ValidationMessageFor(model => model.systolicBP, "", new { @class = "text-danger", @style = "font-size: 75%;" })
+                                                <input type="hidden" name="systolicBP-decimal" id="systolicBP-decimal" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            @Html.LabelFor(model => model.diastolicBP, htmlAttributes: new { @class = "control-label col-md-5 " })
+                                            <div class="col-md-6">
+                                                @Html.EditorFor(model => model.diastolicBP, new { htmlAttributes = new { @class = "infoBox_Pathology nodecimal", placeholder = "0", @onblur = "CheckDecimal2();" } })
+                                                @Html.ValidationMessageFor(model => model.diastolicBP, "", new { @class = "text-danger", @style = "font-size: 75%;" })
+                                                <input type="hidden" name="diastolicBP-decimal" id="diastolicBP-decimal" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            @Html.LabelFor(model => model.BPeffectiveDate, htmlAttributes: new { @class = "control-label col-md-5 " })
+                                            <div class="col-md-6">
+                                                @Html.EditorFor(model => model.BPeffectiveDate, new { htmlAttributes = new { @class = "infoBox_Pathology dateLimit" } })
+                                                @Html.ValidationMessageFor(model => model.BPeffectiveDate, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <br />
+
+                                <!--Comment-->
+                                <h4 class="tableDivider-heading text-divider"><span>comments</span></h4>
+                                <div class="form-group">
+                                    <div class="col-md-12">
+                                        @*<h2 style="margin-left: 20%; font-family: 'Century Gothic'; font-weight: 200; font-size: 18px; color: #003366">Comments</h2>*@
+                                        <div class="col-md-12">
+                                            @Html.TextAreaFor(model => model.comment, htmlAttributes: new { @class = "" })
+                                            @Html.ValidationMessageFor(model => model.comment, "", new { @class = "text-danger" })
+                                        </div>
+                                        <div class="col-md-3">
+                                            @Html.HiddenFor(model => model.createdBy, new { htmlAttributes = new { @class = "infoBox_Pathology", @id = "createdBy" } })
+
+                                        </div>
+                                        <div class="col-md-3"></div>
+                                        <div class="col-md-1"></div>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <br />
+                            <!--Submit-->
+                            <div style="text-align: center!important">
+                                <div class="actionButton" style="margin-bottom: 1%">
+                                    <input type="submit" value="Submit" class="btn questionnaireButton" id="pathologyTaskSubmit" />
+                                    <br />
+                                    <input value="Back" class="btn buttonRound_formBack go_back" style="width: 8%!important" />
+                                </div>
+
+                            </div>
+                            <div class="row"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        }
+    </div>
+</div>
+
+@Html.Raw(TempData["msg"])
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+
+@if (ViewBag.Message != null)
+{
+    <script type="text/javascript">
+
+    window.onload = function () {
+
+        toastr.options = {
+            positionClass: 'toast-bottom-right',
+            showDuration: 1000,
+            timeOut: false,
+            extendedTimeOut: false,
+            onclick: function (e) {
+                //e.preventDefault();
+                history.go(-1);
+            },
+
+
+        };
+        toastr.error("@ViewBag.Message <br /><button class='btn buttonRound_toast'>Ok</button>");
+    }
+    </script>
+}
+
+<link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+<script src="//code.jquery.com/jquery-1.10.2.js"></script>
+<script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+
+<!--Toast Notification-->
+<script type="text/javascript">
+
+    window.onload = function () {
+        toastr.options.positionClass = 'toast-bottom-right';
+        toastr.options.timeOut = 5000;
+        toastr.error("Pathology dates cannot be future dated!", "Please note:");
+
+    }
+
+</script>
+
+<script src="js/jquery.tablesorter.min.js"></script>
+<script src="http://code.jquery.com/jquery.unobtrusive-ajax.min.js"></script>
+
+@section Scripts {
+    <script src="~/bundles/jqueryval"></script>
+    <script src="~/bundles/jqueryui"></script>
+    <style src="~/Content/themes/base/css")
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.7.1/js/bootstrap-datepicker.min.js"></script>
+
+    <script>
+        /*Left navigationSlider*/
+        $("#menu-toggle").click(function (e) {
+            e.preventDefault();
+            $("#wrapper").toggleClass("active");
+        });
+
+        $(function () { // will trigger when the document is ready
+            $('.date').datepicker(); //Initialise any date pickers
+        });
+
+        /*goBack*/
+        $(function () {
+            $('.go_back').click(function (e) {
+                e.preventDefault();
+                history.go(-1);
+            });
+        });
+
+        /*specialNote*/
+        $("#alert-toggle").click(function (e) {
+            e.preventDefault();
+            $("#alertWrapper").toggleClass("active");
+        });
+
+        //AutoDate_EffectiveDate
+        $(document).ready(function () {
+            var date = new Date();
+
+            var day = date.getDate();
+            var month = date.getMonth() + 1;
+            var year = date.getFullYear();
+
+            if (month < 10) month = "0" + month;
+            if (day < 10) day = "0" + day;
+
+            var today = year + "-" + month + "-" + day;
+            $("#task_Pathology").attr("value", today);
+            $("#CD4CounteffectiveDate").attr("value", today);
+            $("#CD4PercentageeffectiveDate").attr("value", today);
+            $("#viralLoadeffectiveDate").attr("value", today);
+            $("#haemoglobineffectiveDate").attr("value", today);
+            $("#bilirubineffectiveDate").attr("value", today);
+            $("#totalCholestroleffectiveDate").attr("value", today);
+            $("#hdleffectiveDate").attr("value", today);
+            $("#ldleffectiveDate").attr("value", today);
+            $("#triglycerideseffectiveDate").attr("value", today);
+            $("#glucoseeffectiveDate").attr("value", today);
+            $("#hba1ceffectiveDate").attr("value", today);
+            $("#alteffectiveDate").attr("value", today);
+            $("#asteffectiveDate").attr("value", today);
+            $("#ureaeffectiveDate").attr("value", today);
+            $("#creatinineeffectiveDate").attr("value", today);
+            $("#eGfreffectiveDate").attr("value", today);
+            $("#mauCreatRatioeffectiveDate").attr("value", today);
+            $("#FEV1effectiveDate").attr("value", today);
+            $("#EosinophyliaeffectiveDate").attr("value", today);
+            $("#hivElizaeffectiveDate").attr("value", today);
+            $("#ucreatinineeffectiveDate").attr("value", today);
+            $("#normGtteffectiveDate").attr("value", today);
+            $("#abnGtteffectiveDate").attr("value", today);
+            $("#salbumineffectiveDate").attr("value", today);
+            $("#ualbuminuriaeffectiveDate").attr("value", today);
+            $("#BPeffectiveDate").attr("value", today);
+        });
+
+
+    </script>
+    <!--EffectiveDate mirror-->
+    <script>
+        $(document).mousemove(function () {
+
+            $('#task_Pathology').mousemove(function () {
+
+                var valuefirstone = $(this).val();
+                $("#CD4CounteffectiveDate").attr("value", valuefirstone);
+                $("#CD4PercentageeffectiveDate").attr("value", valuefirstone);
+                $("#viralLoadeffectiveDate").attr("value", valuefirstone);
+                $("#haemoglobineffectiveDate").attr("value", valuefirstone);
+                $("#bilirubineffectiveDate").attr("value", valuefirstone);
+                $("#totalCholestroleffectiveDate").attr("value", valuefirstone);
+                $("#hdleffectiveDate").attr("value", valuefirstone);
+                $("#ldleffectiveDate").attr("value", valuefirstone);
+                $("#triglycerideseffectiveDate").attr("value", valuefirstone);
+                $("#glucoseeffectiveDate").attr("value", valuefirstone);
+                $("#hba1ceffectiveDate").attr("value", valuefirstone);
+                $("#alteffectiveDate").attr("value", valuefirstone);
+                $("#asteffectiveDate").attr("value", valuefirstone);
+                $("#ureaeffectiveDate").attr("value", valuefirstone);
+                $("#creatinineeffectiveDate").attr("value", valuefirstone);
+                $("#eGfreffectiveDate").attr("value", valuefirstone);
+                $("#mauCreatRatioeffectiveDate").attr("value", valuefirstone);
+                $("#FEV1effectiveDate").attr("value", valuefirstone);
+                $("#EosinophyliaeffectiveDate").attr("value", valuefirstone);
+                $("#hivElizaeffectiveDate").attr("value", valuefirstone);
+                $("#ucreatinineeffectiveDate").attr("value", valuefirstone);
+                $("#normGtteffectiveDate").attr("value", valuefirstone);
+                $("#abnGtteffectiveDate").attr("value", valuefirstone);
+                $("#salbumineffectiveDate").attr("value", valuefirstone);
+                $("#ualbuminuriaeffectiveDate").attr("value", valuefirstone);
+                $("#BPeffectiveDate").attr("value", valuefirstone);
+
+
+            });
+
+        });
+    </script>
+    <!-- validation -->
+    <script>
+        $('#insertPathology').submit(function () {
+            if ($('#labReferenceNo').val() == "" || $('#laboratories').val() == "" || $('#pathologyType').val() == "") {
+                //alert('fields are empty');
+            }
+            else {
+                //button-disable -- HCare-728
+                var button = $('#pathologyTaskSubmit');
+                var oldValue = button.value;
+                var isDisabled = true;
+
+                $(this).find('#pathologyTaskSubmit').prop('disabled', true);
+                $(this).find('#loadingscreen').removeClass('hidden');
+
+                setTimeout(function () {
+                    button.value = oldValue;
+                    button.attr('disabled', !isDisabled);
+                }, 20000)
+            }
+        });
+    </script>
+
+    <script src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.9/jquery.validate.js"></script>
+    <script src="http://ajax.aspnetcdn.com/ajax/mvc/3.0/jquery.validate.unobtrusive.min.js"></script>
+
+    <!--DateLimit-->
+    <script>
+        var dateControler = {
+            currentDate: null
+        }
+
+        $(document).on("change", ".dateLimit", function (event, ui) {
+            var now = new Date();
+            var selectedDate = new Date($(this).val());
+
+            if (selectedDate > now) {
+                $(this).val(dateControler.currentDate)
+            } else {
+                dateControler.currentDate = $(this).val();
+            }
+        });
+
+    </script>
+    <!--Date validation-->
+    <script>
+        $(document).ready(function () {
+            $('#pathologyTaskSubmit').mouseover(function () {
+                if ($('#CD4Count').val() != '') {
+                    $("[name='CD4CounteffectiveDate']").attr("required", true);
+                }
+                else {
+                    $("[name='CD4CounteffectiveDate']").attr("required", false);
+                }
+            });
+            $('#pathologyTaskSubmit').mouseover(function () {
+                if ($('#CD4Percentage').val() != '') {
+                    $("[name='CD4PercentageeffectiveDate']").attr("required", true);
+                }
+                else {
+                    $("[name='CD4PercentageeffectiveDate']").attr("required", false);
+                }
+            });
+            $('#pathologyTaskSubmit').mouseover(function () {
+                if ($('#viralLoad').val() != '') {
+                    $("[name='viralLoadeffectiveDate']").attr("required", true);
+                }
+                else {
+                    $("[name='viralLoadeffectiveDate']").attr("required", false);
+                }
+            });
+            $('#pathologyTaskSubmit').mouseover(function () {
+                if ($('#haemoglobin').val() != '') {
+                    $("[name='haemoglobineffectiveDate']").attr("required", true);
+                }
+                else {
+                    $("[name='haemoglobineffectiveDate']").attr("required", false);
+                }
+            });
+            $('#pathologyTaskSubmit').mouseover(function () {
+                if ($('#bilirubin').val() != '') {
+                    $("[name='bilirubineffectiveDate']").attr("required", true);
+                }
+                else {
+                    $("[name='bilirubineffectiveDate']").attr("required", false);
+                }
+            });
+            $('#pathologyTaskSubmit').mouseover(function () {
+                if ($('#totalCholestrol').val() != '') {
+                    $("[name='totalCholestroleffectiveDate']").attr("required", true);
+                }
+                else {
+                    $("[name='totalCholestroleffectiveDate']").attr("required", false);
+                }
+            });
+            $('#pathologyTaskSubmit').mouseover(function () {
+                if ($('#hdl').val() != '') {
+                    $("[name='hdleffectiveDate']").attr("required", true);
+                }
+                else {
+                    $("[name='hdleffectiveDate']").attr("required", false);
+                }
+            });
+            $('#pathologyTaskSubmit').mouseover(function () {
+                if ($('#ldl').val() != '') {
+                    $("[name='ldleffectiveDate']").attr("required", true);
+                }
+                else {
+                    $("[name='ldleffectiveDate']").attr("required", false);
+                }
+            });
+            $('#pathologyTaskSubmit').mouseover(function () {
+                if ($('#triglycerides').val() != '') {
+                    $("[name='triglycerideseffectiveDate']").attr("required", true);
+                }
+                else {
+                    $("[name='triglycerideseffectiveDate']").attr("required", false);
+                }
+            });
+            $('#pathologyTaskSubmit').mouseover(function () {
+                if ($('#glucose').val() != '') {
+                    $("[name='glucoseeffectiveDate']").attr("required", true);
+                }
+                else {
+                    $("[name='glucoseeffectiveDate']").attr("required", false);
+                }
+            });
+            $('#pathologyTaskSubmit').mouseover(function () {
+                if ($('#hba1c').val() != '') {
+                    $("[name='hba1ceffectiveDate']").attr("required", true);
+                }
+                else {
+                    $("[name='hba1ceffectiveDate']").attr("required", false);
+                }
+            });
+            $('#pathologyTaskSubmit').mouseover(function () {
+                if ($('#alt').val() != '') {
+                    $("[name='alteffectiveDate']").attr("required", true);
+                }
+                else {
+                    $("[name='alteffectiveDate']").attr("required", false);
+                }
+            });
+            $('#pathologyTaskSubmit').mouseover(function () {
+                if ($('#ast').val() != '') {
+                    $("[name='asteffectiveDate']").attr("required", true);
+                }
+                else {
+                    $("[name='asteffectiveDate']").attr("required", false);
+                }
+            });
+            $('#pathologyTaskSubmit').mouseover(function () {
+                if ($('#urea').val() != '') {
+                    $("[name='ureaeffectiveDate']").attr("required", true);
+                }
+                else {
+                    $("[name='ureaeffectiveDate']").attr("required", false);
+                }
+            });
+            $('#pathologyTaskSubmit').mouseover(function () {
+                if ($('#creatinine').val() != '') {
+                    $("[name='creatinineeffectiveDate']").attr("required", true);
+                }
+                else {
+                    $("[name='creatinineeffectiveDate']").attr("required", false);
+                }
+            });
+            $('#pathologyTaskSubmit').mouseover(function () {
+                if ($('#eGfr').val() != '') {
+                    $("[name='eGfreffectiveDate']").attr("required", true);
+                }
+                else {
+                    $("[name='eGfreffectiveDate']").attr("required", false);
+                }
+            });
+            $('#pathologyTaskSubmit').mouseover(function () {
+                if ($('#mauCreatRatio').val() != '') {
+                    $("[name='mauCreatRatioeffectiveDate']").attr("required", true);
+                }
+                else {
+                    $("[name='mauCreatRatioeffectiveDate']").attr("required", false);
+                }
+            });
+            $('#pathologyTaskSubmit').mouseover(function () {
+                if ($('#FEV1').val() != '') {
+                    $("[name='FEV1effectiveDate']").attr("required", true);
+                }
+                else {
+                    $("[name='FEV1effectiveDate']").attr("required", false);
+                }
+            });
+            $('#pathologyTaskSubmit').mouseover(function () {
+                if ($('#Eosinophylia').val() != '') {
+                    $("[name='EosinophyliaeffectiveDate']").attr("required", true);
+                }
+                else {
+                    $("[name='EosinophyliaeffectiveDate']").attr("required", false);
+                }
+            });
+            $('#pathologyTaskSubmit').mouseover(function () {
+                if ($('#hivEliza').val() != '') {
+                    $("[name='hivElizaeffectiveDate']").attr("required", true);
+                }
+                else {
+                    $("[name='hivElizaeffectiveDate']").attr("required", false);
+                }
+            });
+            $('#pathologyTaskSubmit').mouseover(function () {
+                if ($('#ucreatinine').val() != '') {
+                    $("[name='ucreatinineeffectiveDate']").attr("required", true);
+                }
+                else {
+                    $("[name='ucreatinineeffectiveDate']").attr("required", false);
+                }
+            });
+            $('#pathologyTaskSubmit').mouseover(function () {
+                if ($('#normGtt').val() != '') {
+                    $("[name='normGtteffectiveDate']").attr("required", true);
+                }
+                else {
+                    $("[name='normGtteffectiveDate']").attr("required", false);
+                }
+            });
+            $('#pathologyTaskSubmit').mouseover(function () {
+                if ($('#abnGtt').val() != '') {
+                    $("[name='abnGtteffectiveDate']").attr("required", true);
+                }
+                else {
+                    $("[name='abnGtteffectiveDate']").attr("required", false);
+                }
+            });
+            $('#pathologyTaskSubmit').mouseover(function () {
+                if ($('#salbumin').val() != '') {
+                    $("[name='salbumineffectiveDate']").attr("required", true);
+                }
+                else {
+                    $("[name='salbumineffectiveDate']").attr("required", false);
+                }
+            });
+            $('#pathologyTaskSubmit').mouseover(function () {
+                if ($('#ualbuminuria').val() != '') {
+                    $("[name='ualbuminuriaeffectiveDate']").attr("required", true);
+                }
+                else {
+                    $("[name='ualbuminuriaeffectiveDate']").attr("required", false);
+                }
+            });
+            $('#pathologyTaskSubmit').mouseover(function () {
+                if ($('#systolicBP').val() != '') {
+                    $("[name='BPeffectiveDate']").attr("required", true);
+                }
+                else {
+                    $("[name='BPeffectiveDate']").attr("required", false);
+                }
+            });
+            $('#pathologyTaskSubmit').mouseover(function () {
+                if ($('#diastolicBP').val() != '') {
+                    $("[name='BPeffectiveDate']").attr("required", true);
+                }
+                else {
+                    $("[name='BPeffectiveDate']").attr("required", false);
+                }
+            });
+        });
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+    <!--Select dropdown-->
+    <script>
+        $(document).ready(function () { $("#pathologyType").select2({ selectOnClose: true, multiple: false, placeholder: "Select" }); });
+
+        //script that allows you to type your own name into select dropdown menu
+        $("#laboratories").select2({
+            selectOnClose: true,
+            placeholder: "Select",
+            tags: true,
+            createTag: function (params) {
+                return {
+                    id: params.term,
+                    text: params.term,
+                    newOption: true,
+                }
+            },
+            templateResult: function (data) {
+                var $result = $("<span></span>");
+
+                $result.text(data.text);
+
+                if (data.newOption) {
+                    $result.append(" <em>(new)</em>");
+                }
+
+                return $result;
+            }
+        });
+    </script>
+    <script>
+        //HCare-1190
+        function CheckDecimal1() {
+            var inputtxt = $('#systolicBP').val();
+            var decimal = /[^\d].+/;
+
+            if (inputtxt.match(decimal)) {
+                $('span[data-valmsg-for="systolicBP"]').html('<span style="font-size: 8px"><i class="fas fa-exclamation-circle"></i> </span> No decimal point!');
+                $("#systolicBP-decimal").val(inputtxt);
+            }
+            else {
+                $('span[data-valmsg-for="systolicBP"]').html('');
+                $("#systolicBP-decimal").val('');
+            }
+        }
+        function CheckDecimal2() {
+            var inputtxt = $('#diastolicBP').val();
+            var decimal = /[^\d].+/;
+
+            if (inputtxt.match(decimal)) {
+                $('span[data-valmsg-for="diastolicBP"]').html('<span style="font-size: 8px"><i class="fas fa-exclamation-circle"></i> </span> No decimal point!');
+                $("#diastolicBP-decimal").val(inputtxt);
+            }
+            else {
+                $('span[data-valmsg-for="diastolicBP"]').html('');
+                $("#diastolicBP-decimal").val('');
+            }
+        }
+        $("#pathologyTaskSubmit").click(function () {
+            if ($("#diastolicBP-decimal").val().length > 0) {
+                $("#diastolicBP").focus();
+                return false;
+            }
+        });
+        $("#pathologyTaskSubmit").click(function () {
+            if ($("#systolicBP-decimal").val().length > 0) {
+                $("#systolicBP").focus();
+                return false;
+            }
+        });
+
+    </script>
+}

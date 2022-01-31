@@ -1,0 +1,363 @@
+﻿@model HaloCareCore.Models.ViewModels.MedicalAidVM
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+<comment>
+    <!--
+    03 December 2019 -- HCare-905(LINKED TO HCARE-134: Module 2 - Create an Scheme Option master screen)
+    Created settings functionality for Scheme options allowing user to Create, Read, Update and Delete scheme options as well link these options to the schemes.
+    The validation will limit you from adding more than 10 characters to the code and will validate against previously used names as well as codes.
+    The user will access the Scheme Options/Plans via the Settings page / Medical scheme icon and the second tab is linked to the Scheme options.
+    Corrections/Additions: The edit function has been amended to freeze the Plan Code so that the user cannot edit this and create duplicated plans with the same code. A redirect has also been added which will
+    redirect to the correct tab once saved or returned.
+    -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .select2-container {
+        border: none !important;
+    }
+
+        .select2-container:focus {
+            outline: none !important
+        }
+
+    .select2-container--default .select2-selection--single {
+        display: block !important;
+        max-width: 2000px !important;
+        width: 1200px !important;
+        max-height: 100px;
+        height: 30px;
+        margin-left: 2%;
+        padding: 6px 6px;
+        line-height: 1.428571429;
+        color: #003366;
+        border-radius: 0px !important;
+        border: none !important;
+        border-bottom: 1px solid #e8e6e6 !important;
+        background-color: transparent !important;
+        -webkit-box-shadow: none !important;
+        box-shadow: none !important;
+        outline: none !important
+    }
+
+        .select2-container--default .select2-selection--single .select2-selection__placeholder {
+            color: white !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            margin-top: -5px !important;
+            left: 100% !important
+        }
+
+    .field-validation-error:before {
+        font-family: FontAwesome;
+        content: "\f06a\00a0";
+        animation: pulse 2s ease infinite;
+    }
+
+    /*    .field-validation-valid {
+            display: none;
+        }
+
+        .validation-summary-valid {
+            display: none;
+        }
+    */
+    .error-alert {
+        width: 100%;
+        margin: 0 auto;
+        background-color: rgba(217, 83, 79, 0.1);
+        padding: 10px;
+        border-left-color: #d9534f !important;
+        border: 1px solid transparent;
+        border-left-width: 5px;
+        border-radius: 3px;
+        margin: 0 auto;
+        font-family: 'Open Sans', sans-serif;
+        font-size: 12px;
+        margin: 0 0 5px 0;
+        margin-top: -10px;
+        margin-bottom: 20px;
+    }
+
+        .error-alert span {
+            color: #d9534f;
+            text-align: center;
+        }
+</style>
+<javascript>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+    <script src="https://www.jqueryscript.net/demo/jQuery-Plugin-For-Sortable-Bootstrap-Tables-Bootstrap-Sortable/Scripts/bootstrap-sortable.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/js/standalone/selectize.js"></script>
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.default.css">
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet" />
+    <link href='http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.min.css' rel='stylesheet' type='text/css'>
+</javascript>
+
+<div class="fullScreen_container zero-padding">
+    <!--pageHeader-->
+    <nav id="global-nav" class="nav">
+        <div class="pull-left title">
+            <h1 class="site-title_patientProfile">
+                <span><i class="fas fa-plus-square"></i>&emsp; Medical scheme</span>
+            </h1>
+        </div>
+        <div class="pull-right title">
+            <h1 class="site-title_userID pull-right">
+                <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+            </h1>
+            <h1 class="site-title_userID pull-right">
+                @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                {
+                    <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                }
+            </h1>
+            <h1 class="site-waffleIcon pull-right">
+                <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+            </h1>
+        </div>
+    </nav>
+    <!--breadCrumbs-->
+    <ul class="breadcrumbs_fullScreens">
+        <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+        <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+        <li><a href="@Url.Action("Index", "MedicalAids", new {})">Medical scheme</a></li>
+        <li><a href="#">Create</a></li>
+    </ul>
+    <!--navCollection-->
+    <div class="navCollection_fullScreens">
+        @Html.Partial("_navCollection")
+    </div>
+    <div style="margin-bottom: 1%"></div>
+
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="row">
+            <h4 class="tableHeading">Create new</h4>
+            <hr class="fancyruler">
+
+            <div class="form-horizontal createForm">
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                <div class="hidden-fields">
+                    @*<input id="error" value="@ViewBag.Error" style="display:none" />*@
+                    <input type="hidden" name="code-validation" id="code-validation" />
+                    <input type="hidden" name="description-validation" id="description-validation" />
+                    <input type="hidden" name="error-code" id="error-code" value="@ViewBag.Code" />
+                    <input type="hidden" name="error-description" id="error-description" value="@ViewBag.Description" />
+                    <div class="col-md-12"><div id="duplicate-code-notice" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; Plan code already exists!</span></div></div></div>
+                    <div class="col-md-12"><div id="duplicate-description-notice" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; Plan name already exists!</span></div></div></div>
+                    <div class="col-md-12"><div id="code-length-notice" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; Plan code is restricted to 15 characters!</span></div></div></div>
+                    <div class="col-md-12"><div id="error-duplicate-code" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; <b>Code:</b> @ViewBag.Code already exists!</span></div></div></div>
+                    <div class="col-md-12"><div id="error-duplicate-description" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; <b>Description:</b> @ViewBag.Description is already linked to @ViewBag.MedicalAid!</span></div></div></div>
+                    <div class="col-md-12"><div id="error-duplicate" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; This combination, <b>Code:</b> @ViewBag.Code, <b>Description:</b> @ViewBag.Description & <b>Medical aid:</b> @ViewBag.MedicalAid already exists!</span></div></div></div>
+                </div>
+                <br />
+                <br />
+                <div class="form-group">
+                    @Html.LabelFor(model => model.PlanCode, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.PlanCode, new { htmlAttributes = new { @class = "form-control-new", @placeholder = "example: OPT01", autocomplete = "off", @onblur = "CheckPlanCode();" } })
+                        @Html.ValidationMessageFor(model => model.PlanCode, "", new { @class = "text-danger", @style = "font-size: 90%; margin-left: 1%" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.PlanName, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.PlanName, new { htmlAttributes = new { @class = "form-control-new", @placeholder = "example: Scheme option 1", autocomplete = "off", @onblur = "CheckPlanName();" } })
+                        @Html.ValidationMessageFor(model => model.PlanName, "", new { @class = "text-danger", @style = "font-size: 90%; margin-left: 1%" })
+                    </div>
+                </div>
+                <br />
+                <br />
+                <div class="form-group">
+                    @Html.LabelFor(model => model.MedicalAidName, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.DropDownListFor(model => model.MedicalAidName, new SelectList(Model.MedicalAids.Where(x => x.Active == true), "medicalAidID", "Name"), "Select", htmlAttributes: new { @class = "", @required = "required" })<br>
+                        @Html.ValidationMessageFor(model => model.MedicalAidName, "", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 1%" })
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="fixedBack" style="margin-left: 40%">
+                <input value="Back" class="btn buttonRound_formBack go_back" onclick="backKey()" style="width: 15%!important" />
+                <input id="submit" type="submit" value="Create" class="btn buttonRound_formCreate" onclick="storageKey(); maCheck();" style="width: 15%!important" />
+            </div>
+
+        </div>
+
+    }
+</div>
+
+@section Scripts {
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/js/standalone/selectize.js"></script>
+    <script>
+        initSelectize();
+        function initSelectize() {
+            $('#MedicalAidName').selectize({
+                persist: true,
+                preload: true,
+                maxItems: 1,
+                delimiter: ',',
+                valueField: 'id',
+                labelField: 'name',
+                searchField: ['name'],
+                hideSelected: true,
+                plugins: ['remove_button'],
+                render: {
+                    option: function (item, escape) {
+                        return '<span class="name">' + escape(item.name) + '</span>';
+
+                    }
+                }
+            })
+        }
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+    <script>
+        var message = document.getElementById("error").value;
+        if (message != '') {
+            window.onload = function () {
+                toastr.options.positionClass = 'toast-bottom-right';
+                toastr.options.timeOut = 5000;
+                toastr.error(message);
+            }
+        }
+    </script>
+    <script>
+        function backKey() {
+            localStorage.setItem("back_medicalPlan", Date.now());
+        }
+        function storageKey() {
+            localStorage.setItem("create_medicalPlan", Date.now());
+        }
+    </script>
+    <script>
+        function CheckPlanName() {
+            var name = $('#PlanName').val();
+            name = name.trim();
+            $("#description-validation").val("");
+
+            var medicalaidID = $('#MedicalAidName').val();
+
+            $("#description-validation").val("");
+            $("#duplicate-description-notice").addClass("hidden");
+
+            $.ajax({
+                url: '/MedicalAids/PlanNameCheck',
+                type: "POST",
+                dataType: "JSON",
+                data: { name: name, medicalaidID: medicalaidID },
+                success: function (result) {
+                    var description = result.Name;
+                    var medid = result.medicalAidId;
+
+                    if (medicalaidID == medid && description.toLowerCase() == name.toLowerCase()) {
+                        $("#duplicate-description-notice").removeClass("hidden");
+                        $('span[data-valmsg-for="PlanName"]').html('<span style="font-size: 12px"><i class="fas fa-exclamation-circle"></i> </span>Plan name already exists!');
+                        $("#description-validation").val(description);
+                    }
+                },
+                error: function (result) {
+                    $('span[data-valmsg-for="PlanName"]').html('');
+                    $("#duplicate-description-notice").addClass("hidden");
+                }
+            });
+        }
+
+        $("#submit").click(function () {
+            if ($("#description-validation").val().length > 0) {
+                $("#PlanName").focus();
+                return false;
+            }
+        });
+
+    </script>
+    <script>
+        function CheckPlanCode() {
+            var code = $('#PlanCode').val();
+            code = code.trim();
+            $("#code-validation").val("");
+            var count = $("#PlanCode").val().length;
+            if (count > 15) {
+                $("#code-length-notice").removeClass("hidden");
+            }
+            else {
+                $("#code-length-notice").addClass("hidden");
+            }
+
+            $.ajax({
+                url: '/MedicalAids/PlanCodeCheck',
+                type: "POST",
+                dataType: "JSON",
+                data: { code: code },
+                success: function (result) {
+                    var cod3 = result.planCode;
+                    if (cod3.toLowerCase() == code.toLowerCase()) {
+                        $("#duplicate-code-notice").removeClass("hidden");
+                        $('span[data-valmsg-for="PlanCode"]').html('<span style="font-size: 12px"><i class="fas fa-exclamation-circle"></i> </span>Plan code already exists!');
+                        $("#code-validation").val(cod3);
+                    }
+                },
+                error: function (result) {
+                    $("#duplicate-code-notice").addClass("hidden");
+                    $('span[data-valmsg-for="PlanCode"]').html('');
+
+                }
+            });
+        }
+
+        $("#submit").click(function () {
+            if ($("#code-validation").val().length > 0) {
+                $("#PlanCode").focus();
+                return false;
+            }
+            var counter = $("#PlanCode").val().length;
+            if (counter > 15) {
+                $("#PlanCode").focus();
+                return false;
+            }
+        });
+
+    </script>
+    <script>
+        function maCheck() {
+            var value = $("#MedicalAidName :selected").val();
+            if (value == null || value == '') {
+                alert("Medical scheme is required!");
+                event.preventDefault();
+            }
+        }
+    </script>
+    <script>
+        $(document).ready(function () {
+            var c1 = $('#error-code').val();
+            var d1 = $('#error-description').val();
+            if (c1.length > 0 && d1.length > 0) {
+                $("#error-duplicate").removeClass("hidden");
+            }
+            else if (c1.length > 0) {
+                $("#error-duplicate-code").removeClass("hidden");
+            }
+            else if (d1.length > 0) {
+                $("#error-duplicate-description").removeClass("hidden");
+            }
+        });
+    </script>
+
+}
+
+

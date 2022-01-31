@@ -1,0 +1,100 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<style>
+    body {
+        background-image: url('../../Content/Images/Backgrounds/homePage/homePage_one.png');
+        background-size: 120%;
+    }
+</style>
+
+
+<!--topBar_Icon & Heading-->
+<div class="topBar_reports">
+    <h2>Patient Management</h2>
+    <img src="~/Content/Images/memberProfile/topBar Icons/dashBoard.png" style="width: 3%; margin-top: 0.2% " />
+</div>
+
+<br />
+<br />
+<br />
+<br />
+<div class="container">
+    <h2 style="color: #003366; font-size: 250%; text-align: center; margin-bottom: 10%"><i>Patient<span style="color: #0081b3"> Management</span></i></h2>
+
+    <div class="row AdminSolutions" style="margin-bottom: 4%!important">
+        <!--Search Management-->
+        <div class="col-md-4">
+            <img src="~/Content/Images/Navigation/2. patientManagement/Search.png" style="width: 20%; margin-left: 36%!important ; margin: auto; display: block; margin-bottom: 2.5%" />
+
+            <div class="col-xs-10">
+                <ul>
+                    <h2 style="color: #003366; font-size: 115%; text-align: center; margin-bottom: 10%"><i>Search<span style="color: #0081b3"> Management</span></i></h2>
+                    <p class="adminlink" style="text-align: center; font-size: 85%">@Html.ActionLink("Advanced Search", "AdvancedSearch", "PatientManagement")</p>
+                    <p class="adminlink" style="text-align: center; font-size: 85%">@Html.ActionLink("Doctor Search", "DoctorSearch", "PatientManagement")</p>
+
+
+                </ul>
+            </div>
+        </div>
+        <!--Patient Management-->
+        <div class="col-md-4">
+            <img src="~/Content/Images/Navigation/2. patientManagement/profileImage_male.png" style="width: 20%; margin-left: 38%!important ;margin: auto; display: block; margin-bottom: 2%" />
+            <div class="col-xs-10">
+                <ul>
+                    <h2 style="color: #003366; font-size: 115%; text-align: center; margin-bottom: 10%"><i>Patient<span style="color: #0081b3"> Management</span></i></h2>
+                    <p class="adminlink" style="text-align: center; font-size: 85%">@Html.ActionLink("New Profile", "Enrol", "Member")</p>
+                    <p class="adminlink" style="text-align: center; font-size: 85%">@Html.ActionLink("In Progress Enrolments", "InProgressEnrol", "Member")</p>
+                    <p class="adminlink" style="text-align: center; font-size: 85%">@Html.ActionLink("Recent Enrolments", "RecentEnrol", "PatientManagement")</p>
+
+                </ul>
+            </div>
+        </div>
+
+        <!--Assignments-->
+        <div class="col-md-4">
+            <img src="~/Content/Images/Navigation/3. clinicalManagement/iAssignments.png" style="width: 20%; margin-left: 46%!important  ; margin: auto; display: block; margin-bottom: 2%; margin-top: 1.5%" />
+            <ul>
+                <h2 style="color: #003366; font-size: 115%; text-align: center; margin-bottom: 8%"><i>Assignment<span style="color: #0081b3"> Management</span></i></h2>
+
+                <p class="adminlink" style="text-align: center; font-size: 85%">@Html.ActionLink("Open Assignments", "OpenAssignments", "Clinical")</p>
+                <p class="adminlink" style="text-align: center; font-size: 90%">@Html.ActionLink("Closed Assignments", "ClosedAssignments", "Clinical")</p>
+                <p class="adminlink" style="text-align: center; font-size: 85%">@Html.ActionLink("Postponed Assignments", "PostponedAssignments", "Clinical")</p>
+                <p class="adminlink" style="text-align: center; font-size: 85%">@Html.ActionLink("Document Assignments", "DocumentAssignments", "Clinical")</p>
+                <p class="adminlink" style="text-align: center; font-size: 85%">@Html.ActionLink("Enquiries", "SearchQueries", "PatientManagement")</p>
+
+            </ul>
+        </div>
+
+    </div>
+    <footer class="backButton_image" style="position: fixed; bottom: 50px; left: 0; right: 0; width: 80%; margin-left: 9%">
+        <a href="@Url.Action("Index", "Home")"
+            <span id="surround" >
+                <span id="initial"><img src="~/Content/Images/memberProfile/Page Icons/back_gray.png" /></span>
+                <span id="onhover"><img src="~/Content/Images/memberProfile/Page Icons/back_blue.png" /></span>
+            </span>
+            </a>
+    </footer>
+</div>
+
+
+
+
+
+
+<footer>
+    <img src="~/Content/Images/memberProfile/Page Icons/newProfilex.png" style="position:fixed; bottom:3.2%; right: 0; left: 0; margin-left: 95.8%; width: 1.5%">
+</footer>
+
+
+
+
+
+
+
+
+
+

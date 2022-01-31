@@ -1,0 +1,316 @@
+﻿@model IEnumerable<HaloCareCore.Models.UnAuthsScripts>
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@using HaloCareCore.Extensions
+
+@{
+    ViewBag.Title = "Authorise";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+</style>
+
+<div class="fullScreen_container">
+
+    <!--pageHeader-->
+    <nav id="global-nav" class="nav">
+        <div class="pull-left title">
+            <h1 class="site-title_patientProfile">
+                <span><i class="fas fa-check-circle"></i>&emsp; Authorisations</span>
+            </h1>
+        </div>
+        <div class="pull-right title">
+            <h1 class="site-title_userID pull-right">
+                <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+            </h1>
+            <h1 class="site-title_userID pull-right">
+                @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                {
+                    <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                }
+            </h1>
+            <h1 class="site-waffleIcon pull-right">
+                <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+            </h1>
+        </div>
+    </nav>
+
+    <!--breadCrumbs-->
+    <ul class="breadcrumbs_fullScreens">
+        <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+        <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+        <li><a href="#">Authorisations</a></li>
+    </ul>
+
+    <!--navCollection-->
+    @if (User.Identity.IsAuthenticated)
+    {
+        if (User.HasRole("6. Global user") || (User.HasRole("5. Super user")))
+        {
+            <div class="navCollection_fullScreens">
+                <div class="buttonCollection">
+                    <div class="col-md-12">
+                        <div class="col-md-4"></div>
+                        <div class="col-md-4">
+                            <div class="col-md-2">
+                                <a href="@Url.Action("Index", "Home", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Home"><span style="font-size: 15px" class="sub_icon fas fa-home"></span></a>
+                            </div>
+                            <div class="col-md-2">
+                                <a href="@Url.Action("OpenAssignments", "Clinical", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Assignments"><span style="font-size: 15px" class="sub_icon fas fa-bell"></span></a>
+                            </div>
+                            <div class="col-md-2">
+                                <a href="@Url.Action("Search", "Member", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Patient"><span style="font-size: 15px" class="sub_icon fas fa-user-circle"></span></a>
+                            </div>
+                            <div class="col-md-2">
+                                <span style="font-size: 15px; background: -webkit-linear-gradient(#e80a89, #f15b2a);-webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow (10px 10px 1px rgba(34, 34, 34, 0.50))" title="Authorisations" class="sub_icon fas fa-check-circle"></span>
+                            </div>
+                            <div class="col-md-2">
+                                <a href="@Url.Action("searchManagement", "patientManagement", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Search"><span style="font-size: 15px" class="sub_icon fas fa-search"></span></a>
+                            </div>
+                            <div class="col-md-2">
+                                <a href="@Url.Action("Index", "Administration", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Settings"><span style="font-size: 15px" class="sub_icon fas fa-cog"></span></a>
+                            </div>
+                        </div>
+                        <div class="col-md-4"></div>
+
+                    </div>
+                </div>
+            </div>
+        }
+        else if (User.HasRole("4. Advisor"))
+        {
+            <div class="navCollection_fullScreens">
+                <div class="buttonCollection">
+                    <div class="col-md-12">
+                        <div class="col-md-4"></div>
+                        <div class="col-md-4">
+                            <div class="col-md-1"></div>
+                            <div class="col-md-2">
+                                <a href="@Url.Action("Index", "Home", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Home"><span style="font-size: 15px" class="sub_icon fas fa-home"></span></a>
+                            </div>
+                            <div class="col-md-2">
+                                <a href="@Url.Action("OpenAssignments", "Clinical", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Assignments"><span style="font-size: 15px" class="sub_icon fas fa-bell"></span></a>
+                            </div>
+                            <div class="col-md-2">
+                                <a href="@Url.Action("Search", "Member", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Patient"><span style="font-size: 15px" class="sub_icon fas fa-user-circle"></span></a>
+                            </div>
+                            <div class="col-md-2">
+                                <span style="font-size: 15px; background: -webkit-linear-gradient(#e80a89, #f15b2a);-webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow (10px 10px 1px rgba(34, 34, 34, 0.50))" title="Authorisations" class="sub_icon fas fa-check-circle"></span>
+                            </div>
+                            <div class="col-md-2">
+                                <a href="@Url.Action("searchManagement", "patientManagement", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Search"><span style="font-size: 15px" class="sub_icon fas fa-search"></span></a>
+                            </div>
+                            <div class="col-md-1"></div>
+                        </div>
+                        <div class="col-md-4"></div>
+
+                    </div>
+                </div>
+            </div>
+        }
+        else if (User.HasRole("1. Consultant") || (User.HasRole("2. Case manager") || (User.HasRole("3. Specialist"))))
+        {
+            <div class="navCollection_fullScreens">
+                <div class="buttonCollection">
+                    <div class="col-md-12">
+                        <div class="col-md-4"></div>
+                        <div class="col-md-4">
+                            <div class="col-md-2"></div>
+                            <div class="col-md-2">
+                                <a href="@Url.Action("Index", "Home", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Home"><span style="font-size: 15px" class="sub_icon fas fa-home"></span></a>
+                            </div>
+                            <div class="col-md-2">
+                                <a href="@Url.Action("OpenAssignments", "Clinical", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Assignments"><span style="font-size: 15px" class="sub_icon fas fa-bell"></span></a>
+                            </div>
+                            <div class="col-md-2">
+                                <a href="@Url.Action("Search", "Member", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Patient"><span style="font-size: 15px" class="sub_icon fas fa-user-circle"></span></a>
+                            </div>
+                            <div class="col-md-2">
+                                <a href="@Url.Action("searchManagement", "patientManagement", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Search"><span style="font-size: 15px" class="sub_icon fas fa-search"></span></a>
+                            </div>
+                            <div class="col-md-2"></div>
+                        </div>
+                        <div class="col-md-4"></div>
+
+                    </div>
+                </div>
+            </div>
+        }
+    }
+
+
+
+    <div style="margin-bottom: 2%"></div>
+
+    <h4 class="tableHeading" style="margin-top: 4%; margin-bottom: -1.8%">Authorisation overview</h4>
+
+    <!--Search-->
+    <div class="tableSearch_authOverview row">
+        <div class="col-md-6 pull-right">
+            <ul class="input-group" id="adv-search">
+
+                <ul class="nav navbar-nav navbar-right">
+                    <li class="focus">
+                        <input type="text" class="form-control-patientSearch" id="search" onkeyup="myFunction()" placeholder="Search..." />
+                    </li>
+                    <div class="btn-group" role="group">
+                        <button type="submit" class="btn btn-search" style="height: 29px"><span class="glyphicon glyphicon-search" aria-hidden="true" title="Search"></span></button>
+                    </div>
+                </ul>
+            </ul>
+        </div>
+    </div>
+
+    <!--excelExport-->
+    @using (Html.BeginForm("outstandingAuthorisations", "Scripts", FormMethod.Post))
+    {
+        <div class="form-group excelOutAuths">
+            <input type="image" src="~/Content/Images/memberProfile/patientProfile/excel.png" title="Export" alt="Submit" style="width: 100%">
+        </div>
+    }
+
+    <table class="table patient_Table sortable" id="tableAuth">
+        <thead>
+            <tr>
+                <th onclick="tableAuth(0)">
+                    @Html.DisplayNameFor(model => model.membershipNo) <i class="fa fa-fw fa-sort"></i>
+                </th>
+                <th onclick="tableAuth(1)">
+                    @Html.DisplayNameFor(model => model.dependantCode) <i class="fa fa-fw fa-sort"></i>
+                </th>
+                <th onclick="tableAuth(2)">
+                    @Html.DisplayNameFor(model => model.schemeName) <i class="fa fa-fw fa-sort"></i>
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.effectiveDate) <i class="fa fa-fw fa-sort"></i>
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.createdDate) <i class="fa fa-fw fa-sort"></i>
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.overdue)
+                </th>
+                <th style="text-align: center!important">
+                    Action
+                </th>
+            </tr>
+        </thead>
+
+        @foreach (var item in Model)
+        {
+            <tbody>
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.membershipNo)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.dependantCode)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.schemeName)
+                    </td>
+                    <td data-dateformat="DD-MM-YYYY">
+                        @Html.DisplayFor(modelItem => item.effectiveDate)
+                    </td>
+                    <td data-dateformat="DD-MM-YYYY">
+                        @Html.DisplayFor(modelItem => item.createdDate)
+                    </td>
+                    <td data-value="_19">
+                        @Html.DisplayFor(modelItem => item.overdue)
+                    </td>
+                    <td class="linkNav" style="text-align: center!important">
+                        @Html.ActionLink("Authorise", "AuthoriseScript", new { id = item.scriptId })
+                    </td>
+                </tr>
+            </tbody>
+        }
+
+    </table>
+    <div class="fixedBack">
+        <input value="Back" class="btn buttonRound_formBack" onclick="MainbackBtn();" style="width: 15%" />
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js"></script>
+<script src="https://www.jqueryscript.net/demo/jQuery-Plugin-For-Sortable-Bootstrap-Tables-Bootstrap-Sortable/Scripts/bootstrap-sortable.js"></script>
+<script src="//code.jquery.com/jquery-3.2.1.min.js"></script>
+<script src="@Url.Content("~/Scripts/jquery-ui-1.8.11.js")" type="text/javascript"></script>
+<script src="js/jquery.tablesorter.min.js"></script>
+
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <script>
+        /*tableSearch*/
+        var $rows = $('#tableAuth tr');
+        $('#search').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $rows.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+
+        /*tableSorting*/
+        function tableAuth(n) {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("tableAuth");
+            switching = true;
+            dir = "asc";
+
+            while (switching) {
+                switching = false;
+                rows = table.getElementsByTagName("TR");
+
+                for (i = 1; i < (rows.length - 1); i++) {
+
+                    shouldSwitch = false;
+
+                    x = rows[i].getElementsByTagName("TD")[n];
+                    y = rows[i + 1].getElementsByTagName("TD")[n];
+
+                    if (dir == "asc") {
+                        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (dir == "desc") {
+                        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+                if (shouldSwitch) {
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+
+                    switchcount++;
+                } else {
+                    if (switchcount == 0 && dir == "asc") {
+                        dir = "desc";
+                        switching = true;
+                    }
+                }
+            }
+        }
+
+        // Searchbar Focus
+        $(function () {
+            $('.focus :input').focus();
+        });
+
+        /*goBack*/
+         function MainbackBtn() {
+            window.location.href = '@Url.Action("Index", "Home")';
+        }
+
+    </script>
+}

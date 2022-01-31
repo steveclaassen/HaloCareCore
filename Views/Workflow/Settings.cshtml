@@ -1,0 +1,224 @@
+﻿@model HaloCareCore.Models.ViewModels.wfSettingsVM
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Workflow";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<comment>
+    <!--
+        -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .active-placeholder {
+        background-color: transparent !important;
+        border: none !important
+    }
+</style>
+<javascript>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="https://www.jqueryscript.net/demo/jQuery-Plugin-For-Sortable-Bootstrap-Tables-Bootstrap-Sortable/Scripts/bootstrap-sortable.js"></script>
+    <script src="js/jquery.tablesorter.min.js"></script>
+</javascript>
+
+<div class="fullScreen_container">
+    <!----------------------------------------------------------------------------- html-top-navigation-panel  ---------------------------------------------------------------------------->
+    <navigation>
+        <nav id="global-nav" class="nav">
+            <div class="pull-left title">
+                <h1 class="site-title_patientProfile">
+                    <span><i class="fas fa-check-square"></i></span>&emsp; Workflow
+                </h1>
+            </div>
+            <div class="pull-right title">
+                <div class="site-title_userID pull-right">
+                    <div class="halocareLogoX"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+                </div>
+                <h1 class="site-title_userID pull-right">
+                    @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                    {
+                        <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                    }
+                </h1>
+                <h1 class="site-waffleIcon pull-right">
+                    <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+                </h1>
+            </div>
+        </nav>
+        <ul class="breadcrumbs_fullScreens">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+            <li><a href="@Url.Action("Index", "Administration", new {})">Settings</a></li>
+            <li><a href="#">@ViewBag.Title</a></li>
+        </ul>
+        <div class="navCollection_fullScreens">
+            @Html.Partial("_navCollection")
+        </div>
+
+        <div style="margin-bottom: 3%"></div>
+    </navigation>
+    <!-------------------------------------------------------------------------------------- html-body ------------------------------------------------------------------------------------>
+    <div class="container-tab">
+        <div class="row">
+            <div class="span12">
+                <div class="container-tab">
+                    <!------------------------------------------------------------------------------------ tab-navigation ----------------------------------------------------------------------------------->
+                    <ul class="nav nav-pills nav-justified" role="tablist">
+                        <li role="presentation" class="tab-clinical active"><a href="#wfsettings" aria-controls="wfsettings" class="tab-label" data-toggle="tab" id="wf_settings">Workflow settings</a></li>
+                        <li role="presentation" class="tab-clinical"><a href="#wfuserqueue" aria-controls="wfuserqueue" class="tab-label" role="tab" data-toggle="tab" id="wf_userqueue">User/Queue</a></li>
+                    </ul>
+                    <!-------------------------------------------------------------------------------------- tab-panels ------------------------------------------------------------------------------------->
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="wfsettings">
+                            <div class="row">
+                                <br />
+                                <!--------------------------------------------------------------------------- new/search -------------------------------------------------------------------------->
+                                <div class="col-md-12 row">
+                                    <div class="col-md-6">
+                                        <h4 class="subHeading">
+                                            Workflow settings
+                                            <a class="create-new" href="@Url.Action("Create", "Workflow", new { })" style="font-size: 14px">Create new <span><i class="fa fa-plus-circle" style="font-size: 12px"></i></span></a>
+                                        </h4>
+                                    </div>
+                                    <!--------------------------------------------------------------------------- jq-search -------------------------------------------------------------------------->
+                                    <div class="col-md-6">
+                                        <div class="input-wrapper-new-search">
+                                            <input type="text" class="form-control-new-search" id="wfSearch" onkeyup="myFunction()" placeholder="Search..." />
+                                        </div>
+                                    </div>
+                                </div>
+                                <!------------------------------------------------------------------------ medical-aid-table ---------------------------------------------------------------------->
+                                <table class="table settings-table sortable">
+                                    <thead>
+                                        <tr>
+                                            <th>@Html.DisplayNameFor(model => model.wfViewModel.QueueName) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="width: 13%">@Html.DisplayNameFor(model => model.wfViewModel.MedicalScheme) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="width: 13%">@Html.DisplayNameFor(model => model.wfViewModel.Program) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="width: 13%">@Html.DisplayNameFor(model => model.wfViewModel.ManagementStatus) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="width: 13%">@Html.DisplayNameFor(model => model.wfViewModel.RiskRating) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="width: 13%">@Html.DisplayNameFor(model => model.wfViewModel.AssignmentItemType) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="width: 8%; text-align: center!important">@Html.DisplayNameFor(model => model.wfViewModel.Active)</th>
+                                            <th style="width: 8%; text-align: center!important">@Html.DisplayName("Action")</th>
+                                        </tr>
+                                    </thead>
+
+                                    @foreach (var item in Model.wfViewModels)
+                                    {
+                                        <tbody id="workflow-search">
+                                            <tr>
+                                                <td class="text-left"><span class="@(item.Active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.QueueName)</span></td>
+                                                <td class="text-left"><span class="@(item.Active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.MedicalScheme)</span></td>
+                                                <td class="text-left"><span class="@(item.Active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.Program)</span></td>
+                                                <td class="text-left"><span class="@(item.Active == true ? "" : "active-false")">@Html.Raw(Html.Encode(item.ManagementStatus).Replace(",", "<br />" + "	"))</span></td>
+                                                <td class="text-left"><span class="@(item.Active == true ? "" : "active-false")">@Html.Raw(Html.Encode(item.RiskRating).Replace(",", "<br />" + " "))</span></td>
+                                                <td class="text-left"><span class="@(item.Active == true ? "" : "active-false")">@Html.Raw(Html.Encode(item.AssignmentItemType).Replace(",", "<br />" + " "))</span></td>
+                                                <td class="row-information text-center"><span class="@(item.Active == true ? "chk-yes fas fa-circle" : "chk-no fas fa-circle")"></span></td>
+                                                <td class="text-center">
+                                                    <input type="submit" class="link-button" value="View" onclick="location.href='@Url.Action("Details", "Workflow", new { id = item.QueueID })'" /> /
+                                                    <input type="submit" class="link-button" value="Edit" onclick="location.href='@Url.Action("Edit", "Workflow", new { id = item.QueueID })'" />
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    }
+                                </table>
+                            </div>
+                        </div>
+                        <div role="tabpanel" class="tab-pane" id="wfuserqueue">
+                            <div class="row">
+                                <br />
+                                <!--------------------------------------------------------------------------- new/search -------------------------------------------------------------------------->
+                                <div class="col-md-12 row">
+                                    <div class="col-md-6">
+                                        <h4 class="subHeading">
+                                            User/Queue
+                                            <a class="create-new" href="@Url.Action("Create_UserQueue", "Workflow", new { })" style="font-size: 14px">Create new <span><i class="fa fa-plus-circle" style="font-size: 12px"></i></span></a>
+                                        </h4>
+                                    </div>
+                                    <!--------------------------------------------------------------------------- jq-search -------------------------------------------------------------------------->
+                                    <div class="col-md-6">
+                                        <div class="input-wrapper-new-search">
+                                            <input type="text" class="form-control-new-search" id="search" onkeyup="myFunction()" placeholder="Search..." />
+                                        </div>
+                                    </div>
+                                </div>
+                                <!------------------------------------------------------------------------ medical-plan-table ---------------------------------------------------------------------->
+                                <table class="table settings-table sortable">
+                                    <thead>
+                                        <tr>
+                                            <th>@Html.DisplayNameFor(model => model.wfQueueVM.UserName) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th>@Html.DisplayNameFor(model => model.wfQueueVM.QueueName) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+                                            <th style="width: 10%; text-align: center!important">@Html.DisplayNameFor(model => model.wfQueueVM.Active)</th>
+                                            <th style="width: 10%; text-align: center!important">@Html.DisplayName("Action")</th>
+                                        </tr>
+                                    </thead>
+
+                                    @foreach (var item in Model.wfQueueVMs)
+                                    {
+                                        <tbody id="user-queue-search">
+                                            <tr>
+                                                <td class="text-left"><span class="@(item.Active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.UserName)</span></td>
+                                                <td class="text-left"><span class="@(item.Active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.QueueName)</span></td>
+                                                <td class="row-information text-center"><span class="@(item.Active == true ? "chk-yes fas fa-circle" : "chk-no fas fa-circle")"></span></td>
+
+                                                <td class="text-center">
+                                                    <input type="submit" class="link-button" value="View" onclick="location.href='@Url.Action("Details_UserQueue", "Workflow", new { id = item.Id })'" /> /
+                                                    <input type="submit" class="link-button" value="Edit" onclick="location.href='@Url.Action("Edit_UserQueue", "Workflow", new { id = item.Id })'" />
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    }
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixedBack">
+        <input value="Back" class="btn buttonRound_formBack " onclick="MainbackBtn();" style="width: 15%" />
+    </div>
+</div>
+
+<script src="js/jquery.tablesorter.min.js"></script>
+
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+    <script type="text/javascript">
+        var $table1 = $('#workflow-search tr');
+        $('#wfSearch').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $table1.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+    </script>
+    <script type="text/javascript">
+        var $table2 = $('#user-queue-search tr');
+        $('#search').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $table2.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+    </script>
+    <script>
+            function MainbackBtn() {
+            window.location.href = '@Url.Action("Index", "Administration")';
+        }
+    </script>
+}
+

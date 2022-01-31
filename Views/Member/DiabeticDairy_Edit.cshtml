@@ -1,0 +1,447 @@
+﻿@model HaloCareCore.Models.ViewModels.DiabeticDairyViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "DiabeticDairy_Edit";
+    Layout = "~/Views/Shared/_LayoutMember.cshtml";
+}
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+</style>
+<style>
+    .acknowledgement-color p {
+        color: forestgreen;
+    }
+
+    .patientDairy_Modal {
+        background-color: white;
+        border: none;
+        display: block;
+        padding: 0px;
+        border-radius: 5px;
+        margin-top: 0% !important;
+        margin-left: 0%;
+        z-index: 10 !important;
+    }
+
+        .patientDairy_Modal:hover {
+            background-color: white !important;
+        }
+
+    .visibility {
+        display: none;
+    }
+</style>
+
+<!--pageHeader-->
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .field-validation-error:before {
+        font-family: FontAwesome;
+        content: "\f06a\00a0";
+        animation: pulse 2s ease infinite;
+    }
+
+    .tooltip-wrapper {
+        display: inline-block;
+    }
+</style>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet" />
+<link href='http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.min.css' rel='stylesheet' type='text/css'>
+
+<div class="fullScreen_container zero-padding">
+
+    <!--pageHeader-->
+    <nav id="global-nav" class="nav">
+        <div class="pull-left title">
+            <h1 class="site-title_patientProfile">
+                <span><i class="fa fa-book"></i>&emsp; Glocose dairy</span>
+            </h1>
+        </div>
+        <div class="pull-right title">
+            <h1 class="site-title_userID pull-right">
+                <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+            </h1>
+            <h1 class="site-title_userID pull-right">
+                @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                {
+                    <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                }
+            </h1>
+            <h1 class="site-waffleIcon pull-right">
+                <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+            </h1>
+        </div>
+    </nav>
+
+    <ul class="bread-crumbs-full-screen" style="color: #808080 !important;">
+        <li style="font-size: 10px; font-weight: 600">You are here:</li>
+        <li><a href="@Url.Action("Index", "Home" , new { })">Home</a></li>
+        <li><a href="@Url.Action("patientCommunication", "Member", new { DependentID = Model.DiabeticDairy.dependentID, pro=Context.Request.Query["pro"] })">Patient</a></li>
+        <li><a href="#">@ViewBag.Title</a></li>
+    </ul>
+    <!--navCollection-->
+    <div class="navCollection_fullScreens">
+        @Html.Partial("_navCollection")
+    </div>
+
+    <div style="margin-bottom: 1%"></div>
+
+
+    <div style="margin-left: 5%">
+        @using (Html.BeginForm("DiabeticDairySave", "Member", FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(model => model.DiabeticDairy.dairyId)
+            @Html.HiddenFor(model => model.DiabeticDairy.dependentID)
+            @Html.Hidden("pro", Context.Request.Query["pro"])
+            <div class="form-horizontal editForm">
+
+                <div class="row">
+                    <br /><br />
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.DiabeticDairy.sentDate, htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-9">
+                            <input class="text-box single-line input-validation-error form-control-new" data-val="true" data-val-date="The field must be a date." id="DiabeticDairy.sentDate" name="DiabeticDairy.sentDate" type="date" aria-required="true" aria-describedby="DOB-error" aria-invalid="true" value="@string.Format("{0:yyyy-MM-dd}", Model.DiabeticDairy.sentDate)" min="@DateTime.Now.ToString("1900-01-01")" max="@DateTime.Now.ToString("yyyy-MM-dd")" oninvalid="InvalidMsg(this);">
+                            @Html.ValidationMessageFor(model => model.DiabeticDairy.sentDate, "", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 1%" })
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.DiabeticDairy.returnedDate, htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-9">
+                            <input class="text-box single-line input-validation-error form-control-new" data-val="true" data-val-date="The field must be a date." id="DiabeticDairy.returnedDate" name="DiabeticDairy.returnedDate" type="date" aria-required="true" aria-describedby="DOB-error" aria-invalid="true" value="@string.Format("{0:yyyy-MM-dd}", Model.DiabeticDairy.returnedDate)" min="@string.Format("{0:yyyy-MM-dd}",Model.DiabeticDairy.sentDate)" max="@DateTime.Now.ToString("yyyy-MM-dd")">
+                            @Html.ValidationMessageFor(model => model.DiabeticDairy.returnedDate, "", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 1%" })
+                        </div>
+                    </div>
+                    @*<div class="form-group">
+                            @Html.Label(null,"Educational note", htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-9">
+                                @Html.CheckBoxFor(model => model.DiabeticDairy.SingedEducationalNote, new { htmlAttributes = new { @class = "control-label col-md-2", @checked = Model.DiabeticDairy.SingedEducationalNote } })
+                            </div>
+                        </div>*@
+                    <div class="form-group">
+                        <label class="control-label col-md-2"> Diary education terms</label>
+                        <div class="col-md-9">
+                            <a href="#" data-toggle="modal" data-target="#myModal" style="margin-left: 20px;"><u>&#x21AC; Glucose diary education notes</u></a>
+                            <div id="ckbox" style="display:none">
+                                @Html.CheckBoxFor(model => model.DiabeticDairy.SingedEducationalNote, new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire visibility" }, id = "educationalNoted" })
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        @Html.Label(null,"Note", htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-9" style="margin-left:-0.5%">
+                            @Html.TextAreaFor(model => model.DiabeticDairy.notes, htmlAttributes: new { @class = "contentBlock_messageBox  single-line" })
+                        </div>
+                        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                    </div>                                <br />
+                    <br />
+                    <br />
+                    <br />
+                    <br />
+                    <div class="form-group">
+                        <div class="fixed-button" style="text-align: center">
+                            <input value="Back" class="btn back-button go_back" style="width: 15%!important" onclick="backKey()" />
+                            <input id="submit" type="submit" value="Submit" class="btn submit-button" style="width: 15%!important" /><br />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-------------------                ------------------------->
+            <!-- Modal -->
+            <div class="modal fade" id="myModal" role="dialog" style="overflow-y:auto;">
+                <div class="modal-body">
+                    <div class="patientDairy_Modal" style="overflow:visible;min-height:100%!important;">
+
+                        <div class="form-horizontal">
+                            <div class="modal-header modal-header-primary">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true" id="assignmentModalClose">×</button>
+                                <h2 class="modalHeading">Glucose education notes</h2>
+                            </div>
+                            <br />
+
+                            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                            <div class="patientDisclaimer" id="disclaimerPanel">
+                                <!--Disclaimer-->
+                                <div class="col-md-12">
+                                    <div class="col-md-6">
+                                        <table class="table patientDisclaimer_Table">
+                                            <tr>
+                                                <td>•</td>
+                                                <td>Test your glucose in the morning- this is the fasting glucose before breakfast.</td>
+                                            </tr>
+                                            <tr>
+                                                <td>•</td>
+                                                <td>Test then again before each meal- lunch and supper</td>
+                                            </tr>
+                                            <tr>
+                                                <td>•</td>
+                                                <td>
+                                                    Test 90-120 minutes after every meal: e.g. 2 hours after breakfast, 2 hours after lunch, 2 hours, after supper.
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>•</td>
+                                                <td>Test once a week during the night- to rule our hypoglycaemic events during night-time.</td>
+                                            </tr>
+                                            <tr>
+                                                <td>•</td>
+                                                <td>Low glucose levels during the night may explain high glucose readings in the mornings</td>
+                                            </tr>
+                                            <tr>
+                                                <td>•</td>
+                                                <td>The member must give a short description of the meals and snack- e.g. not just cereal- what type of cereal, and not just fruit- what type of fruit</td>
+                                            </tr>
+                                            <tr>
+                                                <td>•</td>
+                                                <td>Remember to wash hands before testing.</td>
+                                            </tr>
+                                            <tr>
+                                                <td>•</td>
+                                                <td>If they inject insulin- they must remember to rotate the injection area.</td>
+                                            </tr>
+                                            <tr>
+                                                <td>•</td>
+                                                <td>Remember to change insulin needles daily.</td>
+                                            </tr>
+                                            <tr>
+                                                <td>•</td>
+                                                <td>Indicate the date and time in the diary.</td>
+                                            </tr>
+                                            <tr>
+                                                <td></td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                    <hr class="questionnaire_Ruler" />
+
+                                    <table class="disclaimerAcknowledgement">
+                                        <tr>
+                                            <td style="width:50%!important; border-top:none!important" class="applicantSignature">
+                                                <p style="text-align: left; padding-bottom: 0%!important">The applicant has signed for acceptance of the disclaimer on the completed questionnaire</p>
+                                            </td>
+                                            <td style="margin: auto!important; border-top:none!important">
+                                                <div class="col-md-4 disclaimer_True" style="margin-left: 2%; margin-top: -2.5%; z-index: 100">
+                                                    <div class="disclaimer-true">
+                                                        @Html.CheckBoxFor(model => model.DiabeticDairy.SingedEducationalNote, new { htmlAttributes = new { @class = "infoBox_doctorQuestionnaire" }, id = "DiabeticDairy.SingedEducationalNote", @value = "DiabeticDairy.SingedEducationalNote" })
+                                                        <label for="educationalNoted"> <i class="fas fa-check-circle" style="font-size: 15px" id="DiabeticDairy.SingedEducationalNote" name="DiabeticDairy.SingedEducationalNote"></i></label>
+                                                        @Html.ValidationMessage("CkeducationalNoted", "", new { @class = "text-danger", @style = "font-size: 110%;margin-left: 0%" })
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <br />
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="actionButton" style="margin-top: 0.5%; margin-left: 41%; margin-bottom: 0.5%">
+                                    <input type="submit" id="btnSubmitID" onclick="sendCheckedBox();" data-dismiss="modal" value="Submit" class="btn questionnaireButton" />
+                                </div>
+                            </div>
+                            <br />
+                        </div>
+
+
+                    </div>
+                </div>
+
+            </div>
+
+        }
+    </div>
+</div>
+</div>
+
+
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.2.1.min.js"></script>
+
+
+<script src="~/bundles/jqueryval"></script>
+
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <!-- Search -->
+    <script>
+
+        document.getElementById("DiabeticDairy.sentDate").onchange = function () {
+            var input = document.getElementById("DiabeticDairy.returnedDate");
+            input.setAttribute("min", this.value);
+        }
+
+        // Javascript to enable link to tab
+        var url = document.location.toString();
+        if (url.match('#')) {
+            $('.nav-tabs a[href="#' + url.split('#')[1] + '"]').tab('show');
+        }
+
+        // Change hash for page-reload
+        $('.nav-tabs a').on('shown.bs.tab', function (e) {
+            window.location.hash = e.target.hash;
+        })
+        $(".nav-tabs a").click(function () { });
+
+    </script>
+    <script type="text/javascript">
+        function sendCheckedBox() {
+            var databack = $('#myModal #CkeducationalNoted').val().trim();
+            $('educationalNoted').html(databack);
+            $('ckbox').show();
+        }
+
+    </script>
+    @*modal*@
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            $("#submit").click(function () {
+                var chkinput = document.getElementById("select_all");
+                if (chkinput.checked) {
+                    alert("Success");
+                }
+                else {
+                    alert("Disclaimer acknowledgment required");
+                }
+            });
+        });
+
+        $(document).ready(function () {
+            $('#select_all').on('click', function () {
+                if (this.checked) {
+                    $('.checkbox').each(function () {
+                        this.checked = true;
+                    });
+                    $('.checkNo').each(function () {
+                        this.checked = false;
+                    });
+
+                } else {
+                    $('.checkbox').each(function () {
+                        this.checked = false;
+                    });
+                }
+            });
+
+            $('.checkbox').on('click', function () {
+                if ($('.checkbox:checked').length == $('.checkbox').length) {
+                    $('#select_all').prop('checked', true);
+                } else {
+                    $('#select_all').prop('checked', false);
+                }
+            });
+        });
+
+    </script>
+
+    <script>
+
+        if ($("#educationalNoted").prop("checked") == true) {
+
+            $('.disclaimer-true').addClass('checkBox_green'),
+                $('.telephonic-true').removeClass('checkBox_green'),
+                $('.applicantSignature').addClass('acknowledgement-color'),
+                $("[name='educationalNoted']").attr("required", false);
+        }
+
+
+        $(document).ready(function () {
+            var dateNewFormat, onlyDate, today = new Date();
+
+            dateNewFormat = today.getFullYear() + '-';
+            if (today.getMonth().length == 2) {
+
+                dateNewFormat += (today.getMonth() + 1);
+            }
+            else {
+                dateNewFormat += '0' + (today.getMonth() + 1);
+            }
+
+            onlyDate = today.getDate();
+            if (onlyDate.toString().length == 2) {
+
+                dateNewFormat += "-" + onlyDate;
+            }
+            else {
+                dateNewFormat += '-0' + onlyDate;
+            }
+
+            $('#createDate').val(dateNewFormat);
+            $('#modifiedDate').val(dateNewFormat);
+
+
+        });
+
+
+    </script>
+
+    <!--disclaimerCheck-->
+    <script>
+        $(document).ready(function () {
+            $("[name='educationalNoted']").attr("required", true),
+                $("[name='CKtelephonicAcknowledgement']").attr("required", true);
+
+        });
+    </script>
+
+    <script type="text/javascript">
+        $('#educationalNoted').change(function () {
+            if (this.checked)
+                $('.disclaimer-true').addClass('checkBox_green'),
+                    $('.telephonic-true').removeClass('checkBox_green'),
+                    $('.applicantSignature').addClass('acknowledgement-color'),
+                    $("[name='educationalNoted']").attr("required", false);
+
+            else
+                $("[name='educationalNoted']").attr("required", true),
+                    $('.applicantSignature').removeClass('acknowledgement-color'),
+                    $('.disclaimer-true').removeClass('checkBox_green');
+
+        });
+
+        $('#CKtelephonicAcknowledgement').change(function () {
+            if (this.checked)
+                $('.telephonic-true').addClass('checkBox_green'),
+                    $('.disclaimer-true').removeClass('checkBox_green'),
+                    $('.applicantSignature').removeClass('acknowledgement-color'),
+                    $("[name='CKtelephonicAcknowledgement']").attr("required", false),
+                    $("[name='educationalNoted']").attr("required", false),
+
+                    document.getElementById("educationalNoted").checked = false;
+
+            else
+                $("[name='CKtelephonicAcknowledgement']").attr("required", true),
+                    $("[name='educationalNoted']").attr("required", true),
+                    $('.telephonic-true').removeClass('checkBox_green');
+
+        });
+
+        $(function () {
+            $('.go_back').click(function (e) {
+                e.preventDefault();
+                history.go(-1);
+
+                   @*window.location.href = "@Url.Action("patientCommunication", "Member")";*@
+            });
+        });
+
+    </script>
+
+}
+
+

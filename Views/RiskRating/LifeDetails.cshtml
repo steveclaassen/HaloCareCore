@@ -1,0 +1,289 @@
+﻿@model HaloCareCore.Models.Management.LifeExpectancyRules
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Details";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<comment>
+    <!--
+        14 May 2019 -- HCare-732 (Account Settings – Life expectancy(Related to HCare-417))
+        Added CSS to the Index, Create, Edit, Details for Risk Rating in settings.
+
+        I have added a search bar as well as a sort function that will allow the user to sort the columns.
+
+        The Create view has an Age Less and Age more or equal to, hbA1C less than, hbA1C greater than field. Only one of these must be populated at a single time (per category).
+        I have added jQuery to remove the second field should the first field have a value greater than 0. The edit page must only show the populated Age and hbA1C and not the field with a zero value.
+
+        I have also redirected the controllers to direct the post to the correct view as well as corrected the Create controller which was not being set correctly.
+
+        Additionally I have changed the Age and RiskId fields to a dropdown menu in order to guide the user better which is applied to the Create and the Edit fields.
+
+    -->
+</comment>
+
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+</style>
+
+<div class="fullScreen_container zero-padding">
+
+    <!--pageHeader-->
+    <nav id="global-nav" class="nav">
+        <div class="pull-left title">
+            <h1 class="site-title_patientProfile">
+                <span><i class="fas fa-calculator"></i>&emsp; Diabetes life expectancy</span>
+            </h1>
+        </div>
+        <div class="pull-right title">
+            <h1 class="site-title_userID pull-right">
+                <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+            </h1>
+            <h1 class="site-title_userID pull-right">
+                @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                {
+                    <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                }
+            </h1>
+            <h1 class="site-waffleIcon pull-right">
+                <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+            </h1>
+        </div>
+    </nav>
+
+    <!--breadCrumbs-->
+    <ul class="breadcrumbs_fullScreens">
+        <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+        <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+        <li><a href="@Url.Action("LifeIndex", "RiskRating", new {})">Life expectancy</a></li>
+        <li><a href="#">Detail</a></li>
+    </ul>
+
+    <!--navCollection-->
+    <div class="navCollection_fullScreens">
+        @Html.Partial("_navCollection")
+    </div>
+
+    <div style="margin-bottom: 1%"></div>
+
+    <div class="row">
+        <h4 class="tableHeading">Details</h4>
+        <hr class="fancyruler">
+        <br />
+        <br />
+        <div style="margin-left: 5%">
+            <dl class="dl-horizontal editForm">
+                <dt>
+                    @Html.DisplayNameFor(model => model.effectiveDate)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.effectiveDate)
+                </dd>
+
+                <br />
+                <hr class="fancyruler" />
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.gender)
+                </dt>
+
+                <dd class="activeCheck">
+                    @if (Model.gender == "M")
+                    {
+                        <p>Male</p>
+                    }
+                    else if (Model.gender == "F")
+                    {
+                        <p>Female</p>
+                    }
+                    else
+                    {
+                        @Html.DisplayFor(model => model.RiskId)
+                    }
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.RiskId)
+                </dt>
+
+                <dd class="activeCheck">
+                    @if (Model.RiskId == "G")
+                    {
+                        <p>Green (Low)</p>
+                    }
+                    else if (Model.RiskId == "Y")
+                    {
+                        <p>Yellow (Medium)</p>
+                    }
+                    else if (Model.RiskId == "R")
+                    {
+                        <p>Red (High)</p>
+                    }
+                    else
+                    {
+                        @Html.DisplayFor(model => model.RiskId)
+                    }
+                </dd>
+
+                <br />
+                <hr class="fancyruler" />
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.smoker)
+                </dt>
+
+                <dd class="activeCheck">
+                    @if (Model.smoker)
+                    {
+                        <img src="~/Content/Images/Icons/Administration/AssignmentTrue.png" style="width: 20%; margin-left: -1%!important" />
+                    }
+                    else
+                    {
+                        <img src="~/Content/Images/Icons/Administration/AssignmentFalse.png" style="width: 20%; margin-left: -1%!important" />
+                    }
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.hypertension)
+                </dt>
+
+                <dd class="activeCheck">
+                    @if (Model.hypertension)
+                    {
+                        <img src="~/Content/Images/Icons/Administration/AssignmentTrue.png" style="width: 20%; margin-left: -1%!important" />
+                    }
+                    else
+                    {
+                        <img src="~/Content/Images/Icons/Administration/AssignmentFalse.png" style="width: 20%; margin-left: -1%!important" />
+                    }
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.hychol)
+                </dt>
+
+                <dd class="activeCheck">
+                    @if (Model.hychol)
+                    {
+                        <img src="~/Content/Images/Icons/Administration/AssignmentTrue.png" style="width: 20%; margin-left: -1%!important" />
+                    }
+                    else
+                    {
+                        <img src="~/Content/Images/Icons/Administration/AssignmentFalse.png" style="width: 20%; margin-left: -1%!important" />
+                    }
+                </dd>
+
+                <dt>
+                    hbA1C greather than:
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.gtHba1C)
+                </dd>
+
+                <dt>
+                    hbA1C less than:
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.ltHba1C)
+                </dd>
+
+                <dt>
+                    Age greather than:
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.gtAge)
+                </dd>
+
+                <dt>
+                    hbA1C less than:
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.ltAge)
+                </dd>
+
+                <br />
+                <hr class="fancyruler" />
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.createdBy)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.createdBy)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.createdDate)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.createdDate)
+                </dd>
+
+                <br />
+                <hr class="fancyruler" />
+
+                @if (Model.modifiedBy != null)
+                {
+                    <dt>
+                        @Html.DisplayNameFor(model => model.modifiedBy)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.modifiedBy)
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.modifiedDate)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.modifiedDate)
+                    </dd>
+
+                    <br />
+                    <hr class="fancyruler" />
+
+                }
+                <dt>
+                    @Html.DisplayNameFor(model => model.active)
+                </dt>
+
+                <dd class="activeCheck">
+                    @if (Model.active)
+                    {
+                        <img src="~/Content/Images/Icons/Administration/AssignmentTrue.png" style="width: 20%; margin-left: -1%!important" />
+                    }
+                    else
+                    {
+                        <img src="~/Content/Images/Icons/Administration/AssignmentFalse.png" style="width: 20%; margin-left: -1%!important" />
+                    }
+                </dd>
+
+            </dl>
+
+            <div class="fixedBack" style="margin-left: 40%">
+                <input value="Back" class="btn buttonRound_formBack go_back" onclick="backKey()" style="width: 15%!important" />
+                <a href="@Url.Action("LifeEdit", "RiskRating", new { id = Model.id })" value="Edit" class="btn buttonRound_formEdit" style="width: 15%!important">Edit</a>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+    <script>
+        function backKey() {
+            localStorage.setItem("back_lerules", Date.now());
+        }
+    </script>
+}

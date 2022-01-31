@@ -1,0 +1,275 @@
+﻿@model HaloCareCore.Models.Management.HypoRiskRules
+
+@{
+    ViewBag.Title = "Create";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<comment>
+    <!--
+        14 May 2019 -- HCare-733 (Account Settings - Risk rating (Related to HCare-417))
+        Applied CSS to the new Risk rating views.
+        I have added a search bar as well as a sort function that will allow the user to sort the columns.
+
+        The Create view has an Age Less and Age more or equal to field. Only one of these must be populated at a single time. I have added jQuery to remove the second field should the first field have a value greater than 0.
+        The edit page must only show the populated Age and not the 0 age field.
+
+        08 October 2020 -- HCare-1185
+    -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .field-validation-error:before {
+        font-family: FontAwesome;
+        content: "\f06a\00a0";
+        animation: pulse 2s ease infinite;
+    }
+
+    .textbox-control-date {
+        display: block !important;
+        max-width: 600px !important;
+        width: 350px;
+        max-height: 100px;
+        height: 30px;
+        margin-top: 10px;
+        margin-left: 10px;
+        padding: 6px 6px;
+        line-height: 1.428571429;
+        color: #003366;
+        border-radius: 0px !important;
+        border: none !important;
+        border-bottom: 1px solid #e8e6e6 !important;
+        background-color: transparent !important;
+        -webkit-box-shadow: none !important;
+        box-shadow: none !important;
+    }
+
+    .error-alert {
+        width: 100%;
+        margin: 0 auto;
+        background-color: rgba(217, 83, 79, 0.1);
+        padding: 10px;
+        border-left-color: #d9534f !important;
+        border: 1px solid transparent;
+        border-left-width: 5px;
+        border-radius: 3px;
+        margin: 0 auto;
+        font-family: 'Open Sans', sans-serif;
+        font-size: 12px;
+        margin: 0 0 5px 0;
+        margin-top: -10px;
+        margin-bottom: 20px;
+    }
+
+        .error-alert span {
+            color: #d9534f;
+            text-align: center;
+        }
+</style>
+<javascript>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet" />
+    <link href='http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.min.css' rel='stylesheet' type='text/css'>
+</javascript>
+
+<div class="fullScreen_container zero-padding">
+
+    <!--pageHeader-->
+    <nav id="global-nav" class="nav">
+        <div class="pull-left title">
+            <h1 class="site-title_patientProfile">
+                <span><i class="fas fa-exclamation-triangle"></i>&emsp; Diabetes risk rating</span>
+            </h1>
+        </div>
+        <div class="pull-right title">
+            <h1 class="site-title_userID pull-right">
+                <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+            </h1>
+            <h1 class="site-title_userID pull-right">
+                @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                {
+                    <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                }
+            </h1>
+            <h1 class="site-waffleIcon pull-right">
+                <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+            </h1>
+        </div>
+    </nav>
+    <!--breadCrumbs-->
+    <ul class="breadcrumbs_fullScreens">
+        <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+        <li><a href="@Url.Action("Index", "Administration", new {})">Settings</a></li>
+        <li><a href="@Url.Action("Index", "ManagementStatus", new {})">Risk rating</a></li>
+        <li><a href="#">Create</a></li>
+    </ul>
+    <!--navCollection-->
+    <div class="navCollection_fullScreens">
+        @Html.Partial("_navCollection")
+    </div>
+    <div style="margin-bottom: 1%"></div>
+
+    <div class="row">
+        <h4 class="tableHeading">Create new</h4>
+        <hr class="fancyruler">
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+            <div class="hidden-fields">
+                <input type="hidden" name="error-rule" id="error-rule" value="@ViewBag.Rule" />
+                <div class="col-md-12"><div id="error-duplicate" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; This combination, <b>Age less:</b> @ViewBag.ltAge, <b>Age greater:</b> @ViewBag.gtAge, <b>Insulin:</b> @ViewBag.Insulin, <b>Sulphonylureas:</b> @ViewBag.Sulphonylureas, <b>Glucose:</b> @ViewBag.Glucose, <b>Renal:</b> @ViewBag.Renal & <b>Hypo hospitalisation:</b> @ViewBag.Hypo already exists!</span></div></div></div>
+            </div>
+            <br />
+            <br />
+            <div class="form-horizontal createForm">
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.effectiveDate, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        <input class="text-box single-line input-validation-error infoBox_editMember" data-val="true" data-val-date="The field must be a date." id="effectiveDate" name="effectiveDate" type="date" aria-required="true" aria-describedby="DOB-error" aria-invalid="true" value="@DateTime.Now.ToString("yyyy-MM-dd")" min="@DateTime.Now.ToString("1900-01-01")" required oninvalid="InvalidMsg(this);">
+                        @Html.ValidationMessageFor(model => model.effectiveDate, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group" id="ageLessThan">
+                    @Html.Label(null,"Age less than:", htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.ltAge, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                        @Html.ValidationMessageFor(model => model.ltAge, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group" id="ageGreaterThan">
+                    @Html.Label(null,"Age more or equal to:", htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.gtAge, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                        @Html.ValidationMessageFor(model => model.gtAge, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Insulin, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        <div class="checkbox">
+                            @Html.EditorFor(model => model.Insulin)
+                            @Html.ValidationMessageFor(model => model.Insulin, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Sulphonylureas, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        <div class="checkbox">
+                            @Html.EditorFor(model => model.Sulphonylureas)
+                            @Html.ValidationMessageFor(model => model.Sulphonylureas, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.Label(null,"Glucose below", htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.Glucose, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                        @Html.ValidationMessageFor(model => model.Glucose, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Renal, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        <div class="checkbox">
+                            @Html.EditorFor(model => model.Renal)
+                            @Html.ValidationMessageFor(model => model.Renal, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.hypo, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        <div class="checkbox">
+                            @Html.EditorFor(model => model.hypo)
+                            @Html.ValidationMessageFor(model => model.hypo, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="fixed-btn">
+                    <input id="submit" type="submit" value="Submit" onclick="storageKey()" class="btn create-button" style="width: 15%" /><br />
+                    <input type="text" value="Back" onclick="backKey()" class="btn reset-button go_back" />
+                </div>
+
+            </div>
+        }
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+@section scripts{
+    <script src="~/bundles/jqueryval"></script>
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+    <script>
+        function backKey() {
+            localStorage.setItem("back_rrrules", Date.now());
+        }
+        function storageKey() {
+            localStorage.setItem("create_rrrules", Date.now());
+        }
+    </script>
+    <script>
+        $(function () {
+            $("#ltAge").change(function () {
+                if ($(this).val() > 0) {
+                    $("#ageGreaterThan").hide();
+                } else {
+                    $("#ageGreaterThan").show();
+                }
+            });
+        });
+        $(function () {
+            $("#gtAge").change(function () {
+                if ($(this).val() > 0) {
+                    $("#ageLessThan").hide();
+                } else {
+                    $("#ageLessThan").show();
+                }
+            });
+        });
+        $(window).ready(function () {
+            if ($("#ltAge").val() > 0) {
+                $("#ageGreaterThan").hide();
+            } else {
+                $("#ageGreaterThan").show();
+            }
+        });
+        $(window).ready(function () {
+            if ($("#gtAge").val() > 0) {
+                $("#ageLessThan").hide();
+            } else {
+                $("#ageLessThan").show();
+            }
+        });
+    </script>
+    <script type="text/javascript">
+        $(function () {
+            $("#Glucose").val("4.1");
+        });
+    </script>
+    <script>
+        $(document).ready(function () {
+            var r = $('#error-rule').val();
+            if (r.length > 0) {
+                $("#error-duplicate").removeClass("hidden");
+            }
+        });
+    </script>
+
+}

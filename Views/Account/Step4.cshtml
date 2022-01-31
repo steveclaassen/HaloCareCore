@@ -1,0 +1,105 @@
+﻿@model List<HaloCareCore.Models.ViewModels.StatusManagmentViewModel>
+@using HaloCareCore.Extensions
+@{
+    ViewBag.Title = "Accounts";
+    Layout = "~/Views/Shared/_layout-view-x.cshtml";
+}
+
+<comment>
+    <!-- 4 June 2021 -- HCare-1338 -->
+</comment>
+<javascript>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+    <script src="https://www.jqueryscript.net/demo/jQuery-Plugin-For-Sortable-Bootstrap-Tables-Bootstrap-Sortable/Scripts/bootstrap-sortable.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/js/standalone/selectize.js"></script>
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.default.css">
+</javascript>
+
+<div id="instruction-wrapper">
+    <div class="instruction-panel">
+        <h class="account-step">Step 4</h>
+        <p class="account-step-instruction">Select management status.</p>
+        <ul style="padding: 0">
+            <li class="account-step-list acc-1"><span class="number-circle a-circle-1 complete-circle">✓</span>Account setup</li>
+            <li class="account-step-list acc-2"><span class="number-circle a-circle-2 complete-circle">✓</span>Program setup</li>
+            <li class="account-step-list acc-3"><span class="number-circle a-circle-3 complete-circle">✓</span>Clinical rules</li>
+            <li class="account-step-list acc-4 active-step"><span class="number-circle a-circle-4 active-circle">4</span>Management status</li>
+            <li class="account-step-list acc-5"><span class="number-circle a-circle-5">5</span>Text messages</li>
+        </ul>
+    </div>
+</div>
+
+<div class="collapse in">
+    <div class="card card-body">
+        <div class="collapse-body">
+            <div class="new-account-panel">
+                @using (Html.BeginForm("Step4", "Account", FormMethod.Post))
+                {
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="accountID" name="accountID" value="@ViewBag.AccountID" />
+                    <input type="hidden" id="programID" name="programID" value="@ViewBag.ProgramID" />
+                    <input type="hidden" id="medicalaidID" name="medicalaidID" value="@ViewBag.MedicalAidID" />
+
+                    <div class="col-md-12 row">
+                        <div class="account-heading">Management status setup</div>
+                        <p class="account-sub-header-new">Select the management status linked to program - @ViewBag.ProgramName.</p>
+                    </div>
+                    <hr class="fancyruler">
+                    <div style="margin-bottom: 20px"></div>
+                    if (Model.Count > 0)
+                    {
+                        <table class="table mh-table table-hover" style="margin-left: 1.6%">
+                            <thead>
+                                <tr>
+                                    <th style="text-align: center!important; width: 8%">@Html.DisplayNameFor(model => model[0].Added)</th>
+                                    <th>@Html.DisplayNameFor(model => model[0].statusName)</th>
+                                    <th>@Html.DisplayNameFor(model => model[0].statusCode)</th>
+                                </tr>
+                            </thead>
+
+                            @for (int i = 0; i < Model.Count(); i++)
+                            {
+                                <tbody>
+                                    <tr>
+                                        @Html.HiddenFor(model => model[i].accountId)
+                                        @Html.HiddenFor(model => model[i].programId)
+                                        @Html.HiddenFor(model => model[i].statusCode)
+                                        @Html.HiddenFor(model => model[i].medicalAidId)
+                                        <td class="accountCheck">@Html.EditorFor(model => model[i].Added)</td>
+                                        <td>@Html.DisplayFor(model => model[i].statusName)</td>
+                                        <td>@Html.DisplayFor(model => model[i].statusCode)</td>
+                                    </tr>
+                                </tbody>
+                            }
+                        </table>
+
+                        <div class="account-footer pull-right">
+                            <input type="button" id="account-skip-step-4" value="Skip" class="btn modal-button-previous" onclick="location.href='@Url.Action("Details", "Account", new { Id = ViewBag.AccountID })'" />
+                            <input type="submit" id="account-next-step-4" value="Next" class="btn modal-button-next" />
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="no-results-1">
+                            <img src="~/Content/Images/_2020/tables/no-results-2.png" />
+                        </div>
+                        <h4 class="no-results">No management statuses found for program</h4>
+
+                        <div class="sf-footer">
+                            <input type="button" id="account-skip-step-3" value="Skip" class="btn modal-button-previous" onclick="location.href='@Url.Action("Details", "Account", new { Id = ViewBag.AccountID })'" />
+                            <input type="submit" id="account-next-step-3" value="Next" class="btn modal-button-next" />
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script src="~/bundles/jqueryval"></script>
+
+}

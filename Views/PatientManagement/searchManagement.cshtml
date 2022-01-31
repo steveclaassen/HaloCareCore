@@ -1,0 +1,261 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using HaloCareCore.Extensions
+
+@{
+    ViewBag.Title = "Search";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<comment>
+    <!--
+        06 April 2020 -- HCARE-815(Pathology report)
+        Added new pathology report based on pathology fields required by user
+        -->
+</comment>
+<style>
+    #search-communication-card {
+        /*  height: 20px;*/
+        width: 256px;
+        line-height: 30px;
+        position: unset;
+    }
+</style>
+
+<!----------------------------------------------------------------------------- html-top-navigation-panel  ---------------------------------------------------------------------------->
+<nav id="global-nav" class="nav" style="z-index: 10000">
+    <div class="pull-left title">
+        <h1 class="site-title_patientProfile">
+            <span><i class="fas fa-search"></i>&emsp; Search</span>
+        </h1>
+    </div>
+    <div class="pull-right title">
+        <h1 class="site-title_userID pull-right">
+            <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+        </h1>
+        <h1 class="site-title_userID pull-right">
+            @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+            {
+                <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+            }
+        </h1>
+        <h1 class="site-waffleIcon pull-right">
+            <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+        </h1>
+    </div>
+</nav>
+
+<!-------------------------------------------------------------------------------------- html-body ------------------------------------------------------------------------------------>
+<div class="full-screen-container">
+    <!--breadCrumbs-->
+    <ul class="breadcrumbs_fullScreens" style="margin-top: -2%!important">
+        <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+        <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+        <li><a href="#">@ViewBag.Title</a></li>
+    </ul>
+
+    <!--navCollection-->
+    @if (User.Identity.IsAuthenticated)
+    {
+        if (User.HasRole("6. Global user") || (User.HasRole("5. Super user")))
+        {
+            <div class="navCollection_fullScreens" style="margin-left: 4%!important">
+                <div class="buttonCollection">
+                    <div class="col-md-12">
+                        <div class="col-md-4"></div>
+                        <div class="col-md-4">
+                            <div class="col-md-2">
+                                <a href="@Url.Action("Index", "Home", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Home"><span style="font-size: 15px" class="sub_icon fas fa-home"></span></a>
+                            </div>
+                            <div class="col-md-2">
+                                <a href="@Url.Action("OpenAssignments", "Clinical", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Assignments"><span style="font-size: 15px" class="sub_icon fas fa-bell"></span></a>
+                            </div>
+                            <div class="col-md-2">
+                                <a href="@Url.Action("Search", "Member", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Patient"><span style="font-size: 15px" class="sub_icon fas fa-user-circle"></span></a>
+                            </div>
+                            <div class="col-md-2">
+                                <a href="@Url.Action("OutstandingAuthorise", "Scripts", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Authorisation"><span style="font-size: 15px" class="sub_icon fas fa-check-circle"></span></a>
+                            </div>
+                            <div class="col-md-2">
+                                <span style="font-size: 15px; background: -webkit-linear-gradient(#e80a89, #f15b2a);-webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow (10px 10px 1px rgba(34, 34, 34, 0.50))" title="Search" class="sub_icon fas fa-search"></span>
+                            </div>
+                            <div class="col-md-2">
+                                <a href="@Url.Action("Index", "Administration", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Settings"><span style="font-size: 15px" class="sub_icon fas fa-cog"></span></a>
+                            </div>
+
+                        </div>
+                        <div class="col-md-4"></div>
+
+                    </div>
+                </div>
+            </div>
+        }
+        else if (User.HasRole("4. Advisor"))
+        {
+            <div class="navCollection_fullScreens">
+                <div class="buttonCollection">
+                    <div class="col-md-12">
+                        <div class="col-md-4"></div>
+                        <div class="col-md-4">
+                            <div class="col-md-1"></div>
+                            <div class="col-md-2">
+                                <a href="@Url.Action("Index", "Home", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Home"><span style="font-size: 15px" class="sub_icon fas fa-home"></span></a>
+                            </div>
+                            <div class="col-md-2">
+                                <a href="@Url.Action("OpenAssignments", "Clinical", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Assignments"><span style="font-size: 15px" class="sub_icon fas fa-bell"></span></a>
+                            </div>
+                            <div class="col-md-2">
+                                <a href="@Url.Action("Search", "Member", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Patient"><span style="font-size: 15px" class="sub_icon fas fa-user-circle"></span></a>
+                            </div>
+                            <div class="col-md-2">
+                                <a href="@Url.Action("OutstandingAuthorise", "Scripts", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Authorisation"><span style="font-size: 15px" class="sub_icon fas fa-check-circle"></span></a>
+                            </div>
+                            <div class="col-md-2">
+                                <span style="font-size: 15px; background: -webkit-linear-gradient(#e80a89, #f15b2a);-webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow (10px 10px 1px rgba(34, 34, 34, 0.50))" title="Search" class="sub_icon fas fa-search"></span>
+                            </div>
+                            <div class="col-md-1"></div>
+                        </div>
+                        <div class="col-md-4"></div>
+
+                    </div>
+                </div>
+            </div>
+        }
+        else if (User.HasRole("1. Consultant") || (User.HasRole("2. Case manager") || (User.HasRole("3. Specialist"))))
+        {
+            <div class="navCollection_fullScreens">
+                <div class="buttonCollection">
+                    <div class="col-md-12">
+                        <div class="col-md-4"></div>
+                        <div class="col-md-4">
+                            <div class="col-md-2"></div>
+                            <div class="col-md-2">
+                                <a href="@Url.Action("Index", "Home", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Home"><span style="font-size: 15px" class="sub_icon fas fa-home"></span></a>
+                            </div>
+                            <div class="col-md-2">
+                                <a href="@Url.Action("OpenAssignments", "Clinical", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Assignments"><span style="font-size: 15px" class="sub_icon fas fa-bell"></span></a>
+                            </div>
+                            <div class="col-md-2">
+                                <a href="@Url.Action("Search", "Member", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Patient"><span style="font-size: 15px" class="sub_icon fas fa-user-circle"></span></a>
+                            </div>
+                            <div class="col-md-2">
+                                <span style="font-size: 15px; background: -webkit-linear-gradient(#e80a89, #f15b2a);-webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow (10px 10px 1px rgba(34, 34, 34, 0.50))" title="Search" class="sub_icon fas fa-search"></span>
+                            </div>
+                            <div class="col-md-2"></div>
+                        </div>
+                        <div class="col-md-4"></div>
+
+                    </div>
+                </div>
+            </div>
+        }
+    }
+
+    <div style="margin-bottom: 1%"></div>
+
+    <div class="container_Home">
+        <div class="menuIcons row">
+            <div class="col-md-12" style="margin-top: 10%; margin-bottom: 0%;">
+                <div class="col-md-1"></div>
+
+                <div class="col-md-2">
+                    <a href="@Url.Action("AdvancedSearch", "PatientManagement", null)">
+                        <div id="search-advanced-card">Advanced</div>
+                    </a>
+                </div>
+
+                <div class="col-md-2">
+                    <a href="@Url.Action("AssignmentSearch", "PatientManagement", null)">
+                        <div id="search-assignment-card">Assignment</div>
+                    </a>
+                </div>
+
+                <div class="col-md-2">
+                    <a href="@Url.Action("DoctorSearch", "PatientManagement", null)">
+                        <div id="search-doctor-card">Doctor</div>
+                    </a>
+                </div>
+
+                <div class="col-md-2">
+                    <a href="@Url.Action("EnquirySearch", "PatientManagement", null)">
+                        <div id="search-enquiry-card">Enquiries</div>
+                    </a>
+                </div>
+
+                <div class="col-md-2">
+                    <a href="@Url.Action("ManagementStatusSearch", "PatientManagement", null)">
+                        <div id="search-management-status-card">Management status</div>
+                    </a>
+                </div>
+
+                <div class="col-md-1"></div>
+            </div>
+
+
+            @if (ViewBag.UserSearchManagment == true)
+            {
+                <div class="col-md-12" style="margin-top: 15%; margin-bottom: 0%">
+                    <div class="col-md-1"></div>
+                    <div class="col-md-2">
+                        <a href="@Url.Action("PathologySearch", "PatientManagement", null)">
+                            <div id="search-pathology-card">Pathology</div>
+                        </a>
+                    </div>
+                    <div class="col-md-2">
+                        <a href="@Url.Action("ProductionSearch", "PatientManagement", null)">
+                            <div id="search-production-card">Production</div>
+                        </a>
+                    </div>
+                    <div class="col-md-2">
+                        <a href="@Url.Action("RiskRatingSearch", "PatientManagement", null)">
+                            <div id="search-risk-rating-card">Risk rating</div>
+                        </a>
+                    </div>
+                    <div class="col-md-2">
+                        <a href="@Url.Action("CommunicationLogSearch", "PatientManagement", null)">
+                            <div id="search-communication-log-card">Communication log</div>
+                        </a>
+                    </div>
+
+                    <div class="col-md-2">
+                        <a href="@Url.Action("SystemLogSearch", "PatientManagement", null)">
+                            <div id="search-system-log-card">System log</div>
+                        </a>
+                    </div>
+                    <div class="col-md-1"></div>
+
+                </div>
+            }
+            else
+            {
+                <div class="col-md-12" style="margin-top: 15%; margin-bottom: 0%">
+                    <div class="col-md-2"></div>
+                    <div class="col-md-2"></div>
+
+                    <div class="col-md-2">
+                        <a href="@Url.Action("PathologySearch", "PatientManagement", null)">
+                            <div id="search-pathology-card">Pathology</div>
+                        </a>
+                    </div>
+                    <div class="col-md-2">
+                        <a href="@Url.Action("RiskRatingSearch", "PatientManagement", null)">
+                            <div id="search-risk-rating-card">Risk rating</div>
+                        </a>
+                    </div>
+
+                    <div class="col-md-2"></div>
+                    <div class="col-md-2"></div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script src="~/bundles/jqueryval"></script>
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+
+}
+
+

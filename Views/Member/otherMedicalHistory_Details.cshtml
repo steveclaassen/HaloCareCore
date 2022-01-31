@@ -1,0 +1,542 @@
+﻿@model HaloCareCore.Models.Questionnaire.OtherMedicalHistory
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "otherMedicalHistory_Details";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+</style>
+
+<!--pageHeader-->
+<nav id="global-nav" class="nav">
+    <div class="pull-left title">
+        <h1 class="site-title_patientProfile">
+            <span><img src="~/Content/Images/memberProfile/topBar Icons/clincalHistory.png" /></span>&emsp; Other
+        </h1>
+    </div>
+    <div class="pull-right title">
+        <h1 class="site-title_userID pull-right">
+            <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+        </h1>
+        <h1 class="site-title_userID pull-right">
+            @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+            {
+                <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+            }
+        </h1>
+        <h1 class="site-waffleIcon pull-right">
+            <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+        </h1>
+    </div>
+</nav>
+
+<div class="dashboardContainer zero-padding">
+    <div class="patientDashboard_View">
+        <!--breadCrumbs-->
+        <ul class="breadcrumbs_patientDashboard">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+            <li><a class="go_back">Patient</a></li>
+            <li><a href="#">Other</a></li>
+        </ul>
+        <!--Left navSlider -->
+        @Html.Partial("_navSlider_blank", new { })
+        <!--navCollection-->
+        <div class="navCollection_patientDashboard">
+            @Html.Partial("_navCollection")
+        </div>
+        <!--profileInformation-->
+        <div class="profileBar">
+            @Html.Action("_profileBar_edit", "Member", new { DependentID = Model.dependentID })
+        </div>
+    </div>
+
+    <div class="profilebar-spacer-assignment"></div>
+
+    <div class="patientDashboard_container">
+
+        <h4 class="summaryHeading">Other detail</h4>
+        <hr class="fancyruler">
+        <br />
+        <br />
+        <div style="margin-left: 2%">
+            <dl class="dl-horizontal editForm">
+                <dt>
+                    @Html.DisplayName("Respiratory tract ")
+                </dt>
+
+                <dd>
+                    @if (Model.respiratoryTract == true)
+                    {
+                        <span style="font-size: 16px; color: forestgreen; text-align: center!important"><i class="far fa-check-circle"></i></span>
+                    }
+                    else
+                    {
+                        <span style="font-size: 16px; color: darkred; text-align: center!important"><i class="far fa-times-circle"></i></span>
+
+                    }
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.respiratoryTractComment)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.respiratoryTractComment)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.respiratoryTractEffectiveDate)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.respiratoryTractEffectiveDate)
+                </dd>
+
+                <br />
+                <hr class="fancyruler" />
+
+                <dt>
+                    @Html.DisplayName("Pneumonia ")
+                </dt>
+
+                <dd>
+                    @if (Model.pneumonia == true)
+                    {
+                        <span style="font-size: 16px; color: forestgreen; text-align: center!important"><i class="far fa-check-circle"></i></span>
+                    }
+                    else
+                    {
+                        <span style="font-size: 16px; color: darkred; text-align: center!important"><i class="far fa-times-circle"></i></span>
+
+                    }
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.pneumoniaComment)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.pneumoniaComment)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.pneumoniaEffectiveDate)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.pneumoniaEffectiveDate)
+                </dd>
+
+                <br />
+                <hr class="fancyruler" />
+
+                <dt>
+                    @Html.DisplayName("Meningitis ")
+                </dt>
+
+                <dd>
+                    @if (Model.meningitis == true)
+                    {
+                        <span style="font-size: 16px; color: forestgreen; text-align: center!important"><i class="far fa-check-circle"></i></span>
+                    }
+                    else
+                    {
+                        <span style="font-size: 16px; color: darkred; text-align: center!important"><i class="far fa-times-circle"></i></span>
+
+                    }
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.meningitisComment)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.meningitisComment)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.meningitisEffectiveDate)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.meningitisEffectiveDate)
+                </dd>
+
+                <br />
+                <hr class="fancyruler" />
+
+                <dt>
+                    @Html.DisplayName("Lymphadenopathy ")
+                </dt>
+
+                <dd>
+                    @if (Model.lymphadenopathy == true)
+                    {
+                        <span style="font-size: 16px; color: forestgreen; text-align: center!important"><i class="far fa-check-circle"></i></span>
+                    }
+                    else
+                    {
+                        <span style="font-size: 16px; color: darkred; text-align: center!important"><i class="far fa-times-circle"></i></span>
+
+                    }
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.lymphadenopathyComment)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.lymphadenopathyComment)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.lymphadenopathyEffectiveDate)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.lymphadenopathyEffectiveDate)
+                </dd>
+
+                <br />
+                <hr class="fancyruler" />
+
+                <dt>
+                    @Html.DisplayName("Diarrhoea ")
+
+                </dt>
+
+                <dd>
+                    @if (Model.diarrhoea == true)
+                    {
+                        <span style="font-size: 16px; color: forestgreen; text-align: center!important"><i class="far fa-check-circle"></i></span>
+                    }
+                    else
+                    {
+                        <span style="font-size: 16px; color: darkred; text-align: center!important"><i class="far fa-times-circle"></i></span>
+
+                    }
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.diarrhoeaComment)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.diarrhoeaComment)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.diarrhoeaEffectiveDate)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.diarrhoeaEffectiveDate)
+                </dd>
+
+                <br />
+                <hr class="fancyruler" />
+
+                <dt>
+                    @Html.DisplayName("Bladder infection ")
+                </dt>
+
+                <dd>
+                    @if (Model.bladderInfection == true)
+                    {
+                        <span style="font-size: 16px; color: forestgreen; text-align: center!important"><i class="far fa-check-circle"></i></span>
+                    }
+                    else
+                    {
+                        <span style="font-size: 16px; color: darkred; text-align: center!important"><i class="far fa-times-circle"></i></span>
+
+                    }
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.bladderInfectionComment)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.bladderInfectionComment)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.bladderInfectionEffectiveDate)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.bladderInfectionEffectiveDate)
+                </dd>
+
+                <br />
+                <hr class="fancyruler" />
+
+                <dt>
+                    @Html.DisplayName("Weight Loss ")
+                </dt>
+
+                <dd>
+                    @if (Model.weightLoss == true)
+                    {
+                        <span style="font-size: 16px; color: forestgreen; text-align: center!important"><i class="far fa-check-circle"></i></span>
+                    }
+                    else
+                    {
+                        <span style="font-size: 16px; color: darkred; text-align: center!important"><i class="far fa-times-circle"></i></span>
+
+                    }
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.weightLossComment)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.weightLossComment)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.weightLossEffectiveDate)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.weightLossEffectiveDate)
+                </dd>
+
+                <br />
+                <hr class="fancyruler" />
+
+                <dt>
+                    @Html.DisplayName("Cancer ")
+                </dt>
+
+                <dd>
+                    @if (Model.cancer == true)
+                    {
+                        <span style="font-size: 16px; color: forestgreen; text-align: center!important"><i class="far fa-check-circle"></i></span>
+                    }
+                    else
+                    {
+                        <span style="font-size: 16px; color: darkred; text-align: center!important"><i class="far fa-times-circle"></i></span>
+
+                    }
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.cancerComment)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.cancerComment)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.cancerEffectiveDate)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.cancerEffectiveDate)
+                </dd>
+
+                <br />
+                <hr class="fancyruler" />
+
+                <dt>
+                    @Html.DisplayName("Cervical cancer ")
+                </dt>
+
+                <dd>
+                    @if (Model.cervicalCancer == true)
+                    {
+                        <span style="font-size: 16px; color: forestgreen; text-align: center!important"><i class="far fa-check-circle"></i></span>
+                    }
+                    else
+                    {
+                        <span style="font-size: 16px; color: darkred; text-align: center!important"><i class="far fa-times-circle"></i></span>
+
+                    }
+                </dd>
+
+                <dt>
+                    @Html.DisplayName("Result ")
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.cervicalCancerComment)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.cervicalCancerEffectiveDate)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.cervicalCancerEffectiveDate)
+                </dd>
+
+                <br />
+                <hr class="fancyruler" />
+
+
+                <dt>
+                    @Html.DisplayName("Immunization ")
+                </dt>
+
+                <dd>
+                    @if (Model.immunization == true)
+                    {
+                        <span style="font-size: 16px; color: forestgreen; text-align: center!important"><i class="far fa-check-circle"></i></span>
+                    }
+                    else
+                    {
+                        <span style="font-size: 16px; color: darkred; text-align: center!important"><i class="far fa-times-circle"></i></span>
+
+                    }
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.immunizationComment)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.immunizationComment)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.immunizationEffectiveDate)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.immunizationEffectiveDate)
+                </dd>
+
+                <br />
+                <hr class="fancyruler" />
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.createdBy)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.createdBy)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.createdDate)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.createdDate)
+                </dd>
+
+                <br />
+                <hr class="fancyruler" />
+
+                @if (Model.modifiedBy != null)
+                {
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.modifiedBy)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.modifiedBy)
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.modifiedDate)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.modifiedDate)
+                    </dd>
+
+                    <br />
+                    <hr class="fancyruler" />
+
+                }
+
+                @if (Model.programType != null)
+                {
+                    <dt>
+                        @Html.DisplayNameFor(model => model.programType)
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.programType)
+                    </dd>
+
+                    <br />
+                    <hr class="fancyruler" />
+
+                }
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.generalComments)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.generalComments)
+                </dd>
+
+                <br />
+                <hr class="fancyruler" />
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.followUp)
+                </dt>
+
+                <dd>
+                    @if (Model.followUp == true)
+                    {
+                        <span style="font-size: 16px; color: forestgreen; text-align: center!important"><i class="far fa-check-circle"></i></span>
+                    }
+                    else
+                    {
+                        <span style="font-size: 16px; color: darkred; text-align: center!important"><i class="far fa-times-circle"></i></span>
+
+                    }
+                </dd>
+
+                <br />
+                <hr class="fancyruler" />
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.active)
+                </dt>
+
+                <dd class="detailsCheck">
+                    @if (Model.active == true)
+                    {
+                        <span style="font-size: 16px; color: forestgreen; text-align: center!important"><i class="far fa-check-circle"></i></span>
+                    }
+                    else
+                    {
+                        <span style="font-size: 16px; color: darkred; text-align: center!important"><i class="far fa-times-circle"></i></span>
+
+                    }
+                </dd>
+
+            </dl>
+            <div class="fixedBack" style="margin-left: 40%">
+                <input value="Back" class="btn buttonRound_formBack go_back" onclick="backKey()" style="width: 15%!important" />
+                <a href="@Url.Action("otherMedicalHistory_Edit", "Member", new { id = Model.Id, pro=Context.Request.Query["pro"]})" value="Edit" class="btn buttonRound_formEdit" style="width: 15%!important">Edit</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <script>
+        function backKey() {
+            localStorage.setItem("back_otherMedication_hiv", Date.now());
+        }
+    </script>
+}

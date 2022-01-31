@@ -1,0 +1,718 @@
+﻿@model HaloCareCore.Models.ViewModels.ManagementStatusSearchVM
+@using HaloCareCore.Extensions
+@{
+    ViewBag.Title = "Management status search";
+    Layout = "~/Views/Shared/_layout-view-x.cshtml";
+}
+
+<comment>
+    <!-- 11 February 2021 -- HCare-1267 -->
+</comment>
+<javascript>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+    <script src="https://www.jqueryscript.net/demo/jQuery-Plugin-For-Sortable-Bootstrap-Tables-Bootstrap-Sortable/Scripts/bootstrap-sortable.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/js/standalone/selectize.js"></script>
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.default.css">
+</javascript>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .textbox-control-date {
+        display: block !important;
+        max-width: 400px !important;
+        width: 300px;
+        max-height: 100px;
+        height: 30px;
+        margin-left: 10px;
+        padding: 6px 6px;
+        line-height: 1.428571429;
+        color: #003366;
+        border-radius: 0px !important;
+        border: none !important;
+        border-bottom: 1px solid #e8e6e6 !important;
+        background-color: transparent !important;
+        -webkit-box-shadow: none !important;
+        box-shadow: none !important;
+        margin-top: 4px;
+    }
+
+    .tooltip-inner {
+        width: 120px;
+        background: rgba(0,0,0,0.80);
+        color: #fff;
+        font-size: 10px;
+        font-weight: 100;
+        text-align: center;
+        border-radius: 6px;
+        padding: 5px 0;
+        z-index: 0;
+        -webkit-transition: opacity 0.5s;
+        transition: opacity 1.2s;
+    }
+
+    .tooltip-arrow {
+        border-bottom-color: rgba(0,0,0,0.80) !important;
+    }
+
+    /*MULTIPLE Pill for SELECT2*/
+    .select2-container--default .select2-selection--multiple {
+        display: block !important;
+        max-width: 500px !important;
+        width: 450px !important;
+        max-height: 100px;
+        height: auto;
+        margin-left: 10px;
+        padding: 6px 6px;
+        line-height: 1.428571429;
+        color: #003366;
+        border-radius: 0px !important;
+        border: none !important;
+        border-bottom: 1px solid #e8e6e6 !important;
+        background-color: transparent !important;
+        -webkit-box-shadow: none !important;
+        box-shadow: none !important;
+    }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice {
+            background-color: #0081b3 !important;
+            color: white !important;
+            border: 1px solid transparent !important;
+            border-radius: 5px;
+            cursor: default;
+            float: left;
+            margin-right: 5px;
+            margin-top: 0px !important;
+            padding: 5px 6px 5px 6px !important;
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+            color: white !important;
+            cursor: pointer;
+            display: inline-block;
+            font-weight: bold;
+            margin-right: 2px;
+        }
+
+    .select2-container--open .select2-dropdown {
+        left: 10px !important;
+    }
+
+    .panel-filter {
+        background-color: rgba(204, 204, 204, 0.10);
+        width: 95%;
+        margin: auto;
+        height: 80px;
+    }
+
+    .text-divider {
+        margin: 4px;
+        line-height: 0;
+        text-align: center;
+    }
+
+    .text-validation {
+        color: #b94a48;
+        font-size: 10px;
+    }
+</style>
+
+<!----------------------------------------------------------------------------------- form-information -------------------------------------------------------------------------------->
+<div class="collapse in">
+    <div class="card card-body">
+        <div class="collapse-body">
+            <div class="search-information-data-panel">
+                <!-------------------------------------------------------------------------- bread-crumbs ------------------------------------------------------------------------->
+                <ul class="bread-crumbs-full-screen" style="color: #808080 !important;">
+                    <li style="font-size: 10px; font-weight: 600">You are here:</li>
+                    <li><a href="@Url.Action("Index", "Home" , new { })">Home</a></li>
+                    <li><a href="@Url.Action("searchManagement", "PatientManagement" , new { })">Search</a></li>
+                    <li><a href="#">@ViewBag.Title</a></li>
+                </ul>
+                <!------------------------------------------------------------------------- nav-collection ------------------------------------------------------------------------>
+                @if (User.Identity.IsAuthenticated)
+                {
+                    if (User.HasRole("6. Global user") || (User.HasRole("5. Super user")))
+                    {
+                        <div class="navCollection_fullScreens">
+                            <div class="buttonCollection">
+                                <div class="col-md-12">
+                                    <div class="col-md-4"></div>
+                                    <div class="col-md-4">
+                                        <div class="col-md-1"></div>
+                                        <div class="col-md-10">
+                                            <div class="col-md-2">
+                                                <a href="@Url.Action("Index", "Home" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Home"><span style="font-size: 12px" class="sub_icon fas fa-home"></span></a>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <a href="@Url.Action("OpenAssignments", "Clinical" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Assignments"><span style="font-size: 12px" class="sub_icon fas fa-bell"></span></a>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <a href="@Url.Action("Search", "Member" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Patient"><span style="font-size: 12px" class="sub_icon fas fa-user-circle"></span></a>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <a href="@Url.Action("OutstandingAuthorise", "Scripts" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Authorisation"><span style="font-size: 12px" class="sub_icon fas fa-check-circle"></span></a>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <a href="@Url.Action("searchManagement", "patientManagement" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Search"><span style="font-size: 12px" class="sub_icon fas fa-search"></span></a>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <a href="@Url.Action("Index", "Administration" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Settings"><span style="font-size: 12px" class="sub_icon fas fa-cog"></span></a>
+                                            </div>
+                                            <div class="col-md-1"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4"></div>
+
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else if (User.HasRole("4. Advisor"))
+                    {
+                        <div class="navCollection_fullScreens">
+                            <div class="buttonCollection">
+                                <div class="col-md-12">
+                                    <div class="col-md-4"></div>
+                                    <div class="col-md-4">
+                                        <div class="col-md-1"></div>
+                                        <div class="col-md-10">
+                                            <div class="col-md-1"></div>
+                                            <div class="col-md-2">
+                                                <a href="@Url.Action("Index", "Home" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Home"><span style="font-size: 12px" class="sub_icon fas fa-home"></span></a>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <a href="@Url.Action("OpenAssignments", "Clinical" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Assignments"><span style="font-size: 12px" class="sub_icon fas fa-bell"></span></a>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <a href="@Url.Action("Search", "Member" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Patient"><span style="font-size: 12px" class="sub_icon fas fa-user-circle"></span></a>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <a href="@Url.Action("OutstandingAuthorise", "Scripts" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Authorisation"><span style="font-size: 12px" class="sub_icon fas fa-check-circle"></span></a>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <a href="@Url.Action("searchManagement", "patientManagement" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Search"><span style="font-size: 12px" class="sub_icon fas fa-search"></span></a>
+                                            </div>
+                                            <div class="col-md-1"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4"></div>
+
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else if (User.HasRole("1. Consultant") || (User.HasRole("2. Case manager") || (User.HasRole("3. Specialist"))))
+                    {
+                        <div class="navCollection_fullScreens">
+                            <div class="buttonCollection">
+                                <div class="col-md-12">
+                                    <div class="col-md-4"></div>
+                                    <div class="col-md-4">
+                                        <div class="col-md-1"></div>
+                                        <div class="col-md-10">
+                                            <div class="col-md-2"></div>
+                                            <div class="col-md-2">
+                                                <a href="@Url.Action("Index", "Home" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Home"><span style="font-size: 12px" class="sub_icon fas fa-home"></span></a>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <a href="@Url.Action("OpenAssignments", "Clinical" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Assignments"><span style="font-size: 12px" class="sub_icon fas fa-bell"></span></a>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <a href="@Url.Action("Search", "Member" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Patient"><span style="font-size: 12px" class="sub_icon fas fa-user-circle"></span></a>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <a href="@Url.Action("searchManagement", "patientManagement" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Search"><span style="font-size: 12px" class="sub_icon fas fa-search"></span></a>
+                                            </div>
+                                            <div class="col-md-2"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4"></div>
+
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                <!---------------------------------------------------------------------------- filter ---------------------------------------------------------------------------->
+                <span class="pull-right filter-button" type="button" title="filter" onclick="SearchFilter()"><span class="fas fa-filter"></span></span>
+                <div id="filter" class="collapse in">
+                    <h4 class="table-heading">Search filter</h4>
+                    <hr class="fancyruler">
+
+                    @using (Html.BeginForm("ManagementStatusSearch", "PatientManagement", FormMethod.Post, new { id = "search" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        <div class="form-horizontal form-layout">
+                            <h class="heading-detail">Medical aid & Program information</h>
+                            <p class="paragraph-detail">The filters below will assist you with the required information.</p>
+                            <h4 class="tableDivider-heading text-divider"></h4>
+                            <div class="form-roup panel-filter">
+                                <br />
+                                <div class="col-md-12">
+                                    <div class="col-md-6">
+                                        <div class="col-md-4">
+                                            <h class="label-detail">Medical scheme <sup style="font-size: 5px; top: -8px;"><i class="fas fa-asterisk pulser"></i></sup></h>
+                                            <p class="paragraph-label-detail">Allowed medical schemes.</p>
+                                        </div>
+                                        <div class="col-md-8">
+                                            @Html.DropDownListFor(model => model.SelectedMedicalAids, new SelectList(Model.MedicalAids, "MedicalAidID", "Name"), "Select", new { @onchange = "FillProgram();", @required = "required" })
+                                            @Html.ValidationMessageFor(model => model.SelectedMedicalAids, "", new { @class = "text-danger", @style = "font-size: 75%;margin-left: 2%" })
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-roup panel-filter">
+                                <br />
+                                <div class="col-md-12">
+                                    <div class="col-md-6">
+                                        <div class="col-md-4">
+                                            <h class="label-detail">Program <sup style="font-size: 5px; top: -8px;"><i class="fas fa-asterisk pulser"></i></sup></h>
+                                            <p class="paragraph-label-detail">Allowed programs.</p>
+                                        </div>
+                                        <div class="col-md-8">
+                                            @Html.DropDownListFor(model => model.SelectedPrograms, new SelectList(Enumerable.Empty<SelectListItem>(), "code", "ProgramName"), "Select", new { @class = "", @required = "required", @onchange = "ProgramDrop();" })
+                                            <br />@Html.ValidationMessageFor(model => model.SelectedPrograms, "", new { @class = "text-danger", @style = "font-size: 75%;margin-left: 2%" })
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <br />
+                            <h class="heading-detail">Current management status</h>
+                            <p class="paragraph-detail">The below filter will search for members based on their current managment status.</p>
+                            <h4 class="tableDivider-heading text-divider"></h4>
+                            <div class="form-roup panel-filter">
+                                <br />
+                                <div class="col-md-12">
+                                    <div class="col-md-6">
+                                        <div class="col-md-4">
+                                            <h class="label-detail">Management status <sup style="font-size: 5px; top: -8px;"><i class="fas fa-asterisk pulser"></i></sup></h>
+                                            <p class="paragraph-label-detail">Current management status.</p>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <select id="management-status-current" name="management-status-current" class="" style="width: 100%;" onchange="MSChange();" required>
+                                                <option value="" disabled selected>Select</option>
+                                                <option value="O">Open</option>
+                                                <option value="P">Pending</option>
+                                                <option value="C">Closed</option>
+                                            </select>
+                                            <div id="ms-current-validation" class="hidden" style="margin-top: 1%; margin-left: 5%;"><div class="text-validation"><span><i class="fas fa-exclamation-circle"></i>&nbsp; This field is required. </span></div></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="col-md-6">
+                                            <input class="text-box single-line input-validation-error textbox-control-date" data-val="true" data-val-date="The field must be a date." id="from-date-current" name="from-date-current" type="date" min="@DateTime.Now.ToString("1900-01-01")" max="@DateTime.Now.ToString("yyyy-MM-dd")" aria-required="true" aria-describedby="DOB-error" aria-invalid="true" onblur="CurrentDateChange();" required>
+                                            <div id="from-date-current-validation" class="hidden" style="margin-top: 1%; margin-left: 5%;"><div class="text-validation"><span><i class="fas fa-exclamation-circle"></i>&nbsp; This field is required. </span></div></div>
+                                            @Html.ValidationMessage("from-date-current", "", new { @class = "text-danger", @style = "font-size: 85%; margin-left: 1.5%" })
+                                        </div>
+                                        <div class="col-md-6">
+                                            <input class="text-box single-line input-validation-error textbox-control-date" data-val="true" data-val-date="The field must be a date." id="to-date-current" name="to-date-current" type="date" min="" max="@DateTime.Now.ToString("yyyy-MM-dd")" aria-required="true" aria-describedby="DOB-error" aria-invalid="true">
+                                            <div id="to-date-current-validation" class="hidden"><div class="text-validation"><span><i class="fas fa-exclamation-circle"></i>&nbsp; This field is required. </span></div></div>
+                                            @Html.ValidationMessage("to-date-current", "", new { @class = "text-danger", @style = "font-size: 98%; margin-left: 1.5%" })
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <br />
+                            <h class="heading-detail">Previous management status<span style="color: dimgray; font-size: 12px; font-weight: 100">&emsp;(optional)</span></h>
+                            <p class="paragraph-detail">The below filter will search for members based on their previous managment status.</p>
+                            <h4 class="tableDivider-heading text-divider"></h4>
+                            <div class="form-roup panel-filter">
+                                <br />
+                                <div class="col-md-12">
+                                    <div class="col-md-6">
+                                        <div class="col-md-4">
+                                            <h class="label-detail">Management status</h>
+                                            <p class="paragraph-label-detail">Previous management status.</p>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <select id="management-status-previous" name="management-status-previous" class="" style="width: 100%;">
+                                                <option value="" disabled selected>Select</option>
+                                                <option value="O">Open</option>
+                                                <option value="P">Pending</option>
+                                                <option value="C">Closed</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="col-md-6">
+                                            @*<input class="text-box single-line input-validation-error textbox-control-date" data-val="true" data-val-date="The field must be a date." id="from-date-prev" name="from-date-prev" type="date" min="@DateTime.Now.ToString("1900-01-01")" max="@DateTime.Now.ToString("yyyy-MM-dd")" aria-required="true" aria-describedby="DOB-error" aria-invalid="true" onblur="PreviousDateChange();">
+                                                <div id="from-date-previous-validation" class="hidden" style="margin-top: 5%; margin-left: 1%;"><div class="text-validation"><span><i class="fas fa-exclamation-circle"></i>&nbsp; This field is required. </span></div></div>
+                                                @Html.ValidationMessage("from-date-prev", "", new { @class = "text-danger", @style = "font-size: 98%; margin-left: 1.5%" })*@
+                                        </div>
+                                        <div class="col-md-6">
+                                            @*<input class="text-box single-line input-validation-error textbox-control-date" data-val="true" data-val-date="The field must be a date." id="to-date-prev" name="to-date-prev" type="date" min="" max="@DateTime.Now.ToString("yyyy-MM-dd")" aria-required="true" aria-describedby="DOB-error" aria-invalid="true">
+                                                @Html.ValidationMessage("from-date-to", "", new { @class = "text-danger", @style = "font-size: 98%; margin-left: 1.5%" })*@
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <br />
+                        <div class="form-group">
+                            <div class="actionButton" style="text-align: center">
+                                <input id="submit" type="submit" value="Search" class="btn submit-button" style="width: 15%!important" onclick="SchemeCheck(); ProgramCheck(); CurrentMSCheck(); CurrentDateCheck();" /><br />
+                                <input type="text" value="Reset filter" class="reset-button" style="width: 15%!important" onclick="Reset();" />
+                            </div>
+                        </div>
+                    }
+                </div>
+                <!----------------------------------------------------------------------------- table ----------------------------------------------------------------------------->
+                @if (Model.filter == true)
+                { }
+                else if (Model.ManagementStatusSearches.Count > 0)
+                {
+                    <br />
+                    <br />
+                    <div class="col-md-12 row">
+                        <div class="col-md-6">
+                            <div class="page-heading">Search results  <span style="color: #ccc; font-size: 12px;">(@Model.ManagementStatusSearches.Count() results)</span></div>
+                        </div>
+                        <!--------------------------------------------------------------------------- jq-search -------------------------------------------------------------------------->
+                        <div class="col-md-6 row">
+                            <div class="col-md-6">
+                                <!-------------------------------------------------------------------------- excel export -------------------------------------------------------------------------->
+                                @using (Html.BeginForm("ManagementStatusToExcel", "PatientManagement", FormMethod.Post))
+                                {
+                                    @Html.HiddenFor(model => model.SelectedMedicalAids)
+                                    @Html.HiddenFor(model => model.SelectedPrograms)
+                                    <input type="hidden" name="medicalaids" id="medicalaids" value="@TempData["medicalaids"].ToString()" />
+                                    <input type="hidden" name="programs" id="programs" value="@TempData["programs"].ToString()" />
+                                    <input type="hidden" name="managementstatus_current" id="managementstatus_current" value="@TempData["managementstatus_current"].ToString()" />
+                                    <input type="hidden" name="managementstatus_previous" id="managementstatus_previous" value="@TempData["managementstatus_previous"].ToString()" />
+                                    <input type="hidden" name="fromdate_current" id="fromdate_current" value="@TempData["fromdate_current"].ToString()" />
+                                    <input type="hidden" name="todate_current" id="todate_current" value="@TempData["todate_current"].ToString()" />
+                                    @*<input type="hidden" name="fromdate_previous" id="fromdate_previous" value="@TempData["fromdate_previous"].ToString()" />*@
+                                    @*<input type="hidden" name="todate_previous" id="todate_previous" value="@TempData["todate_previous"].ToString()" />*@
+
+                                    <div class="form-group">
+                                        <input class="export-excel-icon" type="image" src="~/Content/Images/_2020/icons/microsoft-excel.png" title="export to excel" alt="Submit">
+                                    </div>
+                                }
+                            </div>
+                            <div class="col-md-6">
+                                <div class="input-wrapper-new-search">
+                                    <input type="text" class="form-control-new-search" id="ms-search" onkeyup="myFunction()" placeholder="Search..." />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <table class="table pathology-search-table sortable" id="ms-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 10%">@Html.DisplayNameFor(mi => mi.ManagementStatusSearch.MedicalScheme) <i class="fa fa-fw fa-sort"></i></th>
+                                <th style="width: 10%">@Html.DisplayNameFor(mi => mi.ManagementStatusSearch.Program) <i class="fa fa-fw fa-sort"></i></th>
+                                <th>@Html.DisplayNameFor(mi => mi.ManagementStatusSearch.PatientName) <i class="fa fa-fw fa-sort"></i></th>
+                                @if (!String.IsNullOrEmpty(TempData["managementstatus_previous"].ToString())@*&& TempData["fromdate_previous"].ToString() != "empty" && TempData["todate_previous"].ToString() != "empty"*@)
+{
+<th>@Html.DisplayNameFor(mi => mi.ManagementStatusSearch.ManagementStatusPrevious) <i class="fa fa-fw fa-sort"></i></th>
+<th style="width: 8%; text-align: center!important">@Html.DisplayNameFor(mi => mi.ManagementStatusSearch.ManagementStatusPrevious_StartDate) <i class="fa fa-fw fa-sort"></i></th>
+<th style="width: 8%; text-align: center!important">@Html.DisplayNameFor(mi => mi.ManagementStatusSearch.ManagementStatusPrevious_EndDate) <i class="fa fa-fw fa-sort"></i></th>
+}
+                                <th>@Html.DisplayNameFor(mi => mi.ManagementStatusSearch.ManagementStatusCurrent) <i class="fa fa-fw fa-sort"></i></th>
+                                <th style="width: 8%; text-align: center!important">@Html.DisplayNameFor(mi => mi.ManagementStatusSearch.ManagementStatusCurrent_StartDate) <i class="fa fa-fw fa-sort"></i></th>
+                                <th style="width: 8%; text-align: center!important">@Html.DisplayNameFor(mi => mi.ManagementStatusSearch.ManagementStatusCurrent_EndDate) <i class="fa fa-fw fa-sort"></i></th>
+                                <th style="width: 8%; text-align: center!important">@Html.DisplayName("Action")</th>
+                            </tr>
+                        </thead>
+                        @foreach (var item in Model.ManagementStatusSearches)
+                        {
+                            <tbody id="ms-filter" class="tooltip-div">
+                                <tr>
+                                    <td>@Html.DisplayFor(modelItem => item.MedicalScheme)</td>
+                                    <td title="@Html.DisplayFor(modelItem => item.ProgramStartDate)">@Html.DisplayFor(modelItem => item.Program)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.PatientName)</td>
+                                    @if (!String.IsNullOrEmpty(TempData["managementstatus_previous"].ToString())@*&& TempData["fromdate_previous"].ToString() != "empty" && TempData["todate_previous"].ToString() != "empty"*@)
+{
+<td>@Html.DisplayFor(modelItem => item.ManagementStatusPrevious)</td>
+<td style="text-align: center!important">@Html.DisplayFor(modelItem => item.ManagementStatusPrevious_StartDate)</td>
+<td style="text-align: center !important">@Html.DisplayFor(modelItem => item.ManagementStatusPrevious_EndDate)</td>
+}
+                                    <td>@Html.DisplayFor(modelItem => item.ManagementStatusCurrent)</td>
+                                    <td style="text-align: center !important">@Html.DisplayFor(modelItem => item.ManagementStatusCurrent_StartDate)</td>
+                                    <td style="text-align: center !important">@Html.DisplayFor(modelItem => item.ManagementStatusCurrent_EndDate)</td>
+                                    <td class="text-center">
+                                        <input type="submit" class="link-button" value="view" onclick="location.href='@Url.Action("MemberProgram", "Member", new { DependentID = item.DependantID})'" />
+                                    </td>
+                                </tr>
+                            </tbody>
+                        }
+                    </table>
+                    <br />
+                }
+                else
+                {
+                    <div class="no-results">
+                        <img src="~/Content/Images/_2020/tables/no-results.png" />
+                    </div>
+                    <h4 class="no-results">No results found</h4>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script src="~/bundles/jqueryval"></script>
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/js/standalone/selectize.js"></script>
+    <!-- selectize dropdown menus -->
+    <script>
+        initSelectize();
+        function initSelectize() {
+            $('#SelectedMedicalAids').selectize({
+                persist: true,
+                preload: true,
+                maxItems: 1,
+                delimiter: ',',
+                valueField: 'id',
+                labelField: 'name',
+                searchField: ['name'],
+                //create: true,
+                hideSelected: true,
+                plugins: ['remove_button'],
+                render: {
+                    option: function (item, escape) {
+                        return '<span class="name">' + escape(item.name) + '</span>';
+
+                    }
+                }
+            }),
+                $('#management-status-current').selectize({
+                    persist: true,
+                    preload: true,
+                    maxItems: 5,
+                    delimiter: ',',
+                    valueField: 'id',
+                    labelField: 'name',
+                    searchField: ['name'],
+                    //create: true,
+                    hideSelected: true,
+                    plugins: ['remove_button'],
+                    render: {
+                        option: function (item, escape) {
+                            return '<span class="name">' + escape(item.name) + '</span>';
+
+                        }
+                    }
+                }),
+                $('#management-status-previous').selectize({
+                    persist: true,
+                    preload: true,
+                    maxItems: 5,
+                    delimiter: ',',
+                    valueField: 'id',
+                    labelField: 'name',
+                    searchField: ['name'],
+                    //create: true,
+                    hideSelected: true,
+                    plugins: ['remove_button'],
+                    render: {
+                        option: function (item, escape) {
+                            return '<span class="name">' + escape(item.name) + '</span>';
+
+                        }
+                    }
+                })
+        }
+    </script>
+    <!-- filter reset -->
+    <script>
+        function Reset() {
+            $("#SelectedMedicalAids")[0].selectize.clear();
+            $('#SelectedPrograms').val(null).trigger('change');
+            $("#SelectedPrograms").html("");
+            $("#FromDate").val("");
+            $("#ToDate").val("");
+            $('span[data-valmsg-for="SelectedMedicalAids"]').html('');
+            $('span[data-valmsg-for="SelectedPrograms"]').html('');
+            $("#management-status-current")[0].selectize.clear();
+            $("#management-status-previous")[0].selectize.clear();
+            $("#from-date-current").val('');
+            $("#to-date-current").val('');
+            $("#from-date-prev").val('');
+            $("#to-date-prev").val('');
+        }
+        function SchemeCheck() {
+            var value = $("#SelectedMedicalAids :selected").val();
+            if (value == null || value == '') {
+                alert("Medical scheme is required!");
+                $('span[data-valmsg-for="SelectedMedicalAids"]').html('<span style="font-size: 10px"><i class="fas fa-exclamation-circle"></i> </span>Medical aid is required!');
+            }
+        }
+        function ProgramCheck() {
+            var count = $("#SelectedPrograms").val();
+            if (count == 0) {
+                alert("Program field is required!");
+                $('span[data-valmsg-for="SelectedPrograms"]').html('<span style="font-size: 10px"><i class="fas fa-exclamation-circle"></i> </span>Program is required!');
+
+                document.addEventListener('invalid', (function () {
+                    return function (e) {
+                        e.preventDefault();
+                        document.getElementById("SelectedPrograms").focus();
+                    };
+                })(), true);
+            }
+        }
+        function MSChange() {
+            $('#ms-current-validation').addClass('hidden');
+        }
+        function CurrentMSCheck() {
+            var mscurrent = $("#management-status-current :selected").val();
+            if (mscurrent == null || mscurrent == '') {
+                $('#ms-current-validation').removeClass('hidden');
+                document.addEventListener('invalid', (function () {
+                    return function (e) {
+                        e.preventDefault();
+                        document.getElementById("management-status-current").focus();
+                    };
+                })(), true);
+            }
+        }
+        function CurrentDateChange() {
+            $('#from-date-current-validation').addClass('hidden');
+        }
+        function CurrentDateCheck() {
+            var mscurrent1 = $("#management-status-current :selected").val();
+            var fromdate1 = $("#from-date-current").val();
+            if (mscurrent1 != null || mscurrent1 != '') {
+                if (fromdate1 == null || fromdate1 == '')
+                    $('#from-date-current-validation').removeClass('hidden');
+                document.addEventListener('invalid', (function () {
+                    return function (e) {
+                        e.preventDefault();
+                    };
+                })(), true);
+            }
+        }
+        function PreviousDateChange() {
+            $('#from-date-previous-validation').addClass('hidden');
+        }
+        function PreviousDateCheck() {
+            var mscurrent2 = $("#management-status-previous").val();
+            var fromdate2 = $("#from-date-prev").val();
+
+            if (mscurrent2 == null || mscurrent2 == '') { }
+            else {
+                if (!Date.parse(fromdate2)) {
+                    $('#from-date-previous-validation').removeClass('hidden');
+                    document.addEventListener('invalid', (function () {
+                        return function (e) {
+                            e.preventDefault();
+                        };
+                    })(), true);
+                }
+            }
+        }
+    </script>
+    <!-- after return - null everything to allow for the filters -->
+    <script>
+        $("#SelectedMedicalAids")[0].selectize.clear();
+    </script>
+    <!-- date-validation -->
+    <script type="text/javascript" language="javascript">
+        function CompareDate() {
+            var today = new Date();
+            day = today.getDate();
+            month = today.getMonth() + 1;
+            year = today.getFullYear();
+            //alert([day, month, year].join('-'));
+            var todate = new Date($('#ToDate').val());
+            day = todate.getDate();
+            month = todate.getMonth() + 1;
+            year = todate.getFullYear();
+            //alert([day, month, year].join('-'));
+            if (todate > today) {
+                var toDate = new Date($('#todate').val());
+                toDate.setDate(toDate.getDate());
+                document.querySelector("#ToDate").valueAsDate = toDate;
+            }
+
+        }
+        CompareDate();
+    </script>
+    <!-- date-validation -->
+    <script>
+        document.getElementById("from-date-current").onchange = function () {
+            var input = document.getElementById("to-date-current");
+            input.setAttribute("min", this.value);
+        }
+        document.getElementById("from-date-prev").onchange = function () {
+            var input = document.getElementById("to-date-prev");
+            input.setAttribute("min", this.value);
+        }
+    </script>
+    <script>
+        $(document).ready(function () {
+            $("#ms-search").on("keyup", function () {
+                var value = $(this).val().toLowerCase();
+                $("#ms-filter tr").filter(function () {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+            });
+        });
+    </script>
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+    <!-- tooltip -->
+    <script>
+        $('.tooltip-div').tooltip({
+            selector: "[data-toggle=tooltip]",
+            container: "body"
+        });
+    </script>
+    <!-- collapse -->
+    <script>
+        var len = @Model.ManagementStatusSearches.Count;
+        if (len > 0) {
+            $('#filter').removeClass("in")
+        }
+
+        function SearchFilter() {
+            $('#filter').toggleClass("in")
+        }
+    </script>
+    <!-- medical-aid -> program -->
+    <script>
+        function FillProgram() {
+            var medicalaid = $('#SelectedMedicalAids').val();
+            $.ajax({
+                url: '/Member/FillProgram',
+                type: "POST",
+                dataType: "JSON",
+                data: { medId: medicalaid },
+                success: function (options) {
+                    //alert('success');
+                    $("#SelectedPrograms").html("");
+                    $.each(options, function (i, option) {
+                        $("#SelectedPrograms").append(
+                            $('<option></option>').val(option.programID).html(option.ProgramName)
+                        );
+                    });
+                },
+                error: function (option) {
+                    //alert('error');
+                }
+            });
+            $('span[data-valmsg-for="SelectedMedicalAids"]').html('');
+        }
+    </script>
+    <script>
+        function ProgramDrop() {
+            $('span[data-valmsg-for="SelectedPrograms"]').html('');
+        }
+    </script>
+
+    <!-- select-dropdown -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function () { $("#SelectedPrograms").select2({ multiple: true, placeholder: "Select", allowClear: true, maximumSelectionLength: 1 }); });
+    </script>
+
+
+}

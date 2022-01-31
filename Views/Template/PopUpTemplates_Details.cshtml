@@ -1,0 +1,213 @@
+﻿@model HaloCareCore.Models.Admin.PopUpTemplate
+@using HaloCareCore.Extensions
+@{
+    ViewBag.Title = "Popup template";
+    Layout = "~/Views/Shared/_layout-view-x.cshtml";
+}
+
+<javascript>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+</javascript>
+<style>
+    .row-information {
+        text-indent: 0px !important;
+        padding-left: 10px !important;
+    }
+</style>
+
+<div class="collapse in">
+    <div class="card card-body">
+        <div class="collapse-body">
+            <div class="account-setting-panel">
+                <!-------------------------------------------------------------------------- bread-crumbs ------------------------------------------------------------------------->
+                <ul class="bread-crumbs-full-screen" style="color: #808080 !important;">
+                    <li style="font-size: 10px; font-weight: 600">You are here:</li>
+                    <li><a href="@Url.Action("Index", "Administration" , null)">Settings</a></li>
+                    <li><a class="go_back">Templates</a></li>
+                    <li><a href="#">@ViewBag.Title</a></li>
+                </ul>
+                <!------------------------------------------------------------------------- nav-collection ------------------------------------------------------------------------>
+                @if (User.Identity.IsAuthenticated)
+                {
+                    if (User.HasRole("6. Global user") || (User.HasRole("5. Super user")))
+                    {
+                        <div class="navCollection_fullScreens">
+                            <div class="buttonCollection">
+                                <div class="col-md-12">
+                                    <div class="col-md-4"></div>
+                                    <div class="col-md-4">
+                                        <div class="col-md-2"></div>
+                                        <div class="col-md-10">
+                                            <div class="col-md-2">
+                                                <a href="@Url.Action("Index", "Home" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Home"><span style="font-size: 12px" class="sub_icon fas fa-home"></span></a>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <a href="@Url.Action("OpenAssignments", "Clinical" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Assignments"><span style="font-size: 12px" class="sub_icon fas fa-bell"></span></a>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <a href="@Url.Action("Search", "Member" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Patient"><span style="font-size: 12px" class="sub_icon fas fa-user-circle"></span></a>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <a href="@Url.Action("searchManagement", "patientManagement" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Search"><span style="font-size: 12px" class="sub_icon fas fa-search"></span></a>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <a href="@Url.Action("Index", "Administration" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Settings"><span style="font-size: 12px" class="sub_icon fas fa-cog"></span></a>
+                                            </div>
+                                            <div class="col-md-2"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4"></div>
+
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else if (User.HasRole("4. Advisor"))
+                    {
+                        <div class="navCollection_fullScreens">
+                            <div class="buttonCollection">
+                                <div class="col-md-12">
+                                    <div class="col-md-4"></div>
+                                    <div class="col-md-4">
+                                        <div class="col-md-2"></div>
+                                        <div class="col-md-10">
+                                            <div class="col-md-1"></div>
+                                            <div class="col-md-2">
+                                                <a href="@Url.Action("Index", "Home" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Home"><span style="font-size: 12px" class="sub_icon fas fa-home"></span></a>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <a href="@Url.Action("OpenAssignments", "Clinical" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Assignments"><span style="font-size: 12px" class="sub_icon fas fa-bell"></span></a>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <a href="@Url.Action("Search", "Member" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Patient"><span style="font-size: 12px" class="sub_icon fas fa-user-circle"></span></a>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <a href="@Url.Action("searchManagement", "patientManagement" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Search"><span style="font-size: 12px" class="sub_icon fas fa-search"></span></a>
+                                            </div>
+                                            <div class="col-md-2"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4"></div>
+
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else if (User.HasRole("1. Consultant") || (User.HasRole("2. Case manager") || (User.HasRole("3. Specialist"))))
+                    {
+                        <div class="navCollection_fullScreens">
+                            <div class="buttonCollection">
+                                <div class="col-md-12">
+                                    <div class="col-md-4"></div>
+                                    <div class="col-md-4">
+                                        <div class="col-md-1"></div>
+                                        <div class="col-md-10">
+                                            <div class="col-md-2"></div>
+                                            <div class="col-md-2">
+                                                <a href="@Url.Action("Index", "Home" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Home"><span style="font-size: 12px" class="sub_icon fas fa-home"></span></a>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <a href="@Url.Action("OpenAssignments", "Clinical" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Assignments"><span style="font-size: 12px" class="sub_icon fas fa-bell"></span></a>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <a href="@Url.Action("Search", "Member" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Patient"><span style="font-size: 12px" class="sub_icon fas fa-user-circle"></span></a>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <a href="@Url.Action("searchManagement", "patientManagement" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Search"><span style="font-size: 12px" class="sub_icon fas fa-search"></span></a>
+                                            </div>
+                                            <div class="col-md-2"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4"></div>
+
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                <br />
+                <div class="col-md-12 row"><h4 class="subHeading">Details</h4></div>
+                <hr class="settings-ruler" />
+
+                <div class="col-md-12">
+                    <div class="row">
+                        <table class="table details-table table-hover" id="details">
+                            <tbody>
+                                <tr>
+                                    <td class="row-heading subject">@Html.DisplayNameFor(model => model.Title)</td>
+                                    <td class="row-information">@Html.DisplayFor(model => model.Title)</td>
+                                </tr>
+                                <tr>
+                                    <td class="row-heading subject">@Html.DisplayNameFor(model => model.Template)</td>
+                                    @*<td class="row-information">@Html.DisplayFor(model => model.Template)</td>*@
+                                    <td class="row-information">@Html.Raw(Html.Encode(Model.Template).Replace("(b)", "<b>").Replace("(/b)", "</b>"))</td>
+                                </tr>
+                                <tr>
+                                    <td class="row-heading subject">@Html.DisplayNameFor(model => model.MedicalAids)</td>
+                                    <td class="row-information">@Html.DisplayFor(model => model.selectedSchemes)</td>
+                                </tr>
+                                <tr>
+                                    <td class="row-heading subject">@Html.DisplayNameFor(model => model.Options)</td>
+                                    <td class="row-information">@Html.Raw(Html.Encode(Model.selectedOptions).Replace(",", "<br />" + " "))</td>
+                                </tr>
+                                <tr>
+                                    <td class="row-heading subject">@Html.DisplayNameFor(model => model.Programs)</td>
+                                    <td class="row-information">@Html.Raw(Html.Encode(Model.selectedPrograms).Replace(",", ", "))</td>
+                                </tr>
+                                <tr>
+                                    <td class="row-heading subject">@Html.DisplayNameFor(model => model.CreatedDate)</td>
+                                    <td class="row-information">@Html.DisplayFor(model => model.CreatedDate)</td>
+                                </tr>
+                                <tr>
+                                    <td class="row-heading subject">@Html.DisplayNameFor(model => model.CreatedBy)</td>
+                                    <td class="row-information">@Html.DisplayFor(model => model.CreatedBy)</td>
+                                </tr>
+                                @if (Model.ModifiedDate != null)
+                                {
+                                    <tr>
+                                        <td class="row-heading subject">@Html.DisplayNameFor(model => model.ModifiedDate)</td>
+                                        <td class="row-information">@Html.DisplayFor(model => model.ModifiedDate)</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="row-heading subject">@Html.DisplayNameFor(model => model.ModifiedBy)</td>
+                                        <td class="row-information">@Html.DisplayFor(model => model.ModifiedBy)</td>
+                                    </tr>
+                                }
+                                <tr>
+                                    <td class="row-heading subject">@Html.DisplayNameFor(model => model.Type)</td>
+                                    <td class="row-information">@Html.DisplayFor(model => model.Type)</td>
+                                </tr>
+                                <tr>
+                                    <td class="row-heading subject">@Html.DisplayNameFor(model => model.Active)</td>
+                                    <td class="row-information"><span class="@(Model.Active == true ? "chk-yes fas fa-circle" : "chk-no fas fa-circle")"></span>&emsp;@((Model.Active == true) ? "Yes" : "No")</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="sf-footer">
+                    <input type="button" id="details-back" value="Back" class="btn modal-button-previous" onclick="location.href = '@Url.Action("Index", "Template", null)'; backKey();" />
+                    <input type="button" id="details-edit" value="Edit" class="btn modal-button-next" onclick="location.href='@Url.Action("PopUpTemplates_Edit", "Template", new { id = Model.Id})'" />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script src="~/bundles/jqueryval"></script>
+
+    <script>
+        //CKEDITOR.config.toolbar_test = [['Source', '-', 'Cut', 'Copy', 'Paste', '-', 'Undo', 'Redo', 'RemoveFormat', '-', 'Link', 'Unlink', 'Anchor', '-', 'Image', 'Table', 'HorizontalRule', 'SpecialChar'], '/', ['Format', 'Templates', 'Bold', 'Italic', 'Underline', '-', 'Superscript', '-', ['JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock'], '-', 'NumberedList', 'BulletedList', '-', 'Outdent', 'Indent']];
+        //CKEDITOR.config.toolbar_MA = [['Cut', 'Copy', 'Paste', '-', 'Undo', 'Redo', 'RemoveFormat', '-', 'Bold', 'Italic', 'Underline', '-']];
+        //CKEDITOR.replace('Template', { toolbar: 'MA' });
+    </script>
+    <script>
+        function backKey() {
+            localStorage.setItem("back_popup", Date.now());
+        }
+        function storageKey() {
+            localStorage.setItem("edit_popup", Date.now());
+        }
+    </script>
+}

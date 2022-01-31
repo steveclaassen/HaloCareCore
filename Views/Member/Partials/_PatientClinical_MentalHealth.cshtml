@@ -1,0 +1,919 @@
+﻿@model HaloCareCore.Models.ClinicalViewModel
+
+@{
+    ViewBag.Title = "Mental health";
+    Layout = "~/Views/Shared/_LayoutMember.cshtml";
+}
+<comment>
+    <!--
+        07 August 2020 -- HCare-1142(Patient Clinical bug)
+    -->
+</comment>
+
+<div class="row" style="margin-top: -60px">
+    <!---------- dsm5 hcare-1123 ---------->
+    <div class="col-md-12" style="z-index: 10">
+        <div class="panel panel-default">
+            <div class="panel-heading clickable panel-collapsed" id="mh-dsm5">
+                <h3 class="panel-title">
+                    DSM5
+                </h3>
+                <span class="pull-right clickable panel-collapsed" style="margin-top: -1.25%; margin-right: 0.5%"><i class="fas fa-caret-up"></i></span>
+            </div>
+            <div class="panel-body">
+                <div class="col-md-12">
+                    <div class="row">
+                        <table class="table patient-clinical-history-table sortable" id="otherTable">
+                            <thead>
+                                <tr>
+                                    <th style="width: 10%; text-align: center!important">@Html.DisplayNameFor(model => model.summary.MH_DSM5Responses[0].CreatedDate)</th>
+                                    <th style="width: 10%; text-align: center!important">@Html.DisplayNameFor(model => model.summary.MH_DSM5Responses[0].Depression)</th>
+                                    <th style="width: 10%; text-align: center!important">@Html.DisplayNameFor(model => model.summary.MH_DSM5Responses[0].Interest)</th>
+                                    <th style="width: 10%; text-align: center!important">@Html.DisplayNameFor(model => model.summary.MH_DSM5Responses[0].WeightLoss)</th>
+                                    <th style="width: 10%; text-align: center!important">@Html.DisplayNameFor(model => model.summary.MH_DSM5Responses[0].Psychomotor)</th>
+                                    <th style="width: 10%; text-align: center!important">@Html.DisplayNameFor(model => model.summary.MH_DSM5Responses[0].Tiredness)</th>
+                                    <th style="width: 10%; text-align: center!important">@Html.DisplayNameFor(model => model.summary.MH_DSM5Responses[0].SelfWorth)</th>
+                                    <th style="width: 10%; text-align: center!important">@Html.DisplayNameFor(model => model.summary.MH_DSM5Responses[0].Concentration)</th>
+                                    <th style="width: 10%; text-align: center!important">@Html.DisplayNameFor(model => model.summary.MH_DSM5Responses[0].Suicidal)</th>
+                                    <th style="width: 8%; text-align: center!important">@Html.DisplayName("Action")</th>
+                                </tr>
+                            </thead>
+
+                            @if (Model.summary.MH_DSM5Responses.Count() == 0)
+                            {
+                                <tr><td colspan="10" style="text-align: center!important; color: rgba(128, 128, 128, 0.50)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="color: rgba(128, 128, 128, 0.50)"></i></span> no records found</td></tr>
+                            }
+                            else
+                            {
+                                foreach (var item in Model.summary.MH_DSM5Responses)
+                                {
+                                    <tbody>
+
+                                        @if (item.FollowUp == true)
+                                        {
+                                            <tr>
+                                                <td colspan="9" style="text-align: center!important; color: rgba(204, 0, 0, 0.70)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="font-size: 18px; color: rgba(204, 0, 0, 0.70)!important"></i></span> Follow up required!</td>
+                                                <td class="text-center">
+                                                    <input type="submit" class="link-button" value="View" onclick="location.href='@Url.Action("MH_DSM5_Details", "Member", new { id = item.Id, pro = Context.Request.Query["pro"] })'" /> /
+                                                    <input type="submit" class="link-button" value="Edit" onclick="location.href='@Url.Action("MH_DSM5_Edit", "Member", new { id = item.Id, pro = Context.Request.Query["pro"] })'" />
+                                                </td>
+                                            </tr>
+                                        }
+                                        else
+                                        {
+                                            <tr style="text-indent: 5px">
+                                                <td class="text-center">@Html.DisplayFor(modelItem => item.CreatedDate)</td>
+                                                <td class="text-center" title="@item.Depression.ToString()"><span class="@(item.Depression == true ? "chk-no fas fa-circle" : "chk-yes fas fa-circle")"></span></td>
+                                                <td class="text-center" title="@item.Interest.ToString()"><span class="@(item.Interest == true ? "chk-no fas fa-circle" : "chk-yes fas fa-circle")"></span></td>
+                                                <td class="text-center" title="@item.WeightLoss.ToString()"><span class="@(item.WeightLoss == true ? "chk-no fas fa-circle" : "chk-yes fas fa-circle")"></span></td>
+                                                <td class="text-center" title="@item.Psychomotor.ToString()"><span class="@(item.Psychomotor == true ? "chk-no fas fa-circle" : "chk-yes fas fa-circle")"></span></td>
+                                                <td class="text-center" title="@item.Tiredness.ToString()"><span class="@(item.Tiredness == true ? "chk-no fas fa-circle" : "chk-yes fas fa-circle")"></span></td>
+                                                <td class="text-center" title="@item.SelfWorth.ToString()"><span class="@(item.SelfWorth == true ? "chk-no fas fa-circle" : "chk-yes fas fa-circle")"></span></td>
+                                                <td class="text-center" title="@item.Concentration.ToString()"><span class="@(item.Concentration == true ? "chk-no fas fa-circle" : "chk-yes fas fa-circle")"></span></td>
+                                                <td class="text-center" title="@item.Suicidal.ToString()"><span class="@(item.Suicidal == true ? "chk-no fas fa-circle" : "chk-yes fas fa-circle")"></span></td>
+                                                <td class="text-center">
+                                                    <input type="submit" class="link-button" value="View" onclick="location.href='@Url.Action("MH_DSM5_Details", "Member", new { id = item.Id, pro = Context.Request.Query["pro"] })'" /> /
+                                                    <input type="submit" class="link-button" value="Edit" onclick="location.href='@Url.Action("MH_DSM5_Edit", "Member", new { id = item.Id, pro = Context.Request.Query["pro"] })'" />
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                }
+                            }
+                        </table>
+                    </div>
+                </div>
+                <div style="text-align:center">
+                    <input type="button" class="btn patient-clinical-button" value="Add" onclick="location.href='@Url.Action("MH_DSM5_Create", "Member", new { DependentID = Model.DependentID, pro=Context.Request.Query["pro"] }, null)'" />
+                </div>
+                <br />
+            </div>
+        </div>
+    </div>
+    <!------ schizophrenia hcare-1124 ------>
+    <div class="col-md-12" style="z-index: 10">
+        <div class="panel panel-default">
+            <div class="panel-heading clickable panel-collapsed" id="mh-schizophrenia">
+                <h3 class="panel-title">
+                    Schizophrenia
+                </h3>
+                <span class="pull-right clickable panel-collapsed" style="margin-top: -1.25%; margin-right: 0.5%"><i class="fas fa-caret-up"></i></span>
+            </div>
+            <div class="panel-body">
+                <div class="col-md-12">
+                    <div class="row">
+                        <table class="table patient-clinical-bipolar-table sortable" id="otherTable">
+                            <thead>
+                                <tr>
+                                    <th style="width: 9%; text-align: center!important">@Html.DisplayNameFor(model => model.summary.MH_SchizophreniaResponses[0].CreatedDate)</th>
+                                    <th style="width: 9%; text-align: center!important">@Html.DisplayNameFor(model => model.summary.MH_SchizophreniaResponses[0].Depression)</th>
+                                    <th style="width: 9%; text-align: center!important">@Html.DisplayNameFor(model => model.summary.MH_SchizophreniaResponses[0].Hopelessness)</th>
+                                    <th style="width: 9%; text-align: center!important">@Html.DisplayNameFor(model => model.summary.MH_SchizophreniaResponses[0].SelfDepreciation)</th>
+                                    <th style="width: 9%; text-align: center!important">@Html.DisplayNameFor(model => model.summary.MH_SchizophreniaResponses[0].GuiltyIdeas)</th>
+                                    <th style="width: 9%; text-align: center!important">@Html.DisplayNameFor(model => model.summary.MH_SchizophreniaResponses[0].PathologicalGuilt)</th>
+                                    <th style="width: 9%; text-align: center!important">@Html.DisplayNameFor(model => model.summary.MH_SchizophreniaResponses[0].MorningDepression)</th>
+                                    <th style="width: 9%; text-align: center!important">@Html.DisplayNameFor(model => model.summary.MH_SchizophreniaResponses[0].EarlyWakening)</th>
+                                    <th style="width: 9%; text-align: center!important">@Html.DisplayNameFor(model => model.summary.MH_SchizophreniaResponses[0].Suicidal)</th>
+                                    <th style="width: 9%; text-align: center!important">@Html.DisplayNameFor(model => model.summary.MH_SchizophreniaResponses[0].ObservedDepression)</th>
+                                    <th style="width: 8%; text-align: center!important">@Html.DisplayName("Action")</th>
+                                </tr>
+                            </thead>
+
+                            @if (Model.summary.MH_SchizophreniaResponses.Count() == 0)
+                            {
+                                <tr><td colspan="11" style="text-align: center!important; color: rgba(128, 128, 128, 0.50)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="color: rgba(128, 128, 128, 0.50)"></i></span> no records found</td></tr>
+                            }
+                            else
+                            {
+                                foreach (var item in Model.summary.MH_SchizophreniaResponses)
+                                {
+                                    <tbody>
+                                        @if (item.FollowUp == true)
+                                        {
+                                            <tr>
+                                                <td colspan="10" style="text-align: center!important; color: rgba(204, 0, 0, 0.70)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="font-size: 18px; color: rgba(204, 0, 0, 0.70)!important"></i></span> Follow up required!</td>
+                                                <td class="text-center">
+                                                    <input type="submit" class="link-button" value="View" onclick="location.href='@Url.Action("MH_Schizophrenia_Details", "Member", new { id = item.Id, pro = Context.Request.Query["pro"] })'" /> /
+                                                    <input type="submit" class="link-button" value="Edit" onclick="location.href='@Url.Action("MH_Schizophrenia_Edit", "Member", new { id = item.Id, pro = Context.Request.Query["pro"] })'" />
+                                                </td>
+                                            </tr>
+                                        }
+                                        else
+                                        {
+                                            <tr style="text-indent: 5px">
+                                                <td class="text-center">@Html.DisplayFor(modelItem => item.CreatedDate)</td>
+                                                <td class="text-center" title="@item.Depression">
+                                                    @if (item.Depression.ToLower() == "absent")
+                                                    {<i class="chk-absent fas fa-circle"></i>}
+                                                    else if (item.Depression.ToLower() == "mild")
+                                                    {<i class="chk-mild fas fa-circle"></i>}
+                                                    else if (item.Depression.ToLower() == "moderate")
+                                                    {<i class="chk-moderate fas fa-circle"></i>}
+                                                    else if (item.Depression.ToLower() == "severe")
+                                                    {<i class="chk-severe fas fa-circle"></i>}
+                                                    else if (item.Depression.ToLower() == "follow up")
+                                                    {<i class="chk-followup fas fa-circle"></i>}
+                                                </td>
+                                                <td class="text-center" title="@item.Hopelessness">
+                                                    @if (item.Hopelessness.ToLower() == "absent")
+                                                    {<i class="chk-absent fas fa-circle"></i>}
+                                                    else if (item.Hopelessness.ToLower() == "mild")
+                                                    {<i class="chk-mild fas fa-circle"></i>}
+                                                    else if (item.Hopelessness.ToLower() == "moderate")
+                                                    {<i class="chk-moderate fas fa-circle"></i>}
+                                                    else if (item.Hopelessness.ToLower() == "severe")
+                                                    {<i class="chk-severe fas fa-circle"></i>}
+                                                    else if (item.Hopelessness.ToLower() == "follow up")
+                                                    {<i class="chk-followup fas fa-circle"></i>}
+                                                </td>
+                                                <td class="text-center" title="@item.SelfDepreciation">
+                                                    @if (item.SelfDepreciation.ToLower() == "absent")
+                                                    {<i class="chk-absent fas fa-circle"></i>}
+                                                    else if (item.SelfDepreciation.ToLower() == "mild")
+                                                    {<i class="chk-mild fas fa-circle"></i>}
+                                                    else if (item.SelfDepreciation.ToLower() == "moderate")
+                                                    {<i class="chk-moderate fas fa-circle"></i>}
+                                                    else if (item.SelfDepreciation.ToLower() == "severe")
+                                                    {<i class="chk-severe fas fa-circle"></i>}
+                                                    else if (item.SelfDepreciation.ToLower() == "follow up")
+                                                    {<i class="chk-followup fas fa-circle"></i>}
+                                                </td>
+                                                <td class="text-center" title="@item.GuiltyIdeas">
+                                                    @if (item.GuiltyIdeas.ToLower() == "absent")
+                                                    {<i class="chk-absent fas fa-circle"></i>}
+                                                    else if (item.GuiltyIdeas.ToLower() == "mild")
+                                                    {<i class="chk-mild fas fa-circle"></i>}
+                                                    else if (item.GuiltyIdeas.ToLower() == "moderate")
+                                                    {<i class="chk-moderate fas fa-circle"></i>}
+                                                    else if (item.GuiltyIdeas.ToLower() == "severe")
+                                                    {<i class="chk-severe fas fa-circle"></i>}
+                                                    else if (item.GuiltyIdeas.ToLower() == "follow up")
+                                                    {<i class="chk-followup fas fa-circle"></i>}
+                                                </td>
+                                                <td class="text-center" title="@item.PathologicalGuilt">
+                                                    @if (item.PathologicalGuilt.ToLower() == "absent")
+                                                    {<i class="chk-absent fas fa-circle"></i>}
+                                                    else if (item.PathologicalGuilt.ToLower() == "mild")
+                                                    {<i class="chk-mild fas fa-circle"></i>}
+                                                    else if (item.PathologicalGuilt.ToLower() == "moderate")
+                                                    {<i class="chk-moderate fas fa-circle"></i>}
+                                                    else if (item.PathologicalGuilt.ToLower() == "severe")
+                                                    {<i class="chk-severe fas fa-circle"></i>}
+                                                    else if (item.PathologicalGuilt.ToLower() == "follow up")
+                                                    {<i class="chk-followup fas fa-circle"></i>}
+                                                </td>
+                                                <td class="text-center" title="@item.MorningDepression">
+                                                    @if (item.MorningDepression.ToLower() == "absent")
+                                                    {<i class="chk-absent fas fa-circle"></i>}
+                                                    else if (item.MorningDepression.ToLower() == "mild")
+                                                    {<i class="chk-mild fas fa-circle"></i>}
+                                                    else if (item.MorningDepression.ToLower() == "moderate")
+                                                    {<i class="chk-moderate fas fa-circle"></i>}
+                                                    else if (item.MorningDepression.ToLower() == "severe")
+                                                    {<i class="chk-severe fas fa-circle"></i>}
+                                                    else if (item.MorningDepression.ToLower() == "follow up")
+                                                    {<i class="chk-followup fas fa-circle"></i>}
+                                                </td>
+                                                <td class="text-center" title="@item.EarlyWakening">
+                                                    @if (item.EarlyWakening.ToLower() == "absent")
+                                                    {<i class="chk-absent fas fa-circle"></i>}
+                                                    else if (item.EarlyWakening.ToLower() == "mild")
+                                                    {<i class="chk-mild fas fa-circle"></i>}
+                                                    else if (item.EarlyWakening.ToLower() == "moderate")
+                                                    {<i class="chk-moderate fas fa-circle"></i>}
+                                                    else if (item.EarlyWakening.ToLower() == "severe")
+                                                    {<i class="chk-severe fas fa-circle"></i>}
+                                                    else if (item.EarlyWakening.ToLower() == "follow up")
+                                                    {<i class="chk-followup fas fa-circle"></i>}
+                                                </td>
+                                                <td class="text-center" title="@item.Suicidal">
+                                                    @if (item.Suicidal.ToLower() == "absent")
+                                                    {<i class="chk-absent fas fa-circle"></i>}
+                                                    else if (item.Suicidal.ToLower() == "mild")
+                                                    {<i class="chk-mild fas fa-circle"></i>}
+                                                    else if (item.Suicidal.ToLower() == "moderate")
+                                                    {<i class="chk-moderate fas fa-circle"></i>}
+                                                    else if (item.Suicidal.ToLower() == "severe")
+                                                    {<i class="chk-severe fas fa-circle"></i>}
+                                                    else if (item.Suicidal.ToLower() == "follow up")
+                                                    {<i class="chk-followup fas fa-circle"></i>}
+                                                </td>
+                                                <td class="text-center" title="@item.ObservedDepression">
+                                                    @if (item.ObservedDepression.ToLower() == "absent")
+                                                    {<i class="chk-absent fas fa-circle"></i>}
+                                                    else if (item.ObservedDepression.ToLower() == "mild")
+                                                    {<i class="chk-mild fas fa-circle"></i>}
+                                                    else if (item.ObservedDepression.ToLower() == "moderate")
+                                                    {<i class="chk-moderate fas fa-circle"></i>}
+                                                    else if (item.ObservedDepression.ToLower() == "severe")
+                                                    {<i class="chk-severe fas fa-circle"></i>}
+                                                    else if (item.ObservedDepression.ToLower() == "follow up")
+                                                    {<i class="chk-followup fas fa-circle"></i>}
+                                                </td>
+
+                                                <td class="text-center">
+                                                    <input type="submit" class="link-button" value="View" onclick="location.href='@Url.Action("MH_Schizophrenia_Details", "Member", new { id = item.Id, pro = Context.Request.Query["pro"] })'" /> /
+                                                    <input type="submit" class="link-button" value="Edit" onclick="location.href='@Url.Action("MH_Schizophrenia_Edit", "Member", new { id = item.Id, pro = Context.Request.Query["pro"] })'" />
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                }
+                            }
+                        </table>
+                    </div>
+                </div>
+                <div style="text-align:center">
+                    <input type="button" class="btn patient-clinical-button" value="Add" onclick="location.href='@Url.Action("MH_Schizophrenia_Create", "Member", new { DependentID = Model.DependentID, pro=Context.Request.Query["pro"] }, null)'" />
+                </div>
+                <br />
+            </div>
+        </div>
+    </div>
+    <!--------- bipolar hcare-1125 --------->
+    <div class="col-md-12" style="z-index: 10">
+        <div class="panel panel-default">
+            <div class="panel-heading clickable panel-collapsed" id="mh-bipolar">
+                <h3 class="panel-title">
+                    Bipolar
+                </h3>
+                <span class="pull-right clickable panel-collapsed" style="margin-top: -1.25%; margin-right: 0.5%"><i class="fas fa-caret-up"></i></span>
+            </div>
+            <div class="panel-body">
+                <div class="col-md-12">
+                    <div class="row">
+                        <table class="table patient-clinical-bipolar-table sortable" id="otherTable">
+                            <thead>
+                                <tr>
+                                    <th text-align: center!important">@Html.DisplayNameFor(model => model.summary.MH_BipolarResponses[0].CreatedDate)</th>
+                                    <th text-align: center!important">@Html.DisplayNameFor(model => model.summary.MH_BipolarResponses[0].Depression)</th>
+                                    <th text-align: center!important">@Html.DisplayNameFor(model => model.summary.MH_BipolarResponses[0].Insomnia)</th>
+                                    <th text-align: center!important">@Html.DisplayNameFor(model => model.summary.MH_BipolarResponses[0].Appetite)</th>
+                                    <th text-align: center!important">@Html.DisplayNameFor(model => model.summary.MH_BipolarResponses[0].SocialEngagement)</th>
+                                    <th text-align: center!important">@Html.DisplayNameFor(model => model.summary.MH_BipolarResponses[0].Activity)</th>
+                                    <th text-align: center!important">@Html.DisplayNameFor(model => model.summary.MH_BipolarResponses[0].Motivation)</th>
+                                    <th text-align: center!important">@Html.DisplayNameFor(model => model.summary.MH_BipolarResponses[0].Concentration)</th>
+                                    <th text-align: center!important">@Html.DisplayNameFor(model => model.summary.MH_BipolarResponses[0].Anxiety)</th>
+                                    <th text-align: center!important">@Html.DisplayNameFor(model => model.summary.MH_BipolarResponses[0].Pleasure)</th>
+                                    <th text-align: center!important">@Html.DisplayNameFor(model => model.summary.MH_BipolarResponses[0].Emotion)</th>
+                                    <th text-align: center!important">@Html.DisplayNameFor(model => model.summary.MH_BipolarResponses[0].Worthlessness)</th>
+                                    <th text-align: center!important">@Html.DisplayNameFor(model => model.summary.MH_BipolarResponses[0].Helplessness)</th>
+                                    <th text-align: center!important">@Html.DisplayNameFor(model => model.summary.MH_BipolarResponses[0].Suicidal)</th>
+                                    <th text-align: center!important">@Html.DisplayNameFor(model => model.summary.MH_BipolarResponses[0].Guilt)</th>
+                                    <th text-align: center!important">@Html.DisplayNameFor(model => model.summary.MH_BipolarResponses[0].Psychotic)</th>
+                                    <th text-align: center!important">@Html.DisplayNameFor(model => model.summary.MH_BipolarResponses[0].Irritability)</th>
+                                    <th text-align: center!important">@Html.DisplayNameFor(model => model.summary.MH_BipolarResponses[0].Lability)</th>
+                                    <th text-align: center!important">@Html.DisplayNameFor(model => model.summary.MH_BipolarResponses[0].IncMotorDrive)</th>
+                                    <th text-align: center!important">@Html.DisplayNameFor(model => model.summary.MH_BipolarResponses[0].IncSpeech)</th>
+                                    <th text-align: center!important">@Html.DisplayNameFor(model => model.summary.MH_BipolarResponses[0].Agitation)</th>
+                                    <th style="width: 8%; text-align: center!important">@Html.DisplayName("Action")</th>
+                                </tr>
+                            </thead>
+
+                            @if (Model.summary.MH_BipolarResponses.Count() == 0)
+                            {
+                                <tr><td colspan="22" style="text-align: center!important; color: rgba(128, 128, 128, 0.50)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="color: rgba(128, 128, 128, 0.50)"></i></span> no records found</td></tr>
+                            }
+                            else
+                            {
+                                foreach (var item in Model.summary.MH_BipolarResponses)
+                                {
+                                    <tbody>
+                                        @if (item.FollowUp == true)
+                                        {
+                                            <tr>
+                                                <td colspan="21" style="text-align: center!important; color: rgba(204, 0, 0, 0.70)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="font-size: 18px; color: rgba(204, 0, 0, 0.70)!important"></i></span> Follow up required!</td>
+                                                <td class="text-center">
+                                                    <input type="submit" class="link-button" value="View" onclick="location.href='@Url.Action("MH_Bipolar_Details", "Member", new { id = item.Id, pro = Context.Request.Query["pro"] })'" /> /
+                                                    <input type="submit" class="link-button" value="Edit" onclick="location.href='@Url.Action("MH_Bipolar_Edit", "Member", new { id = item.Id, pro = Context.Request.Query["pro"] })'" />
+                                                </td>
+                                            </tr>
+                                        }
+                                        else
+                                        {
+                                            <tr style="text-indent: 5px">
+                                                <td class="text-center">@Html.DisplayFor(modelItem => item.CreatedDate)</td>
+                                                <td class="text-center" title="@item.Depression">
+                                                    @if (item.Depression.ToLower() == "absent")
+                                                    {<i class="chk-absent fas fa-circle"></i>}
+                                                    else if (item.Depression.ToLower() == "mild")
+                                                    {<i class="chk-mild fas fa-circle"></i>}
+                                                    else if (item.Depression.ToLower() == "moderate")
+                                                    {<i class="chk-moderate fas fa-circle"></i>}
+                                                    else if (item.Depression.ToLower() == "severe")
+                                                    {<i class="chk-severe fas fa-circle"></i>}
+                                                    else if (item.Depression.ToLower() == "follow up")
+                                                    {<i class="chk-followup fas fa-circle"></i>}
+                                                </td>
+                                                <td class="text-center" title="@item.Insomnia">
+                                                    @if (item.Insomnia.ToLower() == "absent")
+                                                    {<i class="chk-absent fas fa-circle"></i>}
+                                                    else if (item.Insomnia.ToLower() == "mild")
+                                                    {<i class="chk-mild fas fa-circle"></i>}
+                                                    else if (item.Insomnia.ToLower() == "moderate")
+                                                    {<i class="chk-moderate fas fa-circle"></i>}
+                                                    else if (item.Insomnia.ToLower() == "severe")
+                                                    {<i class="chk-severe fas fa-circle"></i>}
+                                                    else if (item.Insomnia.ToLower() == "follow up")
+                                                    {<i class="chk-followup fas fa-circle"></i>}
+                                                </td>
+                                                <td class="text-center" title="@item.Appetite">
+                                                    @if (item.Appetite.ToLower() == "absent")
+                                                    {<i class="chk-absent fas fa-circle"></i>}
+                                                    else if (item.Appetite.ToLower() == "mild")
+                                                    {<i class="chk-mild fas fa-circle"></i>}
+                                                    else if (item.Appetite.ToLower() == "moderate")
+                                                    {<i class="chk-moderate fas fa-circle"></i>}
+                                                    else if (item.Appetite.ToLower() == "severe")
+                                                    {<i class="chk-severe fas fa-circle"></i>}
+                                                    else if (item.Appetite.ToLower() == "follow up")
+                                                    {<i class="chk-followup fas fa-circle"></i>}
+                                                </td>
+                                                <td class="text-center" title="@item.SocialEngagement">
+                                                    @if (item.SocialEngagement.ToLower() == "absent")
+                                                    {<i class="chk-absent fas fa-circle"></i>}
+                                                    else if (item.SocialEngagement.ToLower() == "mild")
+                                                    {<i class="chk-mild fas fa-circle"></i>}
+                                                    else if (item.SocialEngagement.ToLower() == "moderate")
+                                                    {<i class="chk-moderate fas fa-circle"></i>}
+                                                    else if (item.SocialEngagement.ToLower() == "severe")
+                                                    {<i class="chk-severe fas fa-circle"></i>}
+                                                    else if (item.SocialEngagement.ToLower() == "follow up")
+                                                    {<i class="chk-followup fas fa-circle"></i>}
+                                                </td>
+                                                <td class="text-center" title="@item.Activity">
+                                                    @if (item.Activity.ToLower() == "absent")
+                                                    {<i class="chk-absent fas fa-circle"></i>}
+                                                    else if (item.Activity.ToLower() == "mild")
+                                                    {<i class="chk-mild fas fa-circle"></i>}
+                                                    else if (item.Activity.ToLower() == "moderate")
+                                                    {<i class="chk-moderate fas fa-circle"></i>}
+                                                    else if (item.Activity.ToLower() == "severe")
+                                                    {<i class="chk-severe fas fa-circle"></i>}
+                                                    else if (item.Activity.ToLower() == "follow up")
+                                                    {<i class="chk-followup fas fa-circle"></i>}
+                                                </td>
+                                                <td class="text-center" title="@item.Motivation">
+                                                    @if (item.Motivation.ToLower() == "absent")
+                                                    {<i class="chk-absent fas fa-circle"></i>}
+                                                    else if (item.Motivation.ToLower() == "mild")
+                                                    {<i class="chk-mild fas fa-circle"></i>}
+                                                    else if (item.Motivation.ToLower() == "moderate")
+                                                    {<i class="chk-moderate fas fa-circle"></i>}
+                                                    else if (item.Motivation.ToLower() == "severe")
+                                                    {<i class="chk-severe fas fa-circle"></i>}
+                                                    else if (item.Motivation.ToLower() == "follow up")
+                                                    {<i class="chk-followup fas fa-circle"></i>}
+                                                </td>
+                                                <td class="text-center" title="@item.Concentration">
+                                                    @if (item.Concentration.ToLower() == "absent")
+                                                    {<i class="chk-absent fas fa-circle"></i>}
+                                                    else if (item.Concentration.ToLower() == "mild")
+                                                    {<i class="chk-mild fas fa-circle"></i>}
+                                                    else if (item.Concentration.ToLower() == "moderate")
+                                                    {<i class="chk-moderate fas fa-circle"></i>}
+                                                    else if (item.Concentration.ToLower() == "severe")
+                                                    {<i class="chk-severe fas fa-circle"></i>}
+                                                    else if (item.Concentration.ToLower() == "follow up")
+                                                    {<i class="chk-followup fas fa-circle"></i>}
+                                                </td>
+                                                <td class="text-center" title="@item.Anxiety">
+                                                    @if (item.Anxiety.ToLower() == "absent")
+                                                    {<i class="chk-absent fas fa-circle"></i>}
+                                                    else if (item.Anxiety.ToLower() == "mild")
+                                                    {<i class="chk-mild fas fa-circle"></i>}
+                                                    else if (item.Anxiety.ToLower() == "moderate")
+                                                    {<i class="chk-moderate fas fa-circle"></i>}
+                                                    else if (item.Anxiety.ToLower() == "severe")
+                                                    {<i class="chk-severe fas fa-circle"></i>}
+                                                    else if (item.Anxiety.ToLower() == "follow up")
+                                                    {<i class="chk-followup fas fa-circle"></i>}
+                                                </td>
+                                                <td class="text-center" title="@item.Pleasure">
+                                                    @if (item.Pleasure.ToLower() == "absent")
+                                                    {<i class="chk-absent fas fa-circle"></i>}
+                                                    else if (item.Pleasure.ToLower() == "mild")
+                                                    {<i class="chk-mild fas fa-circle"></i>}
+                                                    else if (item.Pleasure.ToLower() == "moderate")
+                                                    {<i class="chk-moderate fas fa-circle"></i>}
+                                                    else if (item.Pleasure.ToLower() == "severe")
+                                                    {<i class="chk-severe fas fa-circle"></i>}
+                                                    else if (item.Pleasure.ToLower() == "follow up")
+                                                    {<i class="chk-followup fas fa-circle"></i>}
+                                                </td>
+                                                <td class="text-center" title="@item.Emotion">
+                                                    @if (item.Emotion.ToLower() == "absent")
+                                                    {<i class="chk-absent fas fa-circle"></i>}
+                                                    else if (item.Emotion.ToLower() == "mild")
+                                                    {<i class="chk-mild fas fa-circle"></i>}
+                                                    else if (item.Emotion.ToLower() == "moderate")
+                                                    {<i class="chk-moderate fas fa-circle"></i>}
+                                                    else if (item.Emotion.ToLower() == "severe")
+                                                    {<i class="chk-severe fas fa-circle"></i>}
+                                                    else if (item.Emotion.ToLower() == "follow up")
+                                                    {<i class="chk-followup fas fa-circle"></i>}
+                                                </td>
+                                                <td class="text-center" title="@item.Worthlessness">
+                                                    @if (item.Worthlessness.ToLower() == "absent")
+                                                    {<i class="chk-absent fas fa-circle"></i>}
+                                                    else if (item.Worthlessness.ToLower() == "mild")
+                                                    {<i class="chk-mild fas fa-circle"></i>}
+                                                    else if (item.Worthlessness.ToLower() == "moderate")
+                                                    {<i class="chk-moderate fas fa-circle"></i>}
+                                                    else if (item.Worthlessness.ToLower() == "severe")
+                                                    {<i class="chk-severe fas fa-circle"></i>}
+                                                    else if (item.Worthlessness.ToLower() == "follow up")
+                                                    {<i class="chk-followup fas fa-circle"></i>}
+                                                </td>
+                                                <td class="text-center" title="@item.Helplessness">
+                                                    @if (item.Helplessness.ToLower() == "absent")
+                                                    {<i class="chk-absent fas fa-circle"></i>}
+                                                    else if (item.Helplessness.ToLower() == "mild")
+                                                    {<i class="chk-mild fas fa-circle"></i>}
+                                                    else if (item.Helplessness.ToLower() == "moderate")
+                                                    {<i class="chk-moderate fas fa-circle"></i>}
+                                                    else if (item.Helplessness.ToLower() == "severe")
+                                                    {<i class="chk-severe fas fa-circle"></i>}
+                                                    else if (item.Helplessness.ToLower() == "follow up")
+                                                    {<i class="chk-followup fas fa-circle"></i>}
+                                                </td>
+                                                <td class="text-center" title="@item.Suicidal">
+                                                    @if (item.Suicidal.ToLower() == "absent")
+                                                    {<i class="chk-absent fas fa-circle"></i>}
+                                                    else if (item.Suicidal.ToLower() == "mild")
+                                                    {<i class="chk-mild fas fa-circle"></i>}
+                                                    else if (item.Suicidal.ToLower() == "moderate")
+                                                    {<i class="chk-moderate fas fa-circle"></i>}
+                                                    else if (item.Suicidal.ToLower() == "severe")
+                                                    {<i class="chk-severe fas fa-circle"></i>}
+                                                    else if (item.Suicidal.ToLower() == "follow up")
+                                                    {<i class="chk-followup fas fa-circle"></i>}
+                                                </td>
+                                                <td class="text-center" title="@item.Guilt">
+                                                    @if (item.Guilt.ToLower() == "absent")
+                                                    {<i class="chk-absent fas fa-circle"></i>}
+                                                    else if (item.Guilt.ToLower() == "mild")
+                                                    {<i class="chk-mild fas fa-circle"></i>}
+                                                    else if (item.Guilt.ToLower() == "moderate")
+                                                    {<i class="chk-moderate fas fa-circle"></i>}
+                                                    else if (item.Guilt.ToLower() == "severe")
+                                                    {<i class="chk-severe fas fa-circle"></i>}
+                                                    else if (item.Guilt.ToLower() == "follow up")
+                                                    {<i class="chk-followup fas fa-circle"></i>}
+                                                </td>
+                                                <td class="text-center" title="@item.Psychotic">
+                                                    @if (item.Psychotic.ToLower() == "absent")
+                                                    {<i class="chk-absent fas fa-circle"></i>}
+                                                    else if (item.Psychotic.ToLower() == "mild")
+                                                    {<i class="chk-mild fas fa-circle"></i>}
+                                                    else if (item.Psychotic.ToLower() == "moderate")
+                                                    {<i class="chk-moderate fas fa-circle"></i>}
+                                                    else if (item.Psychotic.ToLower() == "severe")
+                                                    {<i class="chk-severe fas fa-circle"></i>}
+                                                    else if (item.Psychotic.ToLower() == "follow up")
+                                                    {<i class="chk-followup fas fa-circle"></i>}
+                                                </td>
+                                                <td class="text-center" title="@item.Irritability">
+                                                    @if (item.Irritability.ToLower() == "absent")
+                                                    {<i class="chk-absent fas fa-circle"></i>}
+                                                    else if (item.Irritability.ToLower() == "mild")
+                                                    {<i class="chk-mild fas fa-circle"></i>}
+                                                    else if (item.Irritability.ToLower() == "moderate")
+                                                    {<i class="chk-moderate fas fa-circle"></i>}
+                                                    else if (item.Irritability.ToLower() == "severe")
+                                                    {<i class="chk-severe fas fa-circle"></i>}
+                                                    else if (item.Irritability.ToLower() == "follow up")
+                                                    {<i class="chk-followup fas fa-circle"></i>}
+                                                </td>
+                                                <td class="text-center" title="@item.Lability">
+                                                    @if (item.Lability.ToLower() == "absent")
+                                                    {<i class="chk-absent fas fa-circle"></i>}
+                                                    else if (item.Lability.ToLower() == "mild")
+                                                    {<i class="chk-mild fas fa-circle"></i>}
+                                                    else if (item.Lability.ToLower() == "moderate")
+                                                    {<i class="chk-moderate fas fa-circle"></i>}
+                                                    else if (item.Lability.ToLower() == "severe")
+                                                    {<i class="chk-severe fas fa-circle"></i>}
+                                                    else if (item.Lability.ToLower() == "follow up")
+                                                    {<i class="chk-followup fas fa-circle"></i>}
+                                                </td>
+                                                <td class="text-center" title="@item.IncMotorDrive">
+                                                    @if (item.IncMotorDrive.ToLower() == "absent")
+                                                    {<i class="chk-absent fas fa-circle"></i>}
+                                                    else if (item.IncMotorDrive.ToLower() == "mild")
+                                                    {<i class="chk-mild fas fa-circle"></i>}
+                                                    else if (item.IncMotorDrive.ToLower() == "moderate")
+                                                    {<i class="chk-moderate fas fa-circle"></i>}
+                                                    else if (item.IncMotorDrive.ToLower() == "severe")
+                                                    {<i class="chk-severe fas fa-circle"></i>}
+                                                    else if (item.IncMotorDrive.ToLower() == "follow up")
+                                                    {<i class="chk-followup fas fa-circle"></i>}
+                                                </td>
+                                                <td class="text-center" title="@item.IncSpeech">
+                                                    @if (item.IncSpeech.ToLower() == "absent")
+                                                    {<i class="chk-absent fas fa-circle"></i>}
+                                                    else if (item.IncSpeech.ToLower() == "mild")
+                                                    {<i class="chk-mild fas fa-circle"></i>}
+                                                    else if (item.IncSpeech.ToLower() == "moderate")
+                                                    {<i class="chk-moderate fas fa-circle"></i>}
+                                                    else if (item.IncSpeech.ToLower() == "severe")
+                                                    {<i class="chk-severe fas fa-circle"></i>}
+                                                    else if (item.IncSpeech.ToLower() == "follow up")
+                                                    {<i class="chk-followup fas fa-circle"></i>}
+                                                </td>
+                                                <td class="text-center" title="@item.Agitation">
+                                                    @if (item.Agitation.ToLower() == "absent")
+                                                    {<i class="chk-absent fas fa-circle"></i>}
+                                                    else if (item.Agitation.ToLower() == "mild")
+                                                    {<i class="chk-mild fas fa-circle"></i>}
+                                                    else if (item.Agitation.ToLower() == "moderate")
+                                                    {<i class="chk-moderate fas fa-circle"></i>}
+                                                    else if (item.Agitation.ToLower() == "severe")
+                                                    {<i class="chk-severe fas fa-circle"></i>}
+                                                    else if (item.Agitation.ToLower() == "follow up")
+                                                    {<i class="chk-followup fas fa-circle"></i>}
+                                                </td>
+
+                                                <td class="text-center">
+                                                    <input type="submit" class="link-button" value="View" onclick="location.href='@Url.Action("MH_Bipolar_Details", "Member", new { id = item.Id, pro = Context.Request.Query["pro"] })'" /> /
+                                                    <input type="submit" class="link-button" value="Edit" onclick="location.href='@Url.Action("MH_Bipolar_Edit", "Member", new { id = item.Id, pro = Context.Request.Query["pro"] })'" />
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                }
+                            }
+                        </table>
+                    </div>
+                </div>
+                <div style="text-align:center">
+                    <input type="button" class="btn patient-clinical-button" value="Add" onclick="location.href='@Url.Action("MH_Bipolar_Create", "Member", new { DependentID = Model.DependentID, pro=Context.Request.Query["pro"] }, null)'" />
+                </div>
+                <br />
+            </div>
+        </div>
+    </div>
+    <!------- depression hcare-1126 ------->
+    <div class="col-md-12" style="z-index: 10">
+        <div class="panel panel-default">
+            <div class="panel-heading clickable panel-collapsed" id="mh-depression">
+                <h3 class="panel-title">
+                    Depression
+                </h3>
+                <span class="pull-right clickable panel-collapsed" style="margin-top: -1.25%; margin-right: 0.5%"><i class="fas fa-caret-up"></i></span>
+            </div>
+            <div class="panel-body">
+                <div class="col-md-12">
+                    <div class="row">
+                        <table class="table patient-clinical-bipolar-table sortable" id="otherTable">
+                            <thead>
+                                <tr>
+                                    <th text-align: center!important">@Html.DisplayNameFor(model => model.summary.MH_DepressionResponses[0].CreatedDate)</th>
+                                    <th text-align: center!important">@Html.DisplayNameFor(model => model.summary.MH_DepressionResponses[0].Depression)</th>
+                                    <th text-align: center!important">@Html.DisplayNameFor(model => model.summary.MH_DepressionResponses[0].Guilt)</th>
+                                    <th text-align: center!important">@Html.DisplayNameFor(model => model.summary.MH_DepressionResponses[0].Suicidal)</th>
+                                    <th text-align: center!important">@Html.DisplayNameFor(model => model.summary.MH_DepressionResponses[0].InsomniaEarlyNight)</th>
+                                    <th text-align: center!important">@Html.DisplayNameFor(model => model.summary.MH_DepressionResponses[0].InsomniaMiddleNight)</th>
+                                    <th text-align: center!important">@Html.DisplayNameFor(model => model.summary.MH_DepressionResponses[0].InsomniaEarlyMorning)</th>
+                                    <th text-align: center!important">@Html.DisplayNameFor(model => model.summary.MH_DepressionResponses[0].Activity)</th>
+                                    <th text-align: center!important">@Html.DisplayNameFor(model => model.summary.MH_DepressionResponses[0].Psychomotor)</th>
+                                    <th text-align: center!important">@Html.DisplayNameFor(model => model.summary.MH_DepressionResponses[0].Agitation)</th>
+                                    <th text-align: center!important">@Html.DisplayNameFor(model => model.summary.MH_DepressionResponses[0].AnxietyPsychic)</th>
+                                    <th text-align: center!important">@Html.DisplayNameFor(model => model.summary.MH_DepressionResponses[0].AnxietySomatic)</th>
+                                    <th text-align: center!important">@Html.DisplayNameFor(model => model.summary.MH_DepressionResponses[0].SomaticSymGastro)</th>
+                                    <th text-align: center!important">@Html.DisplayNameFor(model => model.summary.MH_DepressionResponses[0].SomaticSymGeneral)</th>
+                                    <th text-align: center!important">@Html.DisplayNameFor(model => model.summary.MH_DepressionResponses[0].Sexology)</th>
+                                    <th text-align: center!important">@Html.DisplayNameFor(model => model.summary.MH_DepressionResponses[0].Hypochondriasis)</th>
+                                    <th text-align: center!important">@Html.DisplayNameFor(model => model.summary.MH_DepressionResponses[0].WeightLoss)</th>
+                                    <th text-align: center!important">@Html.DisplayNameFor(model => model.summary.MH_DepressionResponses[0].Insight)</th>
+
+                                    <th style="width: 8%; text-align: center!important">@Html.DisplayName("Action")</th>
+                                </tr>
+                            </thead>
+
+                            @if (Model.summary.MH_DepressionResponses.Count() == 0)
+                            {
+                                <tr><td colspan="19" style="text-align: center!important; color: rgba(128, 128, 128, 0.50)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="color: rgba(128, 128, 128, 0.50)"></i></span> no records found</td></tr>
+                            }
+                            else
+                            {
+                                foreach (var item in Model.summary.MH_DepressionResponses)
+                                {
+                                    <tbody>
+                                        @if (item.FollowUp == true)
+                                        {
+                                            <tr>
+                                                <td colspan="18" style="text-align: center!important; color: rgba(204, 0, 0, 0.70)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="font-size: 18px; color: rgba(204, 0, 0, 0.70)!important"></i></span> Follow up required!</td>
+                                                <td class="text-center">
+                                                    <input type="submit" class="link-button" value="View" onclick="location.href='@Url.Action("MH_Depression_Details", "Member", new { id = item.Id, pro = Context.Request.Query["pro"] })'" /> /
+                                                    <input type="submit" class="link-button" value="Edit" onclick="location.href='@Url.Action("MH_Depression_Edit", "Member", new { id = item.Id, pro = Context.Request.Query["pro"] })'" />
+                                                </td>
+                                            </tr>
+                                        }
+                                        else
+                                        {
+                                            <tr style="text-indent: 5px">
+                                                <td class="text-center">@Html.DisplayFor(modelItem => item.CreatedDate)</td>
+                                                <td class="text-center" title="@item.Depression">
+                                                    @if (item.Depression.ToLower() == "absent")
+                                                    {<i class="chk-absent fas fa-circle"></i>}
+                                                    else if (item.Depression.ToLower() == "mild")
+                                                    {<i class="chk-mild fas fa-circle"></i>}
+                                                    else if (item.Depression.ToLower() == "moderate")
+                                                    {<i class="chk-moderate fas fa-circle"></i>}
+                                                    else if (item.Depression.ToLower() == "severe")
+                                                    {<i class="chk-severe fas fa-circle"></i>}
+                                                    else if (item.Depression.ToLower() == "urgent")
+                                                    {<i class="chk-urgent fas fa-circle"></i>}
+                                                    else if (item.Depression.ToLower() == "follow up")
+                                                    {<i class="chk-followup fas fa-circle"></i>}
+                                                </td>
+                                                <td class="text-center" title="@item.Guilt">
+                                                    @if (item.Guilt.ToLower() == "absent")
+                                                    {<i class="chk-absent fas fa-circle"></i>}
+                                                    else if (item.Guilt.ToLower() == "mild")
+                                                    {<i class="chk-mild fas fa-circle"></i>}
+                                                    else if (item.Guilt.ToLower() == "moderate")
+                                                    {<i class="chk-moderate fas fa-circle"></i>}
+                                                    else if (item.Guilt.ToLower() == "severe")
+                                                    {<i class="chk-severe fas fa-circle"></i>}
+                                                    else if (item.Guilt.ToLower() == "urgent")
+                                                    {<i class="chk-urgent fas fa-circle"></i>}
+                                                    else if (item.Guilt.ToLower() == "follow up")
+                                                    {<i class="chk-followup fas fa-circle"></i>}
+                                                </td>
+                                                <td class="text-center" title="@item.Suicidal">
+                                                    @if (item.Suicidal.ToLower() == "absent")
+                                                    {<i class="chk-absent fas fa-circle"></i>}
+                                                    else if (item.Suicidal.ToLower() == "mild")
+                                                    {<i class="chk-mild fas fa-circle"></i>}
+                                                    else if (item.Suicidal.ToLower() == "moderate")
+                                                    {<i class="chk-moderate fas fa-circle"></i>}
+                                                    else if (item.Suicidal.ToLower() == "severe")
+                                                    {<i class="chk-severe fas fa-circle"></i>}
+                                                    else if (item.Suicidal.ToLower() == "urgent")
+                                                    {<i class="chk-urgent fas fa-circle"></i>}
+                                                    else if (item.Suicidal.ToLower() == "follow up")
+                                                    {<i class="chk-followup fas fa-circle"></i>}
+                                                </td>
+                                                <td class="text-center" title="@item.InsomniaEarlyNight">
+                                                    @if (item.InsomniaEarlyNight.ToLower() == "absent")
+                                                    {<i class="chk-absent fas fa-circle"></i>}
+                                                    else if (item.InsomniaEarlyNight.ToLower() == "mild")
+                                                    {<i class="chk-mild fas fa-circle"></i>}
+                                                    else if (item.InsomniaEarlyNight.ToLower() == "moderate")
+                                                    {<i class="chk-moderate fas fa-circle"></i>}
+                                                    else if (item.InsomniaEarlyNight.ToLower() == "severe")
+                                                    {<i class="chk-severe fas fa-circle"></i>}
+                                                    else if (item.InsomniaEarlyNight.ToLower() == "urgent")
+                                                    {<i class="chk-urgent fas fa-circle"></i>}
+                                                    else if (item.InsomniaEarlyNight.ToLower() == "follow up")
+                                                    {<i class="chk-followup fas fa-circle"></i>}
+                                                </td>
+                                                <td class="text-center" title="@item.InsomniaMiddleNight">
+                                                    @if (item.InsomniaMiddleNight.ToLower() == "absent")
+                                                    {<i class="chk-absent fas fa-circle"></i>}
+                                                    else if (item.InsomniaMiddleNight.ToLower() == "mild")
+                                                    {<i class="chk-mild fas fa-circle"></i>}
+                                                    else if (item.InsomniaMiddleNight.ToLower() == "moderate")
+                                                    {<i class="chk-moderate fas fa-circle"></i>}
+                                                    else if (item.InsomniaMiddleNight.ToLower() == "severe")
+                                                    {<i class="chk-severe fas fa-circle"></i>}
+                                                    else if (item.InsomniaMiddleNight.ToLower() == "urgent")
+                                                    {<i class="chk-urgent fas fa-circle"></i>}
+                                                    else if (item.InsomniaMiddleNight.ToLower() == "follow up")
+                                                    {<i class="chk-followup fas fa-circle"></i>}
+                                                </td>
+                                                <td class="text-center" title="@item.InsomniaEarlyMorning">
+                                                    @if (item.InsomniaEarlyMorning.ToLower() == "absent")
+                                                    {<i class="chk-absent fas fa-circle"></i>}
+                                                    else if (item.InsomniaEarlyMorning.ToLower() == "mild")
+                                                    {<i class="chk-mild fas fa-circle"></i>}
+                                                    else if (item.InsomniaEarlyMorning.ToLower() == "moderate")
+                                                    {<i class="chk-moderate fas fa-circle"></i>}
+                                                    else if (item.InsomniaEarlyMorning.ToLower() == "severe")
+                                                    {<i class="chk-severe fas fa-circle"></i>}
+                                                    else if (item.InsomniaEarlyMorning.ToLower() == "urgent")
+                                                    {<i class="chk-urgent fas fa-circle"></i>}
+                                                    else if (item.InsomniaEarlyMorning.ToLower() == "follow up")
+                                                    {<i class="chk-followup fas fa-circle"></i>}
+                                                </td>
+                                                <td class="text-center" title="@item.Activity">
+                                                    @if (item.Activity.ToLower() == "absent")
+                                                    {<i class="chk-absent fas fa-circle"></i>}
+                                                    else if (item.Activity.ToLower() == "mild")
+                                                    {<i class="chk-mild fas fa-circle"></i>}
+                                                    else if (item.Activity.ToLower() == "moderate")
+                                                    {<i class="chk-moderate fas fa-circle"></i>}
+                                                    else if (item.Activity.ToLower() == "severe")
+                                                    {<i class="chk-severe fas fa-circle"></i>}
+                                                    else if (item.Activity.ToLower() == "urgent")
+                                                    {<i class="chk-urgent fas fa-circle"></i>}
+                                                    else if (item.Activity.ToLower() == "follow up")
+                                                    {<i class="chk-followup fas fa-circle"></i>}
+                                                </td>
+                                                <td class="text-center" title="@item.Psychomotor">
+                                                    @if (item.Psychomotor.ToLower() == "absent")
+                                                    {<i class="chk-absent fas fa-circle"></i>}
+                                                    else if (item.Psychomotor.ToLower() == "mild")
+                                                    {<i class="chk-mild fas fa-circle"></i>}
+                                                    else if (item.Psychomotor.ToLower() == "moderate")
+                                                    {<i class="chk-moderate fas fa-circle"></i>}
+                                                    else if (item.Psychomotor.ToLower() == "severe")
+                                                    {<i class="chk-severe fas fa-circle"></i>}
+                                                    else if (item.Psychomotor.ToLower() == "urgent")
+                                                    {<i class="chk-urgent fas fa-circle"></i>}
+                                                    else if (item.Psychomotor.ToLower() == "follow up")
+                                                    {<i class="chk-followup fas fa-circle"></i>}
+                                                </td>
+                                                <td class="text-center" title="@item.Agitation">
+                                                    @if (item.Agitation.ToLower() == "absent")
+                                                    {<i class="chk-absent fas fa-circle"></i>}
+                                                    else if (item.Agitation.ToLower() == "mild")
+                                                    {<i class="chk-mild fas fa-circle"></i>}
+                                                    else if (item.Agitation.ToLower() == "moderate")
+                                                    {<i class="chk-moderate fas fa-circle"></i>}
+                                                    else if (item.Agitation.ToLower() == "severe")
+                                                    {<i class="chk-severe fas fa-circle"></i>}
+                                                    else if (item.Agitation.ToLower() == "urgent")
+                                                    {<i class="chk-urgent fas fa-circle"></i>}
+                                                    else if (item.Agitation.ToLower() == "follow up")
+                                                    {<i class="chk-followup fas fa-circle"></i>}
+                                                </td>
+                                                <td class="text-center" title="@item.AnxietyPsychic">
+                                                    @if (item.AnxietyPsychic.ToLower() == "absent")
+                                                    {<i class="chk-absent fas fa-circle"></i>}
+                                                    else if (item.AnxietyPsychic.ToLower() == "mild")
+                                                    {<i class="chk-mild fas fa-circle"></i>}
+                                                    else if (item.AnxietyPsychic.ToLower() == "moderate")
+                                                    {<i class="chk-moderate fas fa-circle"></i>}
+                                                    else if (item.AnxietyPsychic.ToLower() == "severe")
+                                                    {<i class="chk-severe fas fa-circle"></i>}
+                                                    else if (item.AnxietyPsychic.ToLower() == "urgent")
+                                                    {<i class="chk-urgent fas fa-circle"></i>}
+                                                    else if (item.AnxietyPsychic.ToLower() == "follow up")
+                                                    {<i class="chk-followup fas fa-circle"></i>}
+                                                </td>
+                                                <td class="text-center" title="@item.AnxietySomatic">
+                                                    @if (item.AnxietySomatic.ToLower() == "absent")
+                                                    {<i class="chk-absent fas fa-circle"></i>}
+                                                    else if (item.AnxietySomatic.ToLower() == "mild")
+                                                    {<i class="chk-mild fas fa-circle"></i>}
+                                                    else if (item.AnxietySomatic.ToLower() == "moderate")
+                                                    {<i class="chk-moderate fas fa-circle"></i>}
+                                                    else if (item.AnxietySomatic.ToLower() == "severe")
+                                                    {<i class="chk-severe fas fa-circle"></i>}
+                                                    else if (item.AnxietySomatic.ToLower() == "urgent")
+                                                    {<i class="chk-urgent fas fa-circle"></i>}
+                                                    else if (item.AnxietySomatic.ToLower() == "follow up")
+                                                    {<i class="chk-followup fas fa-circle"></i>}
+                                                </td>
+                                                <td class="text-center" title="@item.SomaticSymGastro">
+                                                    @if (item.SomaticSymGastro.ToLower() == "absent")
+                                                    {<i class="chk-absent fas fa-circle"></i>}
+                                                    else if (item.SomaticSymGastro.ToLower() == "mild")
+                                                    {<i class="chk-mild fas fa-circle"></i>}
+                                                    else if (item.SomaticSymGastro.ToLower() == "moderate")
+                                                    {<i class="chk-moderate fas fa-circle"></i>}
+                                                    else if (item.SomaticSymGastro.ToLower() == "severe")
+                                                    {<i class="chk-severe fas fa-circle"></i>}
+                                                    else if (item.SomaticSymGastro.ToLower() == "urgent")
+                                                    {<i class="chk-urgent fas fa-circle"></i>}
+                                                    else if (item.SomaticSymGastro.ToLower() == "follow up")
+                                                    {<i class="chk-followup fas fa-circle"></i>}
+                                                </td>
+                                                <td class="text-center" title="@item.SomaticSymGeneral">
+                                                    @if (item.SomaticSymGeneral.ToLower() == "absent")
+                                                    {<i class="chk-absent fas fa-circle"></i>}
+                                                    else if (item.SomaticSymGeneral.ToLower() == "mild")
+                                                    {<i class="chk-mild fas fa-circle"></i>}
+                                                    else if (item.SomaticSymGeneral.ToLower() == "moderate")
+                                                    {<i class="chk-moderate fas fa-circle"></i>}
+                                                    else if (item.SomaticSymGeneral.ToLower() == "severe")
+                                                    {<i class="chk-severe fas fa-circle"></i>}
+                                                    else if (item.SomaticSymGeneral.ToLower() == "urgent")
+                                                    {<i class="chk-urgent fas fa-circle"></i>}
+                                                    else if (item.SomaticSymGeneral.ToLower() == "follow up")
+                                                    {<i class="chk-followup fas fa-circle"></i>}
+                                                </td>
+                                                <td class="text-center" title="@item.Sexology">
+                                                    @if (item.Sexology.ToLower() == "absent")
+                                                    {<i class="chk-absent fas fa-circle"></i>}
+                                                    else if (item.Sexology.ToLower() == "mild")
+                                                    {<i class="chk-mild fas fa-circle"></i>}
+                                                    else if (item.Sexology.ToLower() == "moderate")
+                                                    {<i class="chk-moderate fas fa-circle"></i>}
+                                                    else if (item.Sexology.ToLower() == "severe")
+                                                    {<i class="chk-severe fas fa-circle"></i>}
+                                                    else if (item.Sexology.ToLower() == "urgent")
+                                                    {<i class="chk-urgent fas fa-circle"></i>}
+                                                    else if (item.Sexology.ToLower() == "follow up")
+                                                    {<i class="chk-followup fas fa-circle"></i>}
+                                                </td>
+                                                <td class="text-center" title="@item.Hypochondriasis">
+                                                    @if (item.Hypochondriasis.ToLower() == "absent")
+                                                    {<i class="chk-absent fas fa-circle"></i>}
+                                                    else if (item.Hypochondriasis.ToLower() == "mild")
+                                                    {<i class="chk-mild fas fa-circle"></i>}
+                                                    else if (item.Hypochondriasis.ToLower() == "moderate")
+                                                    {<i class="chk-moderate fas fa-circle"></i>}
+                                                    else if (item.Hypochondriasis.ToLower() == "severe")
+                                                    {<i class="chk-severe fas fa-circle"></i>}
+                                                    else if (item.Hypochondriasis.ToLower() == "urgent")
+                                                    {<i class="chk-urgent fas fa-circle"></i>}
+                                                    else if (item.Hypochondriasis.ToLower() == "follow up")
+                                                    {<i class="chk-followup fas fa-circle"></i>}
+                                                </td>
+                                                <td class="text-center" title="@item.WeightLoss">
+                                                    @if (item.WeightLoss.ToLower() == "absent")
+                                                    {<i class="chk-absent fas fa-circle"></i>}
+                                                    else if (item.WeightLoss.ToLower() == "mild")
+                                                    {<i class="chk-mild fas fa-circle"></i>}
+                                                    else if (item.WeightLoss.ToLower() == "moderate")
+                                                    {<i class="chk-moderate fas fa-circle"></i>}
+                                                    else if (item.WeightLoss.ToLower() == "severe")
+                                                    {<i class="chk-severe fas fa-circle"></i>}
+                                                    else if (item.WeightLoss.ToLower() == "urgent")
+                                                    {<i class="chk-urgent fas fa-circle"></i>}
+                                                    else if (item.WeightLoss.ToLower() == "follow up")
+                                                    {<i class="chk-followup fas fa-circle"></i>}
+                                                </td>
+                                                <td class="text-center" title="@item.Insight">
+                                                    @if (item.Insight.ToLower() == "absent")
+                                                    {<i class="chk-absent fas fa-circle"></i>}
+                                                    else if (item.Insight.ToLower() == "mild")
+                                                    {<i class="chk-mild fas fa-circle"></i>}
+                                                    else if (item.Insight.ToLower() == "moderate")
+                                                    {<i class="chk-moderate fas fa-circle"></i>}
+                                                    else if (item.Insight.ToLower() == "severe")
+                                                    {<i class="chk-severe fas fa-circle"></i>}
+                                                    else if (item.Insight.ToLower() == "urgent")
+                                                    {<i class="chk-urgent fas fa-circle"></i>}
+                                                    else if (item.Insight.ToLower() == "follow up")
+                                                    {<i class="chk-followup fas fa-circle"></i>}
+                                                </td>
+                                                <td class="text-center">
+                                                    <input type="submit" class="link-button" value="View" onclick="location.href='@Url.Action("MH_Depression_Details", "Member", new { id = item.Id, pro = Context.Request.Query["pro"] })'" /> /
+                                                    <input type="submit" class="link-button" value="Edit" onclick="location.href='@Url.Action("MH_Depression_Edit", "Member", new { id = item.Id, pro = Context.Request.Query["pro"] })'" />
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                }
+                            }
+                        </table>
+                    </div>
+                </div>
+                <div style="text-align:center">
+                    <input type="button" class="btn patient-clinical-button" value="Add" onclick="location.href='@Url.Action("MH_Depression_Create", "Member", new { DependentID = Model.DependentID, pro=Context.Request.Query["pro"] }, null)'" />
+                </div>
+                <br />
+            </div>
+        </div>
+    </div>
+    <hr class="patientProfile_Ruler" />
+</div>
+
+@section Scripts {
+    @*<script src="~/Scripts/redirect-mental-health.js"></script>*@
+}

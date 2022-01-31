@@ -1,0 +1,152 @@
+﻿@model HaloCareCore.Models.Communications.Notes
+
+@{
+    ViewBag.Title = "ViewNote";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<div class="topBar_reports">
+    <h2>Note Detail</h2>
+    <img src="~/Content/Images/memberProfile/topBar Icons/Notes.png" style="width: 2.5%; margin-top: 0.2% " />
+</div>
+<br />
+<br />
+<br />
+<br />
+
+<br />
+<br />
+<br />
+<br />
+
+<div class="row contentBlock_pathology">
+    <h4 style="color: #003366">Details <span style="color: #0081b3"> of Note</span></h4>
+    <hr class="fancyruler">
+    <br />
+    <div>
+
+        <dl class="dl-horizontal">
+            <dt>
+                @Html.DisplayNameFor(model => model.noteType)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.noteType)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.note)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.note)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.createdBy)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.createdBy)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.createdDate)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.createdDate)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.modifiedBy)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.modifiedBy)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.modifiedDate)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.modifiedDate)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.Active)
+            </dt>
+
+            <dd style="margin-top: -0.5%">
+                @Html.DisplayFor(model => model.Active)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.effectiveDate)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.effectiveDate)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.expiryDate)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.expiryDate)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.special)
+            </dt>
+
+            <dd style="margin-top: -0.5%">
+                @Html.DisplayFor(model => model.special)
+            </dd>
+
+        </dl>
+
+        <p class="backButton_Navigation" style="margin-left: 8.5%">
+            @Html.ActionLink("Edit", "EditNote", new { NoteId = Model.noteID })
+        </p>
+    </div>
+
+</div>
+
+<br />
+
+
+
+<br />
+<br />
+<br />
+
+<div class="backButton_image">
+    <span id="surround" class="go_back">
+        <span id="initial"><img src="~/Content/Images/memberProfile/Page Icons/back_gray.png" /></span>
+        <span id="onhover"><img src="~/Content/Images/memberProfile/Page Icons/back_blue.png" /></span>
+    </span>
+</div>
+
+
+
+@section Scripts {
+    <script src="~/bundles/jqueryval"></script>
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <script>
+
+        var $rows = $('#table tr');
+        $('#search').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $rows.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+
+    </script>
+}

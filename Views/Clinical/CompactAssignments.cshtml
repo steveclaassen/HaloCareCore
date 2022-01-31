@@ -1,0 +1,710 @@
+﻿@model HaloCareCore.Models.CompactAssignmentsListView
+@using HaloCareCore.Extensions
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Assignments_compactView";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+</style>
+
+<div class="fullScreen_container" style="display: inline-block;position: relative;width: 100%;">
+    <!--pageHeader-->
+    <nav id="global-nav" class="nav">
+        <div class="pull-left title">
+            <h1 class="site-title_patientProfile">
+                <span><i class="fas fa-bell"></i>&emsp; Assignments</span>
+            </h1>
+        </div>
+        <div class="pull-right title">
+            <h1 class="site-title_userID pull-right">
+                <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+            </h1>
+            <h1 class="site-title_userID pull-right">
+                @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                {
+                    <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                }
+            </h1>
+            <h1 class="site-waffleIcon pull-right">
+                <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+            </h1>
+        </div>
+    </nav>
+
+    <!--breadCrumbs-->
+    <ul class="breadcrumbs_fullScreens">
+        <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+        <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+        <li><a href="#">Assignments</a></li>
+    </ul>
+
+    <!--navCollection-->
+    @if (User.Identity.IsAuthenticated)
+    {
+
+        <div class="navCollection_fullScreens">
+            <div class="buttonCollection">
+                <div class="col-md-12">
+                    <div class="col-md-4"></div>
+                    <div class="col-md-4">
+                        <div class="col-md-2">
+                            <a href="@Url.Action("Index", "Home", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Home"><span style="font-size: 15px" class="sub_icon fas fa-home"></span></a>
+                        </div>
+                        <div class="col-md-2">
+                            <span style="font-size: 15px; background: -webkit-linear-gradient(#e80a89, #f15b2a);-webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow (10px 10px 1px rgba(34, 34, 34, 0.50))" title="Assignments" class="sub_icon fas fa-bell"></span>
+                        </div>
+                        <div class="col-md-2">
+                            <a href="@Url.Action("Search", "Member", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Patient"><span style="font-size: 15px" class="sub_icon fas fa-user-circle"></span></a>
+                        </div>
+                        <!--<div class="col-md-2">
+                            <a href="@Url.Action("OutstandingAuthorise", "Scripts", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Authorisation"><span style="font-size: 15px" class="sub_icon fas fa-check-circle"></span></a>
+                        </div>-->
+                        <div class="col-md-2">
+                            <a href="@Url.Action("searchManagement", "patientManagement", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Search"><span style="font-size: 15px" class="sub_icon fas fa-search"></span></a>
+                        </div>
+                        @if (User.HasRole("6. Global user") || User.RoleHasAccess())
+                        {
+                            <div class="col-md-2">
+                                <a href="@Url.Action("Index", "Administration", new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Settings"><span style="font-size: 15px" class="sub_icon fas fa-cog"></span></a>
+                            </div>
+                        }
+                    </div>
+                    <div class="col-md-4"></div>
+
+                </div>
+            </div>
+        </div>
+
+    }
+
+    <div style="margin-bottom: 3%"></div>
+
+    <div class="compactAssignmentTabs">
+        <!--newAssignments-->
+        <div class="tab-3">
+            <label for="tab3-1">New/Active &nbsp;&nbsp;<span class="blueBadge">@Model.openAssignments.Count</span></label>
+            <input id="tab3-1" name="tabs-three" type="radio" checked="checked">
+            <div class="row">
+
+                <!--fullView-->
+                <div class="form-group">
+                    <a href="@Url.Action("OpenAssignments", "Clinical", new { })">
+                        <div class="actionButton">
+                            <input type="submit" value="Full view" class="btn buttonRound_assignmentFull" />
+                        </div>
+                    </a>
+                </div>
+
+                <h4 class="tableHeading" style="margin-top: -5%; margin-bottom: -4.5%">New/Active assignments</h4>
+
+                <!--excelExport-->
+                @using (Html.BeginForm("openAssignmentsExcel", "Clinical", FormMethod.Post))
+                {
+                    <div class="form-group excelAssignments">
+                        <input type="image" src="~/Content/Images/memberProfile/patientProfile/excel.png" title="New/Active export" alt="Submit" style="width: 100%">
+                    </div>
+                }
+
+                <!--Search-->
+                <div class="row tableSearch_compactAssignments" @*style="margin-left: 212%!important; margin-top: -7%"*@>
+                    <div class="col-md-6 pull-right">
+                        <ul class="input-group" id="adv-search">
+
+                            <ul class="nav navbar-nav navbar-right">
+                                <li class="focus">
+                                    <label for="tableSearch" class="control-label"></label> <input type="text" class="form-control-patientSearch" id="search" onkeyup="myFunction()" placeholder="Search..." style="position: relative; z-index: 50; margin-top: -7.5%" />
+                                </li>
+                                <div class="btn-group" role="group">
+                                    <button type="submit" class="btn btn-search" style="height: 29px"><span class="glyphicon glyphicon-search" aria-hidden="true" title="Search"></span></button>
+                                </div>
+                            </ul>
+                        </ul>
+                    </div>
+                </div>
+
+                <table class="table compactAssignmentsTable" id="openTable">
+                    <tr>
+                        <th onclick="openTable(0)" style="width: 200px">
+                            @Html.DisplayName("Scheme") <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th onclick="openTable(2)" style="width: 150px">
+                            @Html.DisplayName("Option") <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th onclick="openTable(8)">
+                            @Html.DisplayName("Program") <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th onclick="openTable(3)">
+                            @Html.DisplayName("Member #") <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th onclick="openTable(4)" style="width: 80px">
+                            @Html.DisplayName("Dep") <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th onclick="openTable(5)">
+                            @Html.DisplayName("Patient") <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th onclick="openTable(6)">
+                            @Html.DisplayName("Status") <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th onclick="openTable(7)">
+                            @Html.DisplayName("Count") <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th style="text-align: center!important">
+                            Action
+                        </th>
+                    </tr>
+
+                    @foreach (var item in Model.openAssignments)
+                    {
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.medicalScheme)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.option)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.program)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.membershipNumber)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.dependantCode)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.patientName_UC)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.patientStatus)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.assignmentCount)
+                            </td>
+                            <td class="linkNav" style="text-align: center!important; z-index: 50">
+                                @Html.ActionLink("View", "AssignmentSummary", "Member", new { DependentID = item.dependantID, pro = item.programID }, null)
+                            </td>
+                        </tr>
+                    }
+
+                </table>
+                <br />
+            </div>
+            <script type="text/javascript">
+                /*openTable tableSearch*/
+                var $rows = $('#openTable tr');
+                $('#search').keyup(function () {
+                    var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+                    $rows.show().filter(function () {
+                        var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                        return !~text.indexOf(val);
+                    }).hide();
+                });
+
+                /*openTable TableSorting*/
+                function openTable(n) {
+                    var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+                    table = document.getElementById("openTable");
+                    switching = true;
+                    dir = "asc";
+
+                    while (switching) {
+                        switching = false;
+                        rows = table.getElementsByTagName("TR");
+
+                        for (i = 1; i < (rows.length - 1); i++) {
+
+                            shouldSwitch = false;
+
+                            x = rows[i].getElementsByTagName("TD")[n];
+                            y = rows[i + 1].getElementsByTagName("TD")[n];
+
+                            if (dir == "asc") {
+                                if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+
+                                    shouldSwitch = true;
+                                    break;
+                                }
+                            } else if (dir == "desc") {
+                                if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+
+                                    shouldSwitch = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (shouldSwitch) {
+
+                            rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                            switching = true;
+
+                            switchcount++;
+                        } else {
+
+                            if (switchcount == 0 && dir == "asc") {
+                                dir = "desc";
+                                switching = true;
+                            }
+                        }
+                    }
+                }
+            </script>
+        </div>
+
+        <!--closedAssignments-->
+        <div class="tab-3">
+            <label for="tab3-3">Closed&nbsp;&nbsp;<span class="blueBadge">@Model.closedAssignments.Count</span></label>
+            <input id="tab3-3" name="tabs-three" type="radio">
+            <div class="row" style="margin-left: -100%">
+
+                <!--fullView-->
+                <div class="form-group">
+                    <a href="@Url.Action("OpenAssignments", "Clinical", new { })">
+                        <div class="actionButton">
+                            <input type="submit" value="Full view" class="btn buttonRound_assignmentFull" />
+                        </div>
+                    </a>
+                </div>
+
+                <h4 class="tableHeading" style="margin-top: -5%; margin-bottom: -4.5%">Closed assignments</h4>
+
+                <!--excelExport-->
+                @using (Html.BeginForm("closedAssignmentsExcel", "Clinical", FormMethod.Post))
+                {
+                    <div class="form-group excelAssignments">
+                        <input type="image" src="~/Content/Images/memberProfile/patientProfile/excel.png" title="Closed export" alt="Submit" style="width: 100%">
+                    </div>
+                }
+
+                <!--Search-->
+                <div class="row tableSearch_compactAssignments">
+                    <div class="col-md-6 pull-right">
+                        <ul class="input-group" id="adv-search">
+
+                            <ul class="nav navbar-nav navbar-right">
+                                <li class="focus">
+                                    <label for="tableSearch" class="control-label"></label> <input type="text" class="form-control-patientSearch" id="closedInput" onkeyup="myFunction()" placeholder="Search..." style="position: relative; z-index: 50; margin-top: -7.5%" />
+                                </li>
+                                <div class="btn-group" role="group">
+                                    <button type="submit" class="btn btn-search" style="height: 30px"><span class="glyphicon glyphicon-search" aria-hidden="true" title="Search"></span></button>
+                                </div>
+                            </ul>
+                        </ul>
+                    </div>
+                </div>
+
+                <table class="table compactAssignmentsTable" id="closedTable">
+                    <tr>
+                        <th onclick="closedTable(1)" style="width: 200px">
+                            @Html.DisplayName("Scheme") <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th onclick="closedTable(2)" style="width: 150px">
+                            @Html.DisplayName("Option") <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th onclick="closedTable(3)">
+                            @Html.DisplayName("Program") <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th onclick="closedTable(4)">
+                            @Html.DisplayName("Member #") <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th onclick="openTable(5)" style="width: 80px">
+                            @Html.DisplayName("Dep") <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th onclick="closedTable(6)">
+                            @Html.DisplayName("Patient") <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th onclick="closedTable(7)">
+                            @Html.DisplayName("Status") <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th onclick="closedTable(8)">
+                            @Html.DisplayName("Count") <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        @*<th onclick="closedTable(9)">
+                                @Html.DisplayName("Closed") <i class="fa fa-fw fa-sort"></i>
+                            </th>
+                            <th onclick="closedTable(10)">
+                                @Html.DisplayName("Owner") <i class="fa fa-fw fa-sort"></i>
+                            </th>*@
+                        <th style="text-align: center!important">
+                            Action
+                        </th>
+                    </tr>
+                    @if (Model.closedAssignments != null)
+                    {
+                        foreach (var item in Model.closedAssignments)
+                        {
+                            <tr>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.medicalScheme)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.option)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.program)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.membershipNumber)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.dependantCode)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.patientName_UC)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.patientStatus)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.assignmentCount)
+                                </td>
+
+
+                                <td class="statusCode linkNav" style="text-align: center!important">
+                                    @Html.ActionLink("View", "AssignmentSummary", "Member", new { DependentID = item.dependantID }, null)
+                                </td>
+                            </tr>
+                        }
+                    }
+
+                </table>
+            </div>
+            <script>
+                $(document).ready(function () {
+                    $("#closedInput").on("keyup", function () {
+                        var value = $(this).val().toLowerCase();
+                        $("#closedTable tr").filter(function () {
+                            $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                        });
+                    });
+                });
+            </script>
+            <script>
+                /*closedTable TableSorting*/
+                function closedTable(n) {
+                    var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+                    table = document.getElementById("closedTable");
+                    switching = true;
+                    dir = "asc";
+
+                    while (switching) {
+                        switching = false;
+                        rows = table.getElementsByTagName("TR");
+
+                        for (i = 1; i < (rows.length - 1); i++) {
+
+                            shouldSwitch = false;
+
+                            x = rows[i].getElementsByTagName("TD")[n];
+                            y = rows[i + 1].getElementsByTagName("TD")[n];
+
+                            if (dir == "asc") {
+                                if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+
+                                    shouldSwitch = true;
+                                    break;
+                                }
+                            } else if (dir == "desc") {
+                                if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+
+                                    shouldSwitch = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (shouldSwitch) {
+
+                            rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                            switching = true;
+
+                            switchcount++;
+                        } else {
+
+                            if (switchcount == 0 && dir == "asc") {
+                                dir = "desc";
+                                switching = true;
+                            }
+                        }
+                    }
+                }
+            </script>
+        </div>
+    </div>
+
+    <!---->
+    <div class="fixedBack">
+        <input value="Back" class="btn buttonRound_formBack" onclick="MainbackBtn();" style="width: 15%" />
+    </div>
+</div>
+
+<script src="js/jquery.tablesorter.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+@section scripts{
+    <script src="~/bundles/jqueryval"></script>
+
+    <script type="text/javascript">
+
+        var minimized_elements = $('p.minimize');
+
+        minimized_elements.each(function () {
+            var t = $(this).text();
+            if (t.length < 100) return;
+
+            $(this).html(
+                t.slice(0, 100) + '<span>... </span><a href="#" class="more">More</a>' +
+                '<span style="display:none;">' + t.slice(100, t.length) + ' <a href="#" class="less">Less</a></span>'
+            );
+
+        });
+
+        $('a.more', minimized_elements).click(function (event) {
+            event.preventDefault();
+            $(this).hide().prev().hide();
+            $(this).next().show();
+        });
+
+        $('a.less', minimized_elements).click(function (event) {
+            event.preventDefault();
+            $(this).parent().hide().prev().show().prev().show();
+        });
+
+
+        // goBack
+        //$(function () {
+        //    $('.go_back').click(function (e) {
+        //        e.preventDefault();
+        //        history.go(-1);
+        //    });
+        //});
+
+        $(document).ready(function () {
+            $('#table').DataTable({
+                columnDefs: [{
+                    targets: [0],
+                    orderData: [0, 1]
+                }, {
+                    targets: [1],
+                    orderData: [1, 0]
+                }, {
+                    targets: [4],
+                    orderData: [4, 0]
+                }]
+            });
+        });
+
+        // Javascript to enable link to tab
+        var url = document.location.toString();
+        if (url.match('#')) {
+            $('.nav-tabs a[href="#' + url.split('#')[1] + '"]').tab('show');
+        }
+
+        // Change hash for page-reload
+        $('.nav-tabs a').on('shown.bs.tab', function (e) {
+            window.location.hash = e.target.hash;
+        })
+
+        $(".nav-tabs a").click(function () { });
+
+        // Searchbar Focus
+        $(function () {
+            $('.focus :input').focus();
+        });
+
+
+              /*goBack*/
+         function MainbackBtn() {
+           window.location.href = '@Url.Action("Index", "Home")';
+        }
+
+    </script>
+}
+
+
+
+
+
+
+<div class="inprg/activeassignments">
+
+
+    <!--activeAssignments-->
+    @*<div class="tab-3">
+            <label for="tab3-2">Active&nbsp;&nbsp;<span class="blueBadge">@Model.inProgressAssignments.Count</span></label>
+            <input id="tab3-2" name="tabs-three" type="radio">
+            <div class="row" style="margin-left: -98.5%">
+
+                <!--fullView-->
+                <div class="form-group">
+                    <a href="@Url.Action("OpenAssignments", "Clinical", new { })">
+                        <div class="actionButton">
+                            <input type="submit" value="Full view" class="btn buttonRound_assignmentFull" />
+                        </div>
+                    </a>
+                </div>
+
+                <h4 class="tableHeading" style="margin-top: -5%; margin-bottom: -5%">Active assignments</h4>
+
+                <!--excelExport-->
+                @using (Html.BeginForm("ExportOutstandingScriptsToExcel", "Scripts", FormMethod.Post))
+                {
+                    <div class="form-group excelAssignments">
+                        <input type="image" src="~/Content/Images/memberProfile/patientProfile/excel.png" title="Export" alt="Submit" style="width: 100%">
+                    </div>
+                }
+
+                <!--Search-->
+                <div class="row" style="margin-left: 212%!important; margin-top: -7%">
+                    <div class="col-md-6 pull-right">
+                        <ul class="input-group" id="adv-search">
+
+                            <ul class="nav navbar-nav navbar-right">
+                                <li class="focus">
+                                    <label for="tableSearch" class="control-label"></label> <input type="text" class="form-control-patientSearch" id="myInput" onkeyup="myFunction()" placeholder="Search..." style="position: relative; z-index: 50; margin-top: -7.5%" />
+                                </li>
+                                <div class="btn-group" role="group">
+                                    <button type="submit" class="btn btn-search" style="height: 30px"><span class="glyphicon glyphicon-search" aria-hidden="true" title="Search"></span></button>
+                                </div>
+                            </ul>
+                        </ul>
+                    </div>
+                </div>
+
+                <table class="table indexTable" id="ipTable">
+                    <tr>
+                        <th onclick="ipTable(1)" style="width: 200px">
+                            @Html.DisplayName("Scheme") <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th onclick="ipTable(2)" style="width: 150px">
+                            @Html.DisplayName("Option") <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th onclick="ipTable(3)">
+                            @Html.DisplayName("Program") <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th onclick="ipTable(4)">
+                            @Html.DisplayName("Member #") <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th onclick="ipTable(5)" style="width: 65px">
+                            @Html.DisplayName("Dep") <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th onclick="ipTable(6)">
+                            @Html.DisplayName("Patient") <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th onclick="ipTable(7)">
+                            @Html.DisplayName("Status") <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th onclick="ipTable(8)">
+                            @Html.DisplayName("Count") <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th style="text-align: center!important">
+                            Action
+                        </th>
+                    </tr>
+
+                    @foreach (var item in Model.inProgressAssignments)
+                    {
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.medicalScheme)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.option)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.program)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.membershipNumber)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.dependantCode)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.patientName_UC)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.patientStatus)
+                            </td>
+
+                            <td>
+                                @Html.DisplayFor(modelItem => item.assignmentCount)
+                            </td>
+                            <td class="statusCode linkNav" style="text-align: center!important">
+                                @Html.ActionLink("View", "AssignmentSummary", "Member", new { DependentID = item.dependantID }, null)
+                            </td>
+                        </tr>
+                    }
+
+                </table>
+            </div>
+            <script>
+                $(document).ready(function () {
+                    $("#myInput").on("keyup", function () {
+                        var value = $(this).val().toLowerCase();
+                        $("#ipTable tr").filter(function () {
+                            $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                        });
+                    });
+                });
+            </script>
+            <script>
+                /*ipTable TableSorting*/
+                function ipTable(n) {
+                    var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+                    table = document.getElementById("ipTable");
+                    switching = true;
+                    dir = "asc";
+
+                    while (switching) {
+                        switching = false;
+                        rows = table.getElementsByTagName("TR");
+
+                        for (i = 1; i < (rows.length - 1); i++) {
+
+                            shouldSwitch = false;
+
+                            x = rows[i].getElementsByTagName("TD")[n];
+                            y = rows[i + 1].getElementsByTagName("TD")[n];
+
+                            if (dir == "asc") {
+                                if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+
+                                    shouldSwitch = true;
+                                    break;
+                                }
+                            } else if (dir == "desc") {
+                                if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+
+                                    shouldSwitch = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (shouldSwitch) {
+
+                            rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                            switching = true;
+
+                            switchcount++;
+                        } else {
+
+                            if (switchcount == 0 && dir == "asc") {
+                                dir = "desc";
+                                switching = true;
+                            }
+                        }
+                    }
+                }
+            </script>
+
+        </div>*@
+
+</div>

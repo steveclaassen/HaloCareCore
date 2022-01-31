@@ -1,0 +1,378 @@
+﻿@model HaloCareCore.Models.Management.ClinicalRules
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Create";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<comment>
+    <!--
+        14 May 2019 -- HCare-737 (Account Settings – Clinical rules (Related to HCare-417))
+        Added CSS to the Index, Create, Edit, Details for Risk Rating in settings.
+
+        I have added a search bar as well as a sort function that will allow the user to sort the columns.
+
+        I have added a new table to the database which lists the pathology fields and further provides a dropdown menu to navigate the rules easier for the user. I’ve also added a dropdown for the rule type
+        which is linked to the disease program. A search function can be used inside the dropdown menu as well. This same dropdown logic has been added to the edit view.
+
+        I have added a duplication check into the Create view so that a user can’t add a rule with the same name.
+
+        30 September 2019 -- HCare-809 (Trigger on maintenance screen for clinical rule assignments (LINKED TO HCare-811))
+        Added a bool and new dropdown menu to Create / Edit / Details views for Clinical rules. This is to facilitate the creation of an assignment based on the rule that is being setup. i.e. If a rule is broken, and there is an assignment linked to that clinical rule, an assignment will be
+        systematically created based on the selection.
+
+    -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .field-validation-error:before {
+        font-family: FontAwesome;
+        content: "\f06a\00a0";
+        animation: pulse 2s ease infinite;
+    }
+
+    .error-alert {
+        width: 100%;
+        margin: 0 auto;
+        background-color: rgba(217, 83, 79, 0.1);
+        padding: 10px;
+        border-left-color: #d9534f !important;
+        border: 1px solid transparent;
+        border-left-width: 5px;
+        border-radius: 3px;
+        margin: 0 auto;
+        font-family: 'Open Sans', sans-serif;
+        font-size: 12px;
+        margin: 0 0 5px 0;
+        margin-top: -10px;
+        margin-bottom: 20px;
+    }
+
+        .error-alert span {
+            color: #d9534f;
+            text-align: center;
+        }
+</style>
+<javascript>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet" />
+    <link href='http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.min.css' rel='stylesheet' type='text/css'>
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/js/standalone/selectize.js"></script>
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.default.css">
+</javascript>
+
+<div class="fullScreen_container zero-padding">
+
+    <!--pageHeader-->
+    <nav id="global-nav" class="nav">
+        <div class="pull-left title">
+            <h1 class="site-title_patientProfile">
+                <span><i class="fas fa-tags"></i>&emsp; Clinical rules</span>
+            </h1>
+        </div>
+        <div class="pull-right title">
+            <h1 class="site-title_userID pull-right">
+                <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+            </h1>
+            <h1 class="site-title_userID pull-right">
+                @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                {
+                    <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                }
+            </h1>
+            <h1 class="site-waffleIcon pull-right">
+                <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+            </h1>
+        </div>
+    </nav>
+    <!--breadCrumbs-->
+    <ul class="breadcrumbs_fullScreens">
+        <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+        <li><a href="@Url.Action("Index", "Administration", new {})">Settings</a></li>
+        <li><a href="@Url.Action("Index", "ClinicalRules", new {})">Clinical rules</a></li>
+        <li><a href="#">Create</a></li>
+    </ul>
+    <!--navCollection-->
+    <div class="navCollection_fullScreens">
+        @Html.Partial("_navCollection")
+    </div>
+    <div style="margin-bottom: 1%"></div>
+    <div class="row">
+        <h4 class="tableHeading">Create new</h4>
+        <hr class="fancyruler">
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+            <div class="hidden-fields">
+                <input type="hidden" name="error-description" id="error-description" value="@ViewBag.Description" />
+                <input type="hidden" name="error-assignment" id="error-assignment" value="@ViewBag.Assignment" />
+                <input type="hidden" name="error-all-fields" id="error-all-fields" value="@ViewBag.AllFields" />
+                <div class="col-md-12"><div id="error-duplicate-description" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; <b>Description:</b> @ViewBag.Description already exists!</span></div></div></div>
+                <div class="col-md-12"><div id="error-duplicate-af" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; This combination, <b>Higher value:</b> @ViewBag.Higher, <b>Lower value:</b> @ViewBag.Lower, <b>Rule type:</b> @ViewBag.Program, <b>Pathology field:</b> @ViewBag.Pathology & <b>Assignment:</b> @ViewBag.Assignment already exists!</span></div></div></div>
+                <div class="col-md-12"><div id="error-duplicate-na" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; This combination, <b>Higher value:</b> @ViewBag.Higher, <b>Lower value:</b> @ViewBag.Lower, <b>Rule type:</b> @ViewBag.Program & <b>Pathology field:</b> @ViewBag.Pathology already exists!</span></div></div></div>
+            </div>
+
+            <div class="form-horizontal createForm">
+                <br />
+                <br />
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                <div class="form-group">
+                    @Html.LabelFor(model => model.ruleName, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.ruleName, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                        @Html.ValidationMessageFor(model => model.ruleName, "", new { @class = "text-danger", @style = "font-size: 100%; margin-left: 1%" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.greater, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.greater, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                        @Html.ValidationMessageFor(model => model.greater, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.gtMessage, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.gtMessage, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                        @Html.ValidationMessageFor(model => model.gtMessage, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.less, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.less, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                        @Html.ValidationMessageFor(model => model.less, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.ltMessage, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.ltMessage, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                        @Html.ValidationMessageFor(model => model.ltMessage, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.ruleType, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.DropDownListFor(model => model.ruleType, new SelectList(Model.Programs.Where(x => x.Active == true), "code", "ProgramName"), "Select", htmlAttributes: new { @class = "", @required = "required" })<br>
+                        @Html.ValidationMessageFor(model => model.ruleType, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.male, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        <div class="checkbox">
+                            @Html.EditorFor(model => model.male)
+                            @Html.ValidationMessageFor(model => model.male, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.female, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        <div class="checkbox">
+                            @Html.EditorFor(model => model.female)
+                            @Html.ValidationMessageFor(model => model.female, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.pathologyField, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.DropDownListFor(model => model.pathologyField, new SelectList(Model.Pathologies.Where(x => x.active == true), "PathologyField", "PathologyField"), "Select", htmlAttributes: new { @class = "", @required = "required", onchange = "pfChange();" })
+                        @Html.ValidationMessageFor(model => model.pathologyField, "", new { @class = "text-danger", @style = "font-size: 90%;margin-left: 1%" })
+                    </div>
+                </div>
+
+                <br />
+                <div class="form-group">
+                    @Html.LabelFor(model => model.hasAssignment, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10" style="margin-top:-0.8%!important">
+                        @Html.CheckBoxFor(model => model.hasAssignment, new { htmlAttributes = new { @value = "checked" } })
+                    </div>
+                </div>
+
+                <div class="form-group houdini" id="assignmentLink">
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.assignmentItem, htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-10">
+                            @Html.DropDownListFor(model => model.assignmentItem, new SelectList(Model.Assignments.Where(x => x.active == true), "assignmentItemType", "itemDescription"), "Select", htmlAttributes: new { @class = "", @required = "required" })<br>
+                            @Html.ValidationMessageFor(model => model.assignmentItem, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Instruction, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.Instruction, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                        @Html.ValidationMessageFor(model => model.Instruction, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="fixedBack" style="margin-left: 40%">
+                    <input value="Back" class="btn buttonRound_formBack go_back" style="width: 15%!important" />
+                    <input id="submit" type="submit" value="Create" class="btn buttonRound_formCreate" onclick="pfCheck(); formSubmit();" style="width: 15%!important" />
+                </div>
+                <br />
+                <br />
+            </div>
+        }
+    </div>
+</div>
+
+
+
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+@section scripts{
+    <script src="~/bundles/jqueryval"></script>
+    <!-- pathology-field-check -->
+    <script>
+        function pfCheck() {
+            var pathology = $("#pathologyField :selected").val();
+            if (pathology == null || pathology == '') {
+                $('span[data-valmsg-for="pathologyField"]').html('<span style="font-size: 12px"><i class="fas fa-exclamation-circle"></i> </span>Pathology field is required!');
+
+                event.preventDefault();
+            }
+        }
+
+        function pfChange() {
+            var pathology = $("#pathologyField :selected").val();
+            if (pathology == null || pathology == '') {
+                $('span[data-valmsg-for="pathologyField"]').html('<span style="font-size: 12px"><i class="fas fa-exclamation-circle"></i> </span>Pathology field is required!');
+
+                event.preventDefault();
+            }
+            else {
+                $('span[data-valmsg-for="pathologyField"]').html('');
+            }
+        }
+    </script>
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/js/standalone/selectize.js"></script>
+    <script>
+        initSelectize();
+        function initSelectize() {
+            $('#ruleType').selectize({
+                persist: true,
+                preload: true,
+                maxItems: 1,
+                delimiter: ',',
+                valueField: 'id',
+                labelField: 'name',
+                searchField: ['name'],
+                hideSelected: true,
+                plugins: ['remove_button'],
+                render: {
+                    option: function (item, escape) {
+                        return '<span class="name">' + escape(item.name) + '</span>';
+
+                    }
+                }
+            }),
+                $('#pathologyField').selectize({
+                    persist: true,
+                    preload: true,
+                    maxItems: 1,
+                    delimiter: ',',
+                    valueField: 'id',
+                    labelField: 'name',
+                    searchField: ['name'],
+                    hideSelected: true,
+                    plugins: ['remove_button'],
+                    render: {
+                        option: function (item, escape) {
+                            return '<span class="name">' + escape(item.name) + '</span>';
+
+                        }
+                    }
+                }),
+                $('#assignmentItem').selectize({
+                    persist: true,
+                    preload: true,
+                    maxItems: 1,
+                    delimiter: ',',
+                    valueField: 'id',
+                    labelField: 'name',
+                    searchField: ['name'],
+                    hideSelected: true,
+                    plugins: ['remove_button'],
+                    render: {
+                        option: function (item, escape) {
+                            return '<span class="name">' + escape(item.name) + '</span>';
+
+                        }
+                    }
+                })
+        }
+    </script>
+    <script>
+        $('#hasAssignment').change(function () {
+            if (this.checked)
+                $('#assignmentLink').removeClass('houdini');
+            else
+                $('#assignmentLink').addClass('houdini');
+            $("#assignmentItem")[0].selectize.clear();
+
+        });
+
+        $("#submit").click(function () {
+            if ($('#hasAssignment').is(':checked')) {
+                var value = $("#assignmentItem :selected").val();
+                if (value == null || value == '') {
+                    alert("Assignment item is required!");
+                    return false;
+                }
+            }
+            else {
+            }
+        });
+    </script>
+    <script>
+        $(document).ready(function () {
+            var a = $('#error-assignment').val();
+            var d = $('#error-description').val();
+            var af = $('#error-all-fields').val();
+            if (af.length > 0 && a.length > 0) {
+                $("#error-duplicate-af").removeClass("hidden");
+            }
+            else if (af.length > 0 && a.length == 0) {
+                $("#error-duplicate-na").removeClass("hidden");
+            }
+            else if (d.length > 0) {
+                $("#error-duplicate-description").removeClass("hidden");
+            }
+
+            if (a.length > 0) {
+                $('#assignmentLink').removeClass('houdini');
+            }
+        });
+    </script>
+    <script>
+        $(document).ready(function () {
+            $("form").submit(function (e) {
+                $('#submit').attr('disabled', true)
+            });
+        });
+    </script>
+
+}

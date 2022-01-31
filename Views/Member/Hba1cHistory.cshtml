@@ -1,0 +1,149 @@
+﻿@model IEnumerable<HaloCareCore.Models.Management.Hba1cRangeHistory>
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Hba1cHistory";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+</style>
+
+<!------------------------------------------------------------------------------------ jQ-dateSort  ----------------------------------------------------------------------------------->
+<javascript>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="http://code.jquery.com/jquery.unobtrusive-ajax.min.js"></script>
+    <script src="js/jquery.tablesorter.min.js"></script>
+</javascript>
+
+<!----------------------------------------------------------------------------- html-top-navigation-panel  ---------------------------------------------------------------------------->
+<nav id="global-nav" class="nav" style="z-index: 10000">
+    <div class="pull-left title">
+        <h1 class="site-title_patientProfile">
+            <span><img src="~/Content/Images/memberProfile/topBar Icons/bloods.png" style="width: 2.8%" /></span>&emsp; Pathology
+        </h1>
+    </div>
+    <div class="pull-right title">
+        <h1 class="site-title_userID pull-right">
+            <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+        </h1>
+        <h1 class="site-title_userID pull-right">
+            @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+            {
+                <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+            }
+        </h1>
+        <h1 class="site-waffleIcon pull-right">
+            <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+        </h1>
+    </div>
+</nav>
+
+<!-------------------------------------------------------------------------------------- html-body ------------------------------------------------------------------------------------>
+
+<div class="dashboardContainer zero-padding">
+
+    <div class="patientDashboard_View">
+        <!-- breadcrumbs -->
+        <ul class="breadcrumbs_patientDashboard">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+            <li><a href="@Url.Action("patientClinical", "Member", new {DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"]})">Patient</a></li>
+            <li><a href="#">Pathology</a></li>
+        </ul>
+        <!-- navigation-collection -->
+        <div class="navCollection_patientDashboard">
+            @Html.Partial("_navCollection")
+        </div>
+        <!-- left-navigation-panel -->
+        @Html.Partial("_navSlider", new { DependentID = Context.Request.Query["DependentID"] })
+        <!--profile-information-->
+        <div class="profileBar">
+            @Html.Action("_profileBar_edit", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })
+        </div>
+    </div>
+
+    <div class="profilebar-spacer"></div>
+
+    <div class="patientDashboard_container">
+
+        <h4 class="tableHeading">HbA1c range history</h4>
+        <hr class="fancyruler">
+
+        <table class="table patient-clinical-table sortable" id="pathologyTable">
+            <thead>
+                <tr>
+                    <th>
+                        @Html.DisplayNameFor(model => model.effectiveDate)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.targetOutcome)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.hba1c)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.createdBy)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.createdDate)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.hba1cEffectiveDate)
+                    </th>
+                </tr>
+
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.effectiveDate)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.targetOutcome)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.hba1c)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.createdBy)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.createdDate)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.hba1cEffectiveDate)
+                        </td>
+                    </tr>
+                }
+        </table>
+        <br />
+        <br />
+        <div class="fixedBack" style="margin-left: 42%; margin-bottom: 1%">
+            <input value="Back" class="btn buttonRound_formBack go_back" onclick="storageKey()" style="width: 15%" />
+        </div>
+    </div>
+</div>
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script src="http://code.jquery.com/jquery.unobtrusive-ajax.min.js"></script>
+<script src="js/jquery.tablesorter.min.js"></script>
+
+@section Scripts {
+    <script src="~/bundles/jqueryval"></script>
+    <script src="~/bundles/jqueryui"></script>
+    <style src="~/Content/themes/base/css" )
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <script src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.9/jquery.validate.js"></script>
+    <script src="http://ajax.aspnetcdn.com/ajax/mvc/3.0/jquery.validate.unobtrusive.min.js"></script>
+
+    <script>
+        function storageKey() {
+            localStorage.setItem("back_hiv", Date.now());
+        }
+    </script>
+}
+

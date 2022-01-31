@@ -1,0 +1,152 @@
+﻿@model HaloCareCore.Models.Management.ClinicalHistoryQuestionaire
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "AddClinicalHistory";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+</style>
+
+<div class="fullScreen_container zero-padding">
+
+    <!--pageHeader-->
+    <nav id="global-nav" class="nav">
+        <div class="pull-left title">
+            <h1 class="site-title_patientProfile">
+                <span><img src="~/Content/Images/memberProfile/topBar Icons/clinicalExams.png" /></span>&emsp; Clinical history
+            </h1>
+        </div>
+        <div class="pull-right title">
+            <h1 class="site-title_userID pull-right">
+                <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+            </h1>
+            <h1 class="site-title_userID pull-right">
+                @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                {
+                    <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                }
+            </h1>
+            <h1 class="site-waffleIcon pull-right">
+                <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+            </h1>
+        </div>
+    </nav>
+
+    <!--breadCrumbs-->
+    <ul class="breadcrumbs_fullScreens">
+        <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+        <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+        <li><a href="#">Member details</a></li>
+    </ul>
+
+    <div style="margin-bottom: 2%"></div>
+
+    <!--navCollection-->
+    <div class="navCollection_fullScreens">
+        @Html.Partial("_navCollection")
+    </div>
+
+    <!--profileInformation-->
+    @if (Context.Request.Query["DependentID"].ToString() != null)
+    {
+
+        <div style="margin-bottom: 2%">
+            @Html.Action("_profileBar_edit", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })
+        </div>
+    }
+
+    <div style="margin-bottom: 3%"></div>
+
+    <!--pageHeader-->
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(model => model.dependentID)
+
+        <div class="row summaryContentBlock">
+            <h4 class="tableHeading">Clinical history</h4>
+            <hr class="fancyruler">
+            <br />
+            <div class="form-horizontal editForm">
+
+                <div class="form-group">
+                    <div class="col-md-12">
+                        <div class="col-md-6">
+                            @Html.Label(null,"Diagnosis Date", htmlAttributes: new { @class = "control-label col-md-3 push" })
+                            <div class="col-md-5">
+                                @Html.EditorFor(model => model.DiagnosisDate, new { htmlAttributes = new { @class = "createForm_infoBox" } })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br />
+
+                <div class="form-group">
+                    <div class="col-md-12">
+                        <div class="col-md-5">
+                            @Html.Label(null,"Smoker - yes/no?", htmlAttributes: new { @class = "control-label col-md-3 push lift" })
+                            <div class="col-md-4">
+                                @Html.CheckBoxFor(model => model.smoker, new { htmlAttributes = new { @class = "createForm_infoBox" } })
+                            </div>
+                        </div>
+                        <div class="col-md-7">
+                            @Html.LabelFor(model => model.NoCigs, htmlAttributes: new { @class = "control-label col-md-3 pull lift" })
+                            <div class="col-md-3">
+                                @Html.EditorFor(model => model.NoCigs, new { htmlAttributes = new { @class = "createForm_infoBox" } })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br />
+                <div class="form-group">
+                    <div class="col-md-12">
+                        <div class="col-md-5">
+                            @Html.Label(null,"Drinker - yes/no?", htmlAttributes: new { @class = "control-label col-md-3 push lift" })
+                            <div class="col-md-4">
+                                @Html.CheckBoxFor(model => model.drinker, new { htmlAttributes = new { @class = "createForm_infoBox" } })
+                            </div>
+                        </div>
+                        <div class="col-md-7">
+                            @Html.LabelFor(model => model.NrDrinks, htmlAttributes: new { @class = "control-label col-md-3 pull lift" })
+                            <div class="col-md-3">
+                                @Html.EditorFor(model => model.NrDrinks, new { htmlAttributes = new { @class = "createForm_infoBox" } })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br />
+                <br />
+
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                <br />
+            </div>
+
+
+            <div class="form-group">
+                <div class="actionButton" style="margin-left: 39%">
+                    <input value="Back" class="btn buttonRound_formBack go_back" style="width: 15%!important" />
+                    <input type="submit" value="Create" class="btn buttonRound_formCreate" style="width: 15%!important" />
+                </div>
+            </div>
+        </div>
+
+
+    }
+
+</div>
+
+
+<script src="js/jquery.tablesorter.min.js"></script>
+
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+
+}
+

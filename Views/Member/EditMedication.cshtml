@@ -1,0 +1,432 @@
+﻿@model HaloCareCore.Models.Management.MedicationHistory
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "EditMedication";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<comment>
+    <!--
+        12 June 2019 -- HCare-722 (Change "Follow up" to red on patient history drop-down menus)
+        I have added alert badges that draw the users attention to the fields that are either marked with a follow up or that are empty/null.
+
+        06 August 2019 -- HCare-758(Generel - Redirect to tab functionality)
+        Using jquery to add localStorage in order to redirect to the last tab that the user was on and a Submit/Save Button clicked. This will take you back to the origin tab.
+    -->
+</comment>
+
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .input-group-addon {
+        visibility: hidden;
+    }
+
+    .select2-container--default .select2-selection--single {
+        width: 480px !important;
+        margin-left: 5.5% !important;
+        border: 1px solid transparent !important;
+    }
+
+        .select2-container--default .select2-selection--single .select2-selection__placeholder {
+            color: white !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow b {
+            margin-top: -5px !important;
+            margin-left: 2.5px !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            margin-top: -4px !important
+        }
+
+
+
+    .followUPs .select2-container--default .select2-selection--single .select2-selection__rendered {
+        background-color: rgba(204, 0, 0, 0.70) !important;
+        color: white !important;
+        border: 1px solid transparent !important;
+        border-radius: 4px;
+        cursor: default;
+        float: left;
+        margin-right: 5px;
+        margin-top: 0px !important;
+        padding: 0 5px !important;
+        line-height: 20px !important;
+        margin-top: -4px !important;
+        transition-delay: 5s;
+    }
+
+    .field-validation-error:before {
+        font-family: FontAwesome;
+        content: "\f06a\00a0";
+        animation: pulse 2s ease infinite;
+    }
+</style>
+
+<div class="fullPanel_Container">
+    <div class="profilePanel_pathology">
+        <!--breadCrumbs-->
+        <ul class="breadcrumbs" style="margin-top: -1%; margin-bottom: 2%; margin-left: -1%">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+            <li><a class="go_back">Patient</a></li>
+            <li><a href="#">Clinical history</a></li>
+        </ul>
+
+        <!--navCollection-->
+        <div class="navButtons">
+            @Html.Partial("_navCollection")
+        </div>
+
+        <!--profileInformation-->
+        <div>
+            @Html.Action("_profileBar_edit", "Member", new { DependentID = Model.dependantId })
+        </div>
+    </div>
+    <!--pageHeader-->
+    <nav id="global-nav" class="nav">
+        <div class="pull-left title">
+            <h1 class="site-title_patientProfile">
+                <span><img src="~/Content/Images/memberProfile/topBar Icons/Medication_one.png" /></span>&emsp; Medication history
+            </h1>
+        </div>
+        <div class="pull-right title">
+            <h1 class="site-title_userID pull-right">
+                <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+            </h1>
+            <h1 class="site-title_userID pull-right">
+                @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                {
+                    <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                }
+            </h1>
+            <h1 class="site-waffleIcon pull-right">
+                <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+            </h1>
+        </div>
+    </nav>
+
+    <div class="row assignmentOverview_container">
+
+        <h4 class="summaryHeading">Edit medication history</h4>
+        <hr class="fancyruler">
+        <br />
+        <br />
+
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+
+            <div class="form-horizontal editForm">
+
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                @Html.HiddenFor(model => model.Id)
+                @Html.HiddenFor(model => model.dependantId)
+                @Html.HiddenFor(model => model.programType)
+
+                @if (Model.followUp == true)
+                {
+                    <div id="warning_anchor">
+                        <a id="link" href="#anchor_followUp">
+                            <i class="fas fa-exclamation-triangle pulse anchor_warning" title="check box"></i>
+                        </a>
+                    </div>
+                }
+                @if (Model.comment == "follow up" || Model.comment == "Follow up" || Model.comment == "Follow Up" || Model.comment == "" || Model.comment == null)
+                {
+                    <div id="comment_anchor">
+                        <a id="commentLink" href="#comment_comment">
+                            <i class="fas fa-exclamation-triangle pulse anchor_warning" title="comment"></i>
+                        </a>
+                    </div>
+                }
+
+                @if (Model.directions == "follow up" || Model.directions == "Follow up" || Model.directions == "Follow Up" || Model.directions == "" || Model.directions == null)
+                {
+                    <div id="directions_anchor">
+                        <a id="directionsLink" href="#anchor_directions">
+                            <i class="fas fa-exclamation-triangle pulse anchor_warning" title="medical instructions"></i>
+                        </a>
+                    </div>
+                }
+                @if (Model.productName == "follow up" || Model.productName == "Follow up" || Model.productName == "Follow Up" || Model.productName == "" || Model.productName == null)
+                {
+                    <div id="product_anchor">
+                        <a id="allergyLink" href="#anchor_product">
+                            <i class="fas fa-exclamation-triangle pulse anchor_warning" title="product"></i>
+                        </a>
+                    </div>
+                }
+
+                <div id="">
+                    @if (Model.productName == "Follow up" || Model.productName == "")
+                    {
+                        <div id="warning_product">
+                            <i class="fas fa-exclamation-triangle pulse followUp_alert"></i>
+                        </div>
+                    }
+                    <div class="form-group">
+                        @Html.Label(null, "Product", htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-10">
+                            @if (Model.productName == "Follow up")
+                            {
+                                <div id="productDD" class="followUPs">
+                                    @Html.DropDownList("Product", null, "--Select--", htmlAttributes: new { @class = "contentBlock_Info", @required = "required" }) <br />
+                                </div>
+                            }
+                            else
+                            {
+                                @Html.DropDownList("Product", null, "--Select--", htmlAttributes: new { @class = "contentBlock_Info", @required = "required" }) <br />
+                            }
+                            @Html.ValidationMessage("Product", "", new { @class = "text-danger", @style = "font-size: 110%;margin-left: 2.5%" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.directions, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.directions, new { htmlAttributes = new { @class = "contentBlock_Info", @autocomplete = "off", @placeholder = "example: Take 2, three times daily" } })
+                        @Html.ValidationMessageFor(model => model.directions, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.comment, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @if (Model.comment == "Follow up" || Model.comment == "follow up" || Model.comment == "Follow Up" || Model.comment == "FOLLOW UP" || Model.comment == null || Model.comment == "")
+                        {
+                            <span class="pulse" style="color: rgba(204, 0, 0, 0.70)!important; font-size: 14px!important"><i class="fas fa-exclamation-triangle pulse followUp_alertWarning" id="commentWarning"></i> @Html.EditorFor(model => model.comment, new { htmlAttributes = new { @class = "contentBlock_Info warningFont", @autocomplete = "off", @placeholder = "comment" } })</span>
+                            @Html.ValidationMessageFor(model => model.comment, "", new { @class = "text-danger" })
+                        }
+                        else
+                        {
+                            @Html.EditorFor(model => model.comment, new { htmlAttributes = new { @class = "contentBlock_Info", @autocomplete = "off", @placeholder = "comment" } })
+                            @Html.ValidationMessageFor(model => model.comment, "", new { @class = "text-danger" })
+                        }
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.startDate, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        <!-- Datepicker as text field -->
+                        <div class="input-group date pickerBox">
+                            @Html.TextBoxFor(model => model.startDate, "{0:dd MMM yyyy}", new { @class = "contentBlock_Info", min = "1900-01-01", @id = "contentBlock_Info", @autocomplete = "off", @placeholder = "example: 01 Jan 2000" }) @*HCare-904*@
+                            <div class="input-group-addon">
+                                <span class="glyphicon glyphicon-th"></span>
+                            </div>
+                        </div>
+                        @Html.ValidationMessageFor(model => model.startDate, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.endDate, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        <!-- Datepicker as text field -->
+                        <div class="input-group date pickerBox">
+                            @Html.TextBoxFor(model => model.endDate, "{0:dd MMM yyyy}", new { @class = "contentBlock_Info", min = "1900-01-01", @id = "contentBlock_Info", @autocomplete = "off", @placeholder = "example: 01 Jan 2000" }) @*HCare-904*@
+                            <div class="input-group-addon">
+                                <span class="glyphicon glyphicon-th"></span>
+                            </div>
+                        </div>
+                        @Html.ValidationMessageFor(model => model.endDate, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                @*<div class="form-group">
+                        @Html.LabelFor(model => model.programType, htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-10">
+                            @Html.DropDownList("programType", null, "Select", new { @class = "contentBlock_Info" })
+                            @Html.ValidationMessageFor(model => model.programType, "", new { @class = "text-danger" })
+                        </div>
+                    </div>*@
+
+                @if (Model.followUp == true)
+                {
+                    <div id="warning">
+                        <i class="fas fa-exclamation-triangle pulse followUp_alert"></i>
+                    </div>
+
+                }
+                <div class="form-group">
+                    @Html.LabelFor(model => model.followUp, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        <div class="checkbox">
+                            @Html.EditorFor(model => model.followUp)
+                            @Html.ValidationMessageFor(model => model.followUp, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.active, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        <div class="checkbox">
+                            @Html.EditorFor(model => model.active)
+                            @Html.ValidationMessageFor(model => model.active, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="fixedBack" style="margin-left: 40%">
+                    <a href="@Url.Action("patientClinical", "Member", new { DependentID = Model.dependantId,  @target = "4"})" class="btn buttonRound_formBack" style="width: 15%!important; position: relative; margin-left: 1%!important">Back</a>
+                    <input type="submit" class="btn buttonRound_formCreate patientClinical" style="width: 15%" value="Save" />
+                </div>
+
+            </div>
+        }
+
+    </div>
+</div>
+
+
+@section Scripts {
+    <script src="~/bundles/jqueryval"></script>
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.7.1/js/bootstrap-datepicker.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+
+    <script>
+        //Select 2 dropdown menu
+        $(document).ready(function () { $("#Product").select2({ multiple: false, placeholder: "- Select -", allowClear: true }); });
+        $(document).ready(function () { $("#programType").select2({ multiple: false, placeholder: "- Select -", allowClear: true }); });
+
+        //datePicker
+        $(function () {
+
+            $('.input-group.date').datepicker({
+                format: "dd M yyyy",
+                showButtonPanel: true,
+                autoclose: true,
+            });
+        });
+
+    </script>
+    <!--alerts-->
+    <script type="text/javascript">
+        //followUp product field
+        $(document).ready(function () {
+            setInterval(function () {
+                if ($("#Product").val() == "") {
+                    $('#warning_product').removeClass('houdini'),
+                        $("#productDD").addClass('followUPs'),
+                        $('#anchor_warning').removeClass('houdini');
+                }
+                else if ($("#Product").val().toLowerCase() == "follow up") {
+                    $('#warning_product').removeClass('houdini'),
+                        $("#productDD").addClass('followUPs'),
+                        $('#anchor_warning').removeClass('houdini');
+                }
+                else {
+                    $('#warning_product').addClass('houdini'),
+                        $("#productDD").removeClass('followUPs'),
+                        $('#anchor_warning').addClass('houdini');
+
+                }
+            }, 0);
+        });
+
+        //followUp checkBox warning
+        $('#followUp').change(function () {
+            if (this.checked)
+                $('#warning').removeClass('houdini');
+            else
+                $('#warning').addClass('houdini');
+
+        });
+
+        //followUp directions field
+        $(document).ready(function () {
+            setInterval(function () {
+                if ($("#directions").val().toLowerCase() == "follow up") {
+                    $("#directions").addClass('warningFont'),
+                        $("#directions_anchor").removeClass('houdini'),
+                        $('#directionWarning').removeClass('houdini');
+                }
+                else if ($("#directions").val() == "") {
+                    $("#directions").removeClass('warningFont'),
+                        $("#directions_anchor").removeClass('houdini'),
+                        $('#directionWarning').removeClass('houdini');
+                }
+                else if ($("#directions").val() == null) {
+                    $("#directions").removeClass('warningFont'),
+                        $("#directions_anchor").removeClass('houdini'),
+                        $('#directionWarning').removeClass('houdini');
+                }
+                else {
+                    $("#directions").removeClass('warningFont'),
+                        $('#directions').addClass('fontUpdate'),
+                        $("#directions_anchor").addClass('houdini'),
+                        $('#directionWarning').addClass('houdini');
+
+                }
+            }, 0);
+        });
+
+        //followUp comment field
+        $(document).ready(function () {
+            setInterval(function () {
+                if ($("#comment").val().toLowerCase() == "follow up") {
+                    $("#comment").addClass('warningFont'),
+                        $('#commentWarning').removeClass('houdini');
+                }
+                else if ($("#comment").val() == "") {
+                    $("#comment").removeClass('warningFont'),
+                        $('#commentWarning').removeClass('houdini');
+                }
+                else if ($("#comment").val() == null) {
+                    $("#comment").removeClass('warningFont'),
+                        $('#commentWarning').removeClass('houdini');
+                }
+                else {
+                    $("#comment").removeClass('warningFont'),
+                        $('#comment').addClass('fontUpdate'),
+                        $('#commentWarning').addClass('houdini');
+
+                }
+            }, 0);
+        });
+
+    </script>
+    <!--Anchors-->
+    <script>
+        //anchor_directions
+        $("#directionsLink").click(function () {
+            // toggle highlight for Allergy
+            $('#directions').toggleClass('highlight');
+            setTimeout(function () {
+                // toggle back after 1 second
+                $('#directions').toggleClass('highlight');
+            }, 400);
+        });
+
+        //anchor_comment
+        $("#commentLink").click(function () {
+            // toggle highlight for Allergy
+            $('#comment').toggleClass('highlight');
+            setTimeout(function () {
+                // toggle back after 1 second
+                $('#comment').toggleClass('highlight');
+            }, 400);
+        });
+
+    </script>
+    <!--Page redirect-->
+    <script>
+        $(document).ready(function () {
+            $(".patientClinical").on("click", function () {
+                localStorage.setItem("patientClinical", "clicked");
+            });
+        });
+    </script>
+
+}

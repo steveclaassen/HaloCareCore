@@ -1,0 +1,535 @@
+﻿@model HaloCareCore.Models.ViewModels.wfViewModel
+@using HaloCareCore.Extensions
+
+@{
+    ViewBag.Title = "Workflow";
+    Layout = "~/Views/Shared/_layout-view-x.cshtml";
+}
+
+<comment>
+    <!--
+
+    -->
+</comment>
+<javascript>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+    <script src="https://www.jqueryscript.net/demo/jQuery-Plugin-For-Sortable-Bootstrap-Tables-Bootstrap-Sortable/Scripts/bootstrap-sortable.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/js/standalone/selectize.js"></script>
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.default.css">
+</javascript>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .textbox-control-date {
+        display: block !important;
+        max-width: 600px !important;
+        width: 450px;
+        max-height: 100px;
+        height: 30px;
+        margin-left: 10px;
+        padding: 6px 6px;
+        line-height: 1.428571429;
+        color: #003366;
+        border-radius: 0px !important;
+        border: none !important;
+        border-bottom: 1px solid #e8e6e6 !important;
+        background-color: transparent !important;
+        -webkit-box-shadow: none !important;
+        box-shadow: none !important;
+    }
+
+    .tooltip-inner {
+        width: 120px;
+        background: rgba(0,0,0,0.80);
+        color: #fff;
+        font-size: 10px;
+        font-weight: 100;
+        text-align: center;
+        border-radius: 6px;
+        padding: 5px 0;
+        z-index: 0;
+        -webkit-transition: opacity 0.5s;
+        transition: opacity 1.2s;
+    }
+
+    .tooltip-arrow {
+        border-bottom-color: rgba(0,0,0,0.80) !important;
+    }
+
+    /*MULTIPLE Pill for SELECT2*/
+    .select2-container--default .select2-selection--multiple {
+        display: block !important;
+        max-width: 500px !important;
+        width: 450px !important;
+        max-height: 100px;
+        height: auto;
+        margin-left: 10px;
+        padding: 6px 6px;
+        line-height: 1.428571429;
+        color: #003366;
+        border-radius: 0px !important;
+        border: none !important;
+        border-bottom: 1px solid #e8e6e6 !important;
+        background-color: transparent !important;
+        -webkit-box-shadow: none !important;
+        box-shadow: none !important;
+    }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice {
+            background-color: #0081b3 !important;
+            color: white !important;
+            border: 1px solid transparent !important;
+            border-radius: 5px;
+            cursor: default;
+            float: left;
+            margin-right: 5px;
+            margin-top: 0px !important;
+            padding: 5px 6px 5px 6px !important;
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+            color: white !important;
+            cursor: pointer;
+            display: inline-block;
+            font-weight: bold;
+            margin-right: 2px;
+        }
+
+    .select2-container--open .select2-dropdown {
+        left: 10px !important;
+    }
+
+    .text-divider {
+        margin: 0 0;
+        line-height: 0;
+        text-align: center;
+    }
+
+        .text-divider span {
+            background-color: rgba(254, 254, 254, 1);
+            padding-left: 1em;
+            padding-right: 1em;
+        }
+
+        .text-divider:before {
+            content: " ";
+            display: block;
+            border-top: 1px solid rgba(204, 204, 204, 0.50);
+            border-bottom: 1px solid transparent;
+            width: 96%;
+            margin-left: 1.5%;
+        }
+</style>
+
+<div class="collapse in">
+    <div class="card card-body">
+        <div class="collapse-body">
+            <div class="search-information-data-panel">
+                <!-------------------------------------------------------------------------- bread-crumbs ------------------------------------------------------------------------->
+                <ul class="bread-crumbs-full-screen" style="color: #808080 !important;">
+                    <li style="font-size: 10px; font-weight: 600">You are here:</li>
+                    <li><a href="@Url.Action("Index", "Home" , new { })">Home</a></li>
+                    <li><a href="@Url.Action("searchManagement", "PatientManagement" , new { })">Search</a></li>
+                    <li><a href="#">@ViewBag.Title</a></li>
+                </ul>
+                @if (User.Identity.IsAuthenticated)
+                {
+                    if (User.HasRole("6. Global user") || (User.HasRole("5. Super user")))
+                    {
+                        <div class="navCollection_fullScreens">
+                            <div class="buttonCollection">
+                                <div class="col-md-12">
+                                    <div class="col-md-4"></div>
+                                    <div class="col-md-4">
+                                        <div class="col-md-2">
+                                            <a href="@Url.Action("Index", "Home" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Home"><span style="font-size: 12px" class="sub_icon fas fa-home"></span></a>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <a href="@Url.Action("OpenAssignments", "Clinical" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Assignments"><span style="font-size: 12px" class="sub_icon fas fa-bell"></span></a>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <a href="@Url.Action("Search", "Member" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Patient"><span style="font-size: 12px" class="sub_icon fas fa-user-circle"></span></a>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <a href="@Url.Action("OutstandingAuthorise", "Scripts" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Authorisation"><span style="font-size: 12px" class="sub_icon fas fa-check-circle"></span></a>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <a href="@Url.Action("searchManagement", "patientManagement" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Search"><span style="font-size: 12px" class="sub_icon fas fa-search"></span></a>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <a href="@Url.Action("Index", "Administration" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Settings"><span style="font-size: 12px" class="sub_icon fas fa-cog"></span></a>
+                                        </div>
+
+                                    </div>
+                                    <div class="col-md-4"></div>
+
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else if (User.HasRole("4. Advisor"))
+                    {
+                        <div class="navCollection_fullScreens">
+                            <div class="buttonCollection">
+                                <div class="col-md-12">
+                                    <div class="col-md-4"></div>
+                                    <div class="col-md-4">
+                                        <div class="col-md-1"></div>
+                                        <div class="col-md-2">
+                                            <a href="@Url.Action("Index", "Home" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Home"><span style="font-size: 12px" class="sub_icon fas fa-home"></span></a>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <a href="@Url.Action("OpenAssignments", "Clinical" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Assignments"><span style="font-size: 12px" class="sub_icon fas fa-bell"></span></a>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <a href="@Url.Action("Search", "Member" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Patient"><span style="font-size: 12px" class="sub_icon fas fa-user-circle"></span></a>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <a href="@Url.Action("OutstandingAuthorise", "Scripts" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Authorisation"><span style="font-size: 12px" class="sub_icon fas fa-check-circle"></span></a>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <a href="@Url.Action("searchManagement", "patientManagement" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Search"><span style="font-size: 12px" class="sub_icon fas fa-search"></span></a>
+                                        </div>
+                                        <div class="col-md-1"></div>
+                                    </div>
+                                    <div class="col-md-4"></div>
+
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else if (User.HasRole("1. Consultant") || (User.HasRole("2. Case manager") || (User.HasRole("3. Specialist"))))
+                    {
+                        <div class="navCollection_fullScreens">
+                            <div class="buttonCollection">
+                                <div class="col-md-12">
+                                    <div class="col-md-4"></div>
+                                    <div class="col-md-4">
+                                        <div class="col-md-2"></div>
+                                        <div class="col-md-2">
+                                            <a href="@Url.Action("Index", "Home" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Home"><span style="font-size: 12px" class="sub_icon fas fa-home"></span></a>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <a href="@Url.Action("OpenAssignments", "Clinical" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Assignments"><span style="font-size: 12px" class="sub_icon fas fa-bell"></span></a>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <a href="@Url.Action("Search", "Member" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Patient"><span style="font-size: 12px" class="sub_icon fas fa-user-circle"></span></a>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <a href="@Url.Action("searchManagement", "patientManagement" , new { })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="Search"><span style="font-size: 12px" class="sub_icon fas fa-search"></span></a>
+                                        </div>
+                                        <div class="col-md-2"></div>
+                                    </div>
+                                    <div class="col-md-4"></div>
+
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+
+                @using (Html.BeginForm("Create", "Workflow", FormMethod.Post, new { id = "form" }))
+                {
+                    @Html.AntiForgeryToken()
+                    <div class="row">
+                        <br />
+                        <div class="form-horizontal form-layout">
+                            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                            <br />
+                            <h class="heading-detail">Workflow detail</h>
+                            <p class="paragraph-detail">The information below is listed as per the queue setup.</p>
+
+                            <h4 class="tableDivider-heading text-divider"></h4>
+                            <br />
+                            <div class="form-group">
+                                <div class="col-md-12">
+                                    <div class="col-md-2">
+                                        <h class="label-detail">Queue</h>
+                                        <p class="paragraph-label-detail"></p>
+                                    </div>
+                                    <div class="col-md-10">
+                                        <span class="display-details">@Html.DisplayFor(model => model.QueueName)</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h4 class="tableDivider-heading text-divider"></h4>
+                            <br />
+                            <div class="form-group">
+                                <div class="col-md-12">
+                                    <div class="col-md-2">
+                                        <h class="label-detail">Medical scheme </h>
+                                        <p class="paragraph-label-detail"></p>
+                                    </div>
+                                    <div class="col-md-10">
+                                        <span class="display-details">@Html.DisplayFor(model => model.MedicalScheme)</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <br />
+                            <div class="form-group">
+                                <div class="col-md-12">
+                                    <div class="col-md-2">
+                                        <h class="label-detail">Program </h>
+                                        <p class="paragraph-label-detail"></p>
+                                    </div>
+                                    <div class="col-md-10">
+                                        <span class="display-details">@Html.DisplayFor(model => model.Program)</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h4 class="tableDivider-heading text-divider"></h4>
+                            <br />
+                            <div class="form-group">
+                                <div class="col-md-12">
+                                    <div class="col-md-2">
+                                        <h class="label-detail">Management status </h>
+                                        <p class="paragraph-label-detail"></p>
+                                    </div>
+                                    <div class="col-md-10">
+                                        <span class="display-details">@Html.DisplayFor(model => model.ManagementStatus)</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <br />
+                            <h4 class="tableDivider-heading text-divider"></h4>
+                            <br />
+                            <div class="col-md-12">
+                                <div class="col-md-2">
+                                    <h class="label-detail">Pathology </h>
+                                    <p class="paragraph-label-detail"></p>
+                                </div>
+                                <table class="table wf-pathology table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Field</th>
+                                            <th style="text-align: center!important; width: 18%">Less than</th>
+                                            <th style="text-align: center!important; width: 18%">Greater than</th>
+                                        </tr>
+                                    </thead>
+                                    @{int i = 1;}
+                                    @foreach (var item in Model.PathologyFields)
+                                    {
+                                        <tbody>
+                                            <tr>
+                                                <td>
+                                                    <span class="display-details">@item.PathologyField</span>
+                                                </td>
+                                                <td style="text-align: center!important; padding-bottom: 15px">
+                                                    <span class="display-details">@item.Less</span>
+                                                </td>
+                                                <td style="text-align: center!important; padding-bottom: 15px">
+                                                    <span class="display-details">@item.Greater</span>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                        i++;
+                                    }
+                                </table>
+                            </div>
+                            <br />
+                            <div class="form-group">
+                                <div class="col-md-12">
+                                    <div class="col-md-2">
+                                        <h class="label-detail">From date </h>
+                                        <p class="paragraph-label-detail">Management status effective date.</p>
+                                    </div>
+                                    <div class="col-md-10">
+                                        <span class="display-details">@(!String.IsNullOrEmpty(Model.FromDate.ToString()) ? Model.FromDate.Value.ToString("dd-MM-yyyy") : "-")</span>
+
+                                    </div>
+                                </div>
+                            </div>
+                            <br />
+                            <div class="form-group">
+                                <div class="col-md-12">
+                                    <div class="col-md-2">
+                                        <h class="label-detail">To date </h>
+                                        <p class="paragraph-label-detail">Management status effective date.</p>
+                                    </div>
+                                    <div class="col-md-10">
+                                        <span class="display-details">@(!String.IsNullOrEmpty(Model.ToDate.ToString()) ? Model.ToDate.Value.ToString("dd-MM-yyyy") : "-")</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <br />
+                            <div id="pathology-section" class="">
+                                <h4 class="tableDivider-heading text-divider"></h4>
+                                <br />
+                                <div class="col-md-12">
+                                    <div class="col-md-2">
+                                        <h class="label-detail">Pathology </h>
+                                        <p class="paragraph-label-detail">Pathology filters as per the dropdown.</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <table class="table wf-pathology table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>&emsp; Field</th>
+                                                <th style="text-align: center!important; width: 18%">Less than</th>
+                                                <th style="text-align: center!important; width: 18%">Greater than</th>
+                                            </tr>
+                                        </thead>
+
+                                        @foreach (var item in Model.PathologyFields)
+                                        {
+                                            <tbody>
+                                                <tr>
+                                                    <td style="padding-bottom: 15px!important">
+                                                        <span class="display-details" id="pathology-1">@item.PathologyField</span>
+                                                    </td>
+                                                    <td style="text-align: center!important">
+                                                        <span class="display-details">@item.Less</span>
+                                                    </td>
+                                                    <td style="text-align: center!important">
+                                                        <span class="display-details">@item.Greater</span>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        }
+
+                                    </table>
+                                </div>
+                            </div>
+
+                            <h4 class="tableDivider-heading text-divider"></h4>
+                            <br />
+                            <div class="form-group">
+                                <div class="col-md-12">
+                                    <div class="col-md-2">
+                                        <h class="label-detail">Risk rating </h>
+                                        <p class="paragraph-label-detail"></p>
+                                    </div>
+                                    <div class="col-md-10">
+                                        <span class="display-details">@(!String.IsNullOrEmpty(Model.RiskRating) ? Model.RiskRating : "-")</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <br />
+                            <div class="form-group">
+                                <div class="col-md-12">
+                                    <div class="col-md-2">
+                                        <h class="label-detail">Assignments </h>
+                                        <p class="paragraph-label-detail"></p>
+                                    </div>
+                                    <div class="col-md-10">
+                                        <span class="display-details">@(!String.IsNullOrEmpty(Model.AssignmentItemType) ? Model.AssignmentItemType : "-")</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <br />
+                            <div class="form-group">
+                                <div class="col-md-12">
+                                    <div class="col-md-2">
+                                        <h class="label-detail">Instruction </h>
+                                        <p class="paragraph-label-detail"></p>
+                                    </div>
+                                    <div class="col-md-10">
+                                        <span class="display-details">@(!String.IsNullOrEmpty(Model.Instruction) ? Model.Instruction: "-")</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <h4 class="tableDivider-heading text-divider"></h4>
+                            <br />
+                            <div class="form-group">
+                                <div class="col-md-12">
+                                    <div class="col-md-2">
+                                        <h class="label-detail">Created by </h>
+                                        <p class="paragraph-label-detail"></p>
+                                    </div>
+                                    <div class="col-md-10">
+                                        <span class="display-details">@Html.DisplayFor(model => model.CreatedBy)</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <br />
+                            <div class="form-group">
+                                <div class="col-md-12">
+                                    <div class="col-md-2">
+                                        <h class="label-detail">Created date </h>
+                                        <p class="paragraph-label-detail"></p>
+                                    </div>
+                                    <div class="col-md-10">
+                                        <span class="display-details">@Html.DisplayFor(model => model.CreatedDate)</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <br />
+                            @if (Model.ModifiedDate != null)
+                            {
+                                <div class="form-group">
+                                    <div class="col-md-12">
+                                        <div class="col-md-2">
+                                            <h class="label-detail">Modified by </h>
+                                            <p class="paragraph-label-detail"></p>
+                                        </div>
+                                        <div class="col-md-10">
+                                            <span class="display-details">@Html.DisplayFor(model => model.ModifiedBy)</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <br />
+                                <div class="form-group">
+                                    <div class="col-md-12">
+                                        <div class="col-md-2">
+                                            <h class="label-detail">Modified date </h>
+                                            <p class="paragraph-label-detail"></p>
+                                        </div>
+                                        <div class="col-md-10">
+                                            <span class="display-details">@Html.DisplayFor(model => model.ModifiedDate)</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <br />
+                            }
+
+                            <h4 class="tableDivider-heading text-divider"></h4>
+                            <br />
+                            <div class="form-group">
+                                <div class="col-md-12">
+                                    <div class="col-md-2">
+                                        <h class="label-detail">Active </h>
+                                        <p class="paragraph-label-detail"></p>
+                                    </div>
+                                    <div class="col-md-10">
+                                        <span class="@(Model.Active == true ? "chk-yes fas fa-circle tab" : "chk-no fas fa-circle tab")"></span>&emsp;<span class="active-details">@((Model.Active == true) ? "Yes" : "No")</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <br />
+                        </div>
+                        <br />
+                        <br />
+                        <div class="form-group">
+                            <div class="centered-btn">
+                                <input id="edit-other" value="Edit" class="btn edit-button" onclick="location.href = '@Url.Action("Edit", "Workflow", new { id = Model.QueueID })'; editKey();" style="width: 15%!important" /><br />
+                                <input value="Back" class="btn reset-button go_back" onclick="MainbackBtn()" style="width: 15%!important" />
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/js/standalone/selectize.js"></script>
+    <script>
+        $(document).ready(function () {
+            var path1 = $("#pathology-1").val();
+            if (path1.length == 0) {
+                $('#pathology-section').addClass('hidden');
+            }
+        })
+    </script>
+}

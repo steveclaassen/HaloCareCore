@@ -1,0 +1,234 @@
+﻿@model HaloCareCore.Models.ClinicalHistoryViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "AddAllergies";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+<comment>
+    <!--
+        06 August 2019 -- HCare-758(Generel - Redirect to tab functionality)
+        Using jquery to add localStorage in order to redirect to the last tab that the user was on and a Submit/Save Button clicked. This will take you back to the origin tab.
+    -->
+</comment>
+
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+</style>
+
+<div class="fullPanel_Container">
+    <div class="profilePanel_pathology">
+        <!--breadCrumbs-->
+        <ul class="breadcrumbs" style="margin-top: -1%; margin-bottom: 2%; margin-left: -1%">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+            <li><a class="go_back">Patient</a></li>
+            <li><a href="#">Allergy history</a></li>
+        </ul>
+
+        <!--navCollection-->
+        <div class="navButtons">
+            @Html.Partial("_navCollection")
+        </div>
+
+        <!--profileInformation-->
+        <div>
+            @Html.Action("_profileBar_edit", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })
+        </div>
+    </div>
+    <!--pageHeader-->
+    <nav id="global-nav" class="nav">
+        <div class="pull-left title">
+            <h1 class="site-title_patientProfile">
+                <span><img src="~/Content/Images/memberProfile/topBar Icons/Medication_one.png" /></span>&emsp; Allergies
+            </h1>
+        </div>
+        <div class="pull-right title">
+            <h1 class="site-title_userID pull-right">
+                <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+            </h1>
+            <h1 class="site-title_userID pull-right">
+                @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                {
+                    <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                }
+            </h1>
+            <h1 class="site-waffleIcon pull-right">
+                <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+            </h1>
+        </div>
+    </nav>
+
+    <div class="row assignmentOverview_container">
+
+        <h4 class="summaryHeading">Allergy history</h4>
+        <hr class="fancyruler">
+        <br />
+        <br />
+
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(model => model.allergy.dependantId)
+
+
+            <div class="form-horizontal editForm" style="margin-left: 15%">
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                <div class="form-horizontal">
+                    @Html.LabelFor(model => model.allergy.Allergy, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        <div>
+                            @Html.EditorFor(model => model.allergy.Allergy, new { htmlAttributes = new { @class = "infoBox_editMember", @style = "max-width: 800px!important; width: 600px; margin-left: 1%; overflow-x: scroll;" } })
+                            @Html.ValidationMessageFor(model => model.allergy.Allergy, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="actionButton" style="margin-left: 44.5%">
+                    <input type="submit" value="Create" class="btn buttonRound_scriptAdd" style="width: 15%!important" />
+                </div>
+            </div>
+
+        }
+        <br />
+        <br />
+
+        <div class="col-md-12" style="margin-bottom: 7.5%">
+            <div class="row">
+                <table class="table indexTable_assignments" id="allergyTable">
+                    <tr>
+                        <th onclick="allergyTable(1)">
+                            @Html.DisplayNameFor(model => model.allergy.Allergy) <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th onclick="allergyTable(2)">
+                            @Html.DisplayNameFor(model => model.allergy.createdBy) <i class="fa fa-fw fa-sort"></i>
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.allergy.createdDate)
+                        </th>
+                    </tr>
+                    @if (Model.allergies.Count() == 0)
+                    {
+                        <tr><td colspan="3" style="text-align: center!important">No records available</td></tr>
+                    }
+                    else
+                    {
+                        foreach (var item in Model.allergies)
+                        {
+                            <tr>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Allergy)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.createdBy)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.createdDate)
+                                </td>
+                            </tr>
+                        }
+                    }
+
+                </table>
+            </div>
+        </div>
+        <div class="fixedBack" style="margin-left: 40%">
+            <a href="@Url.Action("patientClinical", "Member", new { DependentID = Context.Request.Query["DependentID"]})" class="btn buttonRound_formBack" style="width: 15%!important; position: relative; margin-left: 1%!important">Back</a>
+            <input type="button" class="btn buttonRound_formCreate patientClinical" style="width: 15%" value="Next" onclick="location.href='@Url.Action("AddClinical", "Member", new { DependentID = Model.allergy.dependantId }, null)'" />
+        </div>
+
+    </div>
+</div>
+
+<script src="js/jquery.tablesorter.min.js"></script>
+
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <script>
+        /*tableSearch*/
+        var $rows = $('#allergyTable tr');
+        $('#search').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $rows.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+
+        /*tableSort*/
+        function allergyTable(n) {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("allergyTable");
+            switching = true;
+            dir = "asc";
+
+            while (switching) {
+                switching = false;
+                rows = table.getElementsByTagName("TR");
+
+                for (i = 1; i < (rows.length - 1); i++) {
+
+                    shouldSwitch = false;
+
+                    x = rows[i].getElementsByTagName("TD")[n];
+                    y = rows[i + 1].getElementsByTagName("TD")[n];
+
+                    if (dir == "asc") {
+                        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                            //if so, mark as a switch and break the loop:
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (dir == "desc") {
+                        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                            //if so, mark as a switch and break the loop:
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+                if (shouldSwitch) {
+                    /*If a switch has been marked, make the switch
+                    and mark that a switch has been done:*/
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                    //Each time a switch is done, increase this count by 1:
+                    switchcount++;
+                } else {
+                    /*If no switching has been done AND the direction is "asc",
+                    set the direction to "desc" and run the while loop again.*/
+                    if (switchcount == 0 && dir == "asc") {
+                        dir = "desc";
+                        switching = true;
+                    }
+                }
+            }
+        }
+
+        $(document).ready(function () {
+            $('#table').DataTable({
+                columnDefs: [{
+                    targets: [0],
+                    orderData: [0, 1]
+                }, {
+                    targets: [1],
+                    orderData: [1, 0]
+                }, {
+                    targets: [4],
+                    orderData: [4, 0]
+                }]
+            });
+        });
+
+    </script>
+
+}
+
+
+

@@ -1,0 +1,232 @@
+﻿@model HaloCareCore.Models.EnrolmentViewModel
+
+@{
+    ViewBag.Title = "profileInformation";
+    Layout = "~/Views/Shared/_layout-view.cshtml";
+}
+<comment>
+    <!--
+        12 April 2019 HCare-695(HaloCare Risk rating (new request for Brandon))
+
+        11 February 2020 -- HCare-959(Edit Member changes)
+        Update to Edit Member view which has disabled fields that are controlled by the import of the patient as well as the sync. There are only three fields left as per the SR which allows the user to update accordingly.
+        Corrections were made to the controller queries as the data was not being saved correctly with regard to the fields that are editable. All the editable fields are now being saved correctly.
+        In addition, an update to the view has been made as an example of a test run - The blue button in the middle of the screen will allow you to hide the profile bar to open the page more to see more information.
+    -->
+</comment>
+
+@Html.Hidden("riskRatingID", (object)ViewBag.riskRatingID)
+
+<div class="row member-name">
+    <div class="row" id="memberInformation">
+        <div class="col-md-12 row">
+            <!-------------------------------------------------------------------------- nav-collection -------------------------------------------------------------------------->
+            <div class="member-navigation-collection">
+                @Html.Partial("_navCollection")
+            </div>
+            <!-------------------------------------------------------------------------- member-details -------------------------------------------------------------------------->
+            <div class="col-md-6">
+                <a class="member-info-name" title="@Model.RiskReason @Model.HypoRisk" href="@Url.Action("EditMember", "Member", new { DependentID = Model.dependent.DependantID, pro = Context.Request.Query["pro"] }, null)">
+                    <span style="font-size: 30%; vertical-align: super"><i class="fas fa-star"></i></span>
+                    @Html.DisplayFor(model => model.dependent.Title_UC) @Html.DisplayFor(model => model.dependent.firstName_UC) @Html.DisplayFor(model => model.dependent.lastName_UC), @Html.DisplayFor(model => model.dependent.initials_UC)
+                    <span style="font-size: 70%">@Html.DisplayFor(model => model.dependent.dependantAge)</span>
+                    <span class="genderSymbol">
+                        @if (Model.dependent.sex == "M")
+                        {
+                            <img src="~/Content/Images/_2020/icons/symbol-male.png" class="gender-img" />
+                        }
+                        else if (Model.dependent.sex == "F")
+                        {
+                            <img src="~/Content/Images/_2020/icons/symbol-female.png" class="gender-img" />
+                        }
+                        else
+                        {
+                            <img src="~/Content/Images/_2020/icons/symbol-unknown.png" class="gender-img" />
+                        }
+                    </span>
+                </a>
+            </div>
+            <!--------------------------------------------------------------------------- member-search -------------------------------------------------------------------------->
+            <div class="col-md-6">
+                <div class="input-wrapper-member-search">
+                    @using (Html.BeginForm("Search", "Member", FormMethod.Post, new { id = "Search", @class = "navbar-right" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        <ul class="nav navbar-nav navbar-right">
+                            <li class="focus">
+                                @Html.TextBox("SearchVar", null, new { @class = "form-control-patientSearch", @placeholder = "Search..." })
+                            </li>
+                            <div class="btn-group" role="group">
+                                <button type="submit" class="btn btn-search" style="height: 29px"><span class="glyphicon glyphicon-search" aria-hidden="true" title="Search"></span></button>
+                            </div>
+                        </ul>
+                    }
+                </div>
+            </div>
+        </div>
+        <hr class="member-profile-ruler" />
+        <!---->
+        <div class="row col-md-12 row">
+            <!------------------------------------------------------------------------------ column-1 ---------------------------------------------------------------------------->
+            <div class="col-md-6_custom">
+                <div class="memberInformation_memberNo">
+                    @Html.Label(null,"Member #: ", htmlAttributes: new { @class = "control-label-member_view" })
+                    @Html.DisplayFor(model => model.member.membershipNo)
+                </div>
+                <div class="memberInformation_memberAge">
+                    @Html.Label(null,"Dependant: ", htmlAttributes: new { @class = "control-label-member_view" })
+                    @Html.DisplayFor(model => model.dependent.dependentCode)
+                </div>
+                <div class="memberInformation_idNum">
+                    @Html.Label(null,"ID/Auth #: ", htmlAttributes: new { @class = "control-label-member_view" })
+                    @Html.DisplayFor(model => model.dependent.idNumber)
+                </div>
+            </div>
+            <!------------------------------------------------------------------------------ column-2 ---------------------------------------------------------------------------->
+            <div class="col-md-6_custom">
+                <div class="memberInformation_memberAge">
+                    @Html.Label(null,"Scheme: ", htmlAttributes: new { @class = "control-label-member_view" })
+                    @Html.DisplayFor(model => model.MedicalAids[0].Name)
+                </div>
+                <div class="memberInformation_memberAge">
+                    @Html.Label(null,"Option: ", htmlAttributes: new { @class = "control-label-member_view" })
+                    @Html.DisplayFor(model => model.plan)
+                </div>
+                <div class="memberInformation_memberAge">
+                    @Html.Label(null,"Employer group: ", htmlAttributes: new { @class = "control-label-member_view" })
+                    @if (Model.paypoint != null)
+                    {
+                        @Html.DisplayFor(model => model.paypoint)
+                    }
+                </div>
+            </div>
+            <!------------------------------------------------------------------------------ column-3 ---------------------------------------------------------------------------->
+            <div class="col-md-5_custom">
+                <div class="memberInformation_memberAge">
+                    @Html.Label(null,"Case manager: ", htmlAttributes: new { @class = "control-label-member_view" })
+                    @Html.DisplayFor(model => model.CaseManagers.caseManagerId)
+                </div>
+                <div class="memberInformation_memberAge doctorName">
+                    @Html.Label(null,"Doctor: ", htmlAttributes: new { @class = "control-label-member_view" })
+                    @if (Model.doctor.doctorID != null)
+                    {
+                        @Html.DisplayFor(model => model.doctor.drName)
+                        if (Model.doctor.practiceNo != null)
+                        {
+                            <span class="tooltiptext">(practice #@Html.DisplayFor(model => model.doctor.practiceNo))</span>
+                        }
+                    }
+                </div>
+                <div class="memberInformation_memberAge">
+                    @Html.Label(null,"Pharmacy: ", htmlAttributes: new { @class = "control-label-member_view" })
+                    @if (Model.DProvider != null)
+                    {
+                        @Html.DisplayFor(model => model.DProvider.dispensingName)
+                    }
+                </div>
+            </div>
+            <!------------------------------------------------------------------------------ column-4 ---------------------------------------------------------------------------->
+            <div class="col-md-5_custom">
+                <div class="memberInformation_profileStatus">
+                    @Html.Label(null,"Patient status: ", htmlAttributes: new { @class = "control-label-member_view" }) <br />
+                    <span style="color: forestgreen">@Html.DisplayFor(model => model.patientStatusName)</span>
+                </div>
+            </div>
+            <!------------------------------------------------------------------------------ column-5 ---------------------------------------------------------------------------->
+            <div class="col-md-6_custom">
+                @if (Model.programs.Count != 0)
+                {
+                    if (Model.programs.Count != 0 && Model.programs.Count <= 2)
+                    {
+                        <div class="memberInformation_memberAge">
+                            @Html.Label(null,"Program(s): ", htmlAttributes: new { @class = "control-label-member_view" })<br />
+                            <table>
+                                @foreach (var prog in Model.programs)
+                                {
+                                    if (prog.effectiveDate < DateTime.Now)
+                                    {
+                                        <tr><td><b>@Html.DisplayFor(model => prog.programCode) - @Html.DisplayFor(model => prog.icd10Code)</b></td></tr>
+                                    }
+                                }
+                            </table>
+                        </div>
+                    }
+                    else if (Model.programs.Count != 0 && Model.programs.Count > 2)
+                    {
+                        <div class="memberInformation_memberAge multiProgram">
+                            @Html.Label(null,"Program(s): ", htmlAttributes: new { @class = "control-label-member_view" })<br />
+                            <div>
+                                <p style="font-size: 12px">Multiple programs</p>
+                                <div class="program-nav" id="sidebar">
+                                    <a id="program-toggle" href="#"><span id="program-icon"><i class="sub_icon fas fa-list-ul programIcon"></i></span></a>
+                                </div>
+                            </div>
+                            <span class="tooltipinfo">
+                                <table class="program-table-tooltip">
+                                    @foreach (var prog in Model.programs)
+                                    {
+                                        if (prog.effectiveDate < DateTime.Now)
+                                        {
+                                            <tr><td>@Html.DisplayFor(model => prog.programCode) - @Html.DisplayFor(model => prog.icd10Code)</td></tr>
+                                        }
+                                    }
+                                </table>
+                            </span>
+                        </div>
+                    }
+                }
+            </div>
+            <!------------------------------------------------------------------------------ column-6 ---------------------------------------------------------------------------->
+            <div class="col-md-6_custom">
+                @if (Model.statuss.Count != 0)
+                {
+                    if (Model.statuss.Count <= 2)
+                    {
+                        <div class="memberInformation_memberStatus">
+                            @Html.Label(null,"Management status: ", htmlAttributes: new { @class = "control-label-member_view" })<br />
+                            <table>
+                                @foreach (var stat in Model.statuss)
+                                {
+                                    <tr><td><b>@Html.DisplayFor(model => stat.managementStatusCode)</b></td></tr>
+                                }
+                            </table>
+                        </div>
+                    }
+                    else if (Model.statuss.Count > 2)
+                    {
+                        <div class="memberInformation_memberStatus multiStatus">
+                            @Html.Label(null,"Management status: ", htmlAttributes: new { @class = "control-label-member_view" })<br />
+                            <div>
+                                <p style="font-size: 12px" class="multiProgram">Multiple status</p>
+                                <div class="program-nav" id="sidebar">
+                                    <a id="program-toggle" href="#"><span id="program-icon"><i class="sub_icon fas fa-list-ul programIcon"></i></span></a>
+                                </div>
+                            </div>
+                            <span class="tooltipinfo">
+                                <table class="program-table-tooltip">
+                                    @foreach (var stat in Model.statuss)
+                                    {
+                                        <tr><td><b>@Html.DisplayFor(model => stat.managementStatusCode)</b></td></tr>
+                                    }
+                                </table>
+                            </span>
+                        </div>
+                    }
+                }
+            </div>
+            <!---------------------------------------------------------------------------- special-note -------------------------------------------------------------------------->
+            <div class="special-note-member">
+                @Html.Partial("_special-note")
+            </div>
+        </div>
+        <!---->
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="~/bundles/jqueryval"></script>
+
+
+}

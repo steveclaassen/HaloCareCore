@@ -1,0 +1,108 @@
+﻿@model HaloCareCore.Models.ViewModels.HIVCormodisViewModel
+@{
+    ViewBag.Title = "Details";
+    Layout = "~/Views/Shared/_layout-view-x.cshtml";
+}
+<javascript>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+    <script src="https://www.jqueryscript.net/demo/jQuery-Plugin-For-Sortable-Bootstrap-Tables-Bootstrap-Sortable/Scripts/bootstrap-sortable.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/js/standalone/selectize.js"></script>
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.default.css">
+</javascript>
+<style>
+    .default-badge {
+        display: inline-block;
+        background-color: rgb(204 204 204 / 0.40);
+        border-radius: 10px;
+        padding: 6px;
+        min-width: 10px;
+        font: 100 10px 'Century Gothic';
+        color: darkgray;
+        line-height: 1;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: baseline;
+    }
+
+    .layout-image {
+        position: relative;
+        width: 800px;
+    }
+
+    .row-image {
+    }
+</style>
+<div class="collapse in">
+    <div class="card card-body">
+        <div class="collapse-body">
+            <div class="account-setting-panel">
+                <div class="col-md-12 row">
+                    <div class="account-heading">Details</div>
+                    <p class="account-sub-header-new">HIV comorbid addition details listed below.</p>
+                </div>
+                <hr class="fancyruler">
+                <table class="table details-table table-hover" id="bipolar-details">
+                    <tbody>
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayNameFor(model => model.HivcomorbidRules.stage)</td>
+                            <td class="row-information">@Html.DisplayFor(model => model.HivcomorbidRules.stage)</td>
+                        </tr>
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayNameFor(model => model.HivcomorbidRules.Comorbid)</td>
+                            <td class="row-information">@Html.DisplayFor(model => model.HivcomorbidRules.Comorbid)</td>
+                        </tr>
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayNameFor(model => model.HivcomorbidRules.createdDate)</td>
+                            <td class="row-information">@Html.DisplayFor(model => model.HivcomorbidRules.createdDate)</td>
+                        </tr>
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayNameFor(model => model.HivcomorbidRules.createdBy)</td>
+                            <td class="row-information">@Html.DisplayFor(model => model.HivcomorbidRules.createdBy)</td>
+                        </tr>
+                        @if (Model.HivcomorbidRules.modifiedDate != null)
+                        {
+                            <tr>
+                                <td class="row-heading subject">@Html.DisplayNameFor(model => model.HivcomorbidRules.modifiedDate)</td>
+                                <td class="row-information">@Html.DisplayFor(model => model.HivcomorbidRules.modifiedDate)</td>
+                            </tr>
+                            <tr>
+                                <td class="row-heading subject">@Html.DisplayNameFor(model => model.HivcomorbidRules.modifiedBy)</td>
+                                <td class="row-information">@Html.DisplayFor(model => model.HivcomorbidRules.modifiedBy)</td>
+                            </tr>
+                        }
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayNameFor(model => model.HivcomorbidRules.active)</td>
+                            <td class="row-information"><span class="@(Model.HivcomorbidRules.active == true ? "si-approved fas fa-circle" : "si-rejected fas fa-circle")"></span>&emsp;@((Model.HivcomorbidRules.active == true) ? "Yes" : "No")</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="sf-footer">
+                    <input type="button" id="layout-back" value="Back" class="btn modal-button-previous" onclick="location.href = '@Url.Action("Index", "Rules", null)'; backKey();" />
+                    <input type="button" id="layout-edit" value="Edit" class="btn modal-button-next" onclick="location.href = '@Url.Action("hiv_comorbid_rule_edit", "Administration", new { id = Model.HivcomorbidRules.Id })'; editKey();" />
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+@section scripts{
+    <script src="~/bundles/jqueryval"></script>
+
+    <script>
+        function backKey() {
+            localStorage.setItem("back-hiv-cm", Date.now());
+        }
+        function editKey() {
+            localStorage.setItem("edit-hiv-cm", Date.now());
+        }
+    </script>
+}

@@ -1,0 +1,315 @@
+﻿@model IEnumerable<HaloCareCore.Models.Management.HypoRiskRules>
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<comment>
+    <!--
+        14 May 2019 -- HCare-733 (Account Settings - Risk rating (Related to HCare-417))
+        Applied CSS to the new Risk rating views.
+        I have added a search bar as well as a sort function that will allow the user to sort the columns.
+
+        The Create view has an Age Less and Age more or equal to field. Only one of these must be populated at a single time. I have added jQuery to remove the second field should the first field have a value greater than 0.
+        The edit page must only show the populated Age and not the 0 age field.
+    -->
+</comment>
+
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+</style>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet" />
+<link href='http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.min.css' rel='stylesheet' type='text/css'>
+
+<div class="fullScreen_container zero-padding">
+
+    <!--pageHeader-->
+    <nav id="global-nav" class="nav">
+        <div class="pull-left title">
+            <h1 class="site-title_patientProfile">
+                <span><i class="fas fa-exclamation-triangle"></i>&emsp; Risk rating</span>
+            </h1>
+        </div>
+        <div class="pull-right title">
+            <h1 class="site-title_userID pull-right">
+                <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+            </h1>
+            <h1 class="site-title_userID pull-right">
+                @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                {
+                    <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                }
+            </h1>
+            <h1 class="site-waffleIcon pull-right">
+                <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+            </h1>
+        </div>
+    </nav>
+
+    <!--breadCrumbs-->
+    <ul class="breadcrumbs_fullScreens">
+        <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+        <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+        <li><a href="@Url.Action("Index", "Administration", new {})">Settings</a></li>
+        <li><a href="#">Risk rating</a></li>
+    </ul>
+
+    <!--navCollection-->
+    <div class="navCollection_fullScreens">
+        @Html.Partial("_navCollection")
+    </div>
+
+    <div style="margin-bottom: 2%"></div>
+
+    <h4 class="tableHeading">Risk rating rules</h4>
+
+    <!--createNew-->
+    <div class="createNew_link" style="margin-top: -1%; margin-bottom: -2%">
+        <a href="@Url.Action("Create", "RiskRating", new { })">
+            <span id="texts">
+                Create new
+            </span>
+
+            <i class="material-icons" id="icon" title="New enrolment">
+                add_circle_outline
+            </i>
+        </a>
+    </div>
+    <!--jQ_Search-->
+    <div class="row tableSearch_patientOverview" style="margin-top: -2%; margin-bottom: 0.5%">
+        <div class="col-md-6 pull-right">
+            <ul class="input-group" id="adv-search">
+
+                <ul class="nav navbar-nav navbar-right">
+                    <li class="focus">
+                        <input type="text" class="form-control-patientSearch" id="search" onkeyup="myFunction()" placeholder="Search..." />
+                    </li>
+                    <div class="btn-group" role="group">
+                        <button type="submit" class="btn btn-search" style="height: 30px"><span class="glyphicon glyphicon-search" aria-hidden="true" title="Search"></span></button>
+                    </div>
+                </ul>
+            </ul>
+        </div>
+    </div>
+    <table class="table riskRatingTable" id="tableRisk">
+        <tr>
+            <th onclick="userTable(0)" style="width: 10%">@Html.DisplayNameFor(model => model.effectiveDate) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+            <th onclick="userTable(1)" style="text-align: center!important; width: 10%">@Html.DisplayName("Age less than") <i class="fa fa-fw fa-sort sortArrow"></i></th>
+            <th onclick="userTable(2)" style="text-align: center!important; width: 10%">@Html.DisplayName("Age more than") <i class="fa fa-fw fa-sort sortArrow"></i></th>
+            <th onclick="userTable(3)" style="text-align: center!important; width: 10%">@Html.DisplayNameFor(model => model.Insulin) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+            <th onclick="userTable(4)" style="text-align: center!important; width: 10%">@Html.DisplayNameFor(model => model.Sulphonylureas) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+            <th onclick="userTable(5)" style="text-align: center!important; width: 10%">@Html.DisplayName("Glucose below") <i class="fa fa-fw fa-sort sortArrow"></i></th>
+            <th onclick="userTable(6)" style="text-align: center!important; width: 10%">@Html.DisplayNameFor(model => model.Renal) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+            <th onclick="userTable(7)" style="text-align: center!important; width: 11%">@Html.DisplayNameFor(model => model.hypo) <i class="fa fa-fw fa-sort sortArrow"></i></th>
+            <th onclick="userTable(7)" style="text-align: center!important; width: 10%">@Html.DisplayNameFor(model => model.active)</th>
+            <th style="text-align: center!important; width: 10%!important">Action</th>
+        </tr>
+
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @if (item.active == false)
+                    {
+                        <span style="color: lightgray">@Html.DisplayFor(modelItem => item.effectiveDate)</span>
+                    }
+                    else
+                    {
+                        @Html.DisplayFor(modelItem => item.effectiveDate)
+                    }
+                </td>
+                <td style="text-align: center!important">
+                    @if (item.active == false)
+                    {
+                        <span style="color: lightgray">@Html.DisplayFor(modelItem => item.ltAge)</span>
+                    }
+                    else
+                    {
+                        @Html.DisplayFor(modelItem => item.ltAge)
+                    }
+                </td>
+                <td style="text-align: center!important">
+                    @if (item.active == false)
+                    {
+                        <span style="color: lightgray">@Html.DisplayFor(modelItem => item.gtAge)</span>
+                    }
+                    else
+                    {
+                        @Html.DisplayFor(modelItem => item.gtAge)
+                    }
+                </td>
+                <td style="text-align:center!important">
+                    @if (item.active == false)
+                    {
+                        <i class="fas fa-check-square" style="color: rgba(204, 204, 204, 0.50)!important; font-size: 12px"></i>
+                    }
+                    else
+                    {
+                        if (item.Insulin)
+                        {
+                            <i class="fas fa-check-square ruleCheck" style="font-size: 12px"></i>
+                        }
+                        else
+                        {
+                            <i class="fas fa-square" style="color: rgba(204, 204, 204, 0.25)!important; font-size: 12px"></i>
+                        }
+                    }
+
+                </td>
+                <td style="text-align:center!important">
+                    @if (item.active == false)
+                    {
+                        <i class="fas fa-check-square" style="color: rgba(204, 204, 204, 0.50)!important; font-size: 12px"></i>
+                    }
+                    else
+                    {
+                        if (item.Sulphonylureas)
+                        {
+                            <i class="fas fa-check-square ruleCheck" style="font-size: 12px"></i>
+                        }
+                        else
+                        {
+                            <i class="fas fa-square" style="color: rgba(204, 204, 204, 0.25)!important; font-size: 12px"></i>
+                        }
+                    }
+                </td>
+                <td style="text-align: center!important">
+                    @Html.DisplayFor(modelItem => item.Glucose)
+                </td>
+                <td style="text-align:center!important">
+                    @if (item.active == false)
+                    {
+                        <i class="fas fa-check-square" style="color: rgba(204, 204, 204, 0.50)!important; font-size: 12px"></i>
+                    }
+                    else
+                    {
+                        if (item.Renal)
+                        {
+                            <i class="fas fa-check-square ruleCheck" style="font-size: 12px"></i>
+                        }
+                        else
+                        {
+                            <i class="fas fa-square" style="color: rgba(204, 204, 204, 0.25)!important; font-size: 12px"></i>
+                        }
+                    }
+                </td>
+                <td style="text-align:center!important">
+                    @if (item.active == false)
+                    {
+                        <i class="fas fa-check-square" style="color: rgba(204, 204, 204, 0.50)!important; font-size: 12px"></i>
+                    }
+                    else
+                    {
+                        if (item.hypo)
+                        {
+                            <i class="fas fa-check-square ruleCheck" style="font-size: 12px"></i>
+                        }
+                        else
+                        {
+                            <i class="fas fa-square" style="color: rgba(204, 204, 204, 0.25)!important; font-size: 12px"></i>
+                        }
+                    }
+                </td>
+                <td class="activeCheck">
+                    @if (item.active)
+                    {
+                        <img src="~/Content/Images/Navigation/5. Reports/reportCheck.png" style="width: 15%; margin-left: 45%!important; opacity: 0.7" />
+                    }
+                    else
+                    {
+                        <img src="~/Content/Images/Navigation/5. Reports/reportCheck_x.png" style="width: 15%; margin-left: 45%!important; opacity: 0.5" />
+                    }
+                </td>
+                <td class="statusCode linkNav" style="text-align: center!important">
+                    @Html.ActionLink("Edit", "Edit", new { id = item.id }) |
+                    @Html.ActionLink("Details", "Details", new { id = item.id })
+                </td>
+            </tr>
+        }
+
+    </table>
+    <div class="fixedBack" style="margin-left: 45%!important">
+        <input value="Back" class="btn buttonRound_formBack " onclick="MainbackBtn();" style="width: 15%" />
+    </div>
+
+</div>
+
+
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <script>
+        /*tableSearch*/
+        var $rows = $('#tableRisk tr');
+        $('#search').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $rows.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+
+        /*userTable Sorting*/
+        function userTable(n) {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("tableRisk");
+            switching = true;
+            dir = "asc";
+
+            while (switching) {
+                switching = false;
+                rows = table.getElementsByTagName("TR");
+
+                for (i = 1; i < (rows.length - 1); i++) {
+
+                    shouldSwitch = false;
+
+                    x = rows[i].getElementsByTagName("TD")[n];
+                    y = rows[i + 1].getElementsByTagName("TD")[n];
+
+                    if (dir == "asc") {
+                        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                            //if so, mark as a switch and break the loop:
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (dir == "desc") {
+                        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                            //if so, mark as a switch and break the loop:
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+                if (shouldSwitch) {
+                    /*If a switch has been marked, make the switch
+                    and mark that a switch has been done:*/
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                    //Each time a switch is done, increase this count by 1:
+                    switchcount++;
+                } else {
+                    /*If no switching has been done AND the direction is "asc",
+                    set the direction to "desc" and run the while loop again.*/
+                    if (switchcount == 0 && dir == "asc") {
+                        dir = "desc";
+                        switching = true;
+                    }
+                }
+            }
+        }
+
+        /*goBack*/
+    function MainbackBtn() {
+            window.location.href = '@Url.Action("Index", "Administration")';
+        }
+
+    </script>
+}

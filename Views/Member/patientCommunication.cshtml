@@ -1,0 +1,3266 @@
+﻿@model HaloCareCore.Models.ComsViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Patient communication";
+    Layout = "~/Views/Shared/_LayoutMember.cshtml";
+}
+<comment>
+    <!-- 02 May 2019 -- HCare-621 -->
+    <!-- 21 May 2019 -- HCare-595 -->
+    <!-- 21 May 2019 -- HCare-598 -->
+    <!-- 20 June 2019 -- HCare-391 -->
+    <!-- 01 August 2019 -- HCare-775 -->
+    <!-- 02 August 2019 -- HCare-692 -->
+    <!-- 15 November 2019 -- HCare-886 -->
+    <!-- 20 February 2020 -- HCare-951 -->
+    <!-- 20 February 2020 -- HCare-963 -->
+    <!-- 26 August 2021 -- hcare-1378 -->
+    <!-- 26 August 2021 -- hcare-1379-->
+</comment>
+<style>
+    html {
+        visibility: hidden;
+    }
+
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .text-divider {
+        margin: 1em 0;
+        line-height: 0;
+        text-align: center;
+    }
+
+        .text-divider span {
+            background-color: rgba(254, 254, 254, 1);
+            padding-left: 1em;
+            padding-right: 1em;
+        }
+
+        .text-divider:before {
+            content: " ";
+            display: block;
+            border-top: 1px solid rgba(204, 204, 204, 0.50);
+            border-bottom: 1px solid transparent;
+            width: 96%;
+            margin-left: 0%;
+        }
+
+    .tooltip-wrapper {
+        display: inline-block; /* display: block works as well */
+    }
+
+        .tooltip-wrapper .btn[disabled] {
+            pointer-events: none;
+        }
+
+        .tooltip-wrapper.disabled {
+            cursor: not-allowed;
+        }
+
+    .select2-container {
+        display: block !important;
+        margin: auto !important;
+        width: 650px !important;
+    }
+
+    .select2-container--default .select2-selection--single {
+        display: block !important;
+        max-width: 1000px !important;
+        width: 650px !important;
+        max-height: 100px !important;
+        height: 30px !important;
+        margin-top: 0px !important;
+        margin-bottom: 0px !important;
+        padding: 6px 6px !important;
+        line-height: 1.428571429 !important;
+        color: #003366 !important;
+        border-radius: 0px !important;
+        border: none !important;
+        border-bottom: 1px solid #e8e6e6 !important;
+        background-color: transparent !important;
+        font-family: 'Century Gothic' !important;
+        -webkit-box-shadow: none !important;
+        box-shadow: none !important;
+    }
+
+        .select2-container--default .select2-selection--single:focus {
+            outline: none !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__placeholder {
+            color: white !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow b {
+            margin-top: -2px !important;
+        }
+
+    .field-validation-error:before {
+        font-family: FontAwesome;
+        content: "\f06a\00a0";
+        animation: pulse 2s ease infinite;
+    }
+</style>
+<style>
+    #custom-text {
+        margin-left: 10px;
+        font-family: sans-serif;
+        color: #aaa;
+    }
+</style>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .input-group-addon {
+        visibility: hidden;
+    }
+
+    .text-divider {
+        margin: 1em 0;
+        line-height: 0;
+        text-align: center;
+    }
+
+        .text-divider span {
+            background-color: rgba(254, 254, 254, 1);
+            padding: 1em;
+        }
+
+        .text-divider:before {
+            content: " ";
+            display: block;
+            border-top: 1px solid rgba(204, 204, 204, 0.50);
+            border-bottom: 1px solid transparent;
+            width: 96%;
+            margin-left: 0%;
+        }
+
+    .field-validation-error:before {
+        font-family: FontAwesome;
+        content: "\f06a\00a0";
+        animation: pulse 2s ease infinite;
+    }
+
+    .select2-container--default .select2-selection--single {
+        width: 190px !important;
+        height: 34px !important;
+        border: 1px solid transparent !important;
+    }
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            margin-top: 0px !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow b {
+            margin-top: -3px !important;
+            margin-left: 0px !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__placeholder {
+            color: white !important;
+        }
+
+    .margin-bottom-x {
+        margin-bottom: 15px;
+    }
+</style>
+<style>
+    .file-uploader {
+        background-color: #dbefe9;
+        border-radius: 3px;
+        color: #242424;
+    }
+
+    .file-uploader__message-area {
+        font-size: 18px;
+        padding: 1em;
+        text-align: center;
+        color: #377a65;
+    }
+
+    .file-list {
+        background-color: white;
+        font-size: 16px;
+    }
+
+    .file-list__name {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .file-list li {
+        height: 50px;
+        line-height: 50px;
+        margin-left: 0.5em;
+        border: none;
+        overflow: hidden;
+    }
+
+    .removal-button {
+        width: 20%;
+        border: none;
+        background-color: #d65d38;
+        color: white;
+    }
+
+        .removal-button::before {
+            content: "X";
+        }
+
+        .removal-button:focus {
+            outline: 0;
+        }
+
+    .file-chooser {
+        padding: 1em;
+        transition: background-color 1s, height 1s;
+    }
+
+        .file-chooser p {
+            font-size: 18px;
+            padding-top: 1em;
+        }
+
+    .file-uploader {
+        max-width: 400px;
+        height: auto;
+        margin: 2em auto;
+    }
+
+        .file-uploader * {
+            display: block;
+        }
+
+        .file-uploader input[type="submit"] {
+            margin-top: 2em;
+            float: right;
+        }
+
+    .file-list {
+        margin: 0 auto;
+        max-width: 90%;
+    }
+
+    .file-list__name {
+        max-width: 70%;
+        float: left;
+    }
+
+    .removal-button {
+        display: inline-block;
+        height: 100%;
+        float: right;
+    }
+
+    .file-chooser {
+        width: 90%;
+        margin: 0.5em auto;
+    }
+
+    .file-chooser__input {
+        margin: 0 auto;
+    }
+
+    .file-uploader__submit-button {
+        width: 100%;
+        border: none;
+        font-size: 1.5em;
+        padding: 1em;
+        background-color: #72bfa7;
+        color: white;
+    }
+
+        .file-uploader__submit-button:hover {
+            background-color: #a7d7c8;
+        }
+
+    .file-list li:after, .file-uploader:after {
+        content: "";
+        display: table;
+        clear: both;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+        .hidden input {
+            display: none;
+        }
+
+    .error {
+        background-color: #d65d38;
+        color: white;
+    }
+
+    *, *::before, *::after {
+        box-sizing: border-box;
+    }
+
+    ul, li {
+        margin: 0;
+        padding: 0;
+    }
+
+    .cke_toolbar_last {
+        display: none !important;
+    }
+
+    .select2-container {
+        width: 975px !important;
+        margin-left: 0px;
+    }
+
+    .select2-container--default .select2-selection--single {
+        display: block !important;
+        max-width: 1000px !important;
+        width: 95% !important;
+        max-height: 100px;
+        height: auto;
+        margin-left: 15px;
+        padding: 4px 10px !important;
+        line-height: 1.428571429;
+        color: #003366;
+        border-radius: 0px !important;
+        border: none !important;
+        border-bottom: 1px solid #e8e6e6 !important;
+        background-color: transparent !important;
+        -webkit-box-shadow: none !important;
+        box-shadow: none !important;
+    }
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            border-radius: 0px !important;
+            padding: 2px 8px !important;
+            margin-bottom: 1px !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow b {
+            margin-left: -52px !important;
+        }
+
+    #email-message {
+        display: none;
+    }
+
+    #email-message-2 {
+        display: none;
+    }
+
+    #sms-message {
+        /*        display: none;
+    */
+    }
+
+    .error-alert {
+        background-color: rgba(217, 48, 78, 0.2);
+        padding: 10px 12px 10px 12px;
+        border: 1px solid transparent !important;
+        border-radius: 0px;
+        font: 100 12px 'Open Sans', sans-serif;
+        color: rgb(217, 48, 78);
+        margin: 0 0 0 0;
+        margin-top: 0px;
+        margin-bottom: 0px;
+        margin-left: -10px;
+        width: 102%;
+        vertical-align: middle;
+    }
+
+        .error-alert span a {
+            color: rgb(217, 48, 78);
+            margin-top: -5px;
+        }
+
+    .textbox-control-date {
+        display: block !important;
+        max-width: 600px !important;
+        width: 450px;
+        max-height: 100px;
+        height: 30px;
+        margin-left: 10px;
+        padding: 6px 6px;
+        line-height: 1.428571429;
+        color: #003366;
+        border-radius: 0px !important;
+        border: none !important;
+        border-bottom: 1px solid #e8e6e6 !important;
+        background-color: transparent !important;
+        -webkit-box-shadow: none !important;
+        box-shadow: none !important;
+    }
+
+    .email-type-select {
+        width: 150px;
+        border: 1px solid transparent;
+        box-shadow: none;
+        margin-bottom: 2%;
+        color: #ccc;
+    }
+</style>
+<javascript>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js"></script>
+    <script src="https://www.jqueryscript.net/demo/jQuery-Plugin-For-Sortable-Bootstrap-Tables-Bootstrap-Sortable/Scripts/bootstrap-sortable.js"></script>
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+</javascript>
+
+<div id="email-overlay" class="email-overlay"></div>
+<div id="attachment-overlay" class="attachment-overlay"></div>
+
+<!----------------------------------------------------------------------------- html-top-navigation-panel  ---------------------------------------------------------------------------->
+<nav id="global-nav" class="nav">
+    <div class="pull-left title">
+        <h1 class="site-title_patientProfile">
+            <span><i class="fas fa-comments"></i>&emsp; Patient communication</span>
+        </h1>
+    </div>
+    <div class="pull-right title">
+        <h1 class="site-title_userID pull-right">
+            <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+        </h1>
+        <h1 class="site-title_userID pull-right">
+            @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+            {
+                <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+            }
+        </h1>
+        <h1 class="site-waffleIcon pull-right">
+            <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+        </h1>
+    </div>
+</nav>
+
+<!-------------------------------------------------------------------------------------- html-body ------------------------------------------------------------------------------------>
+<div class="dashboardContainer zero-padding">
+    <div class="patientDashboard_View">
+        <!-- breadcrumbs -->
+        <ul class="breadcrumbs_patientDashboard">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+            <li><a href="@Url.Action("patientDashboard", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"]})">Patient</a></li>
+            <li><a href="#">@ViewBag.Title</a></li>
+        </ul>
+        <!-- navigation-collection -->
+        <div class="navCollection_patientDashboard">
+            @Html.Partial("_navCollection")
+        </div>
+        <!-- left-navigation-panel -->
+        @Html.Partial("_navSlider", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })
+        <!--profile-information-->
+        <div class="profileBar">
+            @Html.Action("_profileBar_edit", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })
+        </div>
+    </div>
+
+    <div class="profilebar-spacer"></div>
+
+    <div class="patientDashboard_container">
+
+        <!-------------------------------------------------------------------------------------- iseries-sync ------------------------------------------------------------------------------------>
+        <div class="col-md-12 row">
+            <div class="col-md-6">
+                <h4 class="summaryHeading">Patient communication</h4>
+            </div>
+            <div class="col-md-6">
+                <div class="sync-button">
+                    @if (ViewBag.sync)
+                    {
+                        <a href="@Url.Action("SyncSeries", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)" title="iSeries sync"><span class="sub_icon fas fa-sync-alt"></span></a>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <hr class="patientProfile_Ruler" />
+
+        <div class="container-tab">
+            <div class="row">
+                <div class="span12">
+                    <div class="container-tab">
+                        <!------------------------------------------------------------------------------------ tab-navigation ----------------------------------------------------------------------------------->
+                        <ul class="nav nav-pills nav-justified" role="tablist">
+                            <li role="presentation" class="tab-clinical active"><a href="#enquiries" aria-controls="enquiries" class="tab-label" data-toggle="tab" id="enquery_tab">Enquiries</a></li>
+                            <li role="presentation" class="tab-clinical"><a href="#sms" aria-controls="sms" class="tab-label" role="tab" data-toggle="tab" id="text_tab">Text message</a></li>
+                            <li role="presentation" class="tab-clinical"><a href="#email" aria-controls="email" class="tab-label" role="tab" data-toggle="tab" id="email_tab">Email</a></li>
+                            <li role="presentation" class="tab-clinical"><a href="#contact" aria-controls="contact" class="tab-label" role="tab" data-toggle="tab" id="contact_tab">Contact information</a></li>
+                            <li role="presentation" class="tab-clinical"><a href="#notes" aria-controls="notes" class="tab-label" role="tab" data-toggle="tab" id="notes_tab">Notes</a></li>
+                            <li role="presentation" class="tab-clinical"><a href="#attachments" aria-controls="attachments" class="tab-label" role="tab" data-toggle="tab" id="attachments_tab">Attachments</a></li>
+                            <li role="presentation" class="tab-clinical"><a href="#documents" aria-controls="documents" class="tab-label" role="tab" data-toggle="tab" id="documents_tab">Documents</a></li>
+                            @if (Model.programCode == "DIABD") //HCare-1252
+                            {
+                                <li role="presentation" class="tab-clinical"><a href="#Diabetic" aria-controls="Diabetic" class="tab-label" role="tab" data-toggle="tab" id="Diabetic_tab">Diabetic diary</a></li>
+                            }
+                            <li role="presentation" class="tab-clinical"><a href="#communicationLog" aria-controls="communicationLog" class="tab-label" role="tab" data-toggle="tab" id="communicationLog-tab">Communication Log</a></li>
+                        </ul>
+                        <!-------------------------------------------------------------------------------------- tab-panels ------------------------------------------------------------------------------------->
+                        <div class="tab-content">
+                            <!---------------------------------------------------------------------------------- tab-enquiries ------------------------------------------------------------------------------------>
+                            <div role="tabpanel" class="tab-pane active" id="enquiries">
+                                <div class="row">
+                                    <br />
+                                    <!--------------------------------------------------------------------------- new/search -------------------------------------------------------------------------->
+                                    <div class="row">
+                                        @using (Html.BeginForm("_Communications", "Member", FormMethod.Post))
+                                        {
+                                            <div class="col-md-12 row">
+                                                <!--------------------------------------------------------------------------- create-enquiry -------------------------------------------------------------------------->
+                                                <div class="col-md-6">
+                                                    <h4 class="subHeading">
+                                                        Patient enquiries
+                                                        <a class="create-new" href="@Url.Action("Enquiries", "Member", new { DependentID = Model.queries.dependentID , pro = Context.Request.Query["pro"] })" style="font-size: 14px">Create new <span><i class="fa fa-plus-circle" style="font-size: 12px"></i></span></a>
+                                                    </h4>
+                                                </div>
+                                                <!--------------------------------------------------------------------------- jq-search -------------------------------------------------------------------------->
+                                                <div class="col-md-6">
+                                                    <div class="input-wrapper-new-search">
+                                                        <input type="text" class="form-control-new-search" id="enquirySearch" placeholder="Search..." />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!------------------------------------------------------------------------ enquiry-table ---------------------------------------------------------------------->
+                                            <table class="table settings-table sortable" id="enquiryTable">
+                                                <thead>
+                                                    <tr>
+                                                        <th>@Html.DisplayNameFor(model => model.queries.effectiveDate) <i class="fa fa-fw fa-sort"></i></th>
+                                                        <th>@Html.DisplayName("Reference #") <i class="fa fa-fw fa-sort"></i></th>
+                                                        <th>@Html.DisplayNameFor(model => model.queries.queryType) <i class="fa fa-fw fa-sort"></i></th>
+                                                        <th>@Html.DisplayNameFor(model => model.queries.enquiryBy) <i class="fa fa-fw fa-sort"></i></th>
+                                                        <th style="width: 20%">@Html.DisplayNameFor(model => model.queries.query) <i class="fa fa-fw fa-sort"></i></th>
+                                                        <th>@Html.DisplayName("Enquiry status") <i class="fa fa-fw fa-sort"></i></th>
+                                                        <th>@Html.DisplayName("Closed by") <i class="fa fa-fw fa-sort"></i></th>
+                                                        <th>@Html.DisplayName("Closed date") <i class="fa fa-fw fa-sort"></i></th>
+                                                        <th>@Html.DisplayNameFor(model => model.queries.Time)</th>
+                                                        <th style="text-align: center!important">Action</th>
+                                                    </tr>
+                                                </thead>
+                                                @foreach (var item in Model.queriess)
+                                                {
+                                                    <tbody id="enqTable">
+                                                        <tr>
+                                                            <td data-dateformat="DD-MM-YYYY">@Html.DisplayFor(modelItem => item.effectiveDate)</td>
+                                                            <td>@Html.DisplayFor(modelItem => item.ReferenceNumber)</td>
+                                                            <td>@Html.DisplayFor(modelItem => item.queryType)</td>
+                                                            <td>@Html.DisplayFor(modelItem => item.enquiryBy)</td>
+                                                            <td>@Html.DisplayFor(modelItem => item.query)</td>
+                                                            <td>@Html.DisplayFor(modelItem => item.EnquiryStatus)</td>
+                                                            <td data-dateformat="DD-MM-YYYY">@Html.DisplayFor(modelItem => item.resolvedBy)</td>
+                                                            <td data-dateformat="DD-MM-YYYY">@Html.DisplayFor(modelItem => item.resolutionDate)</td>
+                                                            <td>@Html.DisplayFor(modelItem => item.Time)</td>
+                                                            <td class="text-center">
+                                                                <input type="button" class="link-button" value="View" onclick="location.href='@Url.Action("EnquiryFullView", "Member", new { depId = Context.Request.Query["DependentID"], QueryID = item.queryID.ToString(), pro = Context.Request.Query["pro"]}, null)'" />
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                }
+                                            </table>
+                                        }
+                                    </div>
+                                </div>
+                                <br /><br />
+                            </div>
+                            <!-------------------------------------------------------------------------------- tab-text-messages ---------------------------------------------------------------------------------->
+                            <div role="tabpanel" class="tab-pane" id="sms">
+                                <div class="row">
+                                    <div class="sms-opt-out-alert">
+                                        @if (Model.dependant.optOut == false)
+                                        {
+                                            <div class="new-alert new-alert-success">
+                                                <span><i class="fas fa-check-circle"></i></span> <strong>&nbsp;SMS Option&emsp;<i class="fas fa-caret-right" style="font-size: 10px"></i> </strong>&nbsp; Member is selected for SMS OPT-IN & can receive SMS.
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="new-alert new-alert-danger">
+                                                <span><i class="fas fa-warning"></i></span> <strong>&nbsp;SMS Option&emsp;<i class="fas fa-caret-right" style="font-size: 10px"></i> </strong>&nbsp; Member is selected for SMS OPT-OUT & <span style="font-weight: bold">SHOULD NOT</span> receive SMS.
+                                            </div>
+                                        }
+                                    </div>
+                                    <div class="col-md-12"><div id="error-invalid" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; A contact number requires 10-12 digits and cannot contain any special characters!</span></div></div></div>
+                                </div>
+
+                                <br />
+                                <!--------------------------------------------------------------------------- new/search -------------------------------------------------------------------------->
+                                <div class="row">
+                                    <div class="col-md-12 row">
+                                        <div class="col-md-6"><h4 class="subHeading">Text message history <a class="create-new new-sms-button" style="font-size: 14px">Create new <span><i class="fa fa-plus-circle" style="font-size: 12px"></i></span></a></h4></div>
+                                        <div class="col-md-6"><div class="input-wrapper-new-search"><input type="text" class="form-control-new-search" id="sms-search" placeholder="Search..." /></div></div>
+                                    </div>
+
+                                    <table class="table settings-table sortable" id="email-history-table">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 10%; text-align: center !important">@Html.DisplayNameFor(model => model.SMSHistory[0].createdDate) <i class="fa fa-fw fa-sort"></i></th>
+                                                <th style="width: 10%">@Html.DisplayNameFor(model => model.SMSHistory[0].cell_no) <i class="fa fa-fw fa-sort"></i></thstyle="width:>
+                                                <th>@Html.DisplayNameFor(model => model.SMSHistory[0].message) <i class="fa fa-fw fa-sort"></i></th>
+                                                <th style="width: 10%">@Html.DisplayName("Status") </th>
+                                                <th style="width: 10%; text-align: center !important">@Html.DisplayName("Action") </th>
+                                            </tr>
+                                        </thead>
+                                        @foreach (var item in Model.SMSHistory)
+                                        {
+                                            <tbody id="sh-search">
+                                                <tr>
+                                                    <td class="text-center" data-dateformat="DD-MM-YYYY">@Html.DisplayFor(modelItem => item.createdDate)</td>
+                                                    <td class="text-left">@Html.DisplayFor(modelItem => item.cell_no)</td>
+                                                    <td class="text-left">@Html.DisplayFor(modelItem => item.message)</td>
+                                                    <td class="text-left">@Html.DisplayFor(modelItem => item.status)</td>
+                                                    <td class="text-center">
+                                                        <input type="button" class="link-button" value="View" onclick="location.href='@Url.Action("textmessage_details", "Member", new {id = item.messageID}, null)'" />
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        }
+                                    </table>
+                                </div>
+                            </div>
+                            <!------------------------------------------------------------------------------------ tab-email -------------------------------------------------------------------------------------->
+                            <div role="tabpanel" class="tab-pane" id="email">
+                                <div class="row">
+                                    <div class="sms-opt-out-alert">
+                                    </div>
+                                    <div class="col-md-12"><div id="error-invalid" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; A contact number requires 10-12 digits and cannot contain any special characters!</span></div></div></div>
+                                </div>
+                                <br />
+                                <div class="row">
+                                    <div class="col-md-12 row">
+                                        <div class="col-md-6"><h4 class="subHeading">Email history <a class="create-new new-email-button" style="font-size: 14px">Create new <span><i class="fa fa-plus-circle" style="font-size: 12px"></i></span></a></h4></div>
+                                        <div class="col-md-6"><div class="input-wrapper-new-search"><input type="text" class="form-control-new-search" id="email-search" placeholder="Search..." /></div></div>
+                                    </div>
+
+                                    <table class="table settings-table sortable" id="email-history-table">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 10%; text-align: center !important">@Html.DisplayNameFor(model => model.EmailHistory[0].createdDate) <i class="fa fa-fw fa-sort"></i></th>
+                                                <th>@Html.DisplayNameFor(model => model.EmailHistory[0].emailTo) <i class="fa fa-fw fa-sort"></i></th>
+                                                <th>@Html.DisplayNameFor(model => model.EmailHistory[0].subject) <i class="fa fa-fw fa-sort"></i></th>
+                                                <th style="width: 10%">@Html.DisplayName("Status") </th>
+                                                <th style="width: 10%; text-align: center !important">@Html.DisplayName("Action") </th>
+                                            </tr>
+                                        </thead>
+                                        @foreach (var item in Model.EmailHistory)
+                                        {
+                                            <tbody id="eh-search">
+                                                <tr>
+                                                    <td class="text-center" data-dateformat="DD-MM-YYYY">@Html.DisplayFor(modelItem => item.createdDate)</td>
+                                                    <td class="text-left">@Html.DisplayFor(modelItem => item.emailTo)</td>
+                                                    <td class="text-left">@Html.DisplayFor(modelItem => item.subject)</td>
+                                                    <td class="text-left">
+                                                        @if (item.status.ToLower() == "queued")
+                                                        {<span><i class="si-pending fas fa-circle"></i>&nbsp;&nbsp;@Html.DisplayFor(modelItem => item.status)</span>}
+                                                    else if (item.status.ToLower() == "sent")
+                                                    {<span><i class="si-approved fas fa-circle"></i>&nbsp;&nbsp;@Html.DisplayFor(modelItem => item.status)</span>}
+                                                else if (item.status.ToLower() == "rejected")
+                                                {<span><i class="si-rejected fas fa-circle"></i>&nbsp;&nbsp;@Html.DisplayFor(modelItem => item.status)</span>}
+                                            else if (item.status.ToLower().Contains("error"))
+                                            {<span><i class="si-rejected fas fa-circle"></i>&nbsp;&nbsp;Error</span>}
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <input type="button" class="link-button" value="View" onclick="location.href='@Url.Action("email_details", "Member", new {id = item.emailId}, null)'" />
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        }
+                                    </table>
+                                </div>
+                            </div>
+                            <!----------------------------------------------------------------------------------- tab-contact ------------------------------------------------------------------------------------->
+                            <div role="tabpanel" class="tab-pane" id="contact">
+                                <div class="row">
+                                    <br />
+                                    <div class="row communicationTab">
+                                        <div class="row">
+                                            <table class="table patientCommunication_iSeriesTable" id="iSeriesTable" style="margin-left: -2.5%!important; margin-top: 1%!important">
+                                                <thead>
+                                                    <tr>
+                                                        <th class="iSeriesTH" style="width: 15%"></th>
+                                                        <th style="text-align: center!important; width: 35%">
+                                                            <span class="tooltip-wrapper" data-title="HaloCare version of Contact & Address information">
+                                                                HaloCare
+                                                            </span>
+                                                            @if (Model.memberInformation.contactID == null)
+                                                            {
+                                                                <div class="contactInfo_icon fas fa-plus" onclick="location.href='@Url.Action("AddContactInformation", "Member", new { DependentID = Model.queries.dependentID,  pro = Context.Request.Query["pro"] })'" title="Add Contact" style="margin-top: 4px!important; margin-right: 1%!important"> </div>
+                                                            }
+                                                            @if (Model.memberInformation.contactID != null)
+                                                            {
+                                                                <div class="contactInfo_icon far fa-edit" onclick="location.href='@Url.Action("EditContactInformation", "Member", new { DependentID = Model.memberInformation.dependantID,  pro = Context.Request.Query["pro"]})'" title="Edit Contact"> </div>
+                                                            }
+                                                        </th>
+                                                        <th style="text-align: center!important; width: 35%">
+                                                            <span class="tooltip-wrapper" data-title="iSeries version of Contact & Address information">
+                                                                Scheme Membership
+                                                            </span>
+                                                            @*<div class="contactInfo_icon fas fa-redo" onclick="location.href='@Url.Action("SyncSeries", "Member", new { DependentID = Context.Request.Query["DependentID"]})'" title="iSeries sync" style="margin-top: 4px!important; margin-right: 1%!important"> </div>*@
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td class="iSeriesTD">@Html.DisplayName("Title")</td>
+                                                        @if (Model.dependant.title != null)
+                                                        {
+                                                            <td class="hcTable hCTitle">@Html.DisplayFor(model => model.dependant.title)</td>
+                                                        }
+                                                        else
+                                                        {
+                                                            <td class="hcTable" style="text-align: center!important; color: rgba(128, 128, 128, 0.50)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="color: rgba(128, 128, 128, 0.50)"></i></span> no records found</td>
+
+                                                        }
+                                                        <td class="hcTable iSTitle">@Html.DisplayFor(model => model.MemberInfo.title)</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="iSeriesTD">@Html.DisplayName("Member")</td>
+                                                        <td class="hcTable hCMemberName">@Html.DisplayFor(model => model.dependant.fullName_ul)</td>
+                                                        <td class="hcTable iSMemberName">@Html.DisplayFor(model => model.MemberInfo.fullName_ul)</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="iSeriesTD">@Html.DisplayNameFor(model => model.dependant.languageCode)</td>
+                                                        @if (Model.dependant.languageCode != null)
+                                                        {
+                                                            <td class="hcTable hCLanguage">@Html.DisplayFor(model => model.dependant.languageCode)</td>
+                                                        }
+                                                        else
+                                                        {
+                                                            <td class="hcTable" style="text-align: center!important; color: rgba(128, 128, 128, 0.50)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="color: rgba(128, 128, 128, 0.50)"></i></span> no records found</td>
+                                                        }
+                                                        <td class="hcTable iSLanguage">@Html.DisplayFor(model => model.MemberInfo.language)</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="iSeriesTD">@Html.DisplayName("Contact name")</td>
+                                                        @if (Model.contacts.contactName != null)
+                                                        {
+                                                            <td class="hcTable hCContactName">@Html.DisplayFor(model => model.contacts.contactName)</td>
+                                                        }
+                                                        else
+                                                        {
+                                                            <td class="hcTable" style="text-align: center!important; color: rgba(128, 128, 128, 0.50)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="color: rgba(128, 128, 128, 0.50)"></i></span> no records found</td>
+                                                        }
+                                                        <td class="hcTable iSContactName">-</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="iSeriesTD">@Html.DisplayName("Mobile")</td>
+                                                        @if (Model.contacts.cell != null)
+                                                        {
+                                                            <td class="hcTable hCMobile">@Html.DisplayFor(model => model.contacts.cell)</td>
+                                                        }
+                                                        else
+                                                        {
+                                                            <td class="hcTable" style="text-align: center!important; color: rgba(128, 128, 128, 0.50)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="color: rgba(128, 128, 128, 0.50)"></i></span> no records found</td>
+                                                        }
+                                                        <td class="hcTable iSMobile" id="iSeriesMobile">@Html.DisplayFor(model => model.MemberInfo.cellphone)</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="iSeriesTD">@Html.DisplayName("Telephone")</td>
+                                                        @if (Model.contacts.landLine != null)
+                                                        {
+                                                            <td class="hcTable hCTelephone">@Html.DisplayFor(model => model.contacts.landLine)</td>
+                                                        }
+                                                        else
+                                                        {
+                                                            <td class="hcTable" style="text-align: center!important; color: rgba(128, 128, 128, 0.50)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="color: rgba(128, 128, 128, 0.50)"></i></span> no records found</td>
+                                                        }
+                                                        <td class="hcTable iSTelephone">@Html.DisplayFor(model => model.MemberInfo.telephoneNumber)</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="iSeriesTD">@Html.DisplayName("Work contact")</td>
+                                                        @if (Model.contacts.workNo != null)
+                                                        {
+                                                            <td class="hcTable hCWorkNo">@Html.DisplayFor(model => model.contacts.workNo)</td>
+                                                        }
+                                                        else
+                                                        {
+                                                            <td class="hcTable" style="text-align: center!important; color: rgba(128, 128, 128, 0.50)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="color: rgba(128, 128, 128, 0.50)"></i></span> no records found</td>
+                                                        }
+                                                        <td class="hcTable iSWorkNo">-</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="iSeriesTD">@Html.DisplayName("Email address")</td>
+                                                        @if (Model.contacts.email != null)
+                                                        {
+                                                            <td class="hcTable hCEmail">@Html.DisplayTextFor(model => model.contacts.email)</td>
+
+                                                        }
+                                                        else
+                                                        {
+                                                            <td class="hcTable" style="text-align: center!important; color: rgba(128, 128, 128, 0.50)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="color: rgba(128, 128, 128, 0.50)"></i></span> no records found</td>
+                                                        }
+                                                        <td class="hcTable iSEmail">@Html.DisplayTextFor(model => model.MemberInfo.emailAddress)</td>
+                                                    </tr>
+
+                                                    <tr>
+                                                        <td class="iSeriesTD">@Html.DisplayName("Physical address")</td>
+                                                        @if (Model.memberInformation.addressID != null)
+                                                        {
+                                                            if (Model.address.line1 != null && Model.address.line2 != null)
+                                                            {
+                                                                <td class="hcTable hCAddress">@Html.DisplayFor(model => model.address.line1), @Html.DisplayFor(model => model.address.line2), @Html.DisplayFor(model => model.address.line3)</td>
+                                                            }
+                                                            else if (Model.address.line1 != null)
+                                                            {
+                                                                <td class="hcTable hCAddress">@Html.DisplayFor(model => model.address.line1), @Html.DisplayFor(model => model.address.line2), @Html.DisplayFor(model => model.address.line3)</td>
+                                                            }
+                                                            else if (Model.address.line2 != null)
+                                                            {
+                                                                <td class="hcTable hCAddress">@Html.DisplayFor(model => model.address.line2), @Html.DisplayFor(model => model.address.line3)</td>
+                                                            }
+                                                            else
+                                                            {
+                                                                <td class="hcTable" style="text-align: center!important; color: rgba(128, 128, 128, 0.50)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="color: rgba(128, 128, 128, 0.50)"></i></span> no records found</td>
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            <td class="hcTable" style="text-align: center!important; color: rgba(128, 128, 128, 0.50)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="color: rgba(128, 128, 128, 0.50)"></i></span> no records found</td>
+                                                        }
+                                                        <td class="hcTable iSAddress">@Html.DisplayFor(model => model.MemberInfo.addressLine1), @Html.DisplayFor(model => model.MemberInfo.addressLine2) </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="iSeriesTD">@Html.DisplayName("City")</td>
+                                                        @if (Model.address.city != null)
+                                                        {
+                                                            <td class="hcTable hCCity">@Html.DisplayFor(model => model.address.city)</td>
+
+                                                        }
+                                                        else
+                                                        {
+                                                            <td class="hcTable" style="text-align: center!important; color: rgba(128, 128, 128, 0.50)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="color: rgba(128, 128, 128, 0.50)"></i></span> no records found</td>
+                                                        }
+                                                        <td class="hcTable iSCity">@Html.DisplayFor(model => model.MemberInfo.city)</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="iSeriesTD">@Html.DisplayName("Province")</td>
+                                                        @if (Model.address.province != null)
+                                                        {
+                                                            <td class="hcTable hCProvince">@Html.DisplayFor(model => model.address.province)</td>
+                                                        }
+                                                        else
+                                                        {
+                                                            <td class="hcTable" style="text-align: center!important; color: rgba(128, 128, 128, 0.50)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="color: rgba(128, 128, 128, 0.50)"></i></span> no records found</td>
+                                                        }
+                                                        <td class="hcTable iSProvince">-</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="iSeriesTD">@Html.DisplayName("Postal code")</td>
+                                                        @if (Model.address.zip != null)
+                                                        {
+                                                            <td class="hcTable hCZip">@Html.DisplayFor(model => model.address.zip)</td>
+
+                                                        }
+                                                        else
+                                                        {
+                                                            <td class="hcTable" style="text-align: center!important; color: rgba(128, 128, 128, 0.50)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="color: rgba(128, 128, 128, 0.50)"></i></span> no records found</td>
+                                                        }
+                                                        <td class="hcTable iSZip">@Html.DisplayFor(model => model.MemberInfo.postalCode)</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="iSeriesTD">@Html.DisplayName("Preferred")</td>
+                                                        @if (Model.contacts.preferredMethodOfContact != null)
+                                                        {
+                                                            <td class="hcTable hCPMOC">@Html.DisplayFor(model => model.contacts.preferredMethodOfContact)</td>
+                                                        }
+                                                        else
+                                                        {
+                                                            <td class="hcTable" style="text-align: center!important; color: rgba(128, 128, 128, 0.50)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="color: rgba(128, 128, 128, 0.50)"></i></span> no records found</td>
+
+                                                        }
+                                                        <td class="hcTable iSPMOC">-</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div class="col-md-12 row">
+                                            <div class="col-md-6">
+                                                <h4 class="subHeading">
+                                                    Next of kin
+                                                    <a class="create-new" href="@Url.Action("Create_NextOfKin", "Member", new { DependentID = Model.queries.dependentID, ProgramID = Context.Request.Query["pro"] })" style="font-size: 14px">Create new <span><i class="fa fa-plus-circle" style="font-size: 12px"></i></span></a>
+                                                </h4>
+                                            </div>
+                                        </div>
+                                        <table class="table nok-table" id="next-of-kin">
+                                            <thead>
+                                                <tr>
+                                                    <th>@Html.DisplayNameFor(model => model.NextOfKin[0].FirstName)</th>
+                                                    <th>@Html.DisplayNameFor(model => model.NextOfKin[0].LastName)</th>
+                                                    <th>@Html.DisplayNameFor(model => model.NextOfKin[0].Telephone)</th>
+                                                    <th>@Html.DisplayNameFor(model => model.NextOfKin[0].Email)</th>
+                                                    <th>@Html.DisplayNameFor(model => model.NextOfKin[0].Relation)</th>
+                                                    <th style="text-align: center!important">@Html.DisplayName("Action")</th>
+                                                </tr>
+                                            </thead>
+                                            @if (Model.NextOfKin.Count() == 0)
+                                            {
+                                                <tr><td colspan="6" style="text-align: center!important; color: rgba(128, 128, 128, 0.50)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="color: rgba(128, 128, 128, 0.50)"></i></span> no records found</td></tr>
+                                            }
+                                            else
+                                            {
+                                                foreach (var item in Model.NextOfKin)
+                                                {
+
+                                                    <tbody id="nok-table">
+                                                        <tr>
+                                                            <td>@Html.DisplayFor(model => item.FirstName)</td>
+                                                            <td>@Html.DisplayFor(model => item.LastName)</td>
+                                                            <td>@Html.DisplayFor(model => item.Telephone)</td>
+                                                            <td>@Html.DisplayFor(model => item.Email)</td>
+                                                            <td>@Html.DisplayFor(model => item.Relation)</td>
+                                                            <td class="linkNav" style="text-align: center!important">
+                                                                @Html.ActionLink("View", "Details_NextOfKin", new { id = item.Id }) /
+                                                                @Html.ActionLink("Edit", "Edit_NextOfKin", new { id = item.Id })
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                }
+                                            }
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <!------------------------------------------------------------------------------------ tab-notes -------------------------------------------------------------------------------------->
+                            <div role="tabpanel" class="tab-pane" id="notes">
+                                <div class="row">
+                                    <br />
+                                    <!--------------------------------------------------------------------------- new/search -------------------------------------------------------------------------->
+                                    <div class="col-md-12 row">
+                                        <!--------------------------------------------------------------------------- create-enquiry -------------------------------------------------------------------------->
+                                        <div class="col-md-6">
+                                            <h4 class="subHeading">
+                                                Patient notes
+                                                <a class="create-new" href="@Url.Action("AddNote", "Member", new { DependentID = Model.queries.dependentID, pro= Context.Request.Query["pro"] })" style="font-size: 14px">Create new <span><i class="fa fa-plus-circle" style="font-size: 12px"></i></span></a>
+                                            </h4>
+                                        </div>
+                                        <!--------------------------------------------------------------------------- jq-search -------------------------------------------------------------------------->
+                                        <div class="col-md-6">
+                                            <div class="input-wrapper-new-search">
+                                                <input type="text" class="form-control-new-search" id="noteSearch" placeholder="Search..." />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!---------------------------------------------------------------------------- note-table ------------------------------------------------------------------------->
+                                    <table class="table settings-table sortable" id="tableNote">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 10%">
+                                                    @Html.DisplayName("Date of note") <i class="fa fa-fw fa-sort"></i>
+                                                </th>
+                                                <!--HCare-1408
+                                                <th onclick="tableNote(0)" style="width: 10%">
+                                                    @Html.DisplayName("Note ID") <i class="fa fa-fw fa-sort"></i>
+                                                </th>-->
+                                                <th onclick="tableNote(1)" style="width: 12%">
+                                                    @Html.DisplayName("Note type") <i class="fa fa-fw fa-sort"></i>
+                                                </th>
+                                                <th onclick="tableNote(2)" style="width: 10%">
+                                                    @Html.DisplayName("Created by") <i class="fa fa-fw fa-sort"></i>
+                                                </th>
+                                                <th>
+                                                    @Html.DisplayName("Note")
+                                                </th>
+                                                <th>
+                                                    @Html.DisplayName("Prescriber pr#")
+                                                </th>
+                                                <th>
+                                                    @Html.DisplayName("Prescriber Name")
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        @if (Model.notes.Count() == 0)
+                                        {
+                                            <tr><td colspan="6" style="text-align: center!important; color: rgba(128, 128, 128, 0.50)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="color: rgba(128, 128, 128, 0.50)"></i></span> no records found</td></tr>
+                                        }
+                                        else
+                                        {
+                                            foreach (var item in Model.notes)
+                                            {
+                                                <tbody id="noteTable">
+                                                    <tr>
+                                                        <td data-dateformat="DD-MM-YYYY">
+                                                            @Html.DisplayFor(modelItem => item.effectiveDate)
+                                                            @Html.HiddenFor(modelItem => item.noteID)
+                                                        </td>
+                                                        <!--HCare-1408
+                                                        <td>
+                                                                                                            @Html.HiddenFor(modelItem => item.noteID)
+                                                                                                            </td>-->
+                                                        <td>
+                                                            @Html.DisplayFor(modelItem => item.noteType)
+                                                        </td>
+                                                        <td>
+                                                            @Html.DisplayFor(modelItem => item.createdBy)
+                                                        </td>
+                                                        <td data-value="0">
+                                                            @Html.DisplayFor(modelItem => item.note)
+                                                        </td>
+                                                        <td>
+                                                            @Html.DisplayFor(modelItem => item.PrescriberPr)
+                                                        </td>
+                                                        <td>
+                                                            @Html.DisplayFor(modelItem => item.PrescriberName)
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            }
+                                        }
+                                    </table>
+                                </div>
+                            </div>
+                            <!--------------------------------------------------------------------------------- tab-attachments ----------------------------------------------------------------------------------->
+                            <div role="tabpanel" class="tab-pane" id="attachments">
+                                <div class="row">
+                                    <br />
+                                    <div class="row communicationTab">
+                                        <div class="form-horizontal">
+                                            <!--------------------------------------------------------------------------- new attachment -------------------------------------------------------------------------->
+                                            <div class="form-horizontal editForm">
+                                                <div class="newAttachments_Container">
+                                                    <div>
+                                                        <div class="textMessage_Header">
+                                                            &nbsp; New Attachment
+                                                        </div>
+                                                        <div class="textMessage_Body" style="padding-left: 6%!important">
+                                                            <div class="row">
+
+                                                                @using (Html.BeginForm("InsertAttachment", "Member", FormMethod.Post, new { enctype = "multipart/form-data", id = "attachmentInsert" }))
+                                                                {
+                                                                    @Html.AntiForgeryToken()
+                                                                    @Html.HiddenFor(model => model.attachment.dependentID)
+                                                                    @Html.Hidden("pro", Context.Request.Query["pro"])
+                                                                    @Html.Hidden("DependantID", (object)ViewBag.DependantID)
+
+                                                                    <div class="row edit`Form">
+                                                                        <br />
+                                                                        <div class="form-group">
+                                                                            @Html.Label(null,"Attachment name", htmlAttributes: new { @class = "control-label col-md-2" })
+                                                                            <div class="col-md-9">
+                                                                                @Html.EditorFor(model => model.attachment.attachmentName, new { htmlAttributes = new { @class = "form-control-attachments", @placeholder = "Insert attachment name" } })
+                                                                                @Html.ValidationMessageFor(model => model.attachment.attachmentName, "", new { @class = "text-danger", @style = "font-size: 110%; margin-left: 2%" })
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="form-group attachmentTypeValidation">
+                                                                            @Html.Label(null,"Attachment type", htmlAttributes: new { @class = "control-label col-md-2" })
+                                                                            <div class="col-md-9" style="margin-left: -0.3%">
+                                                                                @Html.DropDownList("attachmentType", null, "Select", htmlAttributes: new { @class = "infoBox_editMember", @style = "width: 475px", @required = "required" })
+                                                                                <span><br>@Html.ValidationMessage("attachmentType", "", new { @class = "text-danger", @style = "font-size: 110%; margin-left: 2.5%", @id = "attachmentTypeError" })</span>
+
+                                                                            </div>
+                                                                        </div>
+                                                                        <br />
+                                                                        <div class="form-group linkAttachment">
+                                                                            @Html.LabelFor(model => model.attachment.Link, htmlAttributes: new { @class = "control-label col-md-2" })
+                                                                            <div class="col-md-6">
+                                                                                <input type="file" name="file" id="file" class="upload" /> <br />
+                                                                            </div>
+
+                                                                        </div>
+                                                                        <div class="form-group">
+                                                                            <div class="actionButton" style="text-align: center!important">
+                                                                                <input type="submit" value="Submit" class="btn buttonRound_formCreate Attachment" style="width: 15%!important; position: relative" id="attachmentSubmit" />
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                }
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <br />
+                                            <hr class="member-information-ruler" />
+                                            <br />
+                                            <!------------------------------------------------------------------------- attachment history ------------------------------------------------------------------------>
+                                            <div class="form-horizontal">
+                                                <div class="col-md-12 row">
+                                                    <!--------------------------------------------------------------------------- heading -------------------------------------------------------------------------->
+                                                    <div class="col-md-6">
+                                                        <h4 class="subHeading">
+                                                            Attachment history
+                                                        </h4>
+                                                    </div>
+                                                    <!--------------------------------------------------------------------------- jq-search -------------------------------------------------------------------------->
+                                                    <div class="col-md-6">
+                                                        <div class="input-wrapper-new-search">
+                                                            <input type="text" class="form-control-new-search" id="attachmentSearch" onkeyup="myFunction()" placeholder="Search..." />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <!---------------------------------------------------------------------- attachment history table --------------------------------------------------------------------->
+                                                <table class="table settings-table sortable" id="attachmentTable">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>
+                                                                @Html.DisplayNameFor(model => model.attachment.createdDate) <i class="fa fa-fw fa-sort"></i>
+                                                            </th>
+                                                            <th onclick="attachmentTable(1)">
+                                                                @Html.DisplayNameFor(model => model.attachment.attachmentName) <i class="fa fa-fw fa-sort"></i>
+                                                            </th>
+                                                            <th onclick="attachmentTable(2)">
+                                                                @Html.DisplayName("Type") <i class="fa fa-fw fa-sort"></i>
+                                                            </th>
+                                                            <th style="text-align: center!important">
+                                                                @Html.DisplayName("Action")
+                                                            </th>
+                                                        </tr>
+                                                    </thead>
+                                                    @if (Model.attachments.Count() == 0)
+                                                    {
+                                                        <tr><td colspan="4" style="text-align: center!important; color: rgba(128, 128, 128, 0.50)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="color: rgba(128, 128, 128, 0.50)"></i></span> no records found</td></tr>
+                                                    }
+                                                    else
+                                                    {
+                                                        foreach (var item in Model.attachments)
+                                                        {
+                                                            <tbody id="attTable">
+                                                                <tr>
+                                                                    <td data-dateformat="DD-MM-YYYY">
+                                                                        @Html.DisplayFor(modelItem => item.createdDate)
+                                                                    </td>
+                                                                    <td>
+                                                                        @Html.DisplayFor(modelItem => item.attachmentName)
+                                                                    </td>
+                                                                    <td>
+                                                                        @Html.DisplayFor(modelItem => item.attachmentType)
+                                                                    </td>
+                                                                    <td class="linkNav" style="text-align: center!important">
+                                                                        @Html.ActionLink("View", "GetImage", new { image = item.Link, @class = "attachmentLink" }) /
+                                                                        @Html.ActionLink("Edit", "Edit_attachmentType", new { id = item.attachmentID, pro = Context.Request.Query["pro"] })
+                                                                    </td>
+                                                                </tr>
+                                                            </tbody>
+                                                        }
+                                                    }
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!---------------------------------------------------------------------------------- tab-documents ------------------------------------------------------------------------------------>
+                            <div role="tabpanel" class="tab-pane" id="documents">
+                                <div class="row">
+                                    <br />
+                                    <div class="row communicationTab">
+                                        <!---------------------------------------------------------------------- auth-letters --------------------------------------------------------------------->
+                                        <div class="form-horizontal">
+                                            <div class="col-md-12 row">
+                                                <!--------------------------------------------------------------------------- heading -------------------------------------------------------------------------->
+                                                <div class="col-md-6">
+                                                    <h4 class="subHeading">
+                                                        Attachment history
+                                                    </h4>
+                                                </div>
+                                                <!--------------------------------------------------------------------------- jq-search -------------------------------------------------------------------------->
+                                                <div class="col-md-6">
+                                                    <div class="input-wrapper-new-search">
+                                                        <input type="text" class="form-control-new-search" id="authLetterSearch" onkeyup="myFunction()" placeholder="Search..." />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <table class="table settings-table sortable" id="authLetterTable">
+                                                <thead>
+                                                    <tr>
+                                                        <th>
+                                                            @Html.DisplayNameFor(model => model.authLetter.createdDate) <i class="fa fa-fw fa-sort"></i>
+                                                        </th>
+                                                        <th onclick="authLetterTable(0)">
+                                                            @Html.DisplayNameFor(model => model.authLetter.scriptNo) <i class="fa fa-fw fa-sort"></i>
+                                                        </th>
+                                                        <th onclick="authLetterTable(1)">
+                                                            @Html.DisplayNameFor(model => model.authLetter.AuthLetterID) <i class="fa fa-fw fa-sort"></i>
+                                                        </th>
+                                                        <th onclick="authLetterTable(2)">
+                                                            @Html.DisplayNameFor(model => model.authLetter.sentVia) <i class="fa fa-fw fa-sort"></i>
+                                                        </th>
+                                                        <th onclick="authLetterTable(3)">
+                                                            @Html.DisplayNameFor(model => model.authLetter.createdBy) <i class="fa fa-fw fa-sort"></i>
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+                                                @if (Model.authLetters.Count() == 0)
+                                                {
+                                                    <tr><td colspan="5" style="text-align: center!important; color: rgba(128, 128, 128, 0.50)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="color: rgba(128, 128, 128, 0.50)"></i></span> no records found</td></tr>
+                                                }
+                                                else
+                                                {
+                                                    foreach (var item in Model.authLetters)
+                                                    {
+                                                        <tbody id="authTable">
+                                                            <tr>
+                                                                <td data-dateformat="DD-MM-YYYY">
+                                                                    @Html.DisplayFor(modelItem => item.createdDate)
+                                                                </td>
+                                                                <td>
+                                                                    @Html.DisplayFor(modelItem => item.scriptNo)
+                                                                </td>
+                                                                <td>
+                                                                    @Html.DisplayFor(modelItem => item.AuthLetterID)
+                                                                </td>
+                                                                <td>
+                                                                    @Html.DisplayFor(modelItem => item.sentVia)
+                                                                </td>
+                                                                <td>
+                                                                    @Html.DisplayFor(modelItem => item.createdBy)
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    }
+                                                }
+                                            </table>
+                                        </div>
+                                        <!----------------------------------------------------------------------- disclaimer ---------------------------------------------------------------------->
+                                        <div class="form-horizontal">
+                                            <div class="col-md-12 row">
+                                                <!--------------------------------------------------------------------------- heading -------------------------------------------------------------------------->
+                                                <div class="col-md-6"><h4 class="subHeading">Patient disclaimer</h4></div>
+                                                <div class="col-md-6"></div>
+                                            </div>
+                                            <table id="english-table" class="table disclaimer-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 5%;"></th>
+                                                        <th>Question</th>
+                                                        <th style="width: 2.5%;">Yes</th>
+                                                        <th style="width: 2.5%;">No</th>
+                                                        <th style="width: 2.5%"></th>
+                                                    </tr>
+                                                </thead>
+
+                                                @if (Model.DisclaimerFullView.Count() == 0)
+                                                {
+                                                    <tr><td colspan="5" style="text-align: center!important; color: rgba(128, 128, 128, 0.50)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="color: rgba(128, 128, 128, 0.50)"></i></span> no records found</td></tr>
+                                                }
+                                                else
+                                                {
+
+                                                    foreach (var item in Model.DisclaimerFullView.Where(x => x.QuestionNumber.ToLower().Contains("q")))
+                                                    {
+                                                        <tr>
+                                                            <td style="text-align:center!important">@Html.DisplayFor(modelItem => item.QuestionNumber)</td>
+                                                            <td>@Html.DisplayFor(modelItem => item.EnglishQuestion)</td>
+                                                            <td class="text-center"><span class="@(item.Yes == true ? "disclaimer-yes fas fa-circle" : "grey fas fa-circle")"></span></td>
+                                                            <td class="text-center"><span class="@(item.No == true ? "disclaimer-no fas fa-circle" : "grey fas fa-circle")" title="@item.Comment"></span></td>
+                                                            <td></td>
+                                                        </tr>
+                                                    }
+                                                }
+                                            </table>
+
+                                            <table id="english-table" class="table acknowledgement-table">
+                                                @foreach (var item in Model.DisclaimerFullView.Where(x => x.QuestionNumber.ToLower().Contains("a")))
+                                                {
+                                                    <tr>
+                                                        <td class="pull-right" style="font-weight: bold!important">@Html.DisplayFor(modelItem => item.EnglishQuestion)</td>
+                                                    </tr>
+                                                }
+                                            </table>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            @*HCare-1061*@
+                            <!-----------------------------------------------------------------------------------tab-Diabetic------------------------------------------------------------------------------------------------------->
+
+                            @if (Model.programCode == "DIABD") //HCare-1252
+                            {
+                                <div role="tabpanel" class="tab-pane" id="Diabetic">
+                                    <div class="row">
+                                        <br />
+                                        <div class="row communicationTab">
+                                            <div class="row">
+                                                @using (Html.BeginForm("_Communications", "Member", FormMethod.Post))
+                                                {
+                                                    <div class="col-md-12 row">
+                                                        <!--------------------------------------------------------------------------- create-Diabetic -------------------------------------------------------------------------->
+                                                        <div class="col-md-6">
+                                                            <h4 class="subHeading">
+                                                                Diabetic diary
+                                                                <a class="create-new" href="@Url.Action("DiabeticDairy", "Member", new { DependentID = Model.queries.dependentID , pro = Context.Request.Query["pro"] })" style="font-size: 14px">Create new <span><i class="fa fa-plus-circle" style="font-size: 12px"></i></span></a>
+                                                            </h4>
+                                                        </div>
+                                                        <!--------------------------------------------------------------------------- jq-search -------------------------------------------------------------------------->
+                                                        <div class="col-md-6">
+                                                            <div class="input-wrapper-new-search">
+                                                                <input type="text" class="form-control-new-search" id="enquirySearch" placeholder="Search..." />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <!------------------------------------------------------------------------ Diabetic-table ---------------------------------------------------------------------->
+                                                    <table class="table settings-table sortable">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>
+                                                                    @Html.DisplayNameFor(model => model.diabeticDairy.sentDate) <i class="fa fa-fw fa-sort"></i>
+                                                                </th>
+                                                                <th>
+                                                                    @Html.DisplayNameFor(model => model.diabeticDairy.returnedDate) <i class="fa fa-fw fa-sort"></i>
+                                                                </th>
+                                                                <th>
+                                                                    @Html.DisplayNameFor(model => model.diabeticDairy.notes) <i class="fa fa-fw fa-sort"></i>
+                                                                </th>
+                                                                <th>
+                                                                    @Html.DisplayNameFor(model => model.diabeticDairy.createdDate) <i class="fa fa-fw fa-sort"></i>
+                                                                </th>
+                                                                <th>
+                                                                    @Html.DisplayNameFor(model => model.diabeticDairy.createdBy) <i class="fa fa-fw fa-sort"></i>
+                                                                </th>
+                                                                <th>
+                                                                    @Html.DisplayNameFor(model => model.diabeticDairy.modifiedDate) <i class="fa fa-fw fa-sort"></i>
+                                                                </th>
+                                                                <th>
+                                                                    @Html.DisplayNameFor(model => model.diabeticDairy.modifiedBy) <i class="fa fa-fw fa-sort"></i>
+                                                                </th>
+                                                                <th>
+                                                                    @Html.DisplayNameFor(model => model.diabeticDairy.SingedEducationalNote) <i class="fa fa-fw fa-sort"></i>
+                                                                </th>
+                                                                <th style="text-align: center!important">
+                                                                    Action
+                                                                </th>
+                                                            </tr>
+                                                        </thead>
+                                                        @foreach (var item in Model.diabeticDairies)
+                                                        {
+                                                            @Html.HiddenFor(modelItem => item.dairyId)
+                                                            <tbody>
+                                                                <tr>
+                                                                    <td data-dateformat="DD-MM-YYYY">
+                                                                        @Html.DisplayFor(modelItem => item.sentDate)
+                                                                    </td>
+                                                                    <td>
+                                                                        @Html.DisplayFor(modelItem => item.returnedDate)
+                                                                    </td>
+                                                                    <td>
+                                                                        @Html.DisplayFor(modelItem => item.notes)
+                                                                    </td>
+                                                                    <td>
+                                                                        @Html.DisplayFor(modelItem => item.createdDate)
+                                                                    </td>
+                                                                    <td>
+                                                                        @Html.DisplayFor(modelItem => item.createdBy)
+                                                                    </td>
+                                                                    <td>
+                                                                        @Html.DisplayFor(modelItem => item.modifiedDate)
+                                                                    </td>
+                                                                    <td>
+                                                                        @Html.DisplayFor(modelItem => item.modifiedBy)
+                                                                    </td>
+                                                                    @if (item.SingedEducationalNote != true)
+                                                                    {
+                                                                        <td>
+                                                                            <img src="/Content/Images/Navigation/5. Reports/reportCheck_x.png" style="width: 15%; opacity: 0.7">
+                                                                        </td>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <td>
+                                                                            <img src="/Content/Images/Navigation/5. Reports/reportCheck.png" style="width: 15%; opacity: 0.7">
+                                                                        </td>
+                                                                    }
+                                                                    <td class="statusCode linkNav" style="text-align: center!important">
+                                                                        @Html.ActionLink("Edit", "DiabeticDairy_Edit", new { dairyId = item.dairyId, pro = Context.Request.Query["pro"] })
+
+                                                                    </td>
+                                                                </tr>
+                                                            </tbody>
+                                                        }
+
+                                                    </table>
+                                                }
+                                            </div>
+
+
+
+
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                            @*HCare-1119*@
+                            <!------------------------------------------------------------------------------------Communication Log-------------------------------------------------------------------------------------------->
+                            <div role="tabpanel" class="tab-pane" id="communicationLog">
+                                <div class="row">
+                                    <br />
+                                    <!--------------------------------------------------------------------------- new/search -------------------------------------------------------------------------->
+                                    <div class="col-md-12 row">
+                                    </div>
+                                    <!---------------------------------------------------------------------------- Communication Log ------------------------------------------------------------------------->
+                                    <table class="table settings-table sortable" style="table-layout: fixed;">
+                                        <thead>
+                                            <tr>
+
+                                                <th onclick="tableNote(2)" style="width: 13%">
+                                                    @Html.DisplayName("Type of communication") <i class="fa fa-fw fa-sort"></i>
+                                                </th>
+                                                <th>
+                                                    @Html.DisplayName("Description")
+                                                </th>
+                                                <th>
+                                                    @Html.DisplayName("Details")
+                                                </th>
+
+                                                <th style="width: 18%">
+                                                    @Html.DisplayName("Communication sent to")
+                                                </th>
+                                                <th style="width: 8%">
+                                                    @Html.DisplayName("Date sent")
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        @if (Model.CommunicationLog.Count() == 0)
+                                        {
+                                            <tr><td colspan="5" style="text-align: center!important; color: rgba(128, 128, 128, 0.50)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="color: rgba(128, 128, 128, 0.50)"></i></span> no records found</td></tr>
+                                        }
+                                        else
+                                        {
+                                            HashSet<HaloCareCore.Models.ViewModels.CommunicationLogVM> hashWithoutDuplicates = new HashSet<HaloCareCore.Models.ViewModels.CommunicationLogVM>(Model.CommunicationLog);
+
+                                            foreach (var item in hashWithoutDuplicates)
+                                            {
+
+                                                <tbody id="noteTable">
+                                                    <tr>
+                                                        <td>
+                                                            @Html.DisplayFor(modelItem => item.TypeOfCommunication)
+                                                        </td>
+                                                        <td>
+                                                            @Html.DisplayFor(modelItem => item.description)
+                                                        </td>
+
+                                                        @if (item.Detail != null)
+                                                        {
+                                                            <td>
+                                                                @System.Text.RegularExpressions.Regex.Replace(item.Detail, @"<[^>]+>|&nbsp;", "").Trim();
+                                                            </td>
+                                                        }
+                                                        else
+                                                        {
+                                                            <td>
+                                                                @Html.DisplayFor(modelItem => item.Detail)
+                                                            </td>
+
+                                                        }
+                                                        <td>
+                                                            @Html.DisplayFor(modelItem => item.CommunicationSentTo)
+                                                        </td>
+                                                        <td data-value="0">
+                                                            @Convert.ToDateTime(item.DateSent).ToString("dd/MM/yyyy H:mm")
+                                                            @*@Html.DisplayFor(modelItem => item.DateSent.ToString("dd/MM/yyyy"))*@
+                                                        </td>
+
+                                                    </tr>
+                                                </tbody>
+                                            }
+                                        }
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div id="new-email-popup" class="new-email-pop">
+
+            <div class="col-md-12">
+                <button type="button" class="email-close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            </div>
+
+            <ul class="nav nav-pills nav-justified" role="tablist" style="width: 90%; margin: 0 auto">
+                <li role="presentation" class="tab-clinical active"><a href="#member-email" aria-controls="member-email" class="tab-label" data-toggle="tab" id="member_email">Member</a></li>
+                <li role="presentation" class="tab-clinical"><a href="#doctor-email" aria-controls="doctor-email" class="tab-label" role="tab" data-toggle="tab" id="doctor_email">Doctor</a></li>
+            </ul>
+            <div class="tab-content">
+                <div role="tabpanel" class="tab-pane active" id="member-email">
+                    @using (Html.BeginForm("ProfileEmail", "Member", FormMethod.Post, new { enctype = "multipart/form-data", id = "email-assignment" }))
+                    {
+                        <div class="col-md-12">
+                            <div class="new-email-panel">
+                                @Html.AntiForgeryToken()
+                                @Html.HiddenFor(model => model.emailMessages.dependantID)
+                                @Html.Hidden("pro", Context.Request.Query["pro"])
+                                <input id="e1-dependantid" name="e1-dependantid" value="@ViewBag.DependantID" hidden />
+                                <input id="e1-programid" name="e1-programid" value="@ViewBag.ProgramID" hidden />
+                                <input id="e1-medicalaidid" name="e1-medicalaidid" value="@ViewBag.MedicalAidID" hidden />
+                                <input id="e1-userid" name="e1-userid" value="@ViewBag.UserID" hidden />
+                                @*<input id="email-header" name="email-header" value="@ViewBag.Header" hidden />
+                                    <input id="email-footer" name="email-footer" value="@ViewBag.Footer" hidden />*@
+                                <input id="e1-member-name" name="e1-member-name" value="@ViewBag.MemberName" hidden />
+                                <div class="form-horizontal">
+
+                                    <div class="form-group" style="margin-bottom: 0">
+                                        <div class="col-md-12">
+                                            <table class="table ne-table">
+                                                <tr>
+                                                    <td style="width: 5%; text-align: right!important">To</td>
+                                                    <td style="width: 2%"><span id="email-validation-error"></span></td>
+                                                    <td style="width: 93%">
+                                                        @Html.TextBoxFor(model => model.emailMessages.emailTo, htmlAttributes: new { @class = "email-control-new", @required = "required", @onblur = "ValidateEmail()" })
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="width: 5%; text-align: right !important">Cc</td>
+                                                    <td style="width: 2%"></td>
+                                                    <td>
+                                                        @Html.TextBoxFor(model => model.emailMessages.cc, htmlAttributes: new { @class = "email-control-new", @placeholder = "CC" })
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="width: 5%; text-align: right!important">Subject</td>
+                                                    <td style="width: 2%"></td>
+                                                    <td>
+                                                        @Html.TextBox("Subject", (object)ViewBag.schemeSubject + " Disease Management: Member # " + (object)ViewBag.MemberNo + " Dep " + (object)ViewBag.Dep + " " + (object)ViewBag.Intial + " " + (object)ViewBag.Surname, htmlAttributes: new { @class = "email-control-new", @disabled = "disabled", @id = "@model.emailMessages.subject" })
+                                                        @Html.TextBoxFor(m => m.emailMessages.subject, new { @Value = "HaloCare Disease Management: Member # " + (object)ViewBag.MemberNo + " Dep " + (object)ViewBag.Dep + " " + (object)ViewBag.Intial + " " + (object)ViewBag.Surname, @type = "hidden" })
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="width: 5%; text-align: right!important">Template</td>
+                                                    <td style="width: 2%"><span id="template-validation-error"></span></td>
+                                                    <td>@Html.DropDownList("emailTemplate", null, "**Template**", htmlAttributes: new { @class = "email-control-new", @onchange = "EmailTemplate()" })</td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div id="email-message" class="form-group">
+                                        <div class="col-md-12" style="width: 100%!important">
+                                            @Html.TextAreaFor(model => model.emailMessages.emailMassage, htmlAttributes: new { @class = "emailTemplate_Bodys", @id = "emailMessage" })
+                                            @*@Html.HiddenFor(model => model.emailMessages.emailMassage, htmlAttributes: new { @class = "textMessage_messageBox" })*@
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="email-attachment-header">Attachments <span>&nbsp;<input type="button" value="Add" class="email-attachment-button-one" /></span></div>
+                                        <span class="ea-placeholder">Select a file to upload. &emsp;<input type="button" value="Add" class="email-attachment-button-two" /></span>
+                                        <div class="email-attachments">
+                                            <table class="table ea-table" id="attachment-table">
+                                                <tr></tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="validation-email-error" class="error-alert hidden" style="margin-top: 5px"></div>
+                            <div id="validation-error" class="error-alert hidden" style="margin-top: 5px"></div>
+                        </div>
+
+                        <div class="col-md-12 email-info-panel">@ViewBag.MedicalAid • @ViewBag.Program</div>
+
+                        <div class="col-md-12 new-email-pop-footer">
+                            <button type="submit" class="popup-button hidden" id="email-send">Send</button>
+                            <button type="button" class="popup-button" id="email-button">Send</button>
+                        </div>
+                    }
+                </div>
+                <div role="tabpanel" class="tab-pane" id="doctor-email">
+                    @using (Html.BeginForm("DoctorEmail", "Member", FormMethod.Post, new { enctype = "multipart/form-data", id = "dr-email-assignment" }))
+                    {
+                        <div class="col-md-12">
+                            <div class="new-email-panel">
+                                @Html.AntiForgeryToken()
+                                @Html.HiddenFor(model => model.emailMessages.dependantID)
+                                @Html.Hidden("pro", Context.Request.Query["pro"])
+                                <input id="e2-dependantid" name="e2-dependantid" value="@ViewBag.DependantID" hidden />
+                                <input id="e2-programid" name="e2-programid" value="@ViewBag.ProgramID" hidden />
+                                <input id="e2-medicalaidid" name="e2-medicalaidid" value="@ViewBag.MedicalAidID" hidden />
+                                <input id="e2-userid" name="e2-userid" value="@ViewBag.UserID" hidden />
+                                @*<input id="email-header" name="email-header" value="@ViewBag.Header" hidden />
+                                    <input id="email-footer" name="email-footer" value="@ViewBag.Footer" hidden />*@
+                                <input id="e2-member-name" name="e2-member-name" value="@ViewBag.MemberName" hidden />
+                                <div class="form-horizontal">
+                                    <div class="form-group" style="margin-bottom: 0">
+                                        <div class="col-md-12">
+                                            <table class="table ne-table" style="margin-top: 1%">
+                                                <tr>
+                                                    <td style="width: 5%; text-align: right!important"></td>
+                                                    <td style="width: 2%"></td>
+                                                    <td style="width: 93%; text-indent: 18px">
+                                                        @if (ViewBag.DoctorName == null)
+                                                        {
+                                                            <span id="doctor-information" style="font-size: 16px; color: #ccc">No doctor selected &emsp;</span><span>&nbsp;<input type="button" id="doctor-edit" value="Add" class="doctor-email-button" /></span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span id="doctor-information" style="font-size: 16px">@ViewBag.DoctorName | Practice # @ViewBag.DoctorPractice &emsp;</span><span>&nbsp;<input type="button" id="doctor-edit" value="Edit" class="doctor-email-button" /></span>
+                                                        }
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="width: 5%; text-align: right!important">To</td>
+                                                    <td style="width: 2%"><span id="email-validation-error-2"></span></td>
+                                                    <td style="width: 93%">
+                                                        <input type="text" id="doctor-email-to" name="doctor-email-to" value="@ViewBag.DoctorEmail" class="email-control-new" onblur="ValidateEmail2()" required />
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="width: 5%; text-align: right !important">Cc</td>
+                                                    <td style="width: 2%"></td>
+                                                    <td>
+                                                        <input type="text" id="doctor-email-cc" name="doctor-email-cc" class="email-control-new" placeholder="Cc" />
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="width: 5%; text-align: right!important">Subject</td>
+                                                    <td style="width: 2%"></td>
+                                                    <td>
+                                                        @Html.TextBox("Subject", (object)ViewBag.schemeSubject + " Disease Management: Member # " + (object)ViewBag.MemberNo + " Dep " + (object)ViewBag.Dep + " " + (object)ViewBag.Intial + " " + (object)ViewBag.Surname, htmlAttributes: new { @class = "email-control-new", @disabled = "disabled", @id = "@model.emailMessages.subject" })
+                                                        @Html.TextBoxFor(m => m.emailMessages.subject, new { @Value = "HaloCare Disease Management: Member # " + (object)ViewBag.MemberNo + " Dep " + (object)ViewBag.Dep + " " + (object)ViewBag.Intial + " " + (object)ViewBag.Surname, @type = "hidden" })
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="width: 5%; text-align: right!important">Template</td>
+                                                    <td style="width: 2%"><span id="template-validation-error-2"></span></td>
+                                                    <td>@Html.DropDownList("emailTemplate2", null, "**Template**", htmlAttributes: new { @class = "email-control-new", @onchange = "EmailTemplate2()" })</td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div id="email-message-2" class="form-group">
+                                        <div class="col-md-12" style="width: 100%!important">
+                                            @Html.TextAreaFor(model => model.emailMessages.emailMassage, htmlAttributes: new { @class = "emailTemplate_Bodys", @id = "emailMessage2" })
+                                            @*@Html.HiddenFor(model => model.emailMessages.emailMassage, htmlAttributes: new { @class = "textMessage_messageBox" })*@
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="email-attachment-header">Attachments <span>&nbsp;<input type="button" value="Add" class="email-attachment-button-one-2" /></span></div>
+                                        <span class="ea-placeholder-2">Select a file to upload. &emsp;<input type="button" value="Add" class="email-attachment-button-two-2" /></span>
+                                        <div class="email-attachments">
+                                            <table class="table ea-table" id="attachment-table-2">
+                                                <tr></tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="validation-email-error-2" class="error-alert hidden" style="margin-top: 5px"></div>
+                            <div id="validation-error-2" class="error-alert hidden" style="margin-top: 5px"></div>
+                        </div>
+
+                        <div class="col-md-12 email-info-panel">@ViewBag.MedicalAid • @ViewBag.Program</div>
+
+                        <div class="col-md-12 new-email-pop-footer">
+                            <button type="submit" class="popup-button hidden" id="email-2-send">Send</button>
+                            <button type="button" class="popup-button" id="email-2-button">Send</button>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+        <div id="email-attachment-popup" class="popup-box">
+            <div class="col-md-12">
+                <button type="button" class="popup-close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <div class="popup-scheme">Email</div>
+                <div class="popup-title">Attachments</div>
+                <hr class="settings-ruler" />
+                <div class="popup-template">
+                    @if (Model.AttachmentTemplates.Count() > 0)
+                    {
+                        <table class="table mh-table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>@Html.DisplayNameFor(model => model.AttachmentTemplates[0].FileName)</th>
+                                </tr>
+                            </thead>
+                            @foreach (var item in Model.AttachmentTemplates)
+                            {
+                                <tbody>
+                                    <tr>
+                                        <td class="attachment-icon">
+                                            <input type="checkbox" id="attachment-@item.Id" class="check-box-attachment" name="attachments" value="@item.Id" />
+                                            <label for="attachment-@item.Id" class="attachment-row"><i class="far fa-circle" id="check-@item.Id"></i> &nbsp; @item.AttachmentName</label>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            }
+                        </table>
+                    }
+                    else
+                    {
+                        <div class="no-results-1">
+                            <img src="~/Content/Images/_2020/tables/no-results-3.png" />
+                        </div>
+                        <h4 class="no-results-attachments">Attachments for account have not been set up.<br />Please contact your administrator.</h4>
+                    }
+                </div>
+            </div>
+
+            <div class="col-md-12 popup-info-panel">@ViewBag.MedicalAid • @ViewBag.Program</div>
+
+            @if (Model.AttachmentTemplates.Count() > 0)
+            {
+                <div class="col-md-12 popup-footer">
+                    <button class="popup-button" id="popup-close-btn">Submit</button>
+                </div>
+            }
+            else
+            {
+                <div class="col-md-12 popup-footer">
+                    <button class="popup-button" id="popup-close-btn">Close</button>
+                </div>
+            }
+        </div>
+        <div id="dr-email-attachment-popup" class="popup-box">
+            <div class="col-md-12">
+                <button type="button" class="popup-close" id="popup-close-2" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <div class="popup-scheme">Email</div>
+                <div class="popup-title">Attachments</div>
+                <hr class="settings-ruler" />
+                <div class="popup-template">
+                    @if (Model.AttachmentTemplates.Count() > 0)
+                    {
+                        <table class="table mh-table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>@Html.DisplayNameFor(model => model.AttachmentTemplates[0].FileName)</th>
+                                </tr>
+                            </thead>
+                            @foreach (var item in Model.AttachmentTemplates)
+                            {
+                                <tbody>
+                                    <tr>
+                                        <td class="attachment-icon">
+                                            <input type="checkbox" id="attachment-2-@item.Id" class="check-box-attachment" name="attachments-2" value="@item.Id" />
+                                            <label for="attachment-2-@item.Id" class="attachment-row"><i class="far fa-circle" id="check-2-@item.Id"></i> &nbsp; @item.AttachmentName</label>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            }
+                        </table>
+                    }
+                    else
+                    {
+                        <div class="no-results-1">
+                            <img src="~/Content/Images/_2020/tables/no-results-3.png" />
+                        </div>
+                        <h4 class="no-results-attachments">Attachments for account have not been set up.<br />Please contact your administrator.</h4>
+                    }
+                </div>
+            </div>
+
+            <div class="col-md-12 popup-info-panel">@ViewBag.MedicalAid • @ViewBag.Program</div>
+
+            @if (Model.AttachmentTemplates.Count() > 0)
+            {
+                <div class="col-md-12 popup-footer">
+                    <button class="popup-button" id="popup-close-btn-2">Submit</button>
+                </div>
+            }
+            else
+            {
+                <div class="col-md-12 popup-footer">
+                    <button class="popup-button" id="popup-close-btn-2">Close</button>
+                </div>
+            }
+        </div>
+        <div id="doctor-email-popup" class="doctor-popup-box">
+            <div class="col-md-12">
+                <button type="button" class="popup-close" onclick="email_doctor_clear()"><span aria-hidden="true">&times;</span></button>
+                <div class="popup-scheme">Email</div>
+                <div class="popup-title">Doctors</div>
+                <hr class="settings-ruler" style="margin-bottom: 0" />
+                <div class="popup-template">
+                    <table class="table ea-table">
+                        <tr>
+                            <td style="width: 25%; text-align: right!important">Doctor name</td>
+                            <td style="width: 75%">
+                                <input type="text" id="dr-name-search" name="dr-name-search" class="email-control-new" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 25%; text-align: right!important">Practice #</td>
+                            <td style="width: 75%">
+                                <input type="text" id="practice-number-search" name="practice-number-search" class="email-control-new" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 25%; text-align: right!important">Practice name</td>
+                            <td style="width: 75%">
+                                <input type="text" id="practice-name-search" name="practice-name-search" class="email-control-new" />
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <div class="dr-email-detail">
+                <table class="table de-table" id="dr-email-details">
+                    <tbody>
+                        <tr></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="col-md-12 popup-footer-dr-email">
+                <button class="popup-button" id="dr-email-search-btn">Search</button>
+            </div>
+
+        </div>
+        <div id="new-sms-popup" class="new-sms-pop">
+            @using (Html.BeginForm("InsertSms", "Member", FormMethod.Post))
+            {
+                <div class="col-md-12">
+                    <button type="button" class="sms-close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <div class="new-email-panel">
+                        @Html.AntiForgeryToken()
+                        @Html.HiddenFor(model => model.smsMessages.dependantID)
+                        @Html.Hidden("pro", Context.Request.Query["pro"])
+                        <input type="hidden" name="hidden-mobile" id="hidden-mobile" />
+
+                        <div class="form-horizontal">
+
+                            <div class="form-group" style="margin-bottom: 0">
+                                <div class="col-md-12">
+                                    <table class="table ne-table">
+                                        <tr>
+                                            <td style="width: 5%; text-align: right!important">To</td>
+                                            <td style="width: 2%"><span id="sms-validation-error"></span></td>
+                                            <td style="width: 93%">
+                                                @Html.TextBoxFor(model => model.smsMessages.cell_no, htmlAttributes: new { @class = "sms-control-new", @autocomplete = "off", @required = "required", @placeholder = "Insert mobile number", @onblur = "ValidateSMS();" })
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="width: 5%; text-align: right!important">Template</td>
+                                            <td style="width: 2%"><span id="sms-template-validation-error"></span></td>
+                                            <td><span style="width: 80%">@Html.DropDownList("titles", null, "Select", htmlAttributes: new { @class = "sms-control-new", @onchange = "FillTemplate()" })</span></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div id="sms-message" class="form-group">
+                                <div class="col-md-12" style="width: 92%!important; margin-left: 10px">
+                                    @Html.TextAreaFor(model => model.smsMessages.message, htmlAttributes: new { @class = "sms-text-control", @disabled = "disabled" })
+                                    <input type="hidden" name="text-message" id="text-message" />
+                                </div>
+
+                                <div class="form-group" style="margin-bottom: 0">
+                                    <div class="col-md-12">
+                                        <table class="table ne-table">
+                                            <tr>
+                                                <td style="width: 5%; text-align: right!important">Effective</td>
+                                                <td style="width: 2%"><span id="ef-date-validation-error"></span></td>
+                                                <td style="width: 93%">
+                                                    <input class="text-box single-line input-validation-error textbox-control-date" data-val="true" data-val-date="The field must be a date." id="smsMessages.effectiveDate" name="smsMessages.effectiveDate" type="date" aria-required="true" aria-describedby="DOB-error" aria-invalid="true" value="@DateTime.Now.ToString("yyyy-MM-dd")" min="@DateTime.Now.ToString("yyyy-MM-dd")" oninvalid="InvalidMsg(this);">
+                                                    @Html.ValidationMessageFor(model => model.smsMessages.effectiveDate, "", new { @class = "text-danger", @style = "font-size: 80%; margin-left: 1%" })
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="validation-sms-error" class="error-alert hidden" style="margin-top: 5px"></div>
+                    <div id="sms-template-error" class="error-alert hidden" style="margin-top: 5px"></div>
+                    <div id="sms-number-error" class="error-alert hidden" style="margin-top: 5px"></div>
+                </div>
+
+                <div class="col-md-12 email-info-panel">@ViewBag.MedicalAid • @ViewBag.Program</div>
+
+                <div class="col-md-12 new-email-pop-footer">
+                    <button type="submit" class="popup-button hidden" id="sms-send">Send</button>
+                    <button type="button" class="popup-button" id="sms-button">Send</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<script>
+        $(function () {
+            $('[name=owner] option').filter(function () {
+                return ($(this).text() == '@HttpContextAccessor.HttpContext.Session.GetString("fullName").ToString()' );
+            }).prop('selected', true);
+        })
+</script>
+
+<script src="js/jquery.tablesorter.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+<script src="https://code.jquery.com/ui/1.11.3/jquery-ui.min.js"></script>
+<script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+
+@*<script src="https://cdn.ckeditor.com/4.9.2/standard/ckeditor.js"></script*@>
+@*<script src="//cdn.ckeditor.com/4.14.1/full/ckeditor.js"></script>*@
+<link href="toastr.css" rel="stylesheet" />
+<script src="toastr.js"></script>
+<script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+<script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+
+@section scripts{
+    <script src="~/bundles/jqueryval"></script>
+
+    @if (ViewBag.NoContactInformation != null)
+    {
+        <script type="text/javascript">
+
+    window.onload = function () {
+        toastr.options.positionClass = 'toast-bottom-right';
+        toastr.options.timeOut = 5000;
+
+        toastr.error("@ViewBag.NoContactInformation");
+    }
+        </script>
+    }
+
+    <!-- enquiry-table-search -->
+    <script type="text/javascript">
+        var $enqRows = $('#enqTable tr');
+        $('#enquirySearch').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $enqRows.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+    </script>
+    <script type="text/javascript">
+        function enquiryTable(n) {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("enquiryTable");
+            switching = true;
+            dir = "asc";
+
+            while (switching) {
+                switching = false;
+                rows = table.getElementsByTagName("TR");
+
+                for (i = 1; i < (rows.length - 1); i++) {
+
+                    shouldSwitch = false;
+
+                    x = rows[i].getElementsByTagName("TD")[n];
+                    y = rows[i + 1].getElementsByTagName("TD")[n];
+
+                    if (dir == "asc") {
+                        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (dir == "desc") {
+                        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+                if (shouldSwitch) {
+
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+
+                    switchcount++;
+                } else {
+
+                    if (switchcount == 0 && dir == "asc") {
+                        dir = "desc";
+                        switching = true;
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- note-table-search -->
+    <script type="text/javascript">
+        var $noteRows = $('#noteTable tr');
+        $('#noteSearch').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $noteRows.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+    </script>
+    <script type="text/javascript">
+        function tableNote(n) {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("tableNote");
+            switching = true;
+            dir = "asc";
+
+            while (switching) {
+                switching = false;
+                rows = table.getElementsByTagName("TR");
+
+                for (i = 1; i < (rows.length - 1); i++) {
+
+                    shouldSwitch = false;
+
+                    x = rows[i].getElementsByTagName("TD")[n];
+                    y = rows[i + 1].getElementsByTagName("TD")[n];
+
+                    if (dir == "asc") {
+                        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (dir == "desc") {
+                        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+                if (shouldSwitch) {
+
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+
+                    switchcount++;
+                } else {
+
+                    if (switchcount == 0 && dir == "asc") {
+                        dir = "desc";
+                        switching = true;
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- attachment-table-search -->
+    <script type="text/javascript">
+        var $attRows = $('#attTable tr');
+        $('#attachmentSearch').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $attRows.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+    </script>
+    <script type="text/javascript">
+        function attachmentTable(n) {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("attachmentTable");
+            switching = true;
+            dir = "asc";
+
+            while (switching) {
+                switching = false;
+                rows = table.getElementsByTagName("TR");
+
+                for (i = 1; i < (rows.length - 1); i++) {
+
+                    shouldSwitch = false;
+
+                    x = rows[i].getElementsByTagName("TD")[n];
+                    y = rows[i + 1].getElementsByTagName("TD")[n];
+
+                    if (dir == "asc") {
+                        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (dir == "desc") {
+                        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+                if (shouldSwitch) {
+
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+
+                    switchcount++;
+                } else {
+
+                    if (switchcount == 0 && dir == "asc") {
+                        dir = "desc";
+                        switching = true;
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- document-table-search -->
+    <script type="text/javascript">
+        var $docRows = $('#authTable tr');
+        $('#authLetterSearch').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $docRows.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+    </script>
+    <script type="text/javascript">
+        function authLetterTable(n) {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("authLetterTable");
+            switching = true;
+            dir = "asc";
+
+            while (switching) {
+                switching = false;
+                rows = table.getElementsByTagName("TR");
+
+                for (i = 1; i < (rows.length - 1); i++) {
+
+                    shouldSwitch = false;
+
+                    x = rows[i].getElementsByTagName("TD")[n];
+                    y = rows[i + 1].getElementsByTagName("TD")[n];
+
+                    if (dir == "asc") {
+                        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (dir == "desc") {
+                        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+                if (shouldSwitch) {
+
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+
+                    switchcount++;
+                } else {
+
+                    if (switchcount == 0 && dir == "asc") {
+                        dir = "desc";
+                        switching = true;
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- auto-date -->
+    <script>
+        // text-message-auto-date
+        $(document).ready(function () {
+            var date = new Date();
+
+            var day = date.getDate();
+            var month = date.getMonth() + 1;
+            var year = date.getFullYear();
+
+            if (month < 10) month = "0" + month;
+            if (day < 10) day = "0" + day;
+
+            var today = year + "-" + month + "-" + day;
+            $("#textAutoDate").attr("value", today);
+        });
+
+        // email-message-auto-date
+        $(document).ready(function () {
+            var date = new Date();
+
+            var day = date.getDate();
+            var month = date.getMonth() + 1;
+            var year = date.getFullYear();
+
+            if (month < 10) month = "0" + month;
+            if (day < 10) day = "0" + day;
+
+            var today = year + "-" + month + "-" + day;
+            $("#emailAutoDate").attr("value", today);
+        });
+
+    </script>
+    <!-- general -->
+    <script type="text/javascript">
+        // left-navigation-slider
+        $("#menu-toggle").click(function (e) {
+            e.preventDefault();
+            $("#wrapper").toggleClass("active");
+        });
+        // waffle-navigation-script-open
+        $("#patientMenu-toggle").click(function (e) {
+            e.preventDefault();
+            $("#patientWrapper").toggleClass("active");
+        });
+        // waffle-navigation-script-close
+        $("#exit-toggle").click(function (e) {
+            e.preventDefault();
+            $("#patientWrapper").toggleClass("active");
+        });
+        // special-note
+        $("#alert-toggle").click(function (e) {
+            e.preventDefault();
+            $("#alertWrapper").toggleClass("active");
+        });
+        // program-popup
+        $("#program-toggle").click(function (e) {
+            e.preventDefault();
+            $("#programWrapper").toggleClass("active");
+        });
+        // go-back
+        $(function () {
+            $('.go_back').click(function (e) {
+                e.preventDefault();
+                history.go(-1);
+            });
+        });
+        // sms-template-auto-fill
+        function FillTemplate() {
+            var stateId = $('#titles').val();
+            $.ajax({
+                url: '/Member/FillTemplate',
+                type: "GET",
+                dataType: "JSON",
+                data: { tempId: stateId },
+                success: function (options) {
+
+                    $("#smsMessages_message").val(""); // clear before appending new list
+
+                    $.each(options, function (i, option) {
+                        $("#smsMessages_message").val(option.title).val(option.template)
+                        $("#text-message").val(option.template)
+                    });
+
+                }
+            });
+        }
+
+    </script>
+    <!-- redirect-to-tab -->
+    <script>
+        $(document).ready(function () {
+            document.getElementsByTagName("html")[0].style.visibility = "visible";
+            if (localStorage.key(0) == "addContact") {
+                $("#tab5-4").attr("checked", "checked");
+                localStorage.clear();
+                localStorage.removeItem("addContact");
+            }
+        });
+
+        $(document).ready(function () {
+            document.getElementsByTagName("html")[0].style.visibility = "visible";
+            if (localStorage.key(0) == "addAddress") {
+                $("#tab5-4").attr("checked", "checked");
+                localStorage.clear();
+                localStorage.removeItem("addAddress");
+            }
+        });
+
+        $(document).ready(function () {
+            document.getElementsByTagName("html")[0].style.visibility = "visible";
+            if (localStorage.key(0) == "addNote") {
+                $("#tab5-5").attr("checked", "checked");
+                localStorage.clear();
+                localStorage.removeItem("addNote");
+            }
+        });
+    </script>
+    <!-- tool-tip -->
+    <script>
+        $(function () {
+            $('.tooltip-wrapper').tooltip({ position: "bottom" });
+        });
+    </script>
+    <!-- iseries-table -->
+    <script>
+        $(function () {
+            $(document).ready(function () {
+                var table = $("#iSeriesTable");
+                var hCTitle = $(".hCTitle", table);
+                var iSTitle = $(".iSTitle", table);
+                var hCMemberName = $(".hCMemberName", table);
+                var iSMemberName = $(".iSMemberName", table);
+                var hCLanguage = $(".hCLanguage", table);
+                var iSLanguage = $(".iSLanguage", table);
+                var hCContactName = $(".hCContactName", table);
+                var iSContactName = $(".iSContactName", table);
+                var hCMobile = $(".hCMobile", table);
+                var iSMobile = $(".iSMobile", table);
+                var hCTelephone = $(".hCTelephone", table);
+                var iSTelephone = $(".iSTelephone", table);
+                var hCEmail = $(".hCEmail", table);
+                var iSEmail = $(".iSEmail", table);
+                var hCAddress = $(".hCAddress", table);
+                var iSAddress = $(".iSAddress", table);
+                var hCCity = $(".hCCity", table);
+                var iSCity = $(".iSCity", table);
+                var hCZip = $(".hCZip", table);
+                var iSZip = $(".iSZip", table);
+
+                if (hCTitle.text().trim().toLowerCase() == iSTitle.text().trim().toLowerCase())
+                    $('.iSTitle').removeClass('iSeriesDifference');
+                else
+                    $('.iSTitle').addClass('iSeriesDifference');
+
+                if (hCMemberName.text() == iSMemberName.text())
+                    $('.iSMemberName').removeClass('iSeriesDifference');
+                else
+                    $('.iSMemberName').addClass('iSeriesDifference');
+
+                if (hCLanguage.text() == iSLanguage.text())
+                    $('.iSLanguage').removeClass('iSeriesDifference');
+                else
+                    $('.iSLanguage').addClass('iSeriesDifference');
+
+                if (hCMobile.text().trim() == iSMobile.text().trim())
+                    $('.iSMobile').removeClass('iSeriesDifference');
+                else
+                    $('.iSMobile').addClass('iSeriesDifference');
+
+                if (hCTelephone.text().trim() == iSTelephone.text().trim())
+                    $('.iSTelephone').removeClass('iSeriesDifference');
+                else
+                    $('.iSTelephone').addClass('iSeriesDifference');
+
+                if (hCEmail.text() == iSEmail.text())
+                    $('.iSEmail').removeClass('iSeriesDifference');
+                else
+                    $('.iSEmail').addClass('iSeriesDifference');
+
+                if (hCAddress.text() == iSAddress.text())
+                    $('.iSAddress').removeClass('iSeriesDifference');
+                else
+                    $('.iSAddress').addClass('iSeriesDifference');
+
+                if (hCCity.text() == iSCity.text())
+                    $('.iSCity').removeClass('iSeriesDifference');
+                else
+                    $('.iSCity').addClass('iSeriesDifference');
+
+                if (hCZip.text() == iSZip.text())
+                    $('.iSZip').removeClass('iSeriesDifference');
+                else
+                    $('.iSZip').addClass('iSeriesDifference');
+
+            });
+        });
+
+    </script>
+    <!-- attachment submit-->
+    <script type="text/javascript">
+        //Disable submit on click - HCare-728
+        $('#attachmentInsert').submit(function () {
+            var button = $('#attachmentSubmit');
+            var oldValue = button.value;
+            var isDisabled = true;
+
+            $(this).find('#attachmentSubmit').prop('disabled', true);
+
+            setTimeout(function () {
+                button.value = oldValue;
+                button.attr('disabled', !isDisabled);
+            }, 5000)
+
+        });
+
+        $('.attachmentTypeValidation').change(function () {
+            if ($(this).val() != 'Select') {
+                $("#attachmentType-error").hide();
+                $("#attachmentTypeError").hide();
+            }
+        });
+
+
+    </script>
+    <script type="text/javascript">
+        $('.modal-content').resizable({
+            //alsoResize: ".modal-dialog",
+            minHeight: 300,
+            minWidth: 300
+        });
+        $('.modal-dialog').draggable();
+
+        $('#editModal').on('show.bs.modal', function () {
+            $(this).find('.modal-body').css({
+                'max-height': '100%'
+            });
+        });
+
+        $('#backButton').on('click', function (e) {
+            e.preventDefault();
+            $('#editModal').modal('hide');
+        })
+
+        $('.close').on('click', function (e) {
+            e.preventDefault();
+            $('#editModal').modal('hide');
+        })
+
+        $('#btnEdit').click(function () {
+            // reset modal if it isn't visible
+            if (!($('.modal.in').length)) {
+                $('.modal-dialog').css({
+                    top: 0,
+                    left: 0
+                });
+            }
+            $('#editModal').modal({
+                backdrop: "static",
+                show: true,
+            });
+
+            $('.modal-dialog').draggable({
+                handle: ".modal-header"
+            });
+        });
+
+    </script>
+    <script type="text/javascript">
+        $('.modal-content').resizable({
+            //alsoResize: ".modal-dialog",
+            minHeight: 300,
+            minWidth: 300
+        });
+        $('.modal-dialog').draggable();
+
+        $('#addModal').on('show.bs.modal', function () {
+            $(this).find('.modal-body').css({
+                'max-height': '100%'
+            });
+        });
+
+        $('#backButton').on('click', function (e) {
+            e.preventDefault();
+            $('#addModal').modal('hide');
+        })
+
+        $('.close').on('click', function (e) {
+            e.preventDefault();
+            $('#addModal').modal('hide');
+        })
+
+        $('#btnAdd').click(function () {
+            // reset modal if it isn't visible
+            if (!($('.modal.in').length)) {
+                $('.modal-dialog').css({
+                    top: 0,
+                    left: 0
+                });
+            }
+            $('#addModal').modal({
+                backdrop: "static",
+                show: true,
+            });
+
+            $('.modal-dialog').draggable({
+                handle: ".modal-header"
+            });
+        });
+    </script>
+    <!-- attachment-type-tab-redirect-->
+    <script>
+        //attachment-edit
+        $(document).ready(function () {
+            if (localStorage.key(0) == "edit_attachment_type") {
+                $("#attachments_tab").trigger("click"),
+                    localStorage.clear();
+                localStorage.removeItem("edit_attachment_type");
+            }
+        });
+        //attachment-back
+        $(document).ready(function () {
+            if (localStorage.key(0) == "back_attachment_type") {
+                $("#attachments_tab").trigger("click"),
+                    localStorage.clear();
+                localStorage.removeItem("back_attachment_type");
+            }
+        });
+
+
+    </script>
+    <script>
+        const realFilebtn = document.getElementById("attachment");
+        const customBtn = document.getElementById("custom-button");
+        const customTxt = document.getElementById("custom-text");
+        let files = []
+
+        customBtn.addEventListener("click", function () {
+            realFilebtn.click();
+        });
+
+        realFilebtn.addEventListener("change", function () {
+            if (realFilebtn.value) {
+                files.push(realFilebtn.value.match(/[\/\\]([\w\d\s\.\-\(\)]+)$/)[1]);
+            }
+
+            if (files.length > 0) {
+                customTxt.innerHTML = files.length + 1;
+            } else {
+                customTxt.innerHTML = realFilebtn.value.match(/[\/\\]([\w\d\s\.\-\(\)]+)$/)[1];
+            }
+        });
+
+
+
+    </script>
+
+    @*HCare-1061 Glucose diary reporting tool*@
+    <script type="text/javascript">
+        var $enqRows = $('#diaryTable tr');
+        $('#diarySearch').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $enqRows.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+    </script>
+    <script type="text/javascript">
+        function enquiryTable(n) {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("diaryTable");
+            switching = true;
+            dir = "asc";
+
+            while (switching) {
+                switching = false;
+                rows = table.getElementsByTagName("TR");
+
+                for (i = 1; i < (rows.length - 1); i++) {
+
+                    shouldSwitch = false;
+
+                    x = rows[i].getElementsByTagName("TD")[n];
+                    y = rows[i + 1].getElementsByTagName("TD")[n];
+
+                    if (dir == "asc") {
+                        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (dir == "desc") {
+                        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+                if (shouldSwitch) {
+
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+
+                    switchcount++;
+                } else {
+
+                    if (switchcount == 0 && dir == "asc") {
+                        dir = "desc";
+                        switching = true;
+                    }
+                }
+            }
+        }
+    </script>
+
+    <script type="text/javascript">
+        //hcare-1199  //hcare-1274
+        function validatePhoneNumber(input) {
+            $('#mobile-number').html('');
+            $("#error-invalid").addClass("hidden");
+            $('#sms-validation-error').html('');
+            $('#sms-number-error').addClass("hidden").html('').animate({ opacity: 0 }, 500);
+            $('#sms-send').prop('disabled', false);
+            $("#hidden-mobile").val('');
+
+            var mobile = $('#smsMessages_cell_no').val();
+            if (mobile.length != 0) {
+                if (/^[0-9\ - ]*$/.test(mobile) == false || mobile.indexOf(' ') >= 0 || $('#smsMessages_cell_no').val().length > 12 || $('#smsMessages_cell_no').val().length < 10 || $('#smsMessages_cell_no').val().length == 11) {
+                    $('#sms-validation-error').html('<span style="font-size: 8px; color: darkred;vertical-align: middle"><i class="fas fa-exclamation-triangle"></i></span>');
+                    $('#sms-number-error').removeClass("hidden").html('&emsp;<span style="font-size: 8px;vertical-align: middle"> <i class="fas fa-exclamation-triangle"></i></span> <b>Invalid:</b> Invalid contact number.');
+                    $('#sms-send').prop('disabled', true);
+                    $("#hidden-mobile").val(mobile);
+                }
+                if ($('#smsMessages_cell_no').val().length == 0) {
+                    $('#mobile-number').html('');
+                    $("#error-invalid").addClass("hidden");
+                    $('#sms-send').prop('disabled', true);
+                    $("#hidden-mobile").val(mobile);
+                }
+            }
+        }
+
+        $("#submit-text").click(function () {
+            if ($("#hidden-mobile").val().length > 0) {
+                $("#smsMessages_cell_no").focus();
+                document.body.scrollTop = 0;
+                document.documentElement.scrollTop = 0;
+                return false;
+            }
+        });
+
+    </script>
+
+    @*HCare-860*@
+    <script>
+
+        (function ($) {
+            $.fn.uploader = function (options) {
+                var settings = $.extend(
+                    {
+                        MessageAreaText: "No files selected.",
+                        MessageAreaTextWithFiles: "File List:",
+                        DefaultErrorMessage: "Unable to open this file.",
+                        BadTypeErrorMessage: "We cannot accept this file type at this time.",
+                        acceptedFileTypes: [
+                            "pdf",
+                            "jpg",
+                            "gif",
+                            "jpeg",
+                            "bmp",
+                            "tif",
+                            "tiff",
+                            "png",
+                            "xps",
+                            "doc",
+                            "docx",
+                            "fax",
+                            "wmp",
+                            "ico",
+                            "txt",
+                            "cs",
+                            "rtf",
+                            "xls",
+                            "xlsx"
+                        ]
+                    },
+                    options
+                );
+
+                var uploadId = 1;
+                //update the messaging
+                $(".file-uploader__message-area p").text(
+                    options.MessageAreaText || settings.MessageAreaText
+                );
+
+                //create and add the file list and the hidden input list
+                var fileList = $('<ul class="file-list"></ul>');
+                var hiddenInputs = $('<div class="hidden-inputs hidden"></div>');
+                $(".file-uploader__message-area").after(fileList);
+                $(".file-list").after(hiddenInputs);
+
+                //when choosing a file, add the name to the list and copy the file input into the hidden inputs
+                $(".file-chooser__input").on("change", function () {
+                    var files = document.querySelector(".file-chooser__input").files;
+
+                    for (var i = 0; i < files.length; i++) {
+                        console.log(files[i]);
+
+                        var file = files[i];
+                        var fileName = file.name.match(/([^\\\/]+)$/)[0];
+
+                        //clear any error condition
+                        $(".file-chooser").removeClass("error");
+                        $(".error-message").remove();
+
+                        //validate the file
+                        var check = checkFile(fileName);
+                        if (check === "valid") {
+                            // move the 'real' one to hidden list
+                            $(".hidden-inputs").append($(".file-chooser__input"));
+
+                            //insert a clone after the hiddens (copy the event handlers too)
+                            $(".file-chooser").append(
+                                $(".file-chooser__input").clone({ withDataAndEvents: true })
+                            );
+
+                            //add the name and a remove button to the file-list
+                            $(".file-list").append(
+                                '<li style="display: none;"><span class="file-list__name">' +
+                                fileName +
+                                '</span><button class="removal-button" data-uploadid="' +
+                                uploadId +
+                                '"></button></li>'
+                            );
+                            $(".file-list").find("li:last").show(800);
+
+                            //removal button handler
+                            $(".removal-button").on("click", function (e) {
+                                e.preventDefault();
+
+                                //remove the corresponding hidden input
+                                $(
+                                    '.hidden-inputs input[data-uploadid="' +
+                                    $(this).data("uploadid") +
+                                    '"]'
+                                ).remove();
+
+                                //remove the name from file-list that corresponds to the button clicked
+                                $(this)
+                                    .parent()
+                                    .hide("puff")
+                                    .delay(10)
+                                    .queue(function () {
+                                        $(this).remove();
+                                    });
+
+                                //if the list is now empty, change the text back
+                                if ($(".file-list li").length === 0) {
+                                    $(".file-uploader__message-area").text(
+                                        options.MessageAreaText || settings.MessageAreaText
+                                    );
+                                }
+                            });
+
+                            //so the event handler works on the new "real" one
+                            $(".hidden-inputs .file-chooser__input")
+                                .removeClass("file-chooser__input")
+                                .attr("data-uploadId", uploadId);
+
+                            //update the message area
+                            $(".file-uploader__message-area").text(
+                                options.MessageAreaTextWithFiles ||
+                                settings.MessageAreaTextWithFiles
+                            );
+
+                            uploadId++;
+                        } else {
+                            //indicate that the file is not ok
+                            $(".file-chooser").addClass("error");
+                            var errorText =
+                                options.DefaultErrorMessage || settings.DefaultErrorMessage;
+
+                            if (check === "badFileName") {
+                                errorText =
+                                    options.BadTypeErrorMessage || settings.BadTypeErrorMessage;
+                            }
+
+                            $(".file-chooser__input").after(
+                                '<p class="error-message">' + errorText + "</p>"
+                            );
+                        }
+                    }
+                });
+
+                var checkFile = function (fileName) {
+                    var accepted = "invalid",
+                        acceptedFileTypes =
+                            this.acceptedFileTypes || settings.acceptedFileTypes,
+                        regex;
+
+                    for (var i = 0; i < acceptedFileTypes.length; i++) {
+                        regex = new RegExp("\\." + acceptedFileTypes[i] + "$", "i");
+
+                        if (regex.test(fileName)) {
+                            accepted = "valid";
+                            break;
+                        } else {
+                            accepted = "badFileName";
+                        }
+                    }
+
+                    return accepted;
+                };
+            };
+        })($);
+
+        //init
+        $(document).ready(function () {
+            console.log("hi");
+            $(".fileUploader").uploader({
+                MessageAreaText: "No files selected. Please select a file."
+            });
+        });
+
+
+
+    </script>
+    <script>
+        $(document).ready(function () {
+            if (localStorage.key(0) == "create_nok") {
+                $("#contact_tab").trigger("click"),
+                    localStorage.clear();
+                localStorage.removeItem("create_nok");
+            }
+        });
+        $(document).ready(function () {
+            if (localStorage.key(0) == "edit_nok") {
+                $("#contact_tab").trigger("click"),
+                    localStorage.clear();
+                localStorage.removeItem("edit_nok");
+            }
+        });
+        $(document).ready(function () {
+            if (localStorage.key(0) == "back_nok") {
+                $("#contact_tab").trigger("click"),
+                    localStorage.clear();
+                localStorage.removeItem("back_nok");
+            }
+        });
+    </script>
+    <script>
+        $(window).on('load', function () {
+            var dependantid = $('#e1-dependantid').val();
+            var programid = $('#e1-programid').val();
+            $.ajax({
+                url: '/Member/EmailAttachmentHistoryReset',
+                type: "POST",
+                dataType: "JSON",
+                data: { dependantid: dependantid, programid: programid },
+                success: function (result) {
+
+                }
+            });
+        });
+    </script>
+    <script>
+        $(window).on('load', function () {
+            var dependantid = $('#e2-dependantid').val();
+            var programid = $('#e2-programid').val();
+            $.ajax({
+                url: '/Member/EmailAttachmentHistoryReset',
+                type: "POST",
+                dataType: "JSON",
+                data: { dependantid: dependantid, programid: programid },
+                success: function (result) {
+
+                }
+            });
+        });
+    </script>
+    <script>
+        $(".email-attachment-button-one").click(function () {
+            $("#attachment-overlay").fadeIn(150);
+            $("#email-attachment-popup").fadeIn(250);
+        });
+        $(".email-attachment-button-two").click(function () {
+            $("#attachment-overlay").fadeIn(150);
+            $("#email-attachment-popup").fadeIn(250);
+        });
+
+        $("#popup-close-btn").click(function () {
+            $("#attachment-overlay").fadeOut(150);
+            $("#email-attachment-popup").fadeOut(250);
+        });
+
+        $(".popup-close").click(function () {
+            $("#attachment-overlay").fadeOut(150);
+            $("#email-attachment-popup").fadeOut(250);
+        });
+    </script>
+    <script>
+        $(document).on('change', 'input[name="attachments"]', function () {
+            var templateid = $(this).val();
+            var dependantid = $('#e1-dependantid').val();
+            var programid = $('#e1-programid').val();
+
+            if (this.checked) {
+                $('.ea-placeholder').hide();
+                $('#check-' + templateid).removeClass('far fa-circle').addClass('fas fa-check-circle').css({ "color": "rgb(172 209 175 / 0.80)" });
+                $('.email-attachment-button-one').show();
+                $('.email-attachment-button-two').hide();
+
+                $.ajax({
+                    url: '/Member/EmailAttachmentHistoryInsert',
+                    type: "POST",
+                    dataType: "JSON",
+                    data: { templateid: templateid, dependantid: dependantid, programid: programid, status: true },
+                    success: function (result) {
+                        $.ajax({
+                            url: '/Member/EmailAttachmentHistoryDetails',
+                            type: "POST",
+                            dataType: "JSON",
+                            data: { templateid: templateid },
+                            success: function (result) {
+                                var data = {};
+                                data.d = [
+                                    { FileName: result.FileName, AttachmentName: result.AttachmentName, Extension: result.AttachmentExtension }];
+                                var html = '';
+                                for (var i = 0; i < data.d.length; i++)
+                                    if (data.d[i].Extension == '.docx') {
+                                        html += '<tr id="' + result.Id + '"><td id="word-icon" style="width: 5%"></td> <td style="width: 85%">' + data.d[i].AttachmentName + '</td > <td style="width: 10%"><input type="checkbox" name="remove-btn" id="remove-word" value="' + result.Id + '"><label for="remove-word" onclick="remove()" style="margin-bottom: 0px"><i class="fas fa-times-circle delete-attachment"></i ></lable></td ></tr > ';
+                                    }
+                                    else if (data.d[i].Extension == '.xlsx') {
+                                        html += '<tr id="' + result.Id + '"><td id="excel-icon" style="width: 5%"></td> <td style="width: 85%">' + data.d[i].AttachmentName + '<td style="width: 10%"><input type="checkbox" name="remove-btn" id="remove-excel" value="' + result.Id + '"><label for="remove-excel" onclick="remove()" style="margin-bottom: 0px"><i class="fas fa-times-circle delete-attachment"></i ></lable></td ></tr > ';
+                                    }
+                                    else if (data.d[i].Extension == '.pdf') {
+                                        html += '<tr id="' + result.Id + '"><td id="pdf-icon" style="width: 5%"></td> <td style="width: 85%">' + data.d[i].AttachmentName + '<td style="width: 10%"><input type="checkbox" name="remove-btn" id="remove-pdf" value="' + result.Id + '"><label for="remove-pdf" onclick="remove()" style="margin-bottom: 0px"><i class="fas fa-times-circle delete-attachment"></i ></lable></td ></tr > ';
+                                    }
+                                    else if (data.d[i].Extension == '.jpg') {
+                                        html += '<tr id="' + result.Id + '"><td id="jpg-icon" style="width: 5%"></td> <td style="width: 85%">' + data.d[i].AttachmentName + '<td style="width: 10%"><input type="checkbox" name="remove-btn" id="remove-jpg" value="' + result.Id + '"><label for="remove-jpg" onclick="remove()" style="margin-bottom: 0px"><i class="fas fa-times-circle delete-attachment"></i ></lable></td ></tr > ';
+                                    }
+                                    else if (data.d[i].Extension == '.txt') {
+                                        html += '<tr id="' + result.Id + '"><td id="txt-icon" style="width: 5%"></td> <td style="width: 85%">' + data.d[i].AttachmentName + '<td style="width: 10%"><input type="checkbox" name="remove-btn" id="remove-txt" value="' + result.Id + '"><label for="remove-txt" onclick="remove()" style="margin-bottom: 0px"><i class="fas fa-times-circle delete-attachment"></i ></lable></td ></tr > ';
+                                    }
+
+                                $('#attachment-table tr').first().after(html);
+                            }
+                        });
+                    }
+                });
+            }
+            else {
+                $('#check-' + templateid).addClass('far fa-circle').removeClass('fas fa-check-circle').css({ "color": "rgb(204 204 204 / 0.80)" });
+                $.ajax({
+                    url: '/Member/EmailAttachmentHistoryInsert',
+                    type: "POST",
+                    dataType: "JSON",
+                    data: { templateid: templateid, dependantid: dependantid, programid: programid, status: false },
+                    success: function (result) {
+                        $.ajax({
+                            url: '/Member/EmailAttachmentHistoryDetails',
+                            type: "POST",
+                            dataType: "JSON",
+                            data: { templateid: templateid },
+                            success: function (result) {
+                                $('#attachment-table tr#' + result.Id).remove();
+                            }
+                        });
+                    }
+                });
+            }
+        });
+        function remove() {
+            $(document).on('change', 'input[name="remove-btn"]', function () {
+                var templateid = $(this).val();
+                var dependantid = $('#e1-dependantid').val();
+                var programid = $('#e1-programid').val();
+                if (this.checked) {
+                    $.ajax({
+                        url: '/Member/EmailAttachmentHistoryInsert',
+                        type: "POST",
+                        dataType: "JSON",
+                        data: { templateid: templateid, dependantid: dependantid, programid: programid, status: false },
+                        success: function (result) {
+                            $.ajax({
+                                url: '/Member/EmailAttachmentHistoryDetails',
+                                type: "POST",
+                                dataType: "JSON",
+                                data: { templateid: templateid },
+                                success: function (result) {
+                                    $('#attachment-table tr#' + result.Id).fadeOut();
+                                    $('#attachment-' + templateid).prop('checked', false);
+                                    $('#check-' + templateid).addClass('far fa-circle').removeClass('fas fa-check-circle').css({ "color": "rgb(204 204 204 / 0.80)" });
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+        }
+        $(document).on('change', 'input[name="remove-btn"]', function () {
+            if ($('input[name="remove-btn"]:checked').length == $('input[name="remove-btn"]').length) {
+                $('.email-attachment-button-one').fadeOut(5);
+                $('.email-attachment-button-two').fadeIn(10);
+                $('.ea-placeholder').fadeIn(10);
+            }
+        });
+    </script>
+    <script>
+        $(".new-email-button").click(function () {
+            $("#email-overlay").fadeIn(150);
+            $("#new-email-popup").fadeIn(250);
+        });
+    </script>
+    <script type="text/javascript">
+
+        CKEDITOR.replace('emailMessage', {
+            //hcare-1381: toolbar amendment
+            toolbar: [
+                { name: 'basicstyles', items: ['Bold', 'Italic', 'Underline'] },
+                { name: 'clipboard', items: ['Undo', 'Redo'] },
+                { name: 'paragraph', items: ['NumberedList', 'BulletedList'] },
+                { name: 'hidden', items: ['Image', 'Source', 'NewPage', 'Preview', 'Subscript', 'Superscript', 'TextColor', 'BGColor', '-', 'CopyFormatting', 'RemoveFormat', 'Styles', 'Format', 'Font', 'FontSize', '-', 'Outdent', 'Indent', '-', 'Blockquote', 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock', 'Table', 'HorizontalRule', 'SpecialChar'] },
+            ],
+        });
+
+        CKEDITOR.config.removePlugins = 'elementspath,contextmenu,liststyle,tabletools,tableselection'; //hcare-1381
+        CKEDITOR.config.disableNativeSpellChecker = false; //hcare-1381
+
+        function EmailTemplate() {
+            //hcare-1384
+            var templateID = $('#emailTemplate').val();
+            var membername = $("#e1-member-name").val();
+
+            if (CKEDITOR.instances['emailMessage'].getData() != '') { CKEDITOR.instances['emailMessage'].setData(''); }
+
+            $.ajax({
+                url: '/Member/EmailTemplateBuild',
+                type: "GET",
+                dataType: "JSON",
+                data: { templateID: templateID },
+                success: function (results) {
+                    CKEDITOR.instances['emailMessage'].insertHtml(results.EmailTemplate);
+                    CKEDITOR.instances['emailMessage'].setData(CKEDITOR.instances['emailMessage'].getData().replace("[MemberName]", membername));
+                }
+            });
+        }
+    </script>
+    <script>
+        $(document).ready(function () {
+            if (localStorage.key(0) == "back_email") {
+                $("#email_tab").trigger("click"),
+                    localStorage.clear();
+                localStorage.removeItem("back_email");
+            }
+        });
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function () { $("#emailTemplate").select2({ multiple: false, placeholder: "Select", allowClear: false }); });
+        $(document).ready(function () { $("#emailTemplate2").select2({ multiple: false, placeholder: "Select", allowClear: false }); });
+        $(document).ready(function () { $("#titles").select2({ multiple: false, placeholder: "Select", allowClear: false }); });
+    </script>
+    <script>
+        $(document).ready(function () {
+            $('#email-send').prop('disabled', true);
+            $('#emailTemplate').on("select2:select", function (e) {
+                if ($(this).val() > 0) {
+                    $('#email-message').show();
+                    $('#email-send').prop('disabled', false);
+                    $('#email-button').addClass('hidden');
+                    $('#email-send').removeClass('hidden');
+                    $('#validation-error').html('').animate({ opacity: 0 }, 500).addClass("hidden");
+                    $('#template-validation-error').html('');
+                }
+            });
+        });
+    </script>
+    <script>
+        function ValidateEmail() {
+            if ($('#emailMessages_emailTo').val() == "" || $('#emailMessages_emailTo').val() == null) {
+                $('#email-validation-error').html('<span style="font-size: 8px; color: darkred;vertical-align: middle"><i class="fas fa-exclamation-triangle"></i></span>');
+                $('#validation-email-error').removeClass("hidden").html('&emsp;<span style="font-size: 8px;vertical-align: middle"> <i class="fas fa-exclamation-triangle"></i></span> <b>Invalid:</b> Email address is required.').animate({ opacity: 1 }, 500);
+            }
+            else {
+                $('#email-validation-error').html('');
+                $('#validation-email-error').html('').animate({ opacity: 0 }, 500).addClass("hidden");
+            }
+        }
+
+        $(function () {
+            $('#emailMessages_emailTo').on('change mouseup mousedown mouseout keydown keyup', function () {
+                if ($('#emailMessages_emailTo').val() == "" || $('#emailMessages_emailTo').val() == null) {
+                    $('#email-validation-error').html('<span style="font-size: 8px; color: darkred;vertical-align: middle"><i class="fas fa-exclamation-triangle"></i></span>');
+                    $('#validation-email-error').removeClass("hidden").html('&emsp;<span style="font-size: 8px;vertical-align: middle"> <i class="fas fa-exclamation-triangle"></i></span> <b>Invalid:</b> Email address is required.');
+                    $('#email-send').prop('disabled', true);
+                }
+                else {
+                    $('#email-validation-error').html('');
+                    $('#validation-email-error').html('').addClass("hidden");
+                    $('#email-send').prop('disabled', false);
+                }
+            });
+        });
+
+        $(document).ready(function () {
+            $('#email-send').click(function () {
+                if ($('#emailMessages_emailTo').length == 0) {
+                    $('#email-validation-error').html('<span style="font-size: 8px; color: darkred;vertical-align: middle"><i class="fas fa-exclamation-triangle"></i></span>');
+                    $('#validation-email-error').removeClass("hidden").html('&emsp;<span style="font-size: 8px;vertical-align: middle"> <i class="fas fa-exclamation-triangle"></i></span> <b>Invalid:</b> Email address is required.').animate({ opacity: 1 }, 500);
+                    $('#emailMessages_emailTo').focus();
+                }
+                else {
+                    localStorage.setItem("back_email", Date.now());
+                    $("#email-overlay").fadeOut(150);
+                    $("#new-email-popup").fadeOut(250);
+                }
+            });
+
+            $(".email-close").click(function () {
+                $("#email-overlay").fadeOut(150);
+                $("#new-email-popup").fadeOut(250);
+            });
+
+            $('#email-button').click(function () {
+                if ($('#emailTemplate').val() == 0) {
+                    $('#template-validation-error').html('<span style="font-size: 8px; color: darkred;vertical-align: middle"><i class="fas fa-exclamation-triangle"></i></span>');
+                    $('#validation-error').removeClass("hidden").html('&emsp;<span style="font-size: 8px;vertical-align: middle"> <i class="fas fa-exclamation-triangle"></i></span> <b>Invalid:</b> Please select a template from the dropdown menu.').animate({ opacity: 1 }, 500);
+                }
+            });
+        });
+
+        //disable-submit-button
+        $('#email-assignment').submit(function () {
+            $('#email-send').prop('disabled', true);
+        });
+
+    </script>
+    <script>
+        $(document).ready(function () {
+            if (localStorage.key(0) == "back_sms") {
+                $("#text_tab").trigger("click"),
+                    localStorage.clear();
+                localStorage.removeItem("back_sms");
+            }
+        });
+    </script>
+    <script>
+        // sms-table-search
+        $(document).ready(function () {
+            $("#sms-search").on("keyup", function () {
+                var value = $(this).val().toLowerCase();
+                $("#sh-search tr").filter(function () {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+            });
+        });
+        // email-table-search
+        $(document).ready(function () {
+            $("#email-search").on("keyup", function () {
+                var value = $(this).val().toLowerCase();
+                $("#eh-search tr").filter(function () {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+            });
+        });
+    </script>
+    <script>
+        $(".new-sms-button").click(function () {
+            $("#email-overlay").fadeIn(150);
+            $("#new-sms-popup").fadeIn(250);
+        });
+    </script>
+    <script>
+        $(document).ready(function () {
+            $('#sms-send').prop('disabled', true);
+            $('#titles').on("select2:select", function (e) {
+                if ($(this).val() > 0) {
+                    $('#sms-message').show();
+                    $('#sms-send').prop('disabled', false);
+                    $('#sms-button').addClass('hidden');
+                    $('#sms-send').removeClass('hidden');
+                    $('#sms-template-error').html('').animate({ opacity: 0 }, 500).addClass("hidden");
+                    $('#sms-template-validation-error').html('');
+                }
+            });
+        });
+    </script>
+    <script>
+        function ValidateSMS() {
+            if ($('#smsMessages_cell_no').val() == "" || $('#smsMessages_cell_no').val() == null) {
+                $('#sms-validation-error').html('<span style="font-size: 8px; color: darkred;vertical-align: middle"><i class="fas fa-exclamation-triangle"></i></span>');
+                $('#validation-sms-error').removeClass("hidden").html('&emsp;<span style="font-size: 8px;vertical-align: middle"> <i class="fas fa-exclamation-triangle"></i></span> <b>Invalid:</b> Mobile number is required.');
+            }
+            else {
+                $('#sms-validation-error').html('');
+                $('#validation-sms-error').html('').animate({ opacity: 0 }, 500).addClass("hidden");
+            }
+        }
+
+        $(document).ready(function () {
+            $('#sms-send').click(function () {
+                if ($('#smsMessages_cell_no').length == 0) {
+                    $('#sms-validation-error').html('<span style="font-size: 8px; color: darkred;vertical-align: middle"><i class="fas fa-exclamation-triangle"></i></span>');
+                    $('#validation-sms-error').removeClass("hidden").html('&emsp;<span style="font-size: 8px;vertical-align: middle"> <i class="fas fa-exclamation-triangle"></i></span> <b>Invalid:</b> Mobile number is required.');
+                    $('#smsMessages_cell_no').focus();
+                }
+                else {
+                    localStorage.setItem("back_sms", Date.now());
+                    $("#email-overlay").fadeOut(150);
+                    $("#new-sms-popup").fadeOut(250);
+                }
+            });
+
+            $(".sms-close").click(function () {
+                $("#email-overlay").fadeOut(150);
+                $("#new-sms-popup").fadeOut(250);
+            });
+
+            $('#sms-button').click(function () {
+                if ($('#titles').val() == 0) {
+                    $('#sms-template-validation-error').html('<span style="font-size: 8px; color: darkred;vertical-align: middle"><i class="fas fa-exclamation-triangle"></i></span>');
+                    $('#sms-template-error').removeClass("hidden").html('&emsp;<span style="font-size: 8px;vertical-align: middle"> <i class="fas fa-exclamation-triangle"></i></span> <b>Invalid:</b> Please select a template from the dropdown menu.').animate({ opacity: 1 }, 500);
+                }
+            });
+        });
+    </script>
+    <script>
+        $(function () {
+            $(document).mousemove(function () {
+                $('#mobile-number').html('');
+                $("#error-invalid").addClass("hidden");
+                $('#sms-send').prop('disabled', false);
+                $("#hidden-mobile").val('');
+
+                var mobile = $('#smsMessages_cell_no').val();
+                if (mobile.length != 0) {
+                    if (mobile.length > 12 || mobile.length < 10 || mobile.length == 11) {
+                        $('#sms-number-error').removeClass("hidden").html('&emsp;<span style="font-size: 8px;vertical-align: middle"> <i class="fas fa-exclamation-triangle"></i></span> <b>Invalid:</b> Invalid contact number.');
+                        $('#sms-validation-error').html('<span style="font-size: 8px; color: darkred;vertical-align: middle"><i class="fas fa-exclamation-triangle"></i></span>');
+                        $('#sms-send').prop('disabled', true);
+                        $("#hidden-mobile").val(mobile);
+                    }
+                    else {
+                        $('#sms-number-error').addClass("hidden").html('');
+                        $('#sms-validation-error').html('');
+                        $('#sms-send').prop('disabled', false);
+                        $("#hidden-mobile").val('');
+                    }
+                }
+            });
+        })
+
+        $(function () {
+            $(document).ready(function () {
+                $('#smsMessages_cell_no').on('blur', function () {
+                    $('#mobile-number').html('');
+                    $("#error-invalid").addClass("hidden");
+                    $('#sms-send').prop('disabled', false);
+                    $("#hidden-mobile").val('');
+
+                    var mobile = $('#smsMessages_cell_no').val();
+                    if (mobile.length != 0) {
+                        if (mobile.length > 12 || mobile.length < 10 || mobile.length == 11) {
+                            $('#sms-number-error').removeClass("hidden").html('&emsp;<span style="font-size: 8px;vertical-align: middle"> <i class="fas fa-exclamation-triangle"></i></span> <b>Invalid:</b> Invalid contact number.');
+                            $('#sms-validation-error').html('<span style="font-size: 8px; color: darkred;vertical-align: middle"><i class="fas fa-exclamation-triangle"></i></span>');
+                            $('#sms-send').prop('disabled', true);
+                            $("#hidden-mobile").val(mobile);
+                        }
+                        else {
+                            $('#sms-number-error').addClass("hidden").html('');
+                            $('#sms-validation-error').html('');
+                            $('#sms-send').prop('disabled', false);
+                            $("#hidden-mobile").val('');
+                        }
+                    }
+                });
+            });
+        })
+
+    </script>
+    <script>
+        $(document).ready(function () {
+            if (localStorage.key(0) == "create_notes") {
+                $("#notes_tab").trigger("click"),
+                    localStorage.clear();
+                localStorage.removeItem("create_notes");
+            }
+        });
+        $(document).ready(function () {
+            if (localStorage.key(0) == "back_notes") {
+                $("#notes_tab").trigger("click"),
+                    localStorage.clear();
+                localStorage.removeItem("back_notes");
+            }
+        });
+    </script>
+
+    <script src="~/Scripts/pc-email-hcare-1391.js"></script>
+
+}
+
+
+
+

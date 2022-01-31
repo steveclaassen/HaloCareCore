@@ -1,0 +1,238 @@
+﻿@model HaloCareCore.Models.ViewModels.UserRoleVM
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<comment>
+    <!--
+        28 September 2020 -- HCare-821
+     -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+</style>
+<javascript>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js"></script>
+    <script src="https://www.jqueryscript.net/demo/jQuery-Plugin-For-Sortable-Bootstrap-Tables-Bootstrap-Sortable/Scripts/bootstrap-sortable.js"></script>
+</javascript>
+
+<div class="fullScreen_container">
+    <!----------------------------------------------------------------------------- html-top-navigation-panel  ---------------------------------------------------------------------------->
+    <navigation>
+        <nav id="global-nav" class="nav">
+            <div class="pull-left title">
+                <h1 class="site-title_patientProfile">
+                    <span><i class="fas fa-user-circle"></i>&emsp; Users & roles</span>
+                </h1>
+            </div>
+            <div class="pull-right title">
+                <div class="site-title_userID pull-right">
+                    <div class="halocareLogoX"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+                </div>
+                <h1 class="site-title_userID pull-right">
+                    @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                    {
+                        <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                    }
+                </h1>
+                <h1 class="site-waffleIcon pull-right">
+                    <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+                </h1>
+            </div>
+        </nav>
+        <ul class="breadcrumbs_fullScreens">
+            <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+            <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+            <li><a href="@Url.Action("Index", "Administration", new {})">Settings</a></li>
+            <li><a href="#">@ViewBag.Title</a></li>
+        </ul>
+        <div class="navCollection_fullScreens">
+            @Html.Partial("_navCollection")
+        </div>
+        <div style="margin-bottom: 3%"></div>
+    </navigation>
+    <!-------------------------------------------------------------------------------------- html-body ------------------------------------------------------------------------------------>
+    <div class="container-tab">
+        <div class="row">
+            <div class="span12">
+                <div class="container-tab">
+                    <!------------------------------------------------------------------------------------ tab-navigation ----------------------------------------------------------------------------------->
+                    <ul class="nav nav-pills nav-justified" role="tablist">
+                        <li role="presentation" class="tab-clinical active"><a href="#users" aria-controls="users" class="tab-label" data-toggle="tab" id="user_tab">Users</a></li>
+                        <li role="presentation" class="tab-clinical"><a href="#roles" aria-controls="roles" class="tab-label" role="tab" data-toggle="tab" id="role_tab">Roles</a></li>
+                    </ul>
+                    <!-------------------------------------------------------------------------------------- tab-panels ------------------------------------------------------------------------------------->
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="users">
+                            <div class="row">
+                                <br />
+                                <!--------------------------------------------------------------------------- new/search -------------------------------------------------------------------------->
+                                <div class="col-md-12 row">
+                                    <div class="col-md-6">
+                                        <h4 class="subHeading">
+                                            Users overview
+                                            <a class="create-new" href="@Url.Action("AddUser", "Account", new { })" style="font-size: 14px">Create new <span><i class="fa fa-plus-circle" style="font-size: 12px"></i></span></a>
+                                        </h4>
+                                    </div>
+                                    <!--------------------------------------------------------------------------- jq-search -------------------------------------------------------------------------->
+                                    <div class="col-md-6">
+                                        <div class="input-wrapper-new-search">
+                                            <input type="text" class="form-control-new-search" id="userSearch" onkeyup="myFunction()" placeholder="Search..." />
+                                        </div>
+                                    </div>
+                                </div>
+                                <!------------------------------------------------------------------------ medical-aid-table ---------------------------------------------------------------------->
+                                <table class="table settings-table sortable">
+                                    <thead>
+                                        <tr>
+                                            <th>@Html.DisplayNameFor(model => model.Users[0].username) <i class="fa fa-fw fa-sort"></i></th>
+                                            <th>@Html.DisplayNameFor(model => model.Users[0].userFirstName_UC) <i class="fa fa-fw fa-sort"></i></th>
+                                            <th>@Html.DisplayNameFor(model => model.Users[0].userLastName_UC) <i class="fa fa-fw fa-sort"></i></th>
+                                            <th>@Html.DisplayNameFor(model => model.Users[0].email) <i class="fa fa-fw fa-sort"></i></th>
+                                            <th style="text-align: center!important; width: 7%">@Html.DisplayNameFor(model => model.Users[0].Active)</th>
+                                            <th style="text-align: center!important; width: 7%">Action</th>
+                                        </tr>
+                                    </thead>
+
+                                    @foreach (var item in Model.Users)
+                                    {
+                                        <tbody id="user-search">
+                                            <tr>
+                                                <td><span class="@(item.Active == true ? "" : "active-false")"><span class="userAvatar" style="color: white!important; font-size: 11px">@Html.DisplayFor(modelItem => item.userInitial)</span> @Html.DisplayFor(modelItem => item.username)</span></td>
+                                                <td class="row-information"><span class="@(item.Active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.userFirstName_UC)</span></td>
+                                                <td class="row-information"><span class="@(item.Active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.userLastName_UC)</span></td>
+                                                <td class="row-information"><span class="@(item.Active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.email)</span></td>
+                                                <td class="row-information text-center"><span class="@(item.Active == true ? "chk-yes fas fa-circle" : "chk-no fas fa-circle")"></span></td>
+                                                <td class="text-center">
+                                                    <input type="submit" class="link-button" value="View" onclick="location.href='@Url.Action("ViewUser", "Account", new { id = item.userID })'" /> /
+                                                    <input type="submit" class="link-button" value="Edit" onclick="location.href='@Url.Action("EditUser", "Account", new { id = item.userID })'" />
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    }
+                                </table>
+                            </div>
+                        </div>
+                        <div role="tabpanel" class="tab-pane" id="roles">
+                            <div class="row">
+                                <br />
+                                <!--------------------------------------------------------------------------- new/search -------------------------------------------------------------------------->
+                                <div class="col-md-12 row">
+                                    <div class="col-md-6">
+                                        <h4 class="subHeading">
+                                            Roles overview
+                                            <a class="create-new" href="@Url.Action("CreateRole", "Account", new { })" style="font-size: 14px">Create new <span><i class="fa fa-plus-circle" style="font-size: 12px"></i></span></a>
+                                        </h4>
+                                    </div>
+                                    <!--------------------------------------------------------------------------- jq-search -------------------------------------------------------------------------->
+                                    <div class="col-md-6">
+                                        <div class="input-wrapper-new-search">
+                                            <input type="text" class="form-control-new-search" id="roleSearch" onkeyup="myFunction()" placeholder="Search..." />
+                                        </div>
+                                    </div>
+                                </div>
+                                <!------------------------------------------------------------------------ medical-plan-table ---------------------------------------------------------------------->
+                                <table class="table settings-table sortable">
+                                    <thead>
+                                        <tr>
+                                            <th>@Html.DisplayNameFor(model => model.Roles[0].name) <i class="fa fa-fw fa-sort"></i></th>
+                                            <th style="text-align: center!important; width: 10%">@Html.DisplayNameFor(model => model.Roles[0].admin)</th>
+                                            <th style="text-align: center!important; width: 10%">@Html.DisplayNameFor(model => model.Roles[0].active)</th>
+                                            <th style="text-align: center!important; width: 10%">Action</th>
+                                        </tr>
+                                    </thead>
+
+                                    @foreach (var item in Model.Roles)
+                                    {
+                                        <tbody id="role-search">
+                                            <tr>
+                                                <td class="text-left"><span class="@(item.active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.name)</span></td>
+                                                <td class="row-information text-center"><span class="@(item.admin == true ? "chk-yes fas fa-circle" : "chk-no fas fa-circle")"></span></td>
+                                                <td class="row-information text-center"><span class="@(item.active == true ? "chk-yes fas fa-circle" : "chk-no fas fa-circle")"></span></td>
+
+                                                <td class="text-center">
+                                                    <input type="submit" class="link-button" value="Edit" onclick="location.href='@Url.Action("EditRole", "Account", new { id = item.Id })'" />
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    }
+
+                                </table>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixedBack">
+        <input value="Back" class="btn buttonRound_formBack " onclick="MainbackBtn();" style="width: 15%" />
+    </div>
+</div>
+
+<script src="js/jquery.tablesorter.min.js"></script>
+
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+    <script>
+            function MainbackBtn() {
+            window.location.href = '@Url.Action("Index", "Administration")';
+        }
+    </script>
+    <script type="text/javascript">
+        var $rows = $('#user-search tr');
+        $('#userSearch').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $rows.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+
+        var $rrows = $('#role-search tr');
+        $('#roleSearch').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $rrows.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+    </script>
+    <script>
+        //create
+        $(document).ready(function () {
+            if (localStorage.key(0) == "create_role") {
+                $("#role_tab").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("create_role");
+            }
+        });
+        //edit
+        $(document).ready(function () {
+            if (localStorage.key(0) == "edit_role") {
+                $("#role_tab").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("edit_role");
+            }
+        });
+        //back
+        $(document).ready(function () {
+            if (localStorage.key(0) == "back_role") {
+                $("#role_tab").trigger("click");
+                localStorage.clear();
+                localStorage.removeItem("back_role");
+            }
+        });
+
+    </script>
+}
+

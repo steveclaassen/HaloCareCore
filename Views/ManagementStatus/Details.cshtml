@@ -1,0 +1,171 @@
+﻿@model HaloCareCore.Models.Validation.ManagementStatus
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "Details";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<comment>
+    <!--
+    14 May 2019 -- HCare-730 (Account Settings – Management status (Related to HCare-417))
+    Added CSS to the views as well as a duplicate check on the management status code and the management status description.
+
+    The index view allows a user to view the active and inactive entries in order to control the statuses from a settings perspective.
+    I have added a search bar as well as a sort function that will allow the user to sort the columns.
+    The duplication check is applied to the create and the edit view and will not allow a user to enter an entry that has the same Code or the same name.
+
+    30 August 2019 -- HCare-785 (Management status - Add Created and Modified fields to database)
+    Added the Created and modified fields to the details view of the management status
+
+    -->
+</comment>
+
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+</style>
+
+<div class="fullScreen_container zero-padding">
+
+    <!--pageHeader-->
+    <nav id="global-nav" class="nav">
+        <div class="pull-left title">
+            <h1 class="site-title_patientProfile">
+                <span><i class="fas fa-id-card-alt"></i>&emsp; Management status</span>
+            </h1>
+        </div>
+        <div class="pull-right title">
+            <h1 class="site-title_userID pull-right">
+                <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+            </h1>
+            <h1 class="site-title_userID pull-right">
+                @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                {
+                    <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                }
+            </h1>
+            <h1 class="site-waffleIcon pull-right">
+                <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+            </h1>
+        </div>
+    </nav>
+
+    <!--breadCrumbs-->
+    <ul class="breadcrumbs_fullScreens">
+        <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+        <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+        <li><a href="@Url.Action("Index", "ManagementStatus", new {})">Management status</a></li>
+        <li><a href="#">Detail</a></li>
+    </ul>
+
+    <!--navCollection-->
+    <div class="navCollection_fullScreens">
+        @Html.Partial("_navCollection")
+    </div>
+
+    <div style="margin-bottom: 1%"></div>
+
+    <div class="row">
+        <h4 class="tableHeading">Management status detail</h4>
+        <hr class="fancyruler">
+        <br />
+        <br />
+        <div style="margin-left: 5%">
+            <dl class="dl-horizontal editForm">
+                <dt>
+                    @Html.DisplayName("Status code")
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.statusCode)
+                </dd>
+
+                <dt>
+                    @Html.DisplayName("Status description")
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.statusName)
+                </dd>
+
+                <dt>
+                    @Html.DisplayName("Program code")
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.programCode)
+                </dd>
+
+                <br />
+                <hr class="fancyruler" />
+
+                <dt>
+                    @Html.DisplayName("Created by")
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.createdBy)
+                </dd>
+
+                <dt>
+                    @Html.DisplayName("Created date")
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.createdDate)
+                </dd>
+
+                <br />
+                <hr class="fancyruler" />
+                <dt>
+                    @Html.DisplayName("Modified by")
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.modifiedBy)
+                </dd>
+
+                <dt>
+                    @Html.DisplayName("Modified date")
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.modifiedDate)
+                </dd>
+
+                <br />
+                <hr class="fancyruler" />
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.active)
+                </dt>
+
+                <dd class="activeCheck">
+                    @if (Model.active)
+                    {
+                        <img src="~/Content/Images/Icons/Administration/AssignmentTrue.png" style="width: 20%; margin-left: -1%!important" />
+                    }
+                    else
+                    {
+                        <img src="~/Content/Images/Icons/Administration/AssignmentFalse.png" style="width: 20%; margin-left: -1%!important" />
+                    }
+                </dd>
+
+            </dl>
+
+            <div class="fixedBack" style="margin-left: 35%">
+                <input value="Back" class="btn buttonRound_formBack go_back" style="width: 15%!important" />
+                <a href="@Url.Action("Edit", "ManagementStatus", new { id = Model.statusCode })" value="Edit" class="btn buttonRound_formEdit" style="width: 15%!important">Edit</a>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+}

@@ -1,0 +1,308 @@
+﻿@model HaloCareCore.Models.ViewModels.UserCreationCreateModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "AddUser";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+<comment>
+    <!--
+     14 September 2020 -- HCare-956(Master table maintenance screens - DUP checks on EDIT)
+    -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .error-alert {
+        width: 100%;
+        margin: 0 auto;
+        background-color: rgba(217, 83, 79, 0.1);
+        padding: 10px;
+        border-left-color: #d9534f !important;
+        border: 1px solid transparent;
+        border-left-width: 5px;
+        border-radius: 3px;
+        margin: 0 auto;
+        font-family: 'Open Sans', sans-serif;
+        font-size: 12px;
+        margin: 0 0 5px 0;
+        margin-top: -10px;
+        margin-bottom: 20px;
+    }
+
+        .error-alert span {
+            color: #d9534f;
+            text-align: center;
+        }
+
+    .field-validation-error:before {
+        font-family: FontAwesome;
+        content: "\f06a\00a0";
+        animation: pulse 2s ease infinite;
+    }
+</style>
+<javascript>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+    <script src="https://www.jqueryscript.net/demo/jQuery-Plugin-For-Sortable-Bootstrap-Tables-Bootstrap-Sortable/Scripts/bootstrap-sortable.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/js/standalone/selectize.js"></script>
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.default.css">
+</javascript>
+<div class="fullScreen_container zero-padding">
+
+    <!--pageHeader-->
+    <nav id="global-nav" class="nav">
+        <div class="pull-left title">
+            <h1 class="site-title_patientProfile">
+                <span><i class="fas fa-user-circle"></i>&emsp; Users</span>
+            </h1>
+        </div>
+        <div class="pull-right title">
+            <h1 class="site-title_userID pull-right">
+                <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+            </h1>
+            <h1 class="site-title_userID pull-right">
+                @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                {
+                    <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                }
+            </h1>
+            <h1 class="site-waffleIcon pull-right">
+                <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+            </h1>
+        </div>
+    </nav>
+
+    <!--breadCrumbs-->
+    <ul class="breadcrumbs_fullScreens">
+        <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+        <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+        <li><a href="@Url.Action("ListUsers", "Account", new {})">Users</a></li>
+        <li><a href="#">Create</a></li>
+    </ul>
+
+    <!--navCollection-->
+    <div class="navCollection_fullScreens">
+        @Html.Partial("_navCollection")
+    </div>
+
+    <div style="margin-bottom: 1%"></div>
+
+    <!--Form-->
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="row">
+            <h4 class="tableHeading">Create new</h4>
+            <hr class="fancyruler">
+
+            <div class="form-horizontal createForm">
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                <input type="hidden" name="user-validation" id="user-validation" />
+                <input type="hidden" name="name-validation" id="name-validation" />
+                <div class="col-md-12"><div id="duplicate-user-notice" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; Username already exists!</span></div></div></div>
+                <div class="col-md-12"><div id="duplicate-name-notice" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; User's name already exists!</span></div></div></div>
+                <br />
+                <br />
+                <div class="form-group">
+                    @Html.LabelFor(model => model.username, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.username, new { htmlAttributes = new { @class = "form-control-new", @onblur = "UserNameCheck();" } })
+                        @Html.ValidationMessageFor(model => model.username, "", new { @class = "text-danger", @style = "font-size: 90%; margin-left: 1%" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.firstname, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.firstname, new { htmlAttributes = new { @class = "form-control-new", @onblur = "UserFullNameCheck();" } })
+                        @Html.ValidationMessageFor(model => model.firstname, "", new { @class = "text-danger", @style = "font-size: 90%; margin-left: 1%" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.lastname, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.lastname, new { htmlAttributes = new { @class = "form-control-new", @onblur = "UserFullNameCheck();" } })
+                        @Html.ValidationMessageFor(model => model.lastname, "", new { @class = "text-danger", @style = "font-size: 90%; margin-left: 1%" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.email, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.email, new { htmlAttributes = new { @class = "form-control-new" } })
+                        @Html.ValidationMessageFor(model => model.email, "", new { @class = "text-danger", @style = "font-size: 90%; margin-left: 1%" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.password, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.password, new { htmlAttributes = new { @class = "form-control-new" } })
+                        @Html.ValidationMessageFor(model => model.password, "", new { @class = "text-danger", @style = "font-size: 90%; margin-left: 1%" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.Label(null, "User role", htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.DropDownListFor(model => model.selectedRole, new SelectList(Model.roles, "id", "name"), "Select", new { @required = "required" })
+                        @Html.ValidationMessageFor(model => model.selectedRole, "", new { @class = "text-danger", @style = "font-size: 90%; margin-left: 1%" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.Label(null, "Medical scheme access", htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @*@Html.ListBoxFor(m => m.selectedSchemes, new MultiSelectList(Model.medicalAids, "MedicalAidID", "Name"), new { multiple = "multiple", @class = "multiple" })*@
+                        @Html.DropDownListFor(model => model.selectedSchemes, new SelectList(Model.medicalAids, "MedicalAidID", "Name"), "Select", new { })
+                        @Html.ValidationMessageFor(model => model.selectedSchemes, "", new { @class = "text-danger", @style = "font-size: 90%; margin-left: 1%" })
+                    </div>
+                </div>
+                <br />
+            </div>
+
+            <br />
+            <br />
+            <h class="heading-detail">Reporting setup</h>
+            <h4 class="tableDivider-heading text-divider"></h4>
+            <div class="form-group">
+                <div class="col-md-12">
+                    <div class="col-md-3">
+                        <h class="label-detail">Search management</h>
+                        <p class="paragraph-label-detail">Access to production & communication logs.</p>
+                    </div>
+                    <div class="col-md-3 check-box_medAid">
+                        @Html.CheckBoxFor(model => model.SearchManagement, new { htmlAttributes = new { @class = "infoBox_editMember" } })
+                    </div>
+                </div>
+            </div>
+
+            <div class="centered-btn">
+                <input id="submit" type="submit" value="Submit" class="btn create-button" style="width: 15%" /><br />
+                <input type="text" value="Back" class="btn reset-button go_back" />
+            </div>
+
+        </div>
+
+    }
+
+</div>
+
+@section scripts{
+    <script src="~/bundles/jqueryval"></script>
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/js/standalone/selectize.js"></script>
+    <script>
+        initSelectize();
+        function initSelectize() {
+            $('#selectedRole').selectize({
+                persist: true,
+                preload: true,
+                maxItems: 1,
+                delimiter: ',',
+                valueField: 'id',
+                labelField: 'name',
+                searchField: ['name'],
+                hideSelected: true,
+                plugins: ['remove_button'],
+                render: {
+                    option: function (item, escape) {
+                        return '<span class="name">' + escape(item.name) + '</span>';
+
+                    }
+                }
+            }),
+                $('#selectedSchemes').selectize({
+                    persist: true,
+                    preload: true,
+                    maxItems: 20,
+                    delimiter: ',',
+                    valueField: 'id',
+                    labelField: 'name',
+                    searchField: ['name'],
+                    hideSelected: true,
+                    plugins: ['remove_button'],
+                    render: {
+                        option: function (item, escape) {
+                            return '<span class="name">' + escape(item.name) + '</span>';
+
+                        }
+                    }
+                })
+        }
+    </script>
+    <script>
+        //hcare-956
+        function UserNameCheck() {
+            var uname = $('#username').val();
+            uname = uname.trim();
+            $("#user-validation").val("");
+            $.ajax({
+                url: '/Account/UserNameCheck',
+                type: "POST",
+                dataType: "JSON",
+                data: { username: uname },
+                success: function (result) {
+                    var username = result.username;
+                    if (username.toLowerCase == uname.toLowerCase) {
+                        $("#duplicate-user-notice").removeClass("hidden");
+                        $('span[data-valmsg-for="username"]').html('<span style="font-size: 12px"><i class="fas fa-exclamation-circle"></i> </span>Username already exists!');
+                        $("#user-validation").val(username);
+                    }
+                },
+                error: function (result) {
+                    $("#duplicate-user-notice").addClass("hidden");
+                    $('span[data-valmsg-for="username"]').html('');
+                }
+            });
+        }
+        $("#submit").click(function () {
+            if ($("#user-validation").val().length > 0) {
+                $("#username").focus();
+                return false;
+            }
+        });
+    </script>
+    <script>
+        //hcare-956
+        function UserFullNameCheck() {
+            var fname = $('#firstname').val();
+            fname = fname.trim();
+            var lname = $('#lastname').val();
+            lname = lname.trim();
+            $("#name-validation").val("");
+
+            $.ajax({
+                url: '/Account/UserFullNameCheck',
+                type: "POST",
+                dataType: "JSON",
+                data: { firstname: fname, lastname: lname },
+                success: function (result) {
+                    var firstname = result.Firstname;
+                    var lastname = result.Lastname;
+                    if (firstname.toLowerCase + lastname.toLowerCase == fname.toLowerCase + lname.toLowerCase) {
+                        $("#duplicate-name-notice").removeClass("hidden");
+                        $('span[data-valmsg-for="firstname"]').html('<span style="font-size: 12px"><i class="fas fa-exclamation-circle"></i> </span>Username already exists!');
+                        $('span[data-valmsg-for="lastname"]').html('<span style="font-size: 12px"><i class="fas fa-exclamation-circle"></i> </span>Username already exists!');
+                        $("#name-validation").val(username);
+                    }
+                },
+                error: function (result) {
+                    $("#duplicate-name-notice").addClass("hidden");
+                    $('span[data-valmsg-for="firstname"]').html('');
+                    $('span[data-valmsg-for="lastname"]').html('');
+                }
+            });
+        }
+        $("#submit").click(function () {
+            if ($("#name-validation").val().length > 0) {
+                $("#firstname").focus();
+                return false;
+            }
+        });
+    </script>
+
+
+}

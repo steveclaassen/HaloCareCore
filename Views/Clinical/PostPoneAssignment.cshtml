@@ -1,0 +1,287 @@
+﻿@model HaloCareCore.Models.Communications.Assignments
+
+@{
+    ViewBag.Title = "CloseAssignment";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+
+
+<style>
+    .container {
+        max-width: 1600px !important;
+        width: 1400px !important;
+        margin: auto;
+        display: block;
+        padding: 0;
+    }
+
+    .table {
+        table-layout: fixed;
+    }
+
+    ::-webkit-input-placeholder { /* Chrome */
+        color: rgba(128, 128, 128, 0.50);
+        transition: opacity 250ms ease-in-out;
+    }
+
+    :focus::-webkit-input-placeholder {
+        opacity: 0.5;
+    }
+
+    th {
+        cursor: pointer;
+        border-top: none !important;
+    }
+
+    td {
+        cursor: pointer;
+    }
+
+    .table tr th {
+        color: black !important;
+        font-weight: 600 !important;
+    }
+
+    /*breadCrumbs*/
+
+    ul.breadcrumb {
+        padding: 10px 16px;
+        list-style: none;
+        background-color: transparent;
+    }
+
+        ul.breadcrumb li {
+            display: inline;
+            font-size: 10px;
+        }
+
+            ul.breadcrumb li + li:before {
+                padding: 8px;
+                color: #808080;
+                font-size: 10px;
+                content: "/\00a0";
+            }
+
+            ul.breadcrumb li a {
+                color: #808080;
+                text-decoration: none;
+                font-size: 10px;
+            }
+
+                ul.breadcrumb li a:hover {
+                    color: #eea236;
+                }
+
+    * {
+        color: #003366;
+    }
+
+    .contentBlock {
+        width: 105% !important;
+        margin-left: -3.5% !important;
+    }
+
+    .fullWidth_table {
+        max-width: 1450px !important;
+        width: 1450px !important;
+        margin: auto;
+        margin-bottom: 2% !important;
+        font-size: 10px;
+        margin-left: 0.5% !important;
+    }
+
+        .fullWidth_table input {
+            margin-left: 15px !important;
+        }
+
+    .fullWidth_Assignments {
+        max-width: 1450px !important;
+        width: 1450px !important;
+        margin: auto;
+        margin-bottom: 2% !important;
+        font-size: 10px;
+        margin-left: 0% !important;
+    }
+
+    .fullWidth_Pathology {
+        max-width: 1450px !important;
+        width: 1450px !important;
+        margin: auto;
+        margin-bottom: 2% !important;
+        font-size: 10px;
+        margin-left: 0% !important;
+    }
+
+    .backButton_image img {
+        left: 46.6% !important;
+    }
+
+    .modal-dialog_reports {
+        right: auto;
+        left: 50%;
+        width: 800px !important;
+        padding-top: 30px;
+        padding-bottom: 30px;
+    }
+
+
+    .custom-file-input::-webkit-file-upload-button {
+        visibility: hidden;
+    }
+
+    .custom-file-input::before {
+        content: 'Select';
+        display: inline-block;
+        background: #fff;
+        border: 1px solid #cccccc;
+        border-radius: 20px;
+        width: 15%;
+        padding: 5px 8px;
+        outline: none;
+        white-space: nowrap;
+        -webkit-user-select: none;
+        cursor: pointer;
+        text-shadow: 1px 1px #fff;
+        font-size: 10pt;
+        text-align: center;
+        color: #cccccc;
+        margin-top: -1%;
+        position: absolute;
+    }
+
+    .custom-file-input:hover::before {
+        border-color: #0081b3;
+        color: #0081b3;
+    }
+</style>
+
+<div class="container zero-padding">
+
+    <!--breadCrumbs-->
+    <ul class="breadcrumb" style="margin-top: -2.2%; margin-bottom: 3%; position: fixed; z-index: 5">
+        <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+        <li><a href="@Url.Action("OpenAssignments", "Index", new {})">Overview</a></li>
+        <li><a class="go_back">Patient Summary</a></li>
+        <li><a href="#">Assignment</a></li>
+    </ul>
+    <!--breadCrumbs-->
+    <!--FAB-->
+    <div class="zoom">
+        <a class="zoom-fab zoom-btn-md zoom-btn-white" id="zoomBtn"><i class="glyphicon glyphicon-th-large" style="font-size: 12px; color: ghostwhite"></i></a>
+        <ul class="zoom-menu">
+            <li><a href="@Url.Action("Index", "Home", new { })" class="zoom-fab zoom-btn-sm zoom-btn-white scale-transition scale-out"><i class="fa fa-home" style="font-size: 14px; color: ghostwhite"></i></a></li>
+            <li><a href="@Url.Action("Index", "Administration", new { })" class="zoom-fab zoom-btn-sm zoom-btn-white scale-transition scale-out" title="Settings"><i class="fa fa-gear" style="font-size: 14px; color: ghostwhite"></i></a></li>
+            <li><a href="javascript:;" class="zoom-fab zoom-btn-sm zoom-btn-white scale-transition scale-out" title="Add Member"><i class="fa fa-plus" style="font-size: 14px; color: ghostwhite"></i></a></li>
+            <li><a href="@Url.Action("searchManagement", "patientManagement", new { })" class="zoom-fab zoom-btn-sm zoom-btn-white scale-transition scale-out" title="Advanced Search"><i class="fa fa-search" style="font-size: 14px; color: ghostwhite"></i></a></li>
+        </ul>
+    </div>
+    <!--FAB_End-->
+    <!--pageHeader-->
+    <div class="container zero-padding">
+        <div class="topBar_reports img-responsive">
+            <h2>Assignment</h2>
+            <img src="~/Content/Images/memberProfile/topBar Icons/openAssignments.png" style="width: 3%; margin-top: -0.2%;" />
+            <img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" style="width: 8%; float: right; margin-right: 100px; margin-top: 3px" />
+        </div>
+    </div>
+
+
+    <!--pageHeader-->
+    <!--profileInformation-->
+
+    <div class="container" style="margin-left: 0%">
+        @Html.Action("_ProfileInformation_viewMember", "Member", new { DependentID = Model.dependentID })
+    </div>
+
+    <div style="margin-bottom: 6%"></div>
+
+    <!--profileInformation_End-->
+
+
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+        <div class="row contentBlock_pathology">
+            <h4 style="color: #003366; margin-top: 0%; margin-left: 2%; margin-bottom: 1%!important; font-size: 25px; font-family: 'Century Gothic'; font-weight: 300; font-style: normal;">Close Assignment</h4>
+            <hr class="fancyruler">
+            <br />
+            <div class="form-horizontal">
+
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                @Html.HiddenFor(model => model.assignmentID)
+                @Html.HiddenFor(model => model.dependentID)
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.postponementReason, htmlAttributes: new { @class = "control-label col-md-2 drop" })
+                    <div class="col-md-10">
+                        @Html.TextAreaFor(model => model.postponementReason, new { htmlAttributes = new { @class = "infoBox_pathologyComment" } })
+                        @Html.ValidationMessageFor(model => model.postponementReason, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.postponeToDate, htmlAttributes: new { @class = "control-label col-md-2 drop" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.postponeToDate, new { htmlAttributes = new { @class = "infoBox_Enrollment datepicker" } })
+                        @Html.ValidationMessageFor(model => model.postponeToDate, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+
+
+            <br />
+            <div class="form-group">
+                <div class="actionButton" style="margin-left: 42%; margin-bottom: -1.5%">
+                    <input type="submit" value="PostPone" class="btn buttonRound_Postpone" style="width: 15%!important" />
+
+                    <!--<a data-toggle="modal" href="#myModal" class="btn buttonRound_login" style="margin-left: 37.5%!important; width: 10%">Postpone</a>-->
+                </div>
+                <div class="actionButton" style="margin-left: 48%; margin-bottom: -1.5%">
+                </div>
+            </div>
+            <br />
+        </div>
+    }
+
+    <!-- Modal -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="">
+            <div class="">
+                <div class="modal-body">
+
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+    <!-- Modal -->
+    <br />
+    <br />
+    <br />
+</div>
+<div class="backButton">
+    <a class="go_back" style="left: 15px;bottom: 10px; position: fixed; padding: 2px 2px 2px 2px; z-index: 5">
+        Back
+    </a>
+</div>
+
+
+
+<!-- Search -->
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+
+    <script>
+
+        var $rows = $('#table tr');
+        $('#search').keyup(function () {
+            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+            $rows.show().filter(function () {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+        });
+
+
+    </script>
+}

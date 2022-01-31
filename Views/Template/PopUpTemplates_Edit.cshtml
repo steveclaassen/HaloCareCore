@@ -1,0 +1,671 @@
+﻿@model HaloCareCore.Models.Admin.PopUpTemplate
+@using HaloCareCore.Extensions
+@{
+    ViewBag.Title = "Popup template";
+    Layout = "~/Views/Shared/_layout-view-x.cshtml";
+}
+
+<javascript>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+    <script src="https://www.jqueryscript.net/demo/jQuery-Plugin-For-Sortable-Bootstrap-Tables-Bootstrap-Sortable/Scripts/bootstrap-sortable.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/js/standalone/selectize.js"></script>
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.default.css">
+</javascript>
+<style>
+    body {
+        padding-bottom: 0;
+    }
+
+    .selectize-control.single .selectize-input [data-value] {
+        border: 1px solid transparent !important;
+        border-radius: 0px !important;
+    }
+
+    .selectize-control.multi .selectize-input [data-value] {
+        border: 1px solid transparent !important;
+        border-radius: 0px !important;
+        box-shadow: none !important;
+    }
+
+    .select2-container--default .select2-selection--multiple {
+        display: block !important;
+        max-width: 1500px !important;
+        width: 111% !important;
+        max-height: 100px;
+        height: auto;
+        margin-left: 5px;
+        padding: 6px 0px;
+        line-height: 1.428571429;
+        color: #003366;
+        border-radius: 0px !important;
+        border: none !important;
+        border-bottom: 1px solid #e8e6e6 !important;
+        background-color: transparent !important;
+        -webkit-box-shadow: none !important;
+        box-shadow: none !important;
+    }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice {
+            background-color: #0081b3 !important;
+            color: white !important;
+            border: 1px solid transparent !important;
+            border-radius: 5px;
+            cursor: default;
+            float: left;
+            margin-right: 5px;
+            margin-top: 0px !important;
+            padding: 5px 6px 5px 0px !important;
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+            color: white !important;
+            cursor: pointer;
+            display: inline-block;
+            font-weight: bold;
+            margin-right: 2px;
+        }
+
+    .select2-container--open .select2-dropdown {
+        left: 10px !important;
+    }
+
+    .select2-container--default .select2-selection--multiple .select2-selection__choice {
+        border-radius: 0px !important;
+    }
+
+    .error-alert {
+        background-color: rgba(217, 48, 78, 0.2);
+        padding: 10px 12px 10px 12px;
+        border: 1px solid transparent;
+        border-radius: 0px;
+        font: 100 12px 'Open Sans', sans-serif;
+        color: rgb(217, 48, 78);
+        margin: 0 0 0 0;
+        margin-top: -10px;
+        margin-bottom: -10px;
+        margin-left: -15px;
+        width: 102%;
+        vertical-align: middle;
+    }
+
+        .error-alert span a {
+            color: rgb(217, 48, 78);
+            margin-top: -5px;
+        }
+
+    .new-account-row-insert {
+        display: block;
+        max-width: 1000px !important;
+        width: 85%;
+        max-height: 100px;
+        height: 30px;
+        margin-top: 5px;
+        margin-left: 10px;
+        padding: 6px 6px;
+        line-height: 1.428571429;
+        color: #003366;
+        border-radius: 0px;
+        border: none;
+        border-bottom: 1px solid #e8e6e6;
+        background-color: transparent !important;
+        font-family: 'Century Gothic' !important;
+        text-indent: 10px;
+    }
+
+    textarea#Template {
+        max-width: 1000px !important;
+        width: 85%;
+        min-height: 100px;
+        height: auto;
+        margin-bottom: 5px;
+        padding: 8px 10px 2px 10px;
+        vertical-align: middle;
+        outline: none !important;
+        font: 100 14px Calibri;
+        color: #003366;
+        border: 1px solid rgba(204, 204, 204, 0.50);
+        border-radius: 0px;
+        margin-top: 5px;
+        margin-left: 5px;
+        position: relative;
+        resize: none;
+        text-indent: 5px;
+    }
+
+    .required-color {
+        color: transparent !important;
+    }
+
+    .popup-check {
+        position: relative;
+        top: -4px;
+        left: 10px;
+    }
+</style>
+
+<div id="instruction-wrapper">
+    <div class="instruction-panel">
+        <h class="account-step">Instruction</h>
+        <p class="account-step-instruction">Enter new template information.</p>
+        <ul style="padding: 0">
+            <li class="account-step-list asl-1 active-step"><span class="number-circle circle-1 active-circle">1</span>Type</li>
+            <li class="account-step-list asl-2"><span class="number-circle circle-2">2</span>Title</li>
+            <li class="account-step-list asl-3"><span class="number-circle circle-3">3</span>Template</li>
+            <li class="account-step-list asl-4"><span class="number-circle circle-4">4</span>Scheme</li>
+            <li class="account-step-list asl-5"><span class="number-circle circle-5">5</span>Options</li>
+            <li class="account-step-list asl-6"><span class="number-circle circle-6">6</span>Programs</li>
+        </ul>
+    </div>
+</div>
+
+<div class="collapse in">
+    <div class="card card-body">
+        <div class="collapse-body">
+            <div class="new-account-panel">
+                @using (Html.BeginForm("PopUpTemplates_Edit", "Template", FormMethod.Post, new { id = "popup-edit" }))
+                {
+                    <div class="hidden-fields">
+                        <input type="text" name="scheme" id="scheme" value="@TempData["scheme"].ToString()" hidden />
+                        <input type="text" name="options" id="options" value="@TempData["options"].ToString()" hidden />
+                        <input type="text" name="programs" id="programs" value="@TempData["programs"].ToString()" hidden />
+                        @Html.HiddenFor(model => model.CreatedDate)
+                        @Html.HiddenFor(model => model.CreatedBy)
+                    </div>
+                    <div class="col-md-12 row">
+                        <div class="account-heading">Template setup</div>
+                        <p class="account-sub-header-new">Enter the template information below and click submit to continue.</p>
+                    </div>
+                    <hr class="fancyruler">
+                    <input id="duplicate-val" name="duplicate-val" value="@ViewBag.Validation" hidden />
+                    <div id="popup-validation" class="error-alert hidden" style="margin-bottom: 12px"></div>
+                    <div style="margin-bottom: 10px"></div>
+
+                    <table class="table details-table" id="new-template">
+                        <tr>
+                            <td class="new-account-row-heading">@Html.DisplayName("Type") <sup style="font-size: 5px; top: -8px"><i id="required-type" class="fas fa-asterisk pulser"></i></sup></td>
+                            <td class="row-information">
+                                <select id="popup-type" name="popup-type" class="selectize-1" style="width: 47%;" onchange="Validation1()" value="@Model.Type" required>
+                                    <option value="@Model.Type" subtext=" ">@Model.Type</option>
+                                    <option value="Long" subtext="This message will appear after the user selects a patient's program.">Long</option>
+                                    <option value="Short" subtext="This message will appear on the member's profile.">Short</option>
+                                </select>
+                                <span id="type-error" class="text-danger" style="margin-left: 1%"></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="new-account-row-heading">@Html.DisplayNameFor(model => model.Title) <sup style="font-size: 5px; top: -8px"><i id="required-title" class="fas fa-asterisk pulser"></i></sup></td>
+                            <td class="row-information">
+                                @Html.EditorFor(model => model.Title, new { htmlAttributes = new { @class = "new-account-row-insert", @autocomplete = "off", @required = "required", @onkeyup = "Validation2()" } })
+                                <span id="title-error" class="text-danger" style="margin-left: 1%"></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="new-account-row-heading">@Html.DisplayNameFor(model => model.Template) <sup style="font-size: 5px; top: -8px"><i id="required-template" class="fas fa-asterisk pulser"></i></sup></td>
+                            <td class="row-information">
+                                @*<textarea id="Template" name="Template" onkeyup="Validation3()" required ></textarea>*@
+                                @Html.TextAreaFor(model => model.Template, new { required = "required", onkeyup = "Validation3()", htmlAttributes = new { @class = "new-account-row-insert", @autocomplete = "off" } })
+                                <br /><span id="template-error" class="text-danger" style="margin-left: 1%"></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="new-account-row-heading">@Html.DisplayName("Scheme") <sup style="font-size: 5px; top: -8px"><i id="required-scheme" class="fas fa-asterisk pulser"></i></sup></td>
+                            <td class="row-information">
+                                @Html.DropDownListFor(m => m.selectedSchemes, new SelectList(Model.MedicalAids, "MedicalAidID", "Name"), "Select", new { @class = "selectize-2", @required = "required", @onchange = "FillScheme(); Validation4()" })
+                                <span id="scheme-error" class="text-danger" style="margin-left: 1%"></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="new-account-row-heading">@Html.DisplayNameFor(model => model.Options) <sup style="font-size: 5px; top: -8px"><i id="required-option" class="fas fa-asterisk pulser"></i></sup></td>
+                            <td class="row-information">
+                                @Html.DropDownListFor(m => m.selectedOptions, new SelectList(Model.Options, "Name", "Name"), "Select", new { @class = "selectize-3", @required = "required", @onchange = "Validation5()" })
+                                <span id="option-error" class="text-danger" style="margin-left: 1%"></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="new-account-row-heading">@Html.DisplayNameFor(model => model.Programs) <sup style="font-size: 5px; top: -8px"><i id="required-program" class="fas fa-asterisk pulser"></i></sup></td>
+                            <td class="row-information">
+                                @Html.DropDownListFor(m => m.selectedPrograms, new MultiSelectList(Model.Programs, "programID", "ProgramName"), "Select", new { @class = "selectize-4", @required = "required", @onchange = "Validation6()" })
+                                <span id="program-error" class="text-danger" style="margin-left: 1%"></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="new-account-row-heading">@Html.DisplayNameFor(model => model.Active)</td>
+                            <td class="row-information">
+                                @Html.CheckBoxFor(model => model.Active, new { @class = "popup-check" })
+                                <span id="popup-check-error" class="text-danger" style="margin-left: 1%"></span>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <div class="sf-footer">
+                        <input type="button" id="popup-back" value="Back" class="btn modal-button-previous" onclick="location.href = '@Url.Action("Index", "Template", null)'; backKey();" />
+                        <input type="submit" id="popup-submit" value="Submit" class="btn modal-button-next" onclick="storageKey(); TypeCheck(); TemplateCheck(); SchemeCheck(); OptionCheck(); ProgramCheck();" />
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script src="~/bundles/jqueryval"></script>
+
+    <script>
+        $(function () {
+            var validation = $("#duplicate-val").val();
+            if (validation == "duplicate") {
+                $("#popup-validation").removeClass("hidden").html('&emsp;Popup template already exists!');
+
+                var items = ($('#options').val().split(','));
+                $("#selectedOptions").select2({
+                    multiple: true,
+                });
+                $('#selectedOptions').val(items).trigger('change');
+
+                if ($('#programs').val().indexOf(",") >= 0) {
+                    $("#selectedPrograms")[0].selectize.clear();
+                }
+                var program_array = $('#programs').val().split(",");
+                for (var i = 0; i < program_array.length; i++) {
+                    $("#selectedPrograms")[0].selectize.addItem(program_array[i]);
+                }
+
+            }
+        });
+    </script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/js/standalone/selectize.js"></script>
+    <script>
+        initSelectize();
+        function initSelectize() {
+            $('#selectedSchemes').selectize({
+                persist: true,
+                preload: true,
+                maxItems: 1,
+                delimiter: ',',
+                valueField: 'id',
+                labelField: 'name',
+                searchField: ['name'],
+                hideSelected: true,
+                plugins: ['remove_button'],
+                render: {
+                    option: function (item, escape) {
+                        return '<span class="name">' + escape(item.name) + '</span>';
+
+                    }
+                },
+            }),
+                $('#selectedPrograms').selectize({
+                    persist: true,
+                    preload: true,
+                    maxItems: 50,
+                    delimiter: ',',
+                    valueField: 'id',
+                    labelField: 'name',
+                    searchField: ['name'],
+                    hideSelected: true,
+                    //plugins: ['remove_button'],
+                    render: {
+                        option: function (item, escape) {
+                            return '<span class="name">' + escape(item.name) + '</span>';
+
+                        }
+                    }
+                }),
+                $('#popup-type').selectize({
+                    persist: true,
+                    preload: true,
+                    maxItems: 1,
+                    delimiter: ',',
+                    valueField: 'id',
+                    labelField: 'name',
+                    searchField: ['name'],
+                    hideSelected: true,
+                    plugins: ['remove_button'],
+                    placeholder: "Select",
+                    render: {
+                        option: function (item, escape) {
+                            return '<span class="name">' + escape(item.name) + '</span>';
+
+                        }
+                    }
+                })
+        }
+    </script>
+    <script>
+        function FillScheme() {
+            var medicalaid = $('#selectedSchemes').val();
+            $('#account-option-error').addClass("hidden");
+            $("#selectedOptions").html("");
+            $('.modal-button-next').attr('disabled', false);
+
+            $.ajax({
+                url: '/Template/FillScheme',
+                type: "POST",
+                dataType: "JSON",
+                data: { medId: medicalaid },
+                success: function (options) {
+                    if (options.length > 0) {
+                        $("#selectedOptions").html("123");
+                        //alert('success');
+                        $.each(options, function (i, option) {
+                            $("#selectedOptions").append(
+                                $('<option></option>').val(option.Name).html(option.Name)
+                            );
+                        });
+                    }
+                    else {
+                        $('#account-option-error').removeClass("hidden");
+                        $('.modal-button-next').attr('disabled', true);
+                    }
+                },
+                error: function (option) {
+                    //alert('error');
+                }
+            });
+        }
+    </script>
+    <script>
+        $(function () {
+            $('li.asl-2').click(function () {
+                $("#Title").focus();
+                $('li.asl-1').removeClass("active-step");
+                $('li span.circle-1').removeClass("active-circle");
+                $('li.asl-2').addClass("active-step");
+                $('li span.circle-2').addClass("active-circle");
+                $('li.asl-3').removeClass("active-step");
+                $('li span.circle-3').removeClass("active-circle");
+                $('li.asl-4').removeClass("active-step");
+                $('li span.circle-4').removeClass("active-circle");
+                $('li.asl-5').removeClass("active-step");
+                $('li span.circle-5').removeClass("active-circle");
+            });
+            $('li.asl-3').click(function () {
+                $("#Template").focus();
+                $('li.asl-1').removeClass("active-step");
+                $('li span.circle-1').removeClass("active-circle");
+                $('li.asl-2').removeClass("active-step");
+                $('li span.circle-2').removeClass("active-circle");
+                $('li.asl-3').addClass("active-step");
+                $('li span.circle-3').addClass("active-circle");
+                $('li.asl-4').removeClass("active-step");
+                $('li span.circle-4').removeClass("active-circle");
+                $('li.asl-5').removeClass("active-step");
+                $('li span.circle-5').removeClass("active-circle");
+            });
+
+            $(document).on('click', '.selectize-1 div.selectize-input.focus', function (e) {
+                $('li.asl-1').addClass("active-step");
+                $('li span.circle-1').addClass("active-circle");
+                $('li.asl-2').removeClass("active-step");
+                $('li span.circle-2').removeClass("active-circle");
+                $('li.asl-3').removeClass("active-step");
+                $('li span.circle-3').removeClass("active-circle");
+                $('li.asl-4').removeClass("active-step");
+                $('li span.circle-4').removeClass("active-circle");
+                $('li.asl-5').removeClass("active-step");
+                $('li span.circle-5').removeClass("active-circle");
+                $('li.asl-6').removeClass("active-step");
+                $('li span.circle-6').removeClass("active-circle");
+            });
+            $('#Title').focus(function () {
+                $('li.asl-1').removeClass("active-step");
+                $('li span.circle-1').removeClass("active-circle");
+                $('li.asl-2').addClass("active-step");
+                $('li span.circle-2').addClass("active-circle");
+                $('li.asl-3').removeClass("active-step");
+                $('li span.circle-3').removeClass("active-circle");
+                $('li.asl-4').removeClass("active-step");
+                $('li span.circle-4').removeClass("active-circle");
+                $('li.asl-5').removeClass("active-step");
+                $('li span.circle-5').removeClass("active-circle");
+                $('li.asl-6').removeClass("active-step");
+                $('li span.circle-6').removeClass("active-circle");
+            });
+            $('#Template').focus(function () {
+                $('li.asl-1').removeClass("active-step");
+                $('li span.circle-1').removeClass("active-circle");
+                $('li.asl-2').removeClass("active-step");
+                $('li span.circle-2').removeClass("active-circle");
+                $('li.asl-3').addClass("active-step");
+                $('li span.circle-3').addClass("active-circle");
+                $('li.asl-4').removeClass("active-step");
+                $('li span.circle-4').removeClass("active-circle");
+                $('li.asl-5').removeClass("active-step");
+                $('li span.circle-5').removeClass("active-circle");
+                $('li.asl-6').removeClass("active-step");
+                $('li span.circle-6').removeClass("active-circle");
+            });
+            $(document).on('click', '.selectize-2 div.selectize-input.focus', function (e) {
+                $('li.asl-1').removeClass("active-step");
+                $('li span.circle-1').removeClass("active-circle");
+                $('li.asl-2').removeClass("active-step");
+                $('li span.circle-2').removeClass("active-circle");
+                $('li.asl-3').removeClass("active-step");
+                $('li span.circle-3').removeClass("active-circle");
+                $('li.asl-4').addClass("active-step");
+                $('li span.circle-4').addClass("active-circle");
+                $('li.asl-5').removeClass("active-step");
+                $('li span.circle-5').removeClass("active-circle");
+                $('li.asl-6').removeClass("active-step");
+                $('li span.circle-6').removeClass("active-circle");
+            });
+            $(document).on('click', '.selectize-3 div.selectize-input.focus', function (e) {
+                $('li.asl-1').removeClass("active-step");
+                $('li span.circle-1').removeClass("active-circle");
+                $('li.asl-2').removeClass("active-step");
+                $('li span.circle-2').removeClass("active-circle");
+                $('li.asl-3').removeClass("active-step");
+                $('li span.circle-3').removeClass("active-circle");
+                $('li.asl-4').removeClass("active-step");
+                $('li span.circle-4').removeClass("active-circle");
+                $('li.asl-5').addClass("active-step");
+                $('li span.circle-5').addClass("active-circle");
+                $('li.asl-6').removeClass("active-step");
+                $('li span.circle-6').removeClass("active-circle");
+            });
+            $(document).on('click', '.selectize-4 div.selectize-input.focus', function (e) {
+                $('li.asl-1').removeClass("active-step");
+                $('li span.circle-1').removeClass("active-circle");
+                $('li.asl-2').removeClass("active-step");
+                $('li span.circle-2').removeClass("active-circle");
+                $('li.asl-3').removeClass("active-step");
+                $('li span.circle-3').removeClass("active-circle");
+                $('li.asl-4').removeClass("active-step");
+                $('li span.circle-4').removeClass("active-circle");
+                $('li.asl-5').removeClass("active-step");
+                $('li span.circle-5').removeClass("active-circle");
+                $('li.asl-6').addClass("active-step");
+                $('li span.circle-6').addClass("active-circle");
+            });
+        });
+    </script>
+    <script></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function () { $("#selectedOptions").select2({ multiple: true, placeholder: "Select", allowClear: false }); });
+    </script>
+    <script>
+        function Validation1() {
+            var type = $("#popup-type").val();
+            if (type.length > 0) {
+                $("#required-type").addClass("required-color");
+                $('li').find('span.circle-1').text("✓");
+                $('li').find('span.circle-1').addClass("complete-circle");
+                $('#type-error').addClass("hidden");
+            }
+        }
+        function Validation2() {
+            var title = $("#Title").val();
+            if (title.length > 0) {
+                $("#required-title").addClass("required-color");
+                $('li').find('span.circle-2').text("✓");
+                $('li').find('span.circle-2').addClass("complete-circle");
+                $('#title-error').addClass("hidden");
+            }
+            else {
+                $("#required-title").removeClass("required-color");
+                $('li').find('span.circle-2').text("2");
+                $('li').find('span.circle-2').removeClass("complete-circle");
+                $('#title-error').html('<span style="font-size: 10px"><i class="fas fa-exclamation-circle"></i> </span>Title is required!');
+            }
+        }
+        function Validation3() {
+            var template = $("#Template").val();
+            if (template.length > 0) {
+                $("#required-template").addClass("required-color");
+                $('li').find('span.circle-3').text("✓");
+                $('li').find('span.circle-3').addClass("complete-circle");
+                $('#template-error').html('');
+            }
+            else {
+                $("#required-template").remove("required-color");
+                $('li').find('span.circle-3').text("3");
+                $('li').find('span.circle-3').removeClass("complete-circle");
+                $('#template-error').html('<span style="font-size: 10px"><i class="fas fa-exclamation-circle"></i> </span>Template is required!');
+            }
+        }
+        function Validation4() {
+            var scheme = $("#selectedSchemes").val();
+            if (scheme.length > 0) {
+                $("#required-scheme").addClass("required-color");
+                $('li').find('span.circle-4').text("✓");
+                $('li').find('span.circle-4').addClass("complete-circle");
+                $('#scheme-error').addClass("hidden");
+            }
+        }
+        function Validation5() {
+            var option = $("#selectedOptions").val();
+            if (option.length > 0) {
+                $("#required-option").addClass("required-color");
+                $('li').find('span.circle-5').text("✓");
+                $('li').find('span.circle-5').addClass("complete-circle");
+                $('#option-error').addClass("hidden");
+            }
+        }
+        function Validation6() {
+            var programs = $("#selectedPrograms").val();
+            if (programs.length > 0) {
+                $("#required-program").addClass("required-color");
+                $('li').find('span.circle-6').text("✓");
+                $('li').find('span.circle-6').addClass("complete-circle");
+                $('#program-error').addClass("hidden");
+            }
+        }
+    </script>
+    <script>
+        $(function () {
+            var type = $("#popup-type").val();
+            if (type.length > 0) {
+                $("#required-type").addClass("required-color");
+                $('li').find('span.circle-1').text("✓");
+                $('li').find('span.circle-1').addClass("complete-circle");
+                $('#type-error').addClass("hidden");
+            }
+
+            var title = $("#Title").val();
+            if (title.length > 0) {
+                $("#required-title").addClass("required-color");
+                $('li').find('span.circle-2').text("✓");
+                $('li').find('span.circle-2').addClass("complete-circle");
+            }
+
+            var template = $("#Template").val();
+            if (template.length > 0) {
+                $("#required-template").addClass("required-color");
+                $('li').find('span.circle-3').text("✓");
+                $('li').find('span.circle-3').addClass("complete-circle");
+            }
+
+            var scheme = $("#selectedSchemes").val();
+            if (scheme.length > 0) {
+                $("#required-scheme").addClass("required-color");
+                $('li').find('span.circle-4').text("✓");
+                $('li').find('span.circle-4').addClass("complete-circle");
+            }
+
+            var option = $("#selectedOptions").val();
+            if (option.length > 0) {
+                $("#required-option").addClass("required-color");
+                $('li').find('span.circle-5').text("✓");
+                $('li').find('span.circle-5').addClass("complete-circle");
+            }
+
+            var programs = $("#selectedPrograms").val();
+            if (programs.length > 0) {
+                $("#required-program").addClass("required-color");
+                $('li').find('span.circle-6').text("✓");
+                $('li').find('span.circle-6').addClass("complete-circle");
+            }
+
+        })
+    </script>
+    <script>
+        var items = ($('#options').val().split(','));
+        $(document).ready(function () {
+            $("#selectedOptions").select2({
+                multiple: true,
+            });
+            $('#selectedOptions').val(items).trigger('change');
+        });
+    </script>
+    <script>
+        if ($('#programs').val().indexOf(",") >= 0) {
+            $("#selectedPrograms")[0].selectize.clear();
+        }
+        var program_array = $('#programs').val().split(",");
+        for (var i = 0; i < program_array.length; i++) {
+            $("#selectedPrograms")[0].selectize.addItem(program_array[i]);
+        }
+    </script>
+    <script>
+        function backKey() {
+            localStorage.setItem("back_popup", Date.now());
+        }
+        function storageKey() {
+            localStorage.setItem("edit_popup", Date.now());
+        }
+    </script>
+    <script>
+        function TypeCheck() {
+            var value = $("#popup-type").val();
+            if (value == "") {
+                $('#type-error').html('<span style="font-size: 10px"><i class="fas fa-exclamation-circle"></i> </span>Type is required!');
+                event.preventDefault();
+            }
+        }
+        function TemplateCheck() {
+            var value = $("#Template").val();
+            if (value == null || value == '') {
+                $('#template-error').html('<span style="font-size: 10px"><i class="fas fa-exclamation-circle"></i> </span>Template is required!');
+                event.preventDefault();
+            }
+        }
+        function SchemeCheck() {
+            var value = $("#selectedSchemes :selected").val();
+            if (value == null || value == '') {
+                $('#scheme-error').html('<span style="font-size: 10px"><i class="fas fa-exclamation-circle"></i> </span>Medical aid is required!');
+                event.preventDefault();
+            }
+        }
+        function OptionCheck() {
+            var value = $("#selectedOptions").val();
+            if (value == null || value == '') {
+                $('#option-error').html('<span style="font-size: 10px"><i class="fas fa-exclamation-circle"></i> </span>Option is required!');
+                event.preventDefault();
+            }
+        }
+        function ProgramCheck() {
+            var value = $("#selectedPrograms :selected").val();
+            if (value == null || value == '') {
+                $('#program-error').html('<span style="font-size: 10px"><i class="fas fa-exclamation-circle"></i> </span>Program is required!');
+                event.preventDefault();
+            }
+        }
+    </script>
+
+}

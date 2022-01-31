@@ -1,0 +1,281 @@
+﻿@model HaloCareCore.Models.ViewModels.NonCDLFlagViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewBag.Title = "NonCDLFlags_Edit";
+    Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
+}
+
+<comment>
+    <!--
+        08 June 2020 -- HCare-1060 (HaloCare NON-CDL Flag Management Maintenance Screen)
+        Created views for user to manage NON-CDL Flags. Set the Administration controller up with the CRUD functionality. Added CSS to the views as well as a duplicate check on the code and description in the Create NON-CDL Flag view.
+        The index view allows a user to view the active and inactive entries in order to control the NON-CDL Flag from a settings perspective. I have added a search bar as well as a sort function that will allow the user to sort the columns.
+    -->
+</comment>
+<style>
+    body {
+        background-color: #f9f9fc !important;
+    }
+
+    .field-validation-error:before {
+        font-family: FontAwesome;
+        content: "\f06a\00a0";
+        animation: pulse 2s ease infinite;
+    }
+
+    .error-alert {
+        width: 100%;
+        margin: 0 auto;
+        background-color: rgba(217, 83, 79, 0.1);
+        padding: 10px;
+        border-left-color: #d9534f !important;
+        border: 1px solid transparent;
+        border-left-width: 5px;
+        border-radius: 3px;
+        margin: 0 auto;
+        font-family: 'Open Sans', sans-serif;
+        font-size: 12px;
+        margin: 0 0 5px 0;
+        margin-top: -10px;
+        margin-bottom: 20px;
+    }
+
+        .error-alert span {
+            color: #d9534f;
+            text-align: center;
+        }
+</style>
+<javascript>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/js/standalone/selectize.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet" />
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/css/selectize.default.css">
+</javascript>
+
+<div class="fullScreen_container zero-padding">
+
+    <!--pageHeader-->
+    <nav id="global-nav" class="nav">
+        <div class="pull-left title">
+            <h1 class="site-title_patientProfile">
+                <span><i class="fa fa-flag "></i>&emsp; NON-CDL</span>
+            </h1>
+        </div>
+        <div class="pull-right title">
+            <h1 class="site-title_userID pull-right">
+                <div class="halocareLogo"><img src="~/Content/Images/Navigation/navBarIcons/haloCare_White.png" /></div>
+            </h1>
+            <h1 class="site-title_userID pull-right">
+                @if (HttpContextAccessor.HttpContext.Session.GetString("Init") != null)
+                {
+                    <span href="#" id="userMenu-toggle"><span class="initials_Avatar" style="color: white!important; font-size: 16px">@HttpContextAccessor.HttpContext.Session.GetString("Init").ToString() </span></span>
+                }
+            </h1>
+            <h1 class="site-waffleIcon pull-right">
+                <span href="#" id="patientMenu-toggle"><span class="waffleIcon" style="color: white!important; font-size: 12px"><i class="fas fa-th"></i></span></span>
+            </h1>
+        </div>
+    </nav>
+    <!--breadCrumbs-->
+    <ul class="breadcrumbs_fullScreens">
+        <li style="font-size: 12px; color: #0081b3; font-weight: 200">You are here:</li>
+        <li><a href="@Url.Action("Index", "Home", new {})">Home</a></li>
+        <li><a href="@Url.Action("NonCDLFlagsIndex", "Administration", new {})">NON-CDL Flag</a></li>
+        <li><a href="#">Edit</a></li>
+    </ul>
+    <!--navCollection-->
+    <div class="navCollection_fullScreens">
+        @Html.Partial("_navCollection")
+    </div>
+    <div style="margin-bottom: 1%"></div>
+
+    <div class="row">
+        <h4 class="tableHeading">Edit</h4>
+        <hr class="fancyruler">
+        @using (Html.BeginForm("NonCDLFlags_Edit", "Administration"))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+            <div class="hidden-fields">
+                @Html.HiddenFor(m => m.nonCLDFlags.Id)
+                <input type="hidden" name="error-code" id="error-code" value="@ViewBag.Code" />
+                <input type="hidden" name="error-program" id="error-program" value="@ViewBag.Program" />
+                <div class="col-md-12"><div id="error-duplicate" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; The Flag with <b>Code:</b> @ViewBag.Code & <b>Program:</b> @ViewBag.Program , already exists!</span></div></div></div>
+                <input type="hidden" name="flag-validation" id="flag-validation" />
+                <input type="hidden" name="program-validation" id="program-validation" />
+                <div class="col-md-12"><div id="duplicate-flag-notice" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; Flag and Program already exists!</span></div></div></div>
+                <div class="col-md-12"><div id="duplicate-program-notice" class="hidden"><div class="error-alert"><span>&emsp; <i class="fas fa-exclamation-triangle"></i>&nbsp; Program already exists!</span></div></div></div>
+            </div>
+            <br />
+            <br />
+            <div class="form-horizontal editForm">
+                <div class="form-group">
+                    @Html.LabelFor(m => m.nonCLDFlags.flagCode, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(m => m.nonCLDFlags.flagCode, new { htmlAttributes = new { @class = "allergyTextbox", autocomplete = "off", @required = "required" } })
+                        @Html.ValidationMessageFor(m => m.nonCLDFlags.flagCode, "", new { @class = "text-danger", @style = "font-size: 75%;margin-left: 1%" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.Label(null, "Program Name", htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.DropDownListFor(m => m.nonCLDFlags.programCode, new SelectList(Model.programs, "code", "ProgramName"), "Select", new { htmlAttributes = new { @required = "required" } })
+                        @Html.ValidationMessageFor(m => m.nonCLDFlags.programCode, "", new { @class = "text-danger", @style = "font-size: 75%;margin-left: 1%" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(m => m.nonCLDFlags.active, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        <div class="checkbox">
+                            @Html.EditorFor(m => m.nonCLDFlags.active)
+                            @Html.ValidationMessageFor(m => m.nonCLDFlags.active, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="fixed-btn">
+                    <input id="submit" type="submit" value="Submit" class="btn create-button" onclick="storageKey()" style="width: 15%" /><br />
+                    <input type="text" value="Back" class="btn reset-button go_back" onclick="backKey()" />
+                </div>
+
+            </div>
+        }
+    </div>
+</div>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+
+@section scripts{
+    <script src="~/Scripts/layout-buttons-general.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.1/js/standalone/selectize.js"></script>
+    <script>
+        initSelectize();
+        function initSelectize() {
+            $('#nonCLDFlags_programCode').selectize({
+                persist: true,
+                preload: true,
+                maxItems: 1,
+                delimiter: ',',
+                valueField: 'id',
+                labelField: 'name',
+                searchField: ['name'],
+                hideSelected: true,
+                plugins: ['remove_button'],
+                render: {
+                    option: function (item, escape) {
+                        return '<span class="name">' + escape(item.name) + '</span>';
+
+                    }
+                }
+            })
+        }
+    </script>
+    <script>
+        $("#nonCLDFlags_flagCode").change(function () {
+            var id = $('#nonCLDFlags_Id').val();
+            var flag = $('#nonCLDFlags_flagCode').val();
+            flag = flag.trim();
+            var pro = $('#nonCLDFlags_programCode').val();
+
+            $("#flag-validation").val("");
+            $("#duplicate-flag-notice").addClass("hidden");
+
+            $.ajax({
+                url: '/Administration/CDLFlagCheck',
+                type: "POST",
+                dataType: "JSON",
+                data: { code: flag, program: pro },
+                success: function (result) {
+                    var ID = result.Id;
+                    var program = result.programCode;
+                    var cod3 = result.flagCode;
+
+                    if (ID + '-' + cod3.toLowerCase() + program.toLowerCase() == id + '-' + flag.toLowerCase() + pro.toLowerCase()) { }
+                    if (cod3.toLowerCase() + program.toLowerCase() == flag.toLowerCase() + pro.toLowerCase() && ID != id) {
+                        $("#duplicate-flag-notice").removeClass("hidden");
+                        $("#flag-validation").val(cod3);
+                    }
+                },
+                error: function (result) {
+                    $("#duplicate-flag-notice").addClass("hidden");
+                }
+            });
+        });
+        $("#nonCLDFlags_programCode").change(function () {
+
+            var id = $('#nonCLDFlags_Id').val();
+            var flag = $('#nonCLDFlags_flagCode').val();
+            flag = flag.trim();
+            var pro = $('#nonCLDFlags_programCode').val();
+
+            $("#flag-validation").val("");
+            $("#duplicate-flag-notice").addClass("hidden");
+
+            $.ajax({
+                url: '/Administration/CDLFlagCheck',
+                type: "POST",
+                dataType: "JSON",
+                data: { code: flag, program: pro },
+                success: function (result) {
+                    var ID = result.Id;
+                    var program = result.programCode;
+                    var cod3 = result.flagCode;
+
+                    if (ID + '-' + cod3.toLowerCase() + program.toLowerCase() == id + '-' + flag.toLowerCase() + pro.toLowerCase()) { }
+                    if (cod3.toLowerCase() + program.toLowerCase() == flag.toLowerCase() + pro.toLowerCase() && ID != id) {
+                        $("#duplicate-flag-notice").removeClass("hidden");
+                        $("#flag-validation").val(cod3);
+                    }
+                },
+                error: function (result) {
+                    $("#duplicate-flag-notice").addClass("hidden");
+                }
+            });
+        });
+
+        $("#submit").click(function () {
+            if ($("#flag-validation").val().length > 0) {
+                $("#nonCLDFlags_flagCode").focus();
+                return false;
+            }
+        });
+        $("#submit").click(function () {
+            if ($("#program-validation").val().length > 0) {
+                return false;
+            }
+        });
+
+    </script>
+    <script>
+            $(function () {
+                $('.go_back').click(function (e) {
+                    window.location.href = "@Url.Action("NonCDLFlagsIndex", "Administration")";
+                });
+            });
+    </script>
+    <script>
+        function backKey() {
+            localStorage.setItem("back_noncdl", Date.now());
+        }
+        function storageKey() {
+            localStorage.setItem("edit_noncdl", Date.now());
+        }
+    </script>
+    <script>
+        $(document).ready(function () {
+            var c = $('#error-code').val();
+            if (c.length > 0) {
+                $("#error-duplicate").removeClass("hidden");
+            }
+        });
+    </script>
+}
+

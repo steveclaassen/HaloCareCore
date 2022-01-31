@@ -1,0 +1,117 @@
+﻿@model HaloCareCore.Models.Communications.SmsMessages
+@using HaloCareCore.Extensions
+@{
+    ViewBag.Title = "Text message";
+    Layout = "~/Views/Shared/_layout-view-x.cshtml";
+}
+
+<javascript>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+</javascript>
+
+<div class="collapse in">
+    <div class="card card-body">
+        <div class="collapse-body">
+            <div class="account-setting-panel">
+                <div class="col-md-12 row">
+                    <div class="account-heading">Details</div>
+                    <p class="account-sub-header-new">Text message details listed below.</p>
+                </div>
+                <hr class="fancyruler">
+                <table class="table details-table table-hover" id="bipolar-details">
+                    <tbody>
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayNameFor(model => model.effectiveDate)</td>
+                            <td class="row-information">@Html.DisplayFor(model => model.effectiveDate)</td>
+                        </tr>
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayNameFor(model => model.cell_no)</td>
+                            <td class="row-information">@Html.DisplayFor(model => model.cell_no)</td>
+                        </tr>
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayNameFor(model => model.templateID)</td>
+                            <td class="row-information">@Html.DisplayFor(model => model.templateID)</td>
+                        </tr>
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayNameFor(model => model.message)</td>
+                            <td class="row-information">@Html.DisplayFor(model => model.message)</td>
+                        </tr>
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayNameFor(model => model.createdDate)</td>
+                            <td class="row-information">@Html.DisplayFor(model => model.createdDate)</td>
+                        </tr>
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayNameFor(model => model.createdBy)</td>
+                            <td class="row-information">@Html.DisplayFor(model => model.createdBy)</td>
+                        </tr>
+
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayNameFor(model => model.message)</td>
+                            <td class="row-information">@Html.DisplayFor(model => model.message)</td>
+                        </tr>
+                        @if (Model.responseString != null)
+                        {
+                            <tr>
+                                <td class="row-heading subject">@Html.DisplayNameFor(model => model.responseString)</td>
+                                <td class="row-information">@Html.DisplayFor(model => model.responseString)</td>
+                            </tr>
+                        }
+
+                        @if (Model.AttuneID != null)
+                        {
+                            <tr>
+                                <td class="row-heading subject">@Html.DisplayNameFor(model => model.AttuneID)</td>
+                                <td class="row-information">@Html.DisplayFor(model => model.AttuneID)</td>
+                            </tr>
+                        }
+                        @if (Model.AttuneMessageStatus != null)
+                        {
+                            <tr>
+                                <td class="row-heading subject">@Html.DisplayNameFor(model => model.AttuneMessageStatus)</td>
+                                <td class="row-information">@Html.DisplayFor(model => model.AttuneMessageStatus)</td>
+                            </tr>
+                        }
+
+                        @if (Model.modifiedDate != null)
+                        {
+                            <tr>
+                                <td class="row-heading subject">@Html.DisplayNameFor(model => model.modifiedDate)</td>
+                                <td class="row-information">@Html.DisplayFor(model => model.modifiedDate)</td>
+                            </tr>
+                            <tr>
+                                <td class="row-heading subject">@Html.DisplayNameFor(model => model.modifiedBy)</td>
+                                <td class="row-information">@Html.DisplayFor(model => model.modifiedBy)</td>
+                            </tr>
+                        }
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayName("Program")</td>
+                            <td class="row-information">@ViewBag.Program</td>
+                        </tr>
+                        <tr>
+                            <td class="row-heading subject">@Html.DisplayName("Status")</td>
+                            <td class="row-information">@Html.DisplayFor(model => model.status)</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="sf-footer">
+                    <input type="button" id="sms-back" value="Back" class="btn modal-button-previous go_back" onclick="backKey();" />
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+@section scripts{
+    <script src="~/bundles/jqueryval"></script>
+    <script>
+        function backKey() {
+            localStorage.setItem("back_sms", Date.now());
+        }
+    </script>
+}
