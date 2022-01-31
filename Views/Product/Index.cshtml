@@ -223,7 +223,7 @@
                         <th style="text-align: left!important;width: 180px;">@Html.DisplayNameFor(model => model.productName) <i class="fa fa-fw fa-sort sortArrow"></i></th>
                         <th style="text-align: left !important;width: 250px;">@Html.DisplayNameFor(model => model.therapeuticClass6Desc) </th>
                         <th style="text-align: left!important; width: 100px;">@Html.DisplayNameFor(model => model.productSchedule) </th>
-                        <th style="text-align: left!important;width: 100px;">@Html.DisplayNameFor(model => model.strengthUOM) </th>
+                        <th style="text-align: left!important;width: 100px;">@Html.DisplayNameFor(model => model.strength) </th>
                         <th style="text-align: center!important; width: 100px;">@Html.DisplayNameFor(model => model.Active)</i></th>
                         <th style="text-align: center!important; width: 100px">@Html.DisplayName("Action") <i class="fa fa-fw"></i></th>
                     </tr>
@@ -244,7 +244,7 @@
                                     <td class="text-left"><span class="@(item.Active == true? "" : "active-false") ">@Html.DisplayFor(Modelitem => item.productName)</span></td>
                                     <td class="text-left"><span class="@(item.Active == true? "" : "active-false") ">@Html.DisplayFor(Modelitem => item.therapeuticClass6Desc)</span></td>
                                     <td class="text-left"><span class="@(item.Active == true? "" : "active-false") ">@Html.DisplayFor(Modelitem => item.productSchedule)</span></td>
-                                    <td class="text-left"><span class="@(item.Active == true? "" : "active-false") ">@Html.DisplayFor(Modelitem => item.strengthUOM)</span></td>
+                                    <td class="text-left"><span class="@(item.Active == true? "" : "active-false") ">@Html.DisplayFor(Modelitem => item.strength)</span></td>
                                     <td class="text-center"><span class="@(item.Active == true ? "chk-yes fas fa-circle" : "chk-no fas fa-circle")"></span></td>
                                     <td class="text-center">
                                         <input type="submit" data-assigned-id="@item.nappiCode" class="link-button" value="Update" onclick="onclick=Isync(this)" />/

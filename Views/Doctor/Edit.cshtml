@@ -120,7 +120,7 @@
 
     <div style="margin-bottom: 1%"></div>
 
-    @using (Ajax.BeginForm("Edit", "Doctor", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "divPath", OnSuccess = "hideModal(); alert('Saved');" }, new { id = "doctor-edit" }))
+    @using (Html.AjaxBeginForm("Edit", "Doctor", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "divPath", OnSuccess = "hideModal(); alert('Saved');" }, new { id = "doctor-edit" }))
     {
         <div class="hidden-fields">
             @Html.AntiForgeryToken()

@@ -222,7 +222,7 @@
 </style>
 
 <div class="doctorQuestionnaire_Modal">
-    @using (Ajax.BeginForm("_GeneralQuestionnaire", "Clinical", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "divPath", OnSuccess = "hideModal(); alert('Saved');" }, new { id = "generalQuestionnaire001" }))
+    @using (Html.AjaxBeginForm("_GeneralQuestionnaire", "Clinical", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "divPath", OnSuccess = "hideModal(); alert('Saved');" }, new { id = "generalQuestionnaire001" }))
     {
         @Html.Hidden("taskId", (object)ViewBag.task)
         @Html.Hidden("DependantID", (object)ViewBag.DependantID)

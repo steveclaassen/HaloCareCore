@@ -65,7 +65,7 @@ namespace HaloCareCore.Models
         public List<OtherMedicalHistory> otherMedicalHistories { get; set; }
 
         //Mental health tables
-        public List<MH_DSM5ResponseNEW> MH_DSM5Responses { get; set; }
+        public List<MH_DSM5Response> MH_DSM5Responses { get; set; }
         public List<MH_SchizophreniaResponse> MH_SchizophreniaResponses { get; set; }
         public List<MH_BipolarResponse> MH_BipolarResponses { get; set; }
         public List<MH_DepressionResponse> MH_DepressionResponses { get; set; }

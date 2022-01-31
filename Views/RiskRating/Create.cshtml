@@ -1,5 +1,6 @@
 ﻿@model HaloCareCore.Models.Management.HypoRiskRules
-
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
 @{
     ViewBag.Title = "Create";
     Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
@@ -136,7 +137,7 @@
                 </div>
 
                 <div class="form-group" id="ageLessThan">
-                    @Html.Label(null,"Age less than:", htmlAttributes: new { @class = "control-label col-md-2" })
+                    @Html.Label(null, "Age less than:", htmlAttributes: new { @class = "control-label col-md-2" })
                     <div class="col-md-10">
                         @Html.EditorFor(model => model.ltAge, new { htmlAttributes = new { @class = "infoBox_editMember" } })
                         @Html.ValidationMessageFor(model => model.ltAge, "", new { @class = "text-danger" })
@@ -144,7 +145,7 @@
                 </div>
 
                 <div class="form-group" id="ageGreaterThan">
-                    @Html.Label(null,"Age more or equal to:", htmlAttributes: new { @class = "control-label col-md-2" })
+                    @Html.Label(null, "Age more or equal to:", htmlAttributes: new { @class = "control-label col-md-2" })
                     <div class="col-md-10">
                         @Html.EditorFor(model => model.gtAge, new { htmlAttributes = new { @class = "infoBox_editMember" } })
                         @Html.ValidationMessageFor(model => model.gtAge, "", new { @class = "text-danger" })
@@ -172,7 +173,7 @@
                 </div>
 
                 <div class="form-group">
-                    @Html.Label(null,"Glucose below", htmlAttributes: new { @class = "control-label col-md-2" })
+                    @Html.Label(null, "Glucose below", htmlAttributes: new { @class = "control-label col-md-2" })
                     <div class="col-md-10">
                         @Html.EditorFor(model => model.Glucose, new { htmlAttributes = new { @class = "infoBox_editMember" } })
                         @Html.ValidationMessageFor(model => model.Glucose, "", new { @class = "text-danger" })

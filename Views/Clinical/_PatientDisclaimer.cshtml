@@ -103,7 +103,7 @@
 </style>
 
 <div class="modal-content-disclaimer">
-    @using (Ajax.BeginForm("_PatientDisclaimer", "Clinical", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "divPath", OnSuccess = "hideModal(); alert('Saved');" }, new { id = "disclaimer" }))
+    @using (Html.AjaxBeginForm("_PatientDisclaimer", "Clinical", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "divPath", OnSuccess = "hideModal(); alert('Saved');" }, new { id = "disclaimer" }))
     {
         <div class="hidden-fields">
             @Html.ValidationSummary(true, "", new { @class = "text-danger" })

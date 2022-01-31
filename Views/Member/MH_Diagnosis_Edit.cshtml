@@ -124,7 +124,7 @@
         <hr class="fancyruler">
         <br />
 
-        @using (Ajax.BeginForm("MH_Diagnosis_Edit", "Member", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "divPath", OnSuccess = "hideModal(); alert('Saved');" }, new { id = "diagnosis-edit" }))
+        @using (Html.AjaxBeginForm("MH_Diagnosis_Edit", "Member", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "divPath", OnSuccess = "hideModal(); alert('Saved');" }, new { id = "diagnosis-edit" }))
         {
             <div class="hidden-fields">
                 @Html.AntiForgeryToken()

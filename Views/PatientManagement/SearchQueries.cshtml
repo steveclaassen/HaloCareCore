@@ -293,31 +293,31 @@
         <!--HCare-680-->
         @using (Html.BeginForm("ExportQueriesToExcel", "PatientManagement", FormMethod.Post))
         {
-            if (Request.Form["queryType"] != null)
+            if (Context.Request.Query["queryType"].ToString() != null)
             {
-                if (Request.Form["queryType"].ToString() != null)
+                if (Context.Request.Query["queryType"].ToString() != null)
                 {
-                    @Html.Hidden("queryType", Request.Form["queryType"].ToString())
+                    @Html.Hidden("queryType", Context.Request.Query["queryType"].ToString())
                 }
-                if (Request.Form["membershipno"].ToString() != null)
+                if (Context.Request.Query["membershipno"].ToString() != null)
                 {
-                    @Html.Hidden("membershipno", Request.Form["membershipno"].ToString())
+                    @Html.Hidden("membershipno", Context.Request.Query["membershipno"].ToString())
                 }
-                if (Request.Form["medicalAid"].ToString() != null)
+                if (Context.Request.Query["medicalAid"].ToString() != null)
                 {
-                    @Html.Hidden("medicalAid", Request.Form["medicalAid"].ToString())
+                    @Html.Hidden("medicalAid", Context.Request.Query["medicalAid"].ToString())
                 }
-                if (Request.Form["queryPriority"].ToString() != null)
+                if (Context.Request.Query["queryPriority"].ToString() != null)
                 {
-                    @Html.Hidden("queryPriority", Request.Form["queryPriority"].ToString())
+                    @Html.Hidden("queryPriority", Context.Request.Query["queryPriority"].ToString())
                 }
-                if (Request.Form["memberStatus"].ToString() != null)
+                if (Context.Request.Query["memberStatus"].ToString() != null)
                 {
-                    @Html.Hidden("memberStatus", Request.Form["memberStatus"].ToString())
+                    @Html.Hidden("memberStatus", Context.Request.Query["memberStatus"].ToString())
                 }
-                if (Request.Form["queryStatus"].ToString() != null)
+                if (Context.Request.Query["queryStatus"].ToString() != null)
                 {
-                    @Html.Hidden("queryStatus", Request.Form["queryStatus"].ToString())
+                    @Html.Hidden("queryStatus", Context.Request.Query["queryStatus"].ToString())
                 }
             }
             <div class="form-group advancedSearchExcel">

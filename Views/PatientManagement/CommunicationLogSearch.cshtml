@@ -1,6 +1,8 @@
 ﻿@model HaloCareCore.Models.ViewModels.CommunicationLogVM
 @using HaloCareCore.Extensions
 @using System.Configuration
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
 @{
     ViewBag.Title = "CommunicationLogSearch";
     Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
@@ -177,7 +179,7 @@
                         <div class="col-md-12">
                             <div class="col-md-6">
                                 <div class="col-md-3">
-                                    @Html.Label(null,"Medical scheme", htmlAttributes: new { @class = "control-label col-md-12" })
+                                    @Html.Label(null, "Medical scheme", htmlAttributes: new { @class = "control-label col-md-12" })
                                 </div>
                                 <div class="col-md-9">
                                     @Html.DropDownList("medicalAidID", null, "", htmlAttributes: new { @class = "infoBox_editMember" })
@@ -193,7 +195,7 @@
 
                             <div class="col-md-6">
                                 <div class="col-md-3">
-                                    @Html.Label(null,"Type of communication", htmlAttributes: new { @class = "control-label col-md-12" })
+                                    @Html.Label(null, "Type of communication", htmlAttributes: new { @class = "control-label col-md-12" })
                                 </div>
                                 <div class="col-md-9">
                                     @*@Html.ListBox("sex", null, "**Select**")*@
@@ -208,7 +210,7 @@
                         <div class="col-md-12">
                             <div class="col-md-6">
                                 <div class="col-md-3">
-                                    @Html.Label(null,"From date", htmlAttributes: new { @class = "control-label col-md-12" })
+                                    @Html.Label(null, "From date", htmlAttributes: new { @class = "control-label col-md-12" })
                                 </div>
                                 <div class="col-md-9">
                                     @Html.EditorFor(model => model.dateFrom, new { htmlAttributes = new { @class = "infoBox_editMember" } })
@@ -217,7 +219,7 @@
 
                             <div class="col-md-6">
                                 <div class="col-md-3">
-                                    @Html.Label(null,"To date", htmlAttributes: new { @class = "control-label col-md-12" })
+                                    @Html.Label(null, "To date", htmlAttributes: new { @class = "control-label col-md-12" })
                                 </div>
                                 <div class="col-md-9">
                                     @Html.EditorFor(model => model.dateTo, new { htmlAttributes = new { @class = "infoBox_editMember" } })
@@ -336,7 +338,7 @@
     <script>
         $(document).ready(function () { $("#medicalAidID").select2({ multiple: true, placeholder: "--Select--", allowClear: true }); });
         $(document).ready(function () { $("#Value").select2({ multiple: true, placeholder: "--Select--", allowClear: true }); });
-        
+
 
     </script>
 

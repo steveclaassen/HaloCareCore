@@ -1,5 +1,6 @@
 ﻿@model HaloCareCore.Models.Communications.TaskRequirementItemLinking
-
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
 @{
     ViewBag.Title = "Create_TaskLinking";
     Layout = "~/Views/Shared/_LayoutNavigation.cshtml";

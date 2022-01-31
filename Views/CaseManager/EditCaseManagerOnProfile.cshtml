@@ -102,7 +102,7 @@
         <hr class="fancyruler">
 
         <div class="col-md-12 row"><div class="heading-spacer"></div></div>
-        @using (Ajax.BeginForm("EditCaseManagerOnProfile", "CaseManager", new AjaxOptions { HttpMethod = "POST" }, new { id = "edit-case-manager" }))
+        @using (Html.AjaxBeginForm("EditCaseManagerOnProfile", "CaseManager", new AjaxOptions { HttpMethod = "POST" }, new { id = "edit-case-manager" }))
         {
             @Html.ValidationSummary(true, "", new { @class = "text-danger" })
             @Html.Hidden("DependantID", (object)ViewBag.DependantID)

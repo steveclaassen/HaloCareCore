@@ -159,7 +159,7 @@
 
 <div id="dr-attachment-overlay" class="attachment-overlay"></div>
 <div class="email-assignment-modal">
-    @using (Ajax.BeginForm("_DoctorEmailAssignment", "Clinical", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "divPath", OnSuccess = "hideModal(); alert('Saved');" }, new { id = "dr-email-assignment" }))
+    @using (Html.AjaxBeginForm("_DoctorEmailAssignment", "Clinical", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "divPath", OnSuccess = "hideModal(); alert('Saved');" }, new { id = "dr-email-assignment" }))
     {
         @Html.AntiForgeryToken()
 

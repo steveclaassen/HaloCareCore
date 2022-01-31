@@ -106,7 +106,7 @@
 <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet" />
 
 <div class="questionnaire-modal" id="section2">
-    @using (Ajax.BeginForm("_newDiabetesQuestionnaire", "Clinical", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "divPath", OnSuccess = "hideModal(); alert('Saved');" }, new { id = "newDiabetesQuestionnaire" }))
+    @using (Html.AjaxBeginForm("_newDiabetesQuestionnaire", "Clinical", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "divPath", OnSuccess = "hideModal(); alert('Saved');" }, new { id = "newDiabetesQuestionnaire" }))
     {
         @Html.Hidden("taskId", (object)ViewBag.task)
         @Html.Hidden("DependantID", (object)ViewBag.DependantID)

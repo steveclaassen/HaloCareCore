@@ -1,4 +1,6 @@
 ﻿@model HaloCareCore.Models.EnrolmentViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
 @{
     ViewBag.Title = "Patient dashboard";
     Layout = "~/Views/Shared/_LayoutMember.cshtml";
@@ -427,7 +429,7 @@
         <hr class="settings-ruler" />
         <div class="popup-template">@Html.Raw(Html.Encode(Model.PopUp.program_pop_template).Replace("(b)", "<b>").Replace("(/b)", "</b>"))</div>
     </div>
-    <div class="col-md-12 popup-info-panel">@Model.PopUp.program • @Model.PopUp.medicalAid • @Model.PopUp.option</div>
+    <div class="col-md-12 popup-info-panel">@Model.PopUp.programName • @Model.PopUp.medicalAid • @Model.PopUp.option</div>
     <div class="col-md-12 popup-footer">
         <button class="popup-button" id="popup-submit">Close</button>
     </div>

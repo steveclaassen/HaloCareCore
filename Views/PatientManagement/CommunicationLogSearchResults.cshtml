@@ -1,4 +1,6 @@
 ﻿@model HaloCareCore.Models.ViewModels.CommunicationLogResultsVM
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
 @{
     ViewBag.Title = "CommunicationLogSearchResults";
     Layout = "~/Views/Shared/_LayoutNavigation.cshtml";

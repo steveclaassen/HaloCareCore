@@ -152,7 +152,7 @@
 </style>
 
 <div class="modal-content-disclaimer">
-    @using (Ajax.BeginForm("_QuestionnairePregnant", "Clinical", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "divPath", OnSuccess = "hideModal(); alert('Saved');" }, new { id = "questionnaire-pregnant" }))
+    @using (Html.AjaxBeginForm("_QuestionnairePregnant", "Clinical", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "divPath", OnSuccess = "hideModal(); alert('Saved');" }, new { id = "questionnaire-pregnant" }))
     {
         @Html.ValidationSummary(true, "", new { @class = "text-danger" })
 

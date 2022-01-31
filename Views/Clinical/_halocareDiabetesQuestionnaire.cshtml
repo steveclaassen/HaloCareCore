@@ -89,7 +89,7 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 
 <div class="doctorQuestionnaire_Modal">
-    @using (Ajax.BeginForm("_halocareDiabetesQuestionnaire", "Clinical", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "divPath", OnSuccess = "hideModal(); alert('Saved');" }, new { id = "hcDiabetesQuestionnaire" }))
+    @using (Html.AjaxBeginForm("_halocareDiabetesQuestionnaire", "Clinical", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "divPath", OnSuccess = "hideModal(); alert('Saved');" }, new { id = "hcDiabetesQuestionnaire" }))
     {
         @Html.Hidden("taskId", (object)ViewBag.task)
         @Html.Hidden("DependantID", (object)ViewBag.DependantID)

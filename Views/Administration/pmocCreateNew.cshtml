@@ -12,7 +12,7 @@
 
 <div class="row assignmentModal_Status">
 
-    @using (Ajax.BeginForm("pmocCreateNew", "Administration", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "", OnSuccess = "hideModal();" }))
+    @using (Html.AjaxBeginForm("pmocCreateNew", "Administration", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "", OnSuccess = "hideModal();" }))
     {
         @Html.AntiForgeryToken()
         <div class="form-horizontal">

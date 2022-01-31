@@ -1,5 +1,6 @@
 ﻿@model HaloCareCore.Models.DoctorViewModel
-
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
 @{
     ViewBag.Title = "DetailedDoctorView";
     Layout = "~/Views/Shared/_LayoutNavigation.cshtml";

@@ -1,5 +1,6 @@
 ﻿@model HaloCareCore.Models.Validation.AssignmentTypes
-
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
 @{
     ViewBag.Title = "Create_AssignmentType";
     Layout = "~/Views/Shared/_LayoutNavigation.cshtml";

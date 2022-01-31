@@ -233,7 +233,7 @@
             <div class="heading-spacer"></div>
         </div>
 
-        @using (Ajax.BeginForm("MH_DSM5_Create", "Member", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "divPath", OnSuccess = "hideModal(); alert('Saved');" }, new { id = "dsm5-create" }))
+        @using (Html.AjaxBeginForm("MH_DSM5_Create", "Member", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "divPath", OnSuccess = "hideModal(); alert('Saved');" }, new { id = "dsm5-create" }))
         {
             <div class="hidden-fields">
                 @Html.AntiForgeryToken()

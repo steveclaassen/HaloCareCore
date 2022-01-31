@@ -19,7 +19,7 @@
 
 
 <div class="doctorQuestionnaire_Modal">
-    @using (Ajax.BeginForm("_DoctorQuestionnaire", "Clinical", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "divPath", OnSuccess = "hideModal(); alert('Saved');" }))
+    @using (Html.AjaxBeginForm("_DoctorQuestionnaire", "Clinical", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "divPath", OnSuccess = "hideModal(); alert('Saved');" }))
     {
         @Html.Hidden("taskId", (object)ViewBag.task)
         @Html.Hidden("DependantID", (object)ViewBag.DependantID)

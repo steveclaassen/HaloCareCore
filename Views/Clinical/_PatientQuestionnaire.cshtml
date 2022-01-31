@@ -9,7 +9,7 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
 
 <div class="patientQuestionnaire_Modal">
-    @using (Ajax.BeginForm("_PatientQuestionnaire", "Clinical", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "divPath", OnSuccess = "hideModal(); alert('Saved');" }))
+    @using (Html.AjaxBeginForm("_PatientQuestionnaire", "Clinical", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "divPath", OnSuccess = "hideModal(); alert('Saved');" }))
     {
         @Html.AntiForgeryToken()
         <div class="form-horizontal">

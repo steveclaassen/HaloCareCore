@@ -165,7 +165,7 @@
 
     <div id="depression-panel" class="patientDashboard_container">
         <div class="col-md-12 row"><div class="heading-spacer"></div></div>
-        @using (Ajax.BeginForm("MH_Depression_Create", "Clinical", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "divPath", OnSuccess = "hideModal(); alert('Saved');" }, new { id = "depression-create" }))
+        @using (Html.AjaxBeginForm("MH_Depression_Create", "Clinical", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "divPath", OnSuccess = "hideModal(); alert('Saved');" }, new { id = "depression-create" }))
         {
             @Html.ValidationSummary(true, "", new { @class = "text-danger" })
             @Html.Hidden("taskId", (object)ViewBag.task)

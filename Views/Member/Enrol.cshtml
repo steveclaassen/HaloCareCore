@@ -2,6 +2,8 @@
 @model HaloCareCore.Models.EnrolmentViewModel
 @using Microsoft.AspNetCore.Http
 @inject IHttpContextAccessor HttpContextAccessor
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
 @{
     ViewBag.Title = "Enrol";
     Layout = "~/Views/Shared/_LayoutNavigation.cshtml";
@@ -129,7 +131,7 @@
                     <div class="form-group">
                         <div class="col-md-12">
                             <div class="col-md-6">
-                                @Html.Label(null,"Scheme", htmlAttributes: new { @class = "control-label col-md-3 push" })
+                                @Html.Label(null, "Scheme", htmlAttributes: new { @class = "control-label col-md-3 push" })
                                 <div class="col-md-5">
                                     @Html.DropDownListFor(n => n.member.medicalAidID, new SelectList(Model.MedicalAids.Where(x => x.clCarrier != true).Where(x => x.Active == true), "medicalAidID", "Name"), "**Select**", htmlAttributes: new { @class = "enrolForm_infoBox", @onchange = "FillScheme()" })
                                     @Html.ValidationMessageFor(model => model.member.medicalAidID, "", new { @class = "text-danger" })
@@ -137,7 +139,7 @@
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                @Html.Label(null,"Scheme option", htmlAttributes: new { @class = "control-label col-md-3 pull" })
+                                @Html.Label(null, "Scheme option", htmlAttributes: new { @class = "control-label col-md-3 pull" })
                                 <div class="col-md-5">
                                     @Html.DropDownList("schemeOption", new SelectList(Enumerable.Empty<SelectListItem>(), "Id", "Name"), "**Select**", htmlAttributes: new { @class = "enrolForm_infoBox mySelect2", @onchange = "FillRest()" })
                                 </div>
@@ -147,14 +149,14 @@
                     <div class="form-group">
                         <div class="col-md-12">
                             <div class="col-md-6">
-                                @Html.Label(null,"Principle", htmlAttributes: new { @class = "control-label col-md-3 push" })
+                                @Html.Label(null, "Principle", htmlAttributes: new { @class = "control-label col-md-3 push" })
                                 <div class="col-md-5 checkbox check-box_PrincipleMember">
                                     @Html.CheckBoxFor(model => model.dependent.isPrinciple, new { htmlAttributes = new { @class = "enrolForm_infoBox" } })
                                     @Html.ValidationMessageFor(model => model.dependent.isPrinciple, "", new { @class = "text-danger" })
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                @Html.Label(null,"Dependant type", htmlAttributes: new { @class = "control-label col-md-3 pull" })
+                                @Html.Label(null, "Dependant type", htmlAttributes: new { @class = "control-label col-md-3 pull" })
                                 <div class="col-md-5">
                                     @Html.DropDownListFor(m => m.dependent.dependentType, new SelectList(Model.dependentType, "dependentTypeCode", "dependentType"), "**Select**", htmlAttributes: new { @class = "enrolForm_infoBox" })
                                     @Html.ValidationMessageFor(model => model.dependent.dependentType, "", new { @class = "text-danger" })
@@ -266,7 +268,7 @@
                                     </div>
                                 </div>
                                 <div class="col-md-6">
-                                    @Html.Label(null,"Language", htmlAttributes: new { @class = "control-label col-md-3 pull" })
+                                    @Html.Label(null, "Language", htmlAttributes: new { @class = "control-label col-md-3 pull" })
                                     <div class="col-md-5">
                                         @Html.DropDownListFor(model => model.dependent.languageCode, new SelectList(Model.languages, "languageName", "languageCode"), "**Select**", htmlAttributes: new { @class = "enrolForm_infoBox" })
                                     </div>
@@ -278,7 +280,7 @@
                     <div class="form-group">
                         <div class="col-md-12">
                             <div class="col-md-2" style="text-align: right; margin-left: 1.2%!important; font-family: 'Century Gothic'; font-weight: bold; color: #003366">
-                                @System.Web.Configuration.WebConfigurationManager.AppSettings["Citizen"]
+                                @Configuration.GetSection("AppSettings")["Citizen"]
                                 <div class="col-md-5 checkbox check-box_Enrolment">
                                     @Html.CheckBoxFor(model => model.dependent.isSACitizen, new { htmlAttributes = new { @class = "enrolForm_infoBox" } })
                                     @Html.ValidationMessageFor(model => model.dependent.isSACitizen, "", new { @class = "text-danger" })

@@ -11,6 +11,10 @@
         28 July 2020 -- HCare-1124(Mental Health Disease: QUESTIONNAIRE - SCHIZOPHRENIA)
     -->
 </comment>
+
+<script src="~/Scripts/jquery-1.10.2.js"></script>
+<script src="~/Scripts/jquery.unobtrusive-ajax.js"></script>
+
 <style>
     .field-validation-error:before {
         font-family: FontAwesome;
@@ -172,7 +176,7 @@
             <div class="heading-spacer"></div>
         </div>
 
-        @using (Ajax.BeginForm("MH_Schizophrenia_Edit", "Clinical", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "divPath", OnSuccess = "hideModal(); alert('Saved');" }, new { id = "schizophrenia-edit" }))
+        @using (Html.AjaxBeginForm("MH_Schizophrenia_Edit", "Clinical", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "divPath", OnSuccess = "hideModal(); alert('Saved');" }, new { id = "schizophrenia-edit" }))
         {
             <div class="hidden-fields">
                 @Html.AntiForgeryToken()

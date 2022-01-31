@@ -8579,8 +8579,8 @@ namespace HaloCareCore.Controllers
             //-->>
             #region mental-health
             //-->>
-            model.summary.MH_DSM5Responses = new List<MH_DSM5ResponseNEW>(); //HCare-1203
-            model.summary.MH_DSM5Responses = _admin.GetNEWDSM5Results(DependentID); //HCare-1203
+            model.summary.MH_DSM5Responses = new List<MH_DSM5Response>(); //HCare-1203
+            model.summary.MH_DSM5Responses = _admin.GetDSM5Results(DependentID); //HCare-1203
             if (model.summary.MH_DSM5Responses.Count != 0)
             {
                 var maximumdate = _admin.GetNEWDSM5Results(DependentID).OrderByDescending(x => x.CreatedDate).First();
@@ -9030,8 +9030,8 @@ namespace HaloCareCore.Controllers
 
             model.summary = new PatientClinicalSummaryViewModel();
 
-            model.summary.MH_DSM5Responses = new List<MH_DSM5ResponseNEW>(); //HCare-1123
-            model.summary.MH_DSM5Responses = _admin.GetNEWDSM5Results(DependentID); //HCare-1123
+            model.summary.MH_DSM5Responses = new List<MH_DSM5Response>(); //HCare-1123
+            model.summary.MH_DSM5Responses = _admin.GetDSM5Results(DependentID); //HCare-1123
 
             model.summary.MH_SchizophreniaResponses = new List<MH_SchizophreniaResponse>(); //HCare-1124
             model.summary.MH_SchizophreniaResponses = _admin.GetSchizophreniaResults(DependentID); //HCare-1124

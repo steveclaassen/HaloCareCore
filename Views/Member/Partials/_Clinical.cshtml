@@ -702,73 +702,73 @@
 
                                 <div class="row">
                                     @{
-                                        var grid = new WebGrid(Model.ScriptItems);
+                                        //var grid = new WebGrid(Model.ScriptItems);
                                     }
 
                                     <div id="gridContent" style="padding:20px;">
-                                        @grid.GetHtml(
-tableStyle: "table regimeTable",
-headerStyle: "webgrid-header",
-footerStyle: "webgrid-footer",
-alternatingRowStyle: "webgrid-alternating-row",
-selectedRowStyle: "webgrid-selected-row",
-rowStyle: "webgrid-row-style",
-mode: WebGridPagerModes.All,
-columns:
-grid.Columns(
-grid.Column("Script ID", format: @<text>
-                                <span class="display-mode">@item.scriptID </span>
-                                <label id="scriptID" class="edit-mode">@item.scriptID</label>
-</text>, style: "col1Width"),
-grid.Column("Item #", format: @<text>
-    <span class="display-mode">@item.itemNo </span>
-    <label id="lblitemNo" class="edit-mode">@item.itemNo</label>
-</text>, style: "col1Width"),
-grid.Column("NAPPI", format: @<text>
-    <span class="display-mode">@item.nappiCode </span>
-    <label id="nappiCode" class="edit-mode">@item.nappiCode</label>
-</text>, style: "col1Width"),
-grid.Column("Product Name", format: @<text>
-    <span class="display-mode">@item.productName </span>
-    <label id="pName" class="edit-mode">@item.productName</label>
-</text>, style: "col1Width"),
-grid.Column("Qty", "Qty", format: @<text>
-    <span class="display-mode"><label id="lblqty">@item.quantity</label> </span>
-    <input id="txtquantity" class="edit-mode" value="@item.quantity" />
-</text>, style: "col1Width"),
-grid.Column("Directions", format: @<text>
-    <span class="display-mode"><label id="lbldir">@item.directions</label></span>
-    <input id="txtdirections" class="edit-mode" value="@item.directions" />
-</text>, style: "col1Width"),
-grid.Column("Item", format: @<text>
-    <span class="display-mode">@item.itemStatus </span>
-    <label id="itemStatus" class="edit-mode">@item.itemStatus</label>
-</text>, style: "col1Width"),
-grid.Column("fromDate", "From", format: @<text>
-    <span class="display-mode"> <label id="lblFromDate">@item.fromDate.ToString("dd-MM-yyyy")</label> </span>
-    <input type="datetime" id="fromDate" value="@item.fromDate.ToString("dd-MM-yyyy")" class="edit-mode datepicker" data-provide="" />
-</text>, style: "col2Width"),
-grid.Column("toDate", "To", format: @<text>
-    <span class="display-mode"> <label id="lblFirstName">@item.toDate.ToString("dd-MM-yyyy")</label> </span>
-    <input type="datetime" id="toDate" value="@item.toDate.ToString("dd-MM-yyyy")" class="edit-mode datepicker" data-provide="" />
-</text>, style: "col2Width"),
-grid.Column("Prescribing Dr", format: @<text>
-    <span class="display-mode">@item.prescribingDr </span>
-    <label id="prescribingDr" class="edit-mode">@item.prescribingDr</label>
-</text>, style: "col1Width"),
-grid.Column("active", "Active", format: @<text>
-    <span class="display-mode"> <label id="lblact">@item.active</label> </span>
-    <input type="checkbox" id="active" checked="@item.active" class="edit-mode" />
-</text>, style: "col2Width"),
-grid.Column("", format: @<text>
-    @if (item.itemStatus != "Authorised")
-{
-        <button class="btn buttonRound_edit edit-user display-mode">Edit</button>
-}
-    <button class="btn buttonRound_save save-user edit-mode">Save</button>
-    <button class="btn buttonRound_cancelScript cancel-user edit-mode">Cancel</button>
-</text>, style: "col3Width", canSort: false)
-))
+                                        @* @grid.GetHtml(
+        tableStyle: "table regimeTable",
+        headerStyle: "webgrid-header",
+        footerStyle: "webgrid-footer",
+        alternatingRowStyle: "webgrid-alternating-row",
+        selectedRowStyle: "webgrid-selected-row",
+        rowStyle: "webgrid-row-style",
+        mode: WebGridPagerModes.All,
+        columns:
+        grid.Columns(
+        grid.Column("Script ID", format: @<text>
+                                        <span class="display-mode">@item.scriptID </span>
+                                        <label id="scriptID" class="edit-mode">@item.scriptID</label>
+                                        </text>, style: "col1Width"),
+                                        grid.Column("Item #", format: @<text>
+                                            <span class="display-mode">@item.itemNo </span>
+                                            <label id="lblitemNo" class="edit-mode">@item.itemNo</label>
+                                        </text>, style: "col1Width"),
+                                        grid.Column("NAPPI", format: @<text>
+                                            <span class="display-mode">@item.nappiCode </span>
+                                            <label id="nappiCode" class="edit-mode">@item.nappiCode</label>
+                                        </text>, style: "col1Width"),
+                                        grid.Column("Product Name", format: @<text>
+                                            <span class="display-mode">@item.productName </span>
+                                            <label id="pName" class="edit-mode">@item.productName</label>
+                                        </text>, style: "col1Width"),
+                                        grid.Column("Qty", "Qty", format: @<text>
+                                            <span class="display-mode"><label id="lblqty">@item.quantity</label> </span>
+                                            <input id="txtquantity" class="edit-mode" value="@item.quantity" />
+                                        </text>, style: "col1Width"),
+                                        grid.Column("Directions", format: @<text>
+                                            <span class="display-mode"><label id="lbldir">@item.directions</label></span>
+                                            <input id="txtdirections" class="edit-mode" value="@item.directions" />
+                                        </text>, style: "col1Width"),
+                                        grid.Column("Item", format: @<text>
+                                            <span class="display-mode">@item.itemStatus </span>
+                                            <label id="itemStatus" class="edit-mode">@item.itemStatus</label>
+                                        </text>, style: "col1Width"),
+                                        grid.Column("fromDate", "From", format: @<text>
+                                            <span class="display-mode"> <label id="lblFromDate">@item.fromDate.ToString("dd-MM-yyyy")</label> </span>
+                                            <input type="datetime" id="fromDate" value="@item.fromDate.ToString("dd-MM-yyyy")" class="edit-mode datepicker" data-provide="" />
+                                        </text>, style: "col2Width"),
+                                        grid.Column("toDate", "To", format: @<text>
+                                            <span class="display-mode"> <label id="lblFirstName">@item.toDate.ToString("dd-MM-yyyy")</label> </span>
+                                            <input type="datetime" id="toDate" value="@item.toDate.ToString("dd-MM-yyyy")" class="edit-mode datepicker" data-provide="" />
+                                        </text>, style: "col2Width"),
+                                        grid.Column("Prescribing Dr", format: @<text>
+                                            <span class="display-mode">@item.prescribingDr </span>
+                                            <label id="prescribingDr" class="edit-mode">@item.prescribingDr</label>
+                                        </text>, style: "col1Width"),
+                                        grid.Column("active", "Active", format: @<text>
+                                            <span class="display-mode"> <label id="lblact">@item.active</label> </span>
+                                            <input type="checkbox" id="active" checked="@item.active" class="edit-mode" />
+                                        </text>, style: "col2Width"),
+                                        grid.Column("", format: @<text>
+                                            @if (item.itemStatus != "Authorised")
+                                            {
+                                                <button class="btn buttonRound_edit edit-user display-mode">Edit</button>
+                                            }
+                                            <button class="btn buttonRound_save save-user edit-mode">Save</button>
+                                            <button class="btn buttonRound_cancelScript cancel-user edit-mode">Cancel</button>
+                                        </text>, style: "col3Width", canSort: false)
+                                        ))*@
                                     </div>
                                 </div>
 
@@ -1364,71 +1364,71 @@ grid.Column("", format: @<text>
                                                         <div class="row blockbcksubsm">
                                                             <div class="col-md-12">
                                                                 <div class="row">
-                                                                    <table class="table">
-                                                                        <tr>
-                                                                            <th>
-                                                                                @Html.DisplayNameFor(model => model.HospitalClaims[0].claimNo)
-                                                                            </th>
-                                                                            <th>
-                                                                                @Html.DisplayNameFor(model => model.HospitalClaims[0].authNo)
-                                                                            </th>
-                                                                            <th>
-                                                                                @Html.DisplayNameFor(model => model.HospitalClaims[0].requestingVendor)
-                                                                            </th>
-                                                                            <th>
-                                                                                @Html.DisplayNameFor(model => model.HospitalClaims[0].vendorReference)
-                                                                            </th>
-                                                                            <th>
-                                                                                @Html.DisplayNameFor(model => model.HospitalClaims[0].adminDate)
-                                                                            </th>
-                                                                            <th>
-                                                                                @Html.DisplayNameFor(model => model.HospitalClaims[0].dischargeDate)
-                                                                            </th>
-                                                                            <th>
-                                                                                @Html.DisplayNameFor(model => model.HospitalClaims[0].claimTotal)
-                                                                            </th>
-                                                                            <th>
-                                                                                @Html.DisplayNameFor(model => model.HospitalClaims[0].minBenefitCode)
-                                                                            </th>
-                                                                        </tr>
-                                                                        @if (Model.HospitalClaims.Count() == 0)
-                                                                        {
-                                                                            <tr><td>No records available</td></tr>
-                                                                        }
-                                                                        else
-                                                                        {
-                                                                            foreach (var item in Model.HospitalClaims)
-                                                                            {
-                                                                                <tr>
-                                                                                    <td>
-                                                                                        @Html.DisplayFor(modelItem => item.claimNo)
-                                                                                    </td>
-                                                                                    <td>
-                                                                                        @Html.DisplayFor(modelItem => item.authNo)
-                                                                                    </td>
-                                                                                    <td>
-                                                                                        @Html.DisplayFor(modelItem => item.requestingVendor)
-                                                                                    </td>
-                                                                                    <td>
-                                                                                        @Html.DisplayFor(modelItem => item.vendorReference)
-                                                                                    </td>
-                                                                                    <td>
-                                                                                        @Html.DisplayFor(modelItem => item.adminDate)
-                                                                                    </td>
-                                                                                    <td>
-                                                                                        @Html.DisplayFor(modelItem => item.dischargeDate)
-                                                                                    </td>
-                                                                                    <td>
-                                                                                        @Html.DisplayFor(modelItem => item.claimTotal)
-                                                                                    </td>
-                                                                                    <td>
-                                                                                        @Html.DisplayFor(modelItem => item.minBenefitCode)
-                                                                                    </td>
-                                                                                </tr>
-                                                                            }
-                                                                        }
+                                                                    @*<table class="table">
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.HospitalClaims[0].claimNo)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.HospitalClaims[0].authNo)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.HospitalClaims[0].requestingVendor)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.HospitalClaims[0].vendorReference)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.HospitalClaims[0].adminDate)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.HospitalClaims[0].dischargeDate)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.HospitalClaims[0].claimTotal)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.HospitalClaims[0].minBenefitCode)
+                </th>
+            </tr>
+            @if (Model.HospitalClaims.Count() == 0)
+            {
+                <tr><td>No records available</td></tr>
+            }
+            else
+            {
+                foreach (var item in Model.HospitalClaims)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.claimNo)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.authNo)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.requestingVendor)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.vendorReference)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.adminDate)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.dischargeDate)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.claimTotal)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.minBenefitCode)
+                        </td>
+                    </tr>
+                }
+            }
 
-                                                                    </table>
+        </table>*@
                                                                 </div>
                                                             </div>
                                                             <br />

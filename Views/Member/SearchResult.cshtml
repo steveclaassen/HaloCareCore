@@ -2,7 +2,8 @@
 @using Microsoft.AspNetCore.Http
 @inject IHttpContextAccessor HttpContextAccessor
 @using HaloCareCore.Extensions
-@using System.Configuration
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
 
 @{
     ViewBag.Title = "SearchResult";
@@ -163,7 +164,7 @@
 
     <!--createNew-->
     <div class="createNew_link" style="margin-top: -1%; margin-bottom: -4%">
-        @if (System.Web.Configuration.WebConfigurationManager.AppSettings["Citizen"].ToString().ToLower() == "south african")
+        @if (Configuration.GetSection("AppSettings")["Citizen"].ToString().ToLower() == "south african")
         {
             <a href="@Url.Action("Enrol", "Member", new { })">
                 <span id="texts">

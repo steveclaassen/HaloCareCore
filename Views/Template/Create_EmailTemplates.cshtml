@@ -1,5 +1,6 @@
 ﻿@model HaloCareCore.Models.Communications.EmailTemplates
-
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
 @{
     ViewBag.Title = "Create";
     Layout = "~/Views/Shared/_LayoutNavigation.cshtml";

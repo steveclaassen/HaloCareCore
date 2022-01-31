@@ -480,7 +480,7 @@
 
                                                                     foreach (var item in Model.summary.programDiagnoses)
                                                                     {
-                                                                        if (!string.IsNullOrEmpty(item.generalComments) && item.generalComments != "Follow up" && item.generalComments != "None")
+                                                                        if (!string.IsNullOrEmpty(item.Comment) && item.Comment != "Follow up" && item.Comment != "None")
                                                                         {
                                                                             <span style="font-size: 12px">&nbsp;<i class="fas fa-sticky-note notificationIcon" title="comment"></i></span>
                                                                             break;
@@ -496,7 +496,7 @@
 
                                                                     foreach (var item in Model.summary.programDiagnoses)
                                                                     {
-                                                                        if (item.followUp == true || item.diagnosisDate == null)
+                                                                        if (item.FollowUp == true || item.EffectiveDate == null)
                                                                         {
                                                                             <span style="font-size: 12px">&nbsp;<i class="fas fa-star notificationIcon" title="follow up"></i></span>
                                                                             break;
@@ -551,47 +551,47 @@
                                                                                 {
                                                                                     <tbody>
                                                                                         <tr>
-                                                                                            @if (item.followUp == true)
+                                                                                            @if (item.FollowUp == true)
                                                                                             {
                                                                                                 <td colspan="6" style="text-align: center!important; color: rgba(204, 0, 0, 0.70)!important; font-size: 18px!important"><span><i class="fas fa-info-circle" style="font-size: 18px; color: rgba(204, 0, 0, 0.70)!important"></i></span> Follow up required!</td>
                                                                                             }
                                                                                             else
                                                                                             {
                                                                                                 <td data-dateformat="DD-MM-YYYY" style="text-align:center!important">
-                                                                                                    @Html.DisplayFor(modelItem => item.createdDate)
+                                                                                                    @Html.DisplayFor(modelItem => item.CreatedDate)
                                                                                                 </td>
                                                                                             }
                                                                                             <!---->
                                                                                             <!---->
-                                                                                            @if (item.followUp == true)
+                                                                                            @if (item.FollowUp == true)
                                                                                             {
 
                                                                                             }
                                                                                             else
                                                                                             {
                                                                                                 <td>
-                                                                                                    @Html.DisplayFor(modelItem => item.programCode)
+                                                                                                    @Html.DisplayFor(modelItem => item.ProgramCode)
                                                                                                 </td>
                                                                                             }
                                                                                             <!---->
                                                                                             <!---->
-                                                                                            @if (item.followUp == true)
+                                                                                            @if (item.FollowUp == true)
                                                                                             {
 
                                                                                             }
                                                                                             else
                                                                                             {
                                                                                                 <td>
-                                                                                                    @Html.DisplayFor(modelItem => item.programDescription)
+                                                                                                    @Html.DisplayFor(modelItem => item.ProgramDescription)
                                                                                                 </td>
                                                                                             }
                                                                                             <!---->
                                                                                             <!---->
-                                                                                            @if (item.followUp == true)
+                                                                                            @if (item.FollowUp == true)
                                                                                             {
 
                                                                                             }
-                                                                                            else if (item.diagnosisDate == null)
+                                                                                            else if (item.EffectiveDate == null)
                                                                                             {
                                                                                                 <td style="text-align: center!important"> - </td>
 
@@ -599,43 +599,43 @@
                                                                                             else
                                                                                             {
                                                                                                 <td style="text-align: center!important">
-                                                                                                    @Html.DisplayFor(modelItem => item.diagnosisDate)
+                                                                                                    @Html.DisplayFor(modelItem => item.EffectiveDate)
                                                                                                 </td>
                                                                                             }
                                                                                             <!---->
                                                                                             <!---->
-                                                                                            @if (item.followUp == true)
+                                                                                            @if (item.FollowUp == true)
                                                                                             {
 
                                                                                             }
                                                                                             else
                                                                                             {
                                                                                                 <td>
-                                                                                                    @Html.DisplayFor(modelItem => item.createdBy)
+                                                                                                    @Html.DisplayFor(modelItem => item.CreatedBy)
                                                                                                 </td>
                                                                                             }
 
                                                                                             <!---->
                                                                                             <!---->
-                                                                                            @if (item.followUp == true)
+                                                                                            @if (item.FollowUp == true)
                                                                                             {
 
                                                                                             }
-                                                                                            else if (item.generalComments == "None" || item.generalComments == "none" || item.generalComments == "NONE")
+                                                                                            else if (item.Comment == "None" || item.Comment == "none" || item.Comment == "NONE")
                                                                                             {
                                                                                                 <td style="text-align: center!important"><span style="font-size: 14px; color: rgba(204, 0, 0, 0.70); text-align: center!important"><i class="fas fa-times" title="No comment"></i></span></td>
                                                                                             }
-                                                                                            else if (item.generalComments == "Follow up")
+                                                                                            else if (item.Comment == "Follow up")
                                                                                             {
                                                                                                 <td style="text-align: center!important; color: rgba(204, 0, 0, 0.70)!important; font-size: 12px!important" title="follow up required!"><span><i class="fas fa-info-circle" style="color: rgba(204, 0, 0, 0.70)"></i></span> Follow up!</td>
                                                                                             }
-                                                                                            else if (item.generalComments == null || item.generalComments == " " || item.generalComments == "")
+                                                                                            else if (item.Comment == null || item.Comment == " " || item.Comment == "")
                                                                                             {
                                                                                                 <td style="text-align: center!important"><span style="font-size: 14px; color: rgba(204, 0, 0, 0.70); text-align: center!important"><i class="fas fa-times" title="No comment"></i></span></td>
                                                                                             }
                                                                                             else
                                                                                             {
-                                                                                                <td style="text-align: center!important"><span style="font-size: 14px; color: forestgreen; text-align: center!important"><i class="fas fa-check" title="@item.generalComments"></i></span></td>
+                                                                                                <td style="text-align: center!important"><span style="font-size: 14px; color: forestgreen; text-align: center!important"><i class="fas fa-check" title="@item.Comment"></i></span></td>
                                                                                             }
                                                                                             <!---->
                                                                                             <!---->
@@ -3275,7 +3275,7 @@
                                                                     @Html.DisplayNameFor(model => model.HospitalClaims[0].dischargeDate)
                                                                 </th>
                                                                 <th>
-                                                                    @Html.DisplayNameFor(model => model.HospitalClaims[0].icd10)
+                                                                    @Html.DisplayNameFor(model => model.HospitalClaims[0].FinalCD10Description)
                                                                 </th>
                                                                 <th>
                                                                     @Html.DisplayNameFor(model => model.HospitalClaims[0].procedureCode)
@@ -3303,7 +3303,7 @@
                                                                             @Html.DisplayFor(modelItem => item.dischargeDate)
                                                                         </td>
                                                                         <td>
-                                                                            @Html.DisplayFor(modelItem => item.icd10)
+                                                                            @Html.DisplayFor(modelItem => item.FinalCD10Description)
                                                                         </td>
                                                                         <td>
                                                                             @Html.DisplayFor(modelItem => item.procedureCode)

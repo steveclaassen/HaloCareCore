@@ -125,7 +125,7 @@
 <div id="sms-assignment-overlay" class="pop-up-overlay-sms"></div>
 <div class="sms-assignment-modal">
 
-    @using (Ajax.BeginForm("_InsertText", "Clinical", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "divPath", OnSuccess = "hideModal(); alert('Saved');" }, new { id = "patient-text-assignment" }))
+    @using (Html.AjaxBeginForm("_InsertText", "Clinical", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "divPath", OnSuccess = "hideModal(); alert('Saved');" }, new { id = "patient-text-assignment" }))
     {
         @Html.AntiForgeryToken()
         @Html.HiddenFor(model => model.smsMessages.dependantID)

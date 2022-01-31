@@ -429,19 +429,19 @@
             <!--excelExport-->
             using (Html.BeginForm("ExportProductionViewToExcel", "PatientManagement", FormMethod.Post))
             {
-                if (Request.Form["users"] != null)
+                if (Context.Request.Query["users"].ToString() != null)
                 {
-                    if (Request.Form["medicalAidID"].ToString() != null)
+                    if (Context.Request.Query["medicalAidID"].ToString() != null)
                     {
-                        @Html.Hidden("medicalAidID", Request.Form["medicalAidID"].ToString())
+                        @Html.Hidden("medicalAidID", Context.Request.Query["medicalAidID"].ToString())
                     }
-                    if (Request.Form["users"].ToString() != null)
+                    if (Context.Request.Query["users"].ToString() != null)
                     {
-                        @Html.Hidden("users", Request.Form["users"].ToString())
+                        @Html.Hidden("users", Context.Request.Query["users"].ToString())
                     }
-                    if (Request.Form["assignmentItems"].ToString() != null)
+                    if (Context.Request.Query["assignmentItems"].ToString() != null)
                     {
-                        @Html.Hidden("assignmentItems", Request.Form["assignmentItems"].ToString())
+                        @Html.Hidden("assignmentItems", Context.Request.Query["assignmentItems"].ToString())
                     }
 
                 }

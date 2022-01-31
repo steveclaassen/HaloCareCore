@@ -73,15 +73,15 @@
     <hr class="fancyruler">
     @using (Html.BeginForm("ExportOutstandingScriptsToExcel", "Scripts", FormMethod.Post))
     {
-        if (Request.Form["statusCode"] != null)
+        if (Context.Request.Query["statusCode"].ToString() != null)
         {
-            if (Request.Form["statusCode"].ToString() != null)
+            if (Context.Request.Query["statusCode"].ToString() != null)
             {
-                @Html.Hidden("sts", Request.Form["statusCode"].ToString())
+                @Html.Hidden("sts", Context.Request.Query["statusCode"].ToString())
             }
-            if (Request.Form["medicalAidID"].ToString() != null)
+            if (Context.Request.Query["medicalAidID"].ToString() != null)
             {
-                @Html.Hidden("med", Request.Form["medicalAidID"].ToString())
+                @Html.Hidden("med", Context.Request.Query["medicalAidID"].ToString())
             }
             if (Model.search.nrMonths != 0)
             {

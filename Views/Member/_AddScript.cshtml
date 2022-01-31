@@ -95,7 +95,7 @@
 
 <div class="assignmentModal_AddScript">
 
-    @using (Ajax.BeginForm("_AddScriptAjax", "Member", new AjaxOptions { OnSuccess = "OnSuccess", OnFailure = "OnFailure", }))
+    @using (Html.AjaxBeginForm("_AddScriptAjax", "Member", new AjaxOptions { OnSuccess = "OnSuccess", OnFailure = "OnFailure", }))
     {
         @Html.AntiForgeryToken()
         @Html.ValidationSummary(true, "", new { @class = "text-danger" })
@@ -167,7 +167,7 @@
 
     <!---->
     <div id="additem" class="row" style="display:none;">
-        @using (Ajax.BeginForm("_AddScriptItemAjax", "Member", new AjaxOptions
+        @using (Html.AjaxBeginForm("_AddScriptItemAjax", "Member", new AjaxOptions
         {
             OnSuccess = "OnSuccessItem",
             OnFailure = "OnFailure",

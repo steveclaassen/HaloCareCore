@@ -163,7 +163,7 @@
 
 <div class="row assignmentModal_PathologyNew">
     <div id="divPath" style="margin-top: -10px">
-        @using (Ajax.BeginForm("_InsertPathology", "Clinical", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "divPath", OnBegin = "someFunction", OnSuccess = "OnSuccess", OnFailure = "OnFailure" }, new { id = "insertPathology" }))
+        @using (Html.AjaxBeginForm("_InsertPathology", "Clinical", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "divPath", OnBegin = "someFunction", OnSuccess = "OnSuccess", OnFailure = "OnFailure" }, new { id = "insertPathology" }))
         {
             @Html.AntiForgeryToken()
 

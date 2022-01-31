@@ -297,27 +297,27 @@
                                 <!-------------------------------------------------------------------------- excel export -------------------------------------------------------------------------->
                                 @using (Html.BeginForm("ExportPathologyToExcel", "PatientManagement", FormMethod.Post))
                                 {
-                                    if (Request.Form["medicalAid"] != null)
+                                    if (Context.Request.Query["medicalAid"].ToString() != null)
                                     {
-                                        if (Request.Form["medicalAid"].ToString() != null)
+                                        if (Context.Request.Query["medicalAid"].ToString() != null)
                                         {
-                                            @Html.Hidden("medicalAid", Request.Form["medicalAid"].ToString())
+                                            @Html.Hidden("medicalAid", Context.Request.Query["medicalAid"].ToString())
                                         }
-                                        if (Request.Form["programID"].ToString() != null)
+                                        if (Context.Request.Query["programID"].ToString() != null)
                                         {
-                                            @Html.Hidden("programID", Request.Form["programID"].ToString())
+                                            @Html.Hidden("programID", Context.Request.Query["programID"].ToString())
                                         }
-                                        if (Request.Form["pathologyField"].ToString() != null)
+                                        if (Context.Request.Query["pathologyField"].ToString() != null)
                                         {
-                                            @Html.Hidden("pathologyField", Request.Form["pathologyField"].ToString())
+                                            @Html.Hidden("pathologyField", Context.Request.Query["pathologyField"].ToString())
                                         }
-                                        if (Request.Form["FromDate"].ToString() != null)
+                                        if (Context.Request.Query["FromDate"].ToString() != null)
                                         {
-                                            @Html.Hidden("FromDate", Request.Form["FromDate"].ToString())
+                                            @Html.Hidden("FromDate", Context.Request.Query["FromDate"].ToString())
                                         }
-                                        if (Request.Form["ToDate"].ToString() != null)
+                                        if (Context.Request.Query["ToDate"].ToString() != null)
                                         {
-                                            @Html.Hidden("ToDate", Request.Form["ToDate"].ToString())
+                                            @Html.Hidden("ToDate", Context.Request.Query["ToDate"].ToString())
                                         }
                                     }
                                     <div class="form-group">

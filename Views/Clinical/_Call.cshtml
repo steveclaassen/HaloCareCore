@@ -32,7 +32,7 @@
             <h2 class="modalHeading">Contact Details</h2>
         </div>
         <br />
-        @using (Ajax.BeginForm("_Call", "Clinical", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "assignmentModal_Status", OnSuccess = "hideModal(); alert('Saved');" }))
+        @using (Html.AjaxBeginForm("_Call", "Clinical", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "assignmentModal_Status", OnSuccess = "hideModal(); alert('Saved');" }))
         {
             @Html.Hidden("taskId", (object)ViewBag.task)
             @Html.Hidden("id", (object)ViewBag.id)

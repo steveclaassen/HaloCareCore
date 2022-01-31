@@ -172,7 +172,7 @@
             <div class="heading-spacer"></div>
         </div>
 
-        @using (Ajax.BeginForm("MH_Bipolar_Edit", "Clinical", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "divPath", OnSuccess = "hideModal(); alert('Saved');" }, new { id = "bipolar-edit" }))
+        @using (Html.AjaxBeginForm("MH_Bipolar_Edit", "Clinical", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "divPath", OnSuccess = "hideModal(); alert('Saved');" }, new { id = "bipolar-edit" }))
         {
             <div class="hidden-fields">
                 @Html.AntiForgeryToken()

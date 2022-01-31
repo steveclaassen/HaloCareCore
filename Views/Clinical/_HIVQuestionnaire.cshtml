@@ -118,7 +118,7 @@
 <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet" />
 
 <div class="doctorQuestionnaire_Modal">
-    @using (Ajax.BeginForm("_HIVQuestionnaire", "Clinical", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "divPath", OnSuccess = "hideModal(); alert('Saved');" }, new { id = "hivQuestionnaire" }))
+    @using (Html.AjaxBeginForm("_HIVQuestionnaire", "Clinical", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "divPath", OnSuccess = "hideModal(); alert('Saved');" }, new { id = "hivQuestionnaire" }))
     {
 
         @Html.Hidden("taskId", (object)ViewBag.task)

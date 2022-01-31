@@ -165,7 +165,7 @@
 
     <div id="schizophrenia-panel" class="patientDashboard_container">
         <div class="col-md-12 row"><div class="heading-spacer"></div></div>
-        @using (Ajax.BeginForm("MH_Schizophrenia_Create", "Clinical", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "divPath", OnSuccess = "hideModal(); alert('Saved');" }, new { id = "schizophrenia-create" }))
+        @using (Html.AjaxBeginForm("MH_Schizophrenia_Create", "Clinical", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "divPath", OnSuccess = "hideModal(); alert('Saved');" }, new { id = "schizophrenia-create" }))
         {
             @Html.AntiForgeryToken()
             @Html.ValidationSummary(true, "", new { @class = "text-danger" })

@@ -3,7 +3,7 @@
 
 
 
-    @using (Ajax.BeginForm("_AddScriptItemAjax", "Member", new AjaxOptions { OnSuccess = "OnSuccessItem", OnFailure = "OnFailure", }))
+    @using (Html.AjaxBeginForm("_AddScriptItemAjax", "Member", new AjaxOptions { OnSuccess = "OnSuccessItem", OnFailure = "OnFailure", }))
     {
         @Html.AntiForgeryToken()
         @Html.Hidden("scriptID")
