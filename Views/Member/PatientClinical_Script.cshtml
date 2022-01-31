@@ -349,7 +349,7 @@
                                                                                         @Html.DisplayFor(modelItem => item.comment)
                                                                                     </td>
                                                                                     <td class="statusCode linkNav" style="text-align: center!important">
-                                                                                        @*@Html.RenderActionLink("Edit", "EditScriptItem", "Member", new { itemId = item.itemNo }, null)*@
+                                                                                        @*@Html.ActionLink("Edit", "EditScriptItem", "Member", new { itemId = item.itemNo }, null)*@
                                                                                         <div class="contactIcon fas fa-pencil-alt" onclick="location.href='@Url.Action("EditScriptItem", "Member", new { itemId = item.itemNo, pro = Context.Request.Query["pro"] })'" title="edit"></div>
                                                                                     </td>
                                                                             </tbody>
@@ -583,7 +583,7 @@
                                                                                         @Html.DisplayFor(modelItem => item.comment)
                                                                                     </td>
                                                                                     <td class="statusCode linkNav" style="text-align: center!important">
-                                                                                        @Html.RenderActionLink("Edit", "EditScriptItem", "Member", new { itemId = item.itemNo }, null)
+                                                                                        @Html.ActionLink("Edit", "EditScriptItem", "Member", new { itemId = item.itemNo }, null)
                                                                                     </td>
                                                                             </tbody>
                                                                         }

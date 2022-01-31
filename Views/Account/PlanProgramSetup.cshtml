@@ -102,7 +102,7 @@
                         @Html.EditorFor(model => model[i].include)
                     </td>
                     <td class="statusCode linkNav" style="text-align: center!important">
-                        @Html.RenderActionLink("Setup", "ClinicalRulesSelect", new { id = Model[i].accountID, medId = Context.Request.Query["medId"] })
+                        @Html.ActionLink("Setup", "ClinicalRulesSelect", new { id = Model[i].accountID, medId = Context.Request.Query["medId"] })
                     </td>
 
                 </tr>

@@ -29,7 +29,7 @@
 
 
     <hr class="fancyruler">
-    <p class="backButton_Navigation" style="margin-top: 1%!important; margin-left: 1%">@Html.RenderActionLink("Create New", "Create")</p>
+    <p class="backButton_Navigation" style="margin-top: 1%!important; margin-left: 1%">@Html.ActionLink("Create New", "Create")</p>
     <table class="table scriptTable" id="table">
         <tr>
             <th>
@@ -191,7 +191,7 @@
                     @Html.DisplayFor(modelItem => item.Status)
                 </td>
                 <td class="statusCode linkNav">
-                    @Html.RenderActionLink("Details", "Details", new { id = item.scriptID })
+                    @Html.ActionLink("Details", "Details", new { id = item.scriptID })
                 </td>
             </tr>
         }
@@ -202,7 +202,7 @@
 <br />
 
 <div class="backButton_Navigation" style="margin-left: -180px;">
-    @Html.RenderActionLink("Back", "Index", "Clinical")
+    @Html.ActionLink("Back", "Index", "Clinical")
 </div>
 
 <footer>

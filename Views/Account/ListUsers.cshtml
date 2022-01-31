@@ -93,8 +93,8 @@
                         <td class="row-information"><span class="@(item.Active == true ? "" : "active-false")">@Html.DisplayFor(modelItem => item.email)</span></td>
                         <td class="row-information text-center"><span class="@(item.Active == true ? "chk-yes fas fa-circle" : "chk-no fas fa-circle")"></span></td>
                         <td class="statusCode linkNav" style="text-align: center!important">
-                            @Html.RenderActionLink("Edit", "EditUser", new { id = item.userID }) |
-                            @Html.RenderActionLink("Details", "ViewUser", new { id = item.userID })
+                            @Html.ActionLink("Edit", "EditUser", new { id = item.userID }) |
+                            @Html.ActionLink("Details", "ViewUser", new { id = item.userID })
                         </td>
                     </tr>
                 </tbody>

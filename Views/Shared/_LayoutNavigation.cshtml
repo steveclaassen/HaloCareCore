@@ -174,21 +174,21 @@
 
                             <ul>
 
-                                <li>@Html.RenderActionLink("Home", "Index", "Home")</li>
+                                <li>@Html.ActionLink("Home", "Index", "Home")</li>
 
                                 @if (User.HasRole("Clinical Manager") || User.HasRole("System Admin") || User.HasRole("Case Manager"))
                                 {
-                                    <li>@Html.RenderActionLink("Patient", "Search", "Member")</li>
-                                    <li>@Html.RenderActionLink("Workflow", "CompactAssignments", "Clinical")</li>
+                                    <li>@Html.ActionLink("Patient", "Search", "Member")</li>
+                                    <li>@Html.ActionLink("Workflow", "CompactAssignments", "Clinical")</li>
                                 }
                                 @if (User.HasRole("System Admin") || User.HasRole("Clinical Manager"))
                                 {
-                                    <li>@Html.RenderActionLink("Authorisations", "OutstandingAuthorise", "Scripts")</li>
+                                    <li>@Html.ActionLink("Authorisations", "OutstandingAuthorise", "Scripts")</li>
                                 }
 
                                 @if (User.HasRole("Clinical Manager") || User.HasRole("System Admin") || User.HasRole("Administrator"))
                                 {
-                                    <!--<li>@Html.RenderActionLink("Reports", "reportDashboard", "ReportManagement")</li>-->
+                                    <!--<li>@Html.ActionLink("Reports", "reportDashboard", "ReportManagement")</li>-->
                                 }
 
                             </ul>

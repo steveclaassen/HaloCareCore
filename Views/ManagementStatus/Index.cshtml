@@ -108,8 +108,8 @@
                     <td class="row-information text-center"><span class="@(item.active == true ? "chk-yes fas fa-circle" : "chk-no fas fa-circle")"></span></td>
 
                     <td class="statusCode linkNav" style="text-align: center!important">
-                        @Html.RenderActionLink("Edit", "Edit", new { id = item.statusCode }) |
-                        @Html.RenderActionLink("Details", "Details", new { id = item.statusCode })
+                        @Html.ActionLink("Edit", "Edit", new { id = item.statusCode }) |
+                        @Html.ActionLink("Details", "Details", new { id = item.statusCode })
                     </td>
                 </tr>
             </tbody>

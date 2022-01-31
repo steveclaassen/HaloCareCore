@@ -340,7 +340,7 @@
                         @Html.DisplayFor(modelItem => item.isPrinciple)
                     </td>
                     <td>
-                        @Html.RenderActionLink("Details", "MemberFileView", new { DependentID = item.DependantID })
+                        @Html.ActionLink("Details", "MemberFileView", new { DependentID = item.DependantID })
                     </td>
                 </tr>
             }

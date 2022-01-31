@@ -127,11 +127,11 @@
                     @if (Model[i].include)
                     {
                         <td class="statusCode linkNav" style="text-align: center!important">
-                            @Html.RenderActionLink("View rules", "ClinicalRulesEdit", new { id = Model[i].accountID, progID = Model[i].programID, medAid = Model[i].medicalAidID }) |
-                            @Html.RenderActionLink("View statusses", "ManagementStatusEdit", new { id = Model[i].accountID, progID = Model[i].programID, medAid = Model[i].medicalAidID }) |
+                            @Html.ActionLink("View rules", "ClinicalRulesEdit", new { id = Model[i].accountID, progID = Model[i].programID, medAid = Model[i].medicalAidID }) |
+                            @Html.ActionLink("View statusses", "ManagementStatusEdit", new { id = Model[i].accountID, progID = Model[i].programID, medAid = Model[i].medicalAidID }) |
                             <!--HCare-1043-->
-                            @Html.RenderActionLink("View SMS Templates", "TextTemplateEdit", new { id = Model[i].accountID, progID = Model[i].programID, medAid = Model[i].medicalAidID }) |
-                            @Html.RenderActionLink("View Email Templates", "EmailTemplateEdit", new { id = Model[i].accountID, progID = Model[i].programID, medAid = Model[i].medicalAidID })
+                            @Html.ActionLink("View SMS Templates", "TextTemplateEdit", new { id = Model[i].accountID, progID = Model[i].programID, medAid = Model[i].medicalAidID }) |
+                            @Html.ActionLink("View Email Templates", "EmailTemplateEdit", new { id = Model[i].accountID, progID = Model[i].programID, medAid = Model[i].medicalAidID })
                         </td>
                     }
                     else

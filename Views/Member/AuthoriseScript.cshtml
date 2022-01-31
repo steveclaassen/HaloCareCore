@@ -302,7 +302,7 @@
                                                 @Html.HiddenFor(model => Model.scriptItems[x].benefitType)
                                             </td>
                                             <td>
-                                                @Html.RenderActionLink("Edit", "EditScriptItem", new { itemId = Model.scriptItems[x].itemNo })
+                                                @Html.ActionLink("Edit", "EditScriptItem", new { itemId = Model.scriptItems[x].itemNo })
                                             </td>
                                         </tr>
                                     }

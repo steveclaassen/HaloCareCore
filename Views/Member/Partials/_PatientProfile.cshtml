@@ -407,8 +407,8 @@
                                                         @Html.DisplayFor(modelItem => item.attachmentType)
                                                     </td>
                                                     <td class="tableAction_Btn">
-                                                        @Html.RenderActionLink("View", "GetImage", new { image = item.Link, @class = "attachmentLink" }) /
-                                                        @Html.RenderActionLink("Edit", "Edit_attachmentType", new { id = item.attachmentID })
+                                                        @Html.ActionLink("View", "GetImage", new { image = item.Link, @class = "attachmentLink" }) /
+                                                        @Html.ActionLink("Edit", "Edit_attachmentType", new { id = item.attachmentID })
 
                                                     </td>
                                                 </tr>

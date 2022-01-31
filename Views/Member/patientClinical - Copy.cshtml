@@ -1015,7 +1015,7 @@
                                                         </td>
 
                                                         <td class="statusCode linkNav" style="text-align: center!important">
-                                                            @Html.RenderActionLink("Edit", "EditScriptItem", "Member", new { itemId = item.itemNo }, null)
+                                                            @Html.ActionLink("Edit", "EditScriptItem", "Member", new { itemId = item.itemNo }, null)
                                                         </td>
                                                 </tbody>
                                             }
@@ -1600,8 +1600,8 @@
                                                                                             }
 
                                                                                             <td class="linkNav" style="text-align: center!important">
-                                                                                                @Html.RenderActionLink("View", "DetailsClinicalExam", new { id = item.id, pro = Context.Request.Query["pro"] }) /
-                                                                                                @Html.RenderActionLink("Edit", "EditClinicalExam", new { id = item.id, pro = Context.Request.Query["pro"] })
+                                                                                                @Html.ActionLink("View", "DetailsClinicalExam", new { id = item.id, pro = Context.Request.Query["pro"] }) /
+                                                                                                @Html.ActionLink("Edit", "EditClinicalExam", new { id = item.id, pro = Context.Request.Query["pro"] })
                                                                                             </td>
                                                                                         </tr>
                                                                                     </tbody>
@@ -1864,8 +1864,8 @@
                                                                                                 <!---->
                                                                                                 <!---->
                                                                                                 <td class="linkNav statusCode" style="text-align: center!important">
-                                                                                                    @Html.RenderActionLink("View", "DetailsComorbid", new { Id = item.id, pro=Context.Request.Query["pro"] }) /
-                                                                                                    @Html.RenderActionLink("Edit", "EditComorbid", new { Id = item.id, pro=Context.Request.Query["pro"] })
+                                                                                                    @Html.ActionLink("View", "DetailsComorbid", new { Id = item.id, pro=Context.Request.Query["pro"] }) /
+                                                                                                    @Html.ActionLink("Edit", "EditComorbid", new { Id = item.id, pro=Context.Request.Query["pro"] })
                                                                                                 </td>
                                                                                             </tr>
                                                                                         </tbody>
@@ -2169,8 +2169,8 @@
                                                                                                     <td style="text-align: center!important"><span style="font-size: 14px; color: forestgreen; text-align: center!important"><i class="fas fa-check" title="@item.comment"></i></span></td>
                                                                                                 }
                                                                                                 <td class="linkNav statusCode" style="text-align: center!important">
-                                                                                                    @Html.RenderActionLink("View", "DetailsMedication", new { id = item.Id }) /
-                                                                                                    @Html.RenderActionLink("Edit", "EditMedication", new { id = item.Id })
+                                                                                                    @Html.ActionLink("View", "DetailsMedication", new { id = item.Id }) /
+                                                                                                    @Html.ActionLink("Edit", "EditMedication", new { id = item.Id })
                                                                                                 </td>
                                                                                             </tr>
                                                                                         </tbody>
@@ -2343,7 +2343,7 @@
                                                                                                     @Html.DisplayFor(modelItem => item.comment)
                                                                                                 </td>
                                                                                                 <td class="statusCode linkNav" style="text-align: center!important">
-                                                                                                    @Html.RenderActionLink("Edit", "EditMedicationItem", "Member", new { itemId = item.itemNo, pro=Context.Request.Query["pro"] }, null)
+                                                                                                    @Html.ActionLink("Edit", "EditMedicationItem", "Member", new { itemId = item.itemNo, pro=Context.Request.Query["pro"] }, null)
                                                                                                 </td>
                                                                                             </tr>
                                                                                         </tbody>
@@ -2516,8 +2516,8 @@
                                                                                                 <!---->
 
                                                                                                 <td class="linkNav statusCode" style="text-align: center!important">
-                                                                                                    @Html.RenderActionLink("View", "DetailsAllergies", new { id = item.id, pro=Context.Request.Query["pro"] }) /
-                                                                                                    @Html.RenderActionLink("Edit", "EditAllergies", new { id = item.id, pro=Context.Request.Query["pro"] })
+                                                                                                    @Html.ActionLink("View", "DetailsAllergies", new { id = item.id, pro=Context.Request.Query["pro"] }) /
+                                                                                                    @Html.ActionLink("Edit", "EditAllergies", new { id = item.id, pro=Context.Request.Query["pro"] })
                                                                                                 </td>
                                                                                             </tr>
                                                                                         </tbody>
@@ -2798,8 +2798,8 @@
                                                                                                 <!---->
                                                                                                 <!---->
                                                                                                 <td class="linkNav" style="text-align: center!important">
-                                                                                                    @Html.RenderActionLink("View", "Details_socialRecord", new { id = item.id,pro=Context.Request.Query["pro"] }) /
-                                                                                                    @Html.RenderActionLink("Edit", "Edit_socialRecord", new { id = item.id,pro=Context.Request.Query["pro"] })
+                                                                                                    @Html.ActionLink("View", "Details_socialRecord", new { id = item.id,pro=Context.Request.Query["pro"] }) /
+                                                                                                    @Html.ActionLink("Edit", "Edit_socialRecord", new { id = item.id,pro=Context.Request.Query["pro"] })
                                                                                                 </td>
                                                                                             </tr>
                                                                                         </tbody>
@@ -3033,8 +3033,8 @@
                                                                                                 <!---->
                                                                                                 <!---->
                                                                                                 <td class="linkNav statusCode" style="text-align: center!important">
-                                                                                                    @Html.RenderActionLink("View", "Hospitalisations_Details", new { id = item.id, pro=Context.Request.Query["pro"]}) /
-                                                                                                    @Html.RenderActionLink("Edit", "Hospitalisations_Edit", new { id = item.id, pro=Context.Request.Query["pro"]})
+                                                                                                    @Html.ActionLink("View", "Hospitalisations_Details", new { id = item.id, pro=Context.Request.Query["pro"]}) /
+                                                                                                    @Html.ActionLink("Edit", "Hospitalisations_Edit", new { id = item.id, pro=Context.Request.Query["pro"]})
                                                                                                 </td>
                                                                                             </tr>
                                                                                         </tbody>
@@ -3297,8 +3297,8 @@
                                                                                                 <!---->
 
                                                                                                 <td class="linkNav" style="text-align: center!important">
-                                                                                                    @Html.RenderActionLink("View", "generalOther_Details", new { id = item.QuestionnaireOtherID }) /
-                                                                                                    @Html.RenderActionLink("Edit", "generalOther_Edit", new { id = item.QuestionnaireOtherID })
+                                                                                                    @Html.ActionLink("View", "generalOther_Details", new { id = item.QuestionnaireOtherID }) /
+                                                                                                    @Html.ActionLink("Edit", "generalOther_Edit", new { id = item.QuestionnaireOtherID })
                                                                                                 </td>
                                                                                             </tr>
                                                                                         </tbody>
@@ -3552,8 +3552,8 @@
                                                                                                 <!---->
 
                                                                                                 <td class="linkNav statusCode" style="text-align: center!important">
-                                                                                                    @Html.RenderActionLink("View", "diagnosis_Details", new { Id = item.Id, pro=Context.Request.Query["pro"] }) /
-                                                                                                    @Html.RenderActionLink("Edit", "diagnosis_Edit", new { Id = item.Id, pro=Context.Request.Query["pro"] })
+                                                                                                    @Html.ActionLink("View", "diagnosis_Details", new { Id = item.Id, pro=Context.Request.Query["pro"] }) /
+                                                                                                    @Html.ActionLink("Edit", "diagnosis_Edit", new { Id = item.Id, pro=Context.Request.Query["pro"] })
                                                                                                 </td>
                                                                                             </tr>
                                                                                         </tbody>
@@ -3859,8 +3859,8 @@
                                                                                                 <!---->
                                                                                                 <!---->
                                                                                                 <td class="linkNav" style="text-align: center!important">
-                                                                                                    @Html.RenderActionLink("View", "vision_Details", new { id = item.VisionID }) /
-                                                                                                    @Html.RenderActionLink("Edit", "vision_Edit", new { id = item.VisionID })
+                                                                                                    @Html.ActionLink("View", "vision_Details", new { id = item.VisionID }) /
+                                                                                                    @Html.ActionLink("Edit", "vision_Edit", new { id = item.VisionID })
                                                                                                 </td>
                                                                                             </tr>
                                                                                         </tbody>
@@ -4163,8 +4163,8 @@
                                                                                                 <!---->
 
                                                                                                 <td class="linkNav" style="text-align: center!important">
-                                                                                                    @Html.RenderActionLink("View", "podiatry_Details", new { id = item.PodiatryID }) /
-                                                                                                    @Html.RenderActionLink("Edit", "podiatry_Edit", new { id = item.PodiatryID })
+                                                                                                    @Html.ActionLink("View", "podiatry_Details", new { id = item.PodiatryID }) /
+                                                                                                    @Html.ActionLink("Edit", "podiatry_Edit", new { id = item.PodiatryID })
 
                                                                                                 </td>
                                                                                             </tr>
@@ -4362,8 +4362,8 @@
 
 
                                                                                                 <td class="linkNav" style="text-align: center!important">
-                                                                                                    @Html.RenderActionLink("View", "autoNero_Details", new { id = item.AutoNeropathyID }) /
-                                                                                                    @Html.RenderActionLink("Edit", "autoNero_Edit", new { id = item.AutoNeropathyID })
+                                                                                                    @Html.ActionLink("View", "autoNero_Details", new { id = item.AutoNeropathyID }) /
+                                                                                                    @Html.ActionLink("Edit", "autoNero_Edit", new { id = item.AutoNeropathyID })
                                                                                                 </td>
                                                                                             </tr>
                                                                                         </tbody>
@@ -4608,8 +4608,8 @@
                                                                                                 }
 
                                                                                                 <td class="linkNav statusCode" style="text-align: center!important">
-                                                                                                    @Html.RenderActionLink("View", "hypoGlycaemia_Details", new { id = item.HypoglycaemiaID }) /
-                                                                                                    @Html.RenderActionLink("Edit", "hypoGlycaemia_Edit", new { id = item.HypoglycaemiaID })
+                                                                                                    @Html.ActionLink("View", "hypoGlycaemia_Details", new { id = item.HypoglycaemiaID }) /
+                                                                                                    @Html.ActionLink("Edit", "hypoGlycaemia_Edit", new { id = item.HypoglycaemiaID })
                                                                                                 </td>
                                                                                             </tr>
                                                                                         </tbody>
@@ -4865,8 +4865,8 @@
                                                                                                 <!---->
 
                                                                                                 <td class="linkNav statusCode" style="text-align: center!important">
-                                                                                                    @Html.RenderActionLink("View", "diagnosis_Details", new { Id = item.Id,pro=Context.Request.Query["pro"] }) /
-                                                                                                    @Html.RenderActionLink("Edit", "diagnosis_Edit", new { Id = item.Id,pro=Context.Request.Query["pro"] })
+                                                                                                    @Html.ActionLink("View", "diagnosis_Details", new { Id = item.Id,pro=Context.Request.Query["pro"] }) /
+                                                                                                    @Html.ActionLink("Edit", "diagnosis_Edit", new { Id = item.Id,pro=Context.Request.Query["pro"] })
                                                                                                 </td>
                                                                                             </tr>
                                                                                         </tbody>
@@ -5289,8 +5289,8 @@
                                                                                                 <!---->
 
                                                                                                 <td class="linkNav statusCode" style="text-align: center!important">
-                                                                                                    @Html.RenderActionLink("View", "otherMedicalHistory_Details", new { id = item.Id }) /
-                                                                                                    @Html.RenderActionLink("Edit", "otherMedicalHistory_Edit", new { id = item.Id })
+                                                                                                    @Html.ActionLink("View", "otherMedicalHistory_Details", new { id = item.Id }) /
+                                                                                                    @Html.ActionLink("Edit", "otherMedicalHistory_Edit", new { id = item.Id })
                                                                                                 </td>
                                                                                             </tr>
                                                                                         </tbody>
@@ -5739,8 +5739,8 @@
                                                                                                 <!---->
 
                                                                                                 <td class="linkNav" style="text-align: center!important">
-                                                                                                    @Html.RenderActionLink("View", "hivOther_Details", new { id = item.QuestionnaireOtherID }) /
-                                                                                                    @Html.RenderActionLink("Edit", "hivOther_Edit", new { id = item.QuestionnaireOtherID })
+                                                                                                    @Html.ActionLink("View", "hivOther_Details", new { id = item.QuestionnaireOtherID }) /
+                                                                                                    @Html.ActionLink("Edit", "hivOther_Edit", new { id = item.QuestionnaireOtherID })
                                                                                                 </td>
                                                                                             </tr>
                                                                                         </tbody>
@@ -6044,7 +6044,7 @@
                                                     @Html.DisplayFor(modelItem => item.comment)
                                                 </td>
                                                 <td class="statusCode linkNav" style="text-align: center!important">
-                                                    @Html.RenderActionLink("Details", "Details", "Scripts", new { id = item.scriptID }, null)
+                                                    @Html.ActionLink("Details", "Details", "Scripts", new { id = item.scriptID }, null)
                                                 </td>
                                             </tr>
                                         </tbody>

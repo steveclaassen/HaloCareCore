@@ -537,7 +537,7 @@
                                                         @Html.DisplayFor(modelItem => Model.items[i].toDate)
                                                     </td>
                                                     <td class="statusCode linkNav" style="text-align: center!important">
-                                                        @Html.RenderActionLink("Edit", "EditScriptItem", "Member", new { itemId = Model.items[i].itemNo }, null)
+                                                        @Html.ActionLink("Edit", "EditScriptItem", "Member", new { itemId = Model.items[i].itemNo }, null)
                                                     </td>
                                                 </tr>
                                             }

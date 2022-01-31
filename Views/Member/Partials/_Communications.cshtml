@@ -183,7 +183,7 @@
                                                                     @Html.DisplayFor(modelItem => item.Time)
                                                                 </td>
                                                                 <td class="statusCode linkNav">
-                                                                    @Html.RenderActionLink("View", "EnquiryFullView", "Member", new { QueryID = (item.ReferenceNumber != null? item.ReferenceNumber : item.queryID.ToString()) }, null)
+                                                                    @Html.ActionLink("View", "EnquiryFullView", "Member", new { QueryID = (item.ReferenceNumber != null? item.ReferenceNumber : item.queryID.ToString()) }, null)
                                                                 </td>
                                                             </tr>
                                                         }

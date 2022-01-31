@@ -106,7 +106,7 @@
                         Diabetes / HIV
                     </div>
                     <!--                    <div class="memberInformation_upDateInfo" style="z-index: 5">
-                                            @Html.RenderActionLink("Update Patient Details", "EditMember", "Member", new { DependentID = Model.dependent.DependantID }, null)
+                                            @Html.ActionLink("Update Patient Details", "EditMember", "Member", new { DependentID = Model.dependent.DependantID }, null)
                                         </div>
                     -->
                 </div>
@@ -150,7 +150,7 @@
                     @Html.DisplayFor(model => model.Notes.note)
                 </div>
                 <div class="memberInformation_specialNoteAdd">
-                    @Html.RenderActionLink("Edit", "EditNote", new { DependentID = Model.dependent.DependantID }, null)
+                    @Html.ActionLink("Edit", "EditNote", new { DependentID = Model.dependent.DependantID }, null)
                 </div>
                 <div class="blank">&nbsp;</div>
             </div>

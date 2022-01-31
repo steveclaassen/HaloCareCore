@@ -355,7 +355,7 @@
                                                                 @Html.DisplayFor(modelItem => item.comment)
                                                             </td>
                                                             <td class="statusCode linkNav" style="text-align: center!important">
-                                                                @Html.RenderActionLink("Details", "Details", "Scripts", new { id = item.scriptID, pro = Context.Request.Query["pro"] }, null)
+                                                                @Html.ActionLink("Details", "Details", "Scripts", new { id = item.scriptID, pro = Context.Request.Query["pro"] }, null)
                                                             </td>
                                                         </tr>
                                                     </tbody>

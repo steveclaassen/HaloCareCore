@@ -132,7 +132,7 @@
                         <input type="submit" class="link-button" value="View" onclick="location.href='@Url.Action("Details", "Doctor", new { id = item.doctorID })'" />
                         @if (Model.DependentID != null)
                         {
-                            @Html.RenderActionLink(" | Add to Profile", "AddDoctorToProfile", new { docID = item.doctorID, depId = Model.DependentID, doctorname = item.drFirstName + " " + item.drLastName, pro = Context.Request.Query["pro"] })
+                            @Html.ActionLink(" | Add to Profile", "AddDoctorToProfile", new { docID = item.doctorID, depId = Model.DependentID, doctorname = item.drFirstName + " " + item.drLastName, pro = Context.Request.Query["pro"] })
                         }
                     </td>
 

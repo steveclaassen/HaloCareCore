@@ -174,13 +174,13 @@
                                     @if (Model[i].include)
                                     {
                                         <td class="statusCode linkNav" style="text-align: center!important">
-                                            @Html.RenderActionLink("Attachments", "AttachmentTemplateEdit", new { id = Model[i].accountID, programID = Model[i].programID, medicalaidID = Model[i].medicalAidID, optionID = Model[i].optionId }) |
-                                            @Html.RenderActionLink("Email", "EmailTemplateEdit", new { id = Model[i].accountID, progID = Model[i].programID, medAid = Model[i].medicalAidID, optionID = Model[i].optionId }) |
-                                            @Html.RenderActionLink("Layout", "EmailLayoutEdit", new { id = Model[i].accountID, programID = Model[i].programID, medicalaidID = Model[i].medicalAidID, optionID = Model[i].optionId }) |
-                                            @Html.RenderActionLink("Rules", "ClinicalRulesEdit", new { id = Model[i].accountID, progID = Model[i].programID, medAid = Model[i].medicalAidID, optionID = Model[i].optionId }) |
-                                            @Html.RenderActionLink("Status", "ManagementStatusEdit", new { id = Model[i].accountID, progID = Model[i].programID, medAid = Model[i].medicalAidID, optionID = Model[i].optionId }) |
+                                            @Html.ActionLink("Attachments", "AttachmentTemplateEdit", new { id = Model[i].accountID, programID = Model[i].programID, medicalaidID = Model[i].medicalAidID, optionID = Model[i].optionId }) |
+                                            @Html.ActionLink("Email", "EmailTemplateEdit", new { id = Model[i].accountID, progID = Model[i].programID, medAid = Model[i].medicalAidID, optionID = Model[i].optionId }) |
+                                            @Html.ActionLink("Layout", "EmailLayoutEdit", new { id = Model[i].accountID, programID = Model[i].programID, medicalaidID = Model[i].medicalAidID, optionID = Model[i].optionId }) |
+                                            @Html.ActionLink("Rules", "ClinicalRulesEdit", new { id = Model[i].accountID, progID = Model[i].programID, medAid = Model[i].medicalAidID, optionID = Model[i].optionId }) |
+                                            @Html.ActionLink("Status", "ManagementStatusEdit", new { id = Model[i].accountID, progID = Model[i].programID, medAid = Model[i].medicalAidID, optionID = Model[i].optionId }) |
                                             <!--HCare-1043-->
-                                            @Html.RenderActionLink("Text", "TextTemplateEdit", new { id = Model[i].accountID, progID = Model[i].programID, medAid = Model[i].medicalAidID, optionID = Model[i].optionId })
+                                            @Html.ActionLink("Text", "TextTemplateEdit", new { id = Model[i].accountID, progID = Model[i].programID, medAid = Model[i].medicalAidID, optionID = Model[i].optionId })
                                         </td>
                                     }
                                     else

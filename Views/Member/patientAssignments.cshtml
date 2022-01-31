@@ -193,7 +193,7 @@
                                                                         }
 
                                                                     </td>*@
-                                                                <td class="linkNav" style="text-align: center!important">@Html.RenderActionLink("View", "AssignmentDetails", "Clinical", new { id = item.assignmentID, pro = Context.Request.Query["pro"] }, null)</td>
+                                                                <td class="linkNav" style="text-align: center!important">@Html.ActionLink("View", "AssignmentDetails", "Clinical", new { id = item.assignmentID, pro = Context.Request.Query["pro"] }, null)</td>
                                                             </tr>
                                                         </tbody>
                                                     }
@@ -252,7 +252,7 @@
                                                                     <td>@Html.DisplayFor(modelItem => item.AssignmentItemType)</td>
                                                                     <td>@Html.DisplayFor(modelItem => item.createdBy)</td>
                                                                     <td>@Html.DisplayFor(modelItem => item.Instruction)</td>
-                                                                    <td class="linkNav" style="text-align: center!important">@Html.RenderActionLink("View", "AssignmentDetails", "Clinical", new { id = item.assignmentID, pro = Context.Request.Query["pro"] }, null)</td>
+                                                                    <td class="linkNav" style="text-align: center!important">@Html.ActionLink("View", "AssignmentDetails", "Clinical", new { id = item.assignmentID, pro = Context.Request.Query["pro"] }, null)</td>
                                                                 </tr>
                                                             </tbody>
                                                         }

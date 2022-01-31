@@ -591,8 +591,8 @@
                                                     @Html.DisplayFor(modelItem => item.labReferenceNo)
                                                 </td>
                                                 <td class="actionHover">
-                                                    @Html.RenderActionLink("Edit", "EditPathology", new { id = item.pathologyID }) |
-                                                    @Html.RenderActionLink("Details", "PathologyDetails", new { id = item.pathologyID })
+                                                    @Html.ActionLink("Edit", "EditPathology", new { id = item.pathologyID }) |
+                                                    @Html.ActionLink("Details", "PathologyDetails", new { id = item.pathologyID })
                                                 </td>
                                             </tr>
                                         }
@@ -978,7 +978,7 @@ grid.Column("", format: @<text>
                                                                         @Html.DisplayFor(modelItem => item.createdDate)
                                                                     </td>
                                                                     <td class="linkNav statusCode">
-                                                                        @Html.RenderActionLink("Edit", "EditClinicalExam", new { id = item.id })
+                                                                        @Html.ActionLink("Edit", "EditClinicalExam", new { id = item.id })
                                                                     </td>
                                                                 </tr>
                                                             }
@@ -1062,7 +1062,7 @@ grid.Column("", format: @<text>
                                                                     @Html.DisplayFor(modelItem => item.createdBy)
                                                                 </td>
                                                                 <td class="linkNav statusCode">
-                                                                    @Html.RenderActionLink("Edit", "EditMedication", new { id = item.Id })
+                                                                    @Html.ActionLink("Edit", "EditMedication", new { id = item.Id })
                                                                 </td>
                                                             </tr>
                                                             }
@@ -1118,7 +1118,7 @@ grid.Column("", format: @<text>
                                                                     </td>
 
                                                                     <td class="linkNav statusCode">
-                                                                        @Html.RenderActionLink("Edit", "EditAllergies", new { id = item.id })
+                                                                        @Html.ActionLink("Edit", "EditAllergies", new { id = item.id })
                                                                     </td>
                                                                 </tr>
                                                             }
@@ -1625,7 +1625,7 @@ grid.Column("", format: @<text>
                                                         @Html.DisplayFor(modelItem => item.Status)
                                                     </td>
                                                     <td class="statusCode linkNav">
-                                                        @Html.RenderActionLink("Details", "Details", "Scripts", new { id = item.scriptID }, null)
+                                                        @Html.ActionLink("Details", "Details", "Scripts", new { id = item.scriptID }, null)
                                                     </td>
                                                 </tr>
                                             }

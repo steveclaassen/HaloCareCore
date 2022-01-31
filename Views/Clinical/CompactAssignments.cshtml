@@ -187,7 +187,7 @@
                                 @Html.DisplayFor(modelItem => item.assignmentCount)
                             </td>
                             <td class="linkNav" style="text-align: center!important; z-index: 50">
-                                @Html.RenderActionLink("View", "AssignmentSummary", "Member", new { DependentID = item.dependantID, pro = item.programID }, null)
+                                @Html.ActionLink("View", "AssignmentSummary", "Member", new { DependentID = item.dependantID, pro = item.programID }, null)
                             </td>
                         </tr>
                     }
@@ -367,7 +367,7 @@
 
 
                                 <td class="statusCode linkNav" style="text-align: center!important">
-                                    @Html.RenderActionLink("View", "AssignmentSummary", "Member", new { DependentID = item.dependantID }, null)
+                                    @Html.ActionLink("View", "AssignmentSummary", "Member", new { DependentID = item.dependantID }, null)
                                 </td>
                             </tr>
                         }
@@ -638,7 +638,7 @@
                                 @Html.DisplayFor(modelItem => item.assignmentCount)
                             </td>
                             <td class="statusCode linkNav" style="text-align: center!important">
-                                @Html.RenderActionLink("View", "AssignmentSummary", "Member", new { DependentID = item.dependantID }, null)
+                                @Html.ActionLink("View", "AssignmentSummary", "Member", new { DependentID = item.dependantID }, null)
                             </td>
                         </tr>
                     }

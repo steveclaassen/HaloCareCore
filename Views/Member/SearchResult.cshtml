@@ -309,8 +309,8 @@
                         @Html.DisplayFor(modelItem => item.patientStatus)
                     </td>
                     <td class="statusCode linkNav" style="text-align:center!important">
-                        @*@Html.RenderActionLink("View", "MemberFileView", new { DependentID = item.DependantID })*@
-                        @Html.RenderActionLink("View", "MemberProgram", new { DependentID = item.DependantID })
+                        @*@Html.ActionLink("View", "MemberFileView", new { DependentID = item.DependantID })*@
+                        @Html.ActionLink("View", "MemberProgram", new { DependentID = item.DependantID })
                     </td>
                 </tr>
             </tbody>

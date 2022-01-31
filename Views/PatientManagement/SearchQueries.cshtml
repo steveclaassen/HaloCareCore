@@ -435,7 +435,7 @@
                             </td>
 
                             <td class="linkNav" style="text-align: center!important">
-                                @Html.RenderActionLink("View", "patientDashboard", "Member", new { DependentID = item.dependantId, pro = item.programID }, null)
+                                @Html.ActionLink("View", "patientDashboard", "Member", new { DependentID = item.dependantId, pro = item.programID }, null)
                             </td>
                         </tr>
                     </tbody>

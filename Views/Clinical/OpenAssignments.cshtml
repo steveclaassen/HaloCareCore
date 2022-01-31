@@ -207,7 +207,7 @@
                                     @Html.DisplayFor(modelItem => item.elapsedTime)
                                 </td>
                                 <td class="statusCode linkNav" style="text-align: center!important">
-                                    @Html.RenderActionLink("View", "patientAssignments", "Member", new { DependentID = item.dependantID, pro = item.programID }, null) @*HCare-1108*@
+                                    @Html.ActionLink("View", "patientAssignments", "Member", new { DependentID = item.dependantID, pro = item.programID }, null) @*HCare-1108*@
                                 </td>
                             </tr>
                         </tbody>
@@ -397,7 +397,7 @@
                                 @Html.DisplayFor(modelItem => item.elapsedTime)
                             </td>
                             <td class="statusCode linkNav" style="text-align: center!important">
-                                @Html.RenderActionLink("View", "AssignmentSummary", "Member", new { DependentID = item.dependantID }, null)
+                                @Html.ActionLink("View", "AssignmentSummary", "Member", new { DependentID = item.dependantID }, null)
                             </td>
                         </tr>
                     }
@@ -578,7 +578,7 @@
                                     @Html.DisplayFor(modelItem => item.assignmentAge)
                                 </td>
                                 <td class="statusCode linkNav" style="text-align: center!important">
-                                    @Html.RenderActionLink("View", "AssignmentSummary", "Member", new { DependentID = item.dependantID }, null)
+                                    @Html.ActionLink("View", "AssignmentSummary", "Member", new { DependentID = item.dependantID }, null)
                                 </td>
                             </tr>
                         }

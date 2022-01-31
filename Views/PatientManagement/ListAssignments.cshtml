@@ -81,9 +81,9 @@
             @Html.DisplayFor(modelItem => item.postponeToDate)
         </td>
         <td>
-            @Html.RenderActionLink("Edit", "Edit", new { id=item.assignmentID }) |
-            @Html.RenderActionLink("Details", "Details", new { id=item.assignmentID }) |
-            @Html.RenderActionLink("Delete", "Delete", new { id=item.assignmentID })
+            @Html.ActionLink("Edit", "Edit", new { id=item.assignmentID }) |
+            @Html.ActionLink("Details", "Details", new { id=item.assignmentID }) |
+            @Html.ActionLink("Delete", "Delete", new { id=item.assignmentID })
         </td>
     </tr>
 }

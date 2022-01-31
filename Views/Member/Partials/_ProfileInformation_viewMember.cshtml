@@ -182,13 +182,13 @@
                     @if (Model.Notes == null)
                     {
                         <div class="memberInformation_specialNoteAdd">
-                            @Html.RenderActionLink("Add", "AddNote", new { DependentID = Model.dependent.DependantID }, null)
+                            @Html.ActionLink("Add", "AddNote", new { DependentID = Model.dependent.DependantID }, null)
                         </div>
                     }
                     @if (Model.Notes != null)
                     {
                         <div class="memberInformation_specialNoteAdd">
-                            @Html.RenderActionLink("Edit", "EditNote", "Member", new { NoteId = Model.Notes.noteID }, null)
+                            @Html.ActionLink("Edit", "EditNote", "Member", new { NoteId = Model.Notes.noteID }, null)
                         </div>
                     }
 
