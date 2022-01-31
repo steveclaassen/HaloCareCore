@@ -52,7 +52,7 @@
 
         if (Model.hasDemographic && !Model.demographicCaptured)
         {
-            @Html.ActionLink("Create Demographic Information", "AddDemographic", new { DependentID = Model.dependantId })
+            @Html.RenderActionLink("Create Demographic Information", "AddDemographic", new { DependentID = Model.dependantId })
 
         }
         <br />

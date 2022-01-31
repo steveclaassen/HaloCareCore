@@ -56,7 +56,7 @@ iv class="dashboardContainer zero-padding">
     </div>
     <!--profileInformation-->
     <div class="profileBar">
-        @Html.Action("_profileBar_edit", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })
+        @Html.RenderAction("_profileBar_edit", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })
     </div>
 </div>
 
@@ -122,7 +122,7 @@ iv class="dashboardContainer zero-padding">
                                     @Html.DisplayFor(modelItem => item.comment)
                                 </td>
                                 <td class="statusCode linkNav" style="text-align: center!important">
-                                    @Html.ActionLink("View", "AssignmentDetails", "Clinical", new { id = item.assignmentID }, null)
+                                    @Html.RenderActionLink("View", "AssignmentDetails", "Clinical", new { id = item.assignmentID }, null)
                                 </td>
                             </tr>
                         </tbody>
@@ -187,7 +187,7 @@ iv class="dashboardContainer zero-padding">
                                     @Html.DisplayFor(modelItem => item.comment)
                                 </td>
                                 <td class="statusCode linkNav" style="text-align: center!important">
-                                    @Html.ActionLink("View", "AssignmentDetails", "Clinical", new { id = item.assignmentID }, null)
+                                    @Html.RenderActionLink("View", "AssignmentDetails", "Clinical", new { id = item.assignmentID }, null)
                                 </td>
                             </tr>
                         </tbody>
@@ -252,7 +252,7 @@ iv class="dashboardContainer zero-padding">
                                     @Html.DisplayFor(modelItem => item.closedDate)
                                 </td>
                                 <td class="statusCode linkNav" style="text-align: center!important">
-                                    @Html.ActionLink("View", "EnquiryFullView", "Member", new { QueryID = item.assignmentID }, null)
+                                    @Html.RenderActionLink("View", "EnquiryFullView", "Member", new { QueryID = item.assignmentID }, null)
                                 </td>
                             </tr>
                         </tbody>

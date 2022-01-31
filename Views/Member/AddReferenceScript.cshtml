@@ -57,7 +57,7 @@
 
         <!--profileInformation-->
         <div>
-            @Html.Action("_profileBar_edit", "Member", new { DependentID = Model.script.dependantId })
+            @Html.RenderAction("_profileBar_edit", "Member", new { DependentID = Model.script.dependantId })
         </div>
     </div>
 

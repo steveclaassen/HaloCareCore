@@ -37,16 +37,16 @@
             <ul>
                 <h2 style="color: #003366; font-size: 130%; text-align: center; margin-bottom: 5%; margin-left: -40%"><i>Member<span style="color: #0081b3"> Management</span></i></h2>
 
-                <p class="adminlink" style="text-align: center; font-size: 85%; margin-left: -19%">@Html.ActionLink("List Outstanding Scripts", "Outstanding", "Scripts")</p>
-                <p class="adminlink" style="text-align: center; font-size: 85%; margin-left: -19%">@Html.ActionLink("List Oustanding Pathology", "OutstandingPathologies", "Clinical")</p>
-                <!--<p class="adminlink" style="text-align: center; font-size: 85%; margin-left: -19%">@Html.ActionLink("List Oustanding Authorisations", "OutstandingAuthorise", "Scripts")</p>-->
+                <p class="adminlink" style="text-align: center; font-size: 85%; margin-left: -19%">@Html.RenderActionLink("List Outstanding Scripts", "Outstanding", "Scripts")</p>
+                <p class="adminlink" style="text-align: center; font-size: 85%; margin-left: -19%">@Html.RenderActionLink("List Oustanding Pathology", "OutstandingPathologies", "Clinical")</p>
+                <!--<p class="adminlink" style="text-align: center; font-size: 85%; margin-left: -19%">@Html.RenderActionLink("List Oustanding Authorisations", "OutstandingAuthorise", "Scripts")</p>-->
             </ul>
         </div>
 
         <ul>
 
 
-            <!--<p class="adminlink" style="text-align: center; font-size: 85%">@Html.ActionLink("SMS Report", "#", "#")</p>-->
+            <!--<p class="adminlink" style="text-align: center; font-size: 85%">@Html.RenderActionLink("SMS Report", "#", "#")</p>-->
         </ul>
     </div>
 </div>
@@ -84,8 +84,8 @@
     <ul>
         <h2 style="color: #003366; font-size: 130%; text-align: center; margin-bottom: 8%"><i>Case<span style="color: #0081b3"> Management</span></i></h2>
 
-        <p class="adminlink" style="text-align: center; font-size: 90%">@Html.ActionLink("List Case Managers", "Index", "CaseManager")</p>
-        <p class="adminlink" style="text-align: center; font-size: 90%">@Html.ActionLink("Case Manager Production Report", "Report", "CaseManager")</p>
+        <p class="adminlink" style="text-align: center; font-size: 90%">@Html.RenderActionLink("List Case Managers", "Index", "CaseManager")</p>
+        <p class="adminlink" style="text-align: center; font-size: 90%">@Html.RenderActionLink("Case Manager Production Report", "Report", "CaseManager")</p>
     </ul>
 </div>
     -->

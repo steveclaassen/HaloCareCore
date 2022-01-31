@@ -194,13 +194,13 @@
                     @if (Model.Notes == null)
                     {
                         <div class="memberInformation_specialNoteAdd">
-                            @Html.ActionLink("Add", "AddNote", new { DependentID = Model.dependent.DependantID }, null)
+                            @Html.RenderActionLink("Add", "AddNote", new { DependentID = Model.dependent.DependantID }, null)
                         </div>
                     }
                     @if (Model.Notes != null)
                     {
                         <div class="memberInformation_specialNoteAdd">
-                            @Html.ActionLink("Edit", "EditNote", "Member", new { NoteId = Model.Notes.noteID }, null)
+                            @Html.RenderActionLink("Edit", "EditNote", "Member", new { NoteId = Model.Notes.noteID }, null)
                         </div>
                     }
 
@@ -269,11 +269,11 @@
         </div>
 
         <div class="tab-content sideNav-Container">
-            <div class="tab-pane active" id="dash">@Html.Action("loadDashboard", "Member", new { DependentID = Model.dependent.DependantID })</div>
-            <div class="tab-pane active" id="coms">@Html.Action("LoadComsPartial", "Member", new { DependentID = Model.dependent.DependantID })</div>
-            <div class="tab-pane active" id="prof">@Html.Action("LoadProfilePartial", "Member", new { DependentID = Model.dependent.DependantID })</div>
-            <div class="tab-pane active" id="clin">@Html.Action("LoadClinicalPartial", "Member", new { DependentID = Model.dependent.DependantID })</div>
-            <div class="tab-pane active" id="ass">@Html.Action("LoadAssignmentsPartial", "Member", new { DependentID = Model.dependent.DependantID })</div>
+            <div class="tab-pane active" id="dash">@Html.RenderAction("loadDashboard", "Member", new { DependentID = Model.dependent.DependantID })</div>
+            <div class="tab-pane active" id="coms">@Html.RenderAction("LoadComsPartial", "Member", new { DependentID = Model.dependent.DependantID })</div>
+            <div class="tab-pane active" id="prof">@Html.RenderAction("LoadProfilePartial", "Member", new { DependentID = Model.dependent.DependantID })</div>
+            <div class="tab-pane active" id="clin">@Html.RenderAction("LoadClinicalPartial", "Member", new { DependentID = Model.dependent.DependantID })</div>
+            <div class="tab-pane active" id="ass">@Html.RenderAction("LoadAssignmentsPartial", "Member", new { DependentID = Model.dependent.DependantID })</div>
         </div>
 
     </div>

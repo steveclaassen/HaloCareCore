@@ -59,7 +59,7 @@
 
         <!--profileInformation-->
         <div>
-            @Html.Action("_profileBar_edit", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })
+            @Html.RenderAction("_profileBar_edit", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })
         </div>
     </div>
 
@@ -139,7 +139,7 @@
                                                                             }
                                                                         </td>
                                                                         <td class="linkNav" style="text-align: center!important">
-                                                                            @Html.ActionLink("View", "ProgramHistory", new { DependentID = Model.dependent.DependantID }, null)
+                                                                            @Html.RenderActionLink("View", "ProgramHistory", new { DependentID = Model.dependent.DependantID }, null)
                                                                         </td>
                                                                     </tr>
                                                                 </table>
@@ -192,7 +192,7 @@
                                                                             }
                                                                         </td>
                                                                         <td class="linkNav" style="text-align: center!important">
-                                                                            @Html.ActionLink("View", "ManageStatus", "Member", new { DependentID = Model.dependent.DependantID }, null)
+                                                                            @Html.RenderActionLink("View", "ManageStatus", "Member", new { DependentID = Model.dependent.DependantID }, null)
                                                                         </td>
                                                                     </tr>
                                                                 </table>
@@ -253,7 +253,7 @@
                                                                             <td>-</td>
                                                                         }
                                                                         <td class="linkNav" style="text-align: center!important">
-                                                                            @Html.ActionLink("Add", "AddFromList", "CaseManager", new { DependentID = Model.dependent.DependantID }, null)/@Html.ActionLink("View", "CaseManagerHistory", "Member", new { DependentID = Model.dependent.DependantID }, null)
+                                                                            @Html.RenderActionLink("Add", "AddFromList", "CaseManager", new { DependentID = Model.dependent.DependantID }, null)/@Html.RenderActionLink("View", "CaseManagerHistory", "Member", new { DependentID = Model.dependent.DependantID }, null)
                                                                         </td>
 
                                                                     </tr>
@@ -310,7 +310,7 @@
                                                                         }
 
                                                                         <td class="linkNav" style="text-align: center!important">
-                                                                            @Html.ActionLink("Add", "DoctorSearch", "PatientManagement", new { DependentID = Model.dependent.DependantID }, null)/@Html.ActionLink("View", "ViewDoctorHistory", "Member", new { DependentID = Model.dependent.DependantID }, null)
+                                                                            @Html.RenderActionLink("Add", "DoctorSearch", "PatientManagement", new { DependentID = Model.dependent.DependantID }, null)/@Html.RenderActionLink("View", "ViewDoctorHistory", "Member", new { DependentID = Model.dependent.DependantID }, null)
                                                                         </td>
 
                                                                     </tr>

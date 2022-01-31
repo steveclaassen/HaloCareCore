@@ -48,20 +48,20 @@
             {
                     <div class="navbar-collapse collapse">
                         <ul class="nav navbar-nav topBar_links" style="margin-left: -13.5%; margin-top: 0.5%">
-                            <li>@Html.ActionLink("Home", "Index", "Home")</li>
+                            <li>@Html.RenderActionLink("Home", "Index", "Home")</li>
                             @if (User.HasRole("Clinical Manager") || User.HasRole("System Admin") || User.HasRole("Case Manager"))
                             {
-                                <li>@Html.ActionLink("Patient Management", "Index", "PatientManagement")</li>
-                                <li>@Html.ActionLink("Clinical Management", "Index", "Clinical")</li>
+                                <li>@Html.RenderActionLink("Patient Management", "Index", "PatientManagement")</li>
+                                <li>@Html.RenderActionLink("Clinical Management", "Index", "Clinical")</li>
                             }
                             @if (User.HasRole("System Admin") || User.RoleHasAccess())//HCare-889
                             {
-                                <li>@Html.ActionLink("Administration", "Index", "Administration")</li>
+                                <li>@Html.RenderActionLink("Administration", "Index", "Administration")</li>
                             }
 
                             @if (User.HasRole("Clinical Manager") || User.HasRole("System Admin") || User.HasRole("Administrator"))
                             {
-                                <!--<li>@Html.ActionLink("Reports", "reportDashboard", "ReportManagement")</li>-->
+                                <!--<li>@Html.RenderActionLink("Reports", "reportDashboard", "ReportManagement")</li>-->
                             }
                         </ul>
 

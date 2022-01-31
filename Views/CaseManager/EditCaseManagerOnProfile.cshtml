@@ -91,7 +91,7 @@
         </div>
 
         <div class="profileBar">
-            @Html.Action("_profileBar_edit", "Member", new { DependentID = Model.DependantID, pro = Context.Request.Query["pro"] })
+            @Html.RenderAction("_profileBar_edit", "Member", new { DependentID = Model.DependantID, pro = Context.Request.Query["pro"] })
         </div>
     </div>
     <br />

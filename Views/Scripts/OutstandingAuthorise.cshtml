@@ -223,7 +223,7 @@
                         @Html.DisplayFor(modelItem => item.overdue)
                     </td>
                     <td class="linkNav" style="text-align: center!important">
-                        @Html.ActionLink("Authorise", "AuthoriseScript", new { id = item.scriptId })
+                        @Html.RenderActionLink("Authorise", "AuthoriseScript", new { id = item.scriptId })
                     </td>
                 </tr>
             </tbody>

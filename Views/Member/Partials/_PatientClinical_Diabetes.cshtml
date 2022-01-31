@@ -182,8 +182,8 @@
                                             <!---->
 
                                             <td class="linkNav statusCode" style="text-align: center!important">
-                                                @Html.ActionLink("View", "diagnosis_Details", new { Id = item.Id, pro = Context.Request.Query["pro"] }) /
-                                                @Html.ActionLink("Edit", "diagnosis_Edit", new { Id = item.Id, pro = Context.Request.Query["pro"] })
+                                                @Html.RenderActionLink("View", "diagnosis_Details", new { Id = item.Id, pro = Context.Request.Query["pro"] }) /
+                                                @Html.RenderActionLink("Edit", "diagnosis_Edit", new { Id = item.Id, pro = Context.Request.Query["pro"] })
                                             </td>
                                         </tr>
                                     </tbody>
@@ -478,8 +478,8 @@
                                             <!---->
                                             <!---->
                                             <td class="linkNav" style="text-align: center!important">
-                                                @Html.ActionLink("View", "vision_Details", new { id = item.VisionID, pro = Context.Request.Query["pro"] }) /
-                                                @Html.ActionLink("Edit", "vision_Edit", new { id = item.VisionID, pro = Context.Request.Query["pro"] })
+                                                @Html.RenderActionLink("View", "vision_Details", new { id = item.VisionID, pro = Context.Request.Query["pro"] }) /
+                                                @Html.RenderActionLink("Edit", "vision_Edit", new { id = item.VisionID, pro = Context.Request.Query["pro"] })
                                             </td>
                                         </tr>
                                     </tbody>
@@ -770,8 +770,8 @@
                                             <!---->
 
                                             <td class="linkNav" style="text-align: center!important">
-                                                @Html.ActionLink("View", "podiatry_Details", new { id = item.PodiatryID, pro = Context.Request.Query["pro"] }) /
-                                                @Html.ActionLink("Edit", "podiatry_Edit", new { id = item.PodiatryID, pro = Context.Request.Query["pro"] })
+                                                @Html.RenderActionLink("View", "podiatry_Details", new { id = item.PodiatryID, pro = Context.Request.Query["pro"] }) /
+                                                @Html.RenderActionLink("Edit", "podiatry_Edit", new { id = item.PodiatryID, pro = Context.Request.Query["pro"] })
 
                                             </td>
                                         </tr>
@@ -960,8 +960,8 @@
 
 
                                             <td class="linkNav" style="text-align: center!important">
-                                                @Html.ActionLink("View", "autoNero_Details", new { id = item.AutoNeropathyID, pro = Context.Request.Query["pro"] }) /
-                                                @Html.ActionLink("Edit", "autoNero_Edit", new { id = item.AutoNeropathyID, pro = Context.Request.Query["pro"] })
+                                                @Html.RenderActionLink("View", "autoNero_Details", new { id = item.AutoNeropathyID, pro = Context.Request.Query["pro"] }) /
+                                                @Html.RenderActionLink("Edit", "autoNero_Edit", new { id = item.AutoNeropathyID, pro = Context.Request.Query["pro"] })
                                             </td>
                                         </tr>
                                     </tbody>
@@ -1197,8 +1197,8 @@
                                             }
 
                                             <td class="linkNav statusCode" style="text-align: center!important">
-                                                @Html.ActionLink("View", "hypoGlycaemia_Details", new { id = item.HypoglycaemiaID, pro = Context.Request.Query["pro"] }) /
-                                                @Html.ActionLink("Edit", "hypoGlycaemia_Edit", new { id = item.HypoglycaemiaID, pro = Context.Request.Query["pro"] })
+                                                @Html.RenderActionLink("View", "hypoGlycaemia_Details", new { id = item.HypoglycaemiaID, pro = Context.Request.Query["pro"] }) /
+                                                @Html.RenderActionLink("Edit", "hypoGlycaemia_Edit", new { id = item.HypoglycaemiaID, pro = Context.Request.Query["pro"] })
                                             </td>
                                         </tr>
                                     </tbody>
@@ -1368,8 +1368,8 @@
                                             }
 
                                             <td class="linkNav" style="text-align: center!important">
-                                                @Html.ActionLink("View", "diabetesOther_Details", new { id = item.QuestionnaireOtherID, pro = Context.Request.Query["pro"] }) /
-                                                @Html.ActionLink("Edit", "diabetesOther_Edit", new { id = item.QuestionnaireOtherID, pro = Context.Request.Query["pro"] })
+                                                @Html.RenderActionLink("View", "diabetesOther_Details", new { id = item.QuestionnaireOtherID, pro = Context.Request.Query["pro"] }) /
+                                                @Html.RenderActionLink("Edit", "diabetesOther_Edit", new { id = item.QuestionnaireOtherID, pro = Context.Request.Query["pro"] })
                                             </td>
                                         </tr>
                                     </tbody>

@@ -69,7 +69,7 @@
         @Html.Partial("_navSlider", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })
         <!--profile-information-->
         <div class="profileBar">
-            @Html.Action("_profileBar_edit", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })
+            @Html.RenderAction("_profileBar_edit", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })
         </div>
     </div>
 
@@ -142,8 +142,8 @@
                                 if (User.HasRole("6. Global user") || User.HasRole("5. Super user"))
                                 {
                                     <td class="statusCode linkNav" style="text-align: center!important">
-                                        @Html.ActionLink("Edit", "EditManagementStatus", new { id = item.id, pro = Context.Request.Query["pro"] }) |
-                                        @Html.ActionLink("Details", "DetailsManagementStatus", new { id = item.id, pro = Context.Request.Query["pro"] })
+                                        @Html.RenderActionLink("Edit", "EditManagementStatus", new { id = item.id, pro = Context.Request.Query["pro"] }) |
+                                        @Html.RenderActionLink("Details", "DetailsManagementStatus", new { id = item.id, pro = Context.Request.Query["pro"] })
                                     </td>
                                 }
                             }

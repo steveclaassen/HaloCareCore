@@ -96,8 +96,8 @@
                                                 </table>
                                                 <br />
                                                 <div class="statusCode linkNav" style="margin-left: 4%!important; font-size: 10px; font-family: 'Century Gothic'; margin-top: 2%">
-                                                    @Html.ActionLink("Add", "AddProgram", new { DependentID = Model.dependent.DependantID }) /
-                                                    @Html.ActionLink("View History", "ProgramHistory", new { DependentID = Model.dependent.DependantID }, null)
+                                                    @Html.RenderActionLink("Add", "AddProgram", new { DependentID = Model.dependent.DependantID }) /
+                                                    @Html.RenderActionLink("View History", "ProgramHistory", new { DependentID = Model.dependent.DependantID }, null)
                                                 </div>
                                             </div>
                                         </div>
@@ -139,8 +139,8 @@
                                                 </table>
                                                 <br />
                                                 <div class="statusCode linkNav" style="margin-left: 4%!important; font-size: 10px; font-family: 'Century Gothic'; margin-top: 2%">
-                                                    @Html.ActionLink("Add", "SetManagementStatus", "Member", new { DependentID = Model.dependent.DependantID }, null) /
-                                                    @Html.ActionLink("View History", "ManageStatus", "Member", new { DependentID = Model.dependent.DependantID }, null)
+                                                    @Html.RenderActionLink("Add", "SetManagementStatus", "Member", new { DependentID = Model.dependent.DependantID }, null) /
+                                                    @Html.RenderActionLink("View History", "ManageStatus", "Member", new { DependentID = Model.dependent.DependantID }, null)
                                                 </div>
                                             </div>
                                         </div>
@@ -181,8 +181,8 @@
                                                 </table>
                                                 <br />
                                                 <div class="statusCode linkNav" style="margin-left: 4%!important; font-size: 10px; font-family: 'Century Gothic'; margin-top: 2%">
-                                                    @Html.ActionLink("Add", "AddFromList", "CaseManager", new { DependentID = Model.dependent.DependantID }, null) /
-                                                    @Html.ActionLink("View History", "CaseManagerHistory", "Member", new { DependentID = Model.dependent.DependantID }, null)
+                                                    @Html.RenderActionLink("Add", "AddFromList", "CaseManager", new { DependentID = Model.dependent.DependantID }, null) /
+                                                    @Html.RenderActionLink("View History", "CaseManagerHistory", "Member", new { DependentID = Model.dependent.DependantID }, null)
                                                 </div>
                                             </div>
                                         </div>
@@ -213,8 +213,8 @@
                                                 </table>
                                                 <br />
                                                 <div class="statusCode linkNav" style="margin-left: 4%!important; font-size: 10px; font-family: 'Century Gothic'; margin-top: 2%">
-                                                    @Html.ActionLink("Add", "DoctorSearch", "PatientManagement", new { DependentID = Model.dependent.DependantID }, null) /
-                                                    @Html.ActionLink("View History", "ViewDoctorHistory", "Member", new { DependentID = Model.dependent.DependantID }, null)
+                                                    @Html.RenderActionLink("Add", "DoctorSearch", "PatientManagement", new { DependentID = Model.dependent.DependantID }, null) /
+                                                    @Html.RenderActionLink("View History", "ViewDoctorHistory", "Member", new { DependentID = Model.dependent.DependantID }, null)
                                                 </div>
                                             </div>
                                         </div>

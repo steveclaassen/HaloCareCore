@@ -8,7 +8,7 @@
 <h2>List scripts</h2>
 
 <p>
-    @Html.ActionLink("Create New", "Create")
+    @Html.RenderActionLink("Create New", "Create")
 </p>
 <table class="table">
     <tr>
@@ -60,9 +60,9 @@
             @Html.DisplayFor(modelItem => item.modifiedDate)
         </td>
         <td>
-            @Html.ActionLink("Edit", "Edit", new { id=item.scriptID }) |
-            @Html.ActionLink("Details", "Details", new { id=item.scriptID }) |
-            @Html.ActionLink("Delete", "Delete", new { id=item.scriptID })
+            @Html.RenderActionLink("Edit", "Edit", new { id=item.scriptID }) |
+            @Html.RenderActionLink("Details", "Details", new { id=item.scriptID }) |
+            @Html.RenderActionLink("Delete", "Delete", new { id=item.scriptID })
         </td>
     </tr>
 }

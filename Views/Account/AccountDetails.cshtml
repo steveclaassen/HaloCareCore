@@ -183,7 +183,7 @@
                         <td class="statusCode linkNav" style="text-align: center!important">
                             @if (Model.medicalAids[i].active)
                             {
-                                @Html.ActionLink("Edit", "OptionEdit", new { id = Model.medicalAids[i].accountId, optionId = Model.medicalAids[i].optionId })
+                                @Html.RenderActionLink("Edit", "OptionEdit", new { id = Model.medicalAids[i].accountId, optionId = Model.medicalAids[i].optionId })
                             }
                         </td>
                     </tr>

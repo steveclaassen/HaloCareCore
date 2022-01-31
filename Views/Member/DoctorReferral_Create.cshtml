@@ -125,7 +125,7 @@
         </div>
 
         <div class="profileBar">
-            @Html.Action("_profileBar_edit", "Member", new { DependentID = Model.DependantID })
+            @Html.RenderAction("_profileBar_edit", "Member", new { DependentID = Model.DependantID })
         </div>
     </div>
     <br />

@@ -106,9 +106,9 @@
 
                 </td>
                 <td class="statusCode linkNav">
-                    @Html.ActionLink("Edit", "EditAssignment", new { id = item.assignmentID }) |
-                    @Html.ActionLink("Details", "AssignmentDetails", new { id = item.assignmentID }) |
-                    @Html.ActionLink("Close", "CloseAssignment", new { id = item.assignmentID })
+                    @Html.RenderActionLink("Edit", "EditAssignment", new { id = item.assignmentID }) |
+                    @Html.RenderActionLink("Details", "AssignmentDetails", new { id = item.assignmentID }) |
+                    @Html.RenderActionLink("Close", "CloseAssignment", new { id = item.assignmentID })
                 </td>
             </tr>
         }

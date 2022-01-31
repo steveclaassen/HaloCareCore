@@ -227,8 +227,8 @@
                     }
                 </td>
                 <td class="statusCode linkNav" style="text-align: center!important">
-                    @Html.ActionLink("Edit", "Edit", new { id = item.id }) |
-                    @Html.ActionLink("Details", "Details", new { id = item.id })
+                    @Html.RenderActionLink("Edit", "Edit", new { id = item.id }) |
+                    @Html.RenderActionLink("Details", "Details", new { id = item.id })
                 </td>
             </tr>
         }

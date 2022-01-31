@@ -65,7 +65,7 @@
 
         <!--profileInformation-->
         <div class="profileBar">
-            @Html.Action("_profileBar_MemberFile", "Member", new { DependentID = Context.Request.Query["DependentID"] })
+            @Html.RenderAction("_profileBar_MemberFile", "Member", new { DependentID = Context.Request.Query["DependentID"] })
         </div>
     </div>
     <div class="profilebar-spacer-program"></div>

@@ -15,11 +15,11 @@
             [
             @if (Model.HasPassword)
             {
-                @Html.ActionLink("Change your password", "ChangePassword")
+                @Html.RenderActionLink("Change your password", "ChangePassword")
             }
             else
             {
-                @Html.ActionLink("Create", "SetPassword")
+                @Html.RenderActionLink("Create", "SetPassword")
             }
             ]
         </dd>
@@ -38,7 +38,7 @@
                 @if (Model.PhoneNumber != null)
                 {
                     <br />
-                    <text>[&nbsp;&nbsp;@Html.ActionLink("Change", "AddPhoneNumber")&nbsp;&nbsp;]</text>
+                    <text>[&nbsp;&nbsp;@Html.RenderActionLink("Change", "AddPhoneNumber")&nbsp;&nbsp;]</text>
                     using (Html.BeginForm("RemovePhoneNumber", "Manage", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
                     {
                         @Html.AntiForgeryToken()
@@ -47,7 +47,7 @@
                 }
                 else
                 {
-                    <text>[&nbsp;&nbsp;@Html.ActionLink("Add", "AddPhoneNumber")
+                    <text>[&nbsp;&nbsp;@Html.RenderActionLink("Add", "AddPhoneNumber")
                 }
             </dd>
         *@

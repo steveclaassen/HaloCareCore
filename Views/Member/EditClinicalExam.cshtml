@@ -89,7 +89,7 @@
 
         <!--profileInformation-->
         <div class="profileBar">
-            @Html.Action("_profileBar_edit", "Member", new { DependentID = Model.dependantID })
+            @Html.RenderAction("_profileBar_edit", "Member", new { DependentID = Model.dependantID })
         </div>
     </div>
 
@@ -237,7 +237,7 @@
         <div class="">
             <div class="">
                 <div class="modal-body">
-                    @Html.Action("DateInformationPopUp", "Member", new { })
+                    @Html.RenderAction("DateInformationPopUp", "Member", new { })
                 </div>
             </div>
         </div>

@@ -113,7 +113,7 @@
 
                     </td>
                     <td class="statusCode linkNav" style="text-align: center!important">
-                        @Html.ActionLink("Setup", "ClinicalRulesSetup", new { id = Model[i].accountID, progrID = Model[i].programID, medId = Context.Request.Query["medId"] })
+                        @Html.RenderActionLink("Setup", "ClinicalRulesSetup", new { id = Model[i].accountID, progrID = Model[i].programID, medId = Context.Request.Query["medId"] })
                     </td>
                 </tr>
             }

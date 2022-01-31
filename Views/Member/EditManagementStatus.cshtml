@@ -140,7 +140,7 @@
 
         <!----------------------------------------------------------------------- patient-profile ----------------------------------------------------------------------->
         <div class="profileBar">
-            @Html.Action("_profileBar_edit", "Member", new { DependentID = Model.dependantId, pro = Context.Request.Query["pro"] })
+            @Html.RenderAction("_profileBar_edit", "Member", new { DependentID = Model.dependantId, pro = Context.Request.Query["pro"] })
         </div>
     </div>
     <!----------------------------------------------------------------------- form ----------------------------------------------------------------------->

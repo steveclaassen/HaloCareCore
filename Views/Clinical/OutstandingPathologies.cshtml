@@ -26,7 +26,7 @@
     </div>
 
     <h4 style="color: #003366; margin-top: -2%">Outstanding Pathologies <span style="color: #0081b3">Table</span></h4>
-    @Html.ActionLink("Export to Excel", "ExportOutstandingPathologyToExcel", "Clinical", null)
+    @Html.RenderActionLink("Export to Excel", "ExportOutstandingPathologyToExcel", "Clinical", null)
 
     <table class="table" id="table">
         <tr>
@@ -85,7 +85,7 @@
                     @Html.DisplayFor(modelItem => item.overdue)
                 </td>
                 <td>
-                    @Html.ActionLink("Create New", "CreatePathology", new { DependentID = item.dependantID })
+                    @Html.RenderActionLink("Create New", "CreatePathology", new { DependentID = item.dependantID })
                 </td>
             </tr>
         }

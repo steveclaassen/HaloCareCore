@@ -141,7 +141,7 @@
     <!--profileInformation-->
 
     <div class="container" style="margin-top: -2%; margin-left: -7%">
-        @Html.Action("_ProfileInformation", "Member", new { DependentID = Model.script.dependentID })
+        @Html.RenderAction("_ProfileInformation", "Member", new { DependentID = Model.script.dependentID })
     </div>
 
     <div style="margin-bottom: 3%"></div>
@@ -302,7 +302,7 @@
                                                 @Html.HiddenFor(model => Model.scriptItems[x].benefitType)
                                             </td>
                                             <td>
-                                                @Html.ActionLink("Edit", "EditScriptItem", new { itemId = Model.scriptItems[x].itemNo })
+                                                @Html.RenderActionLink("Edit", "EditScriptItem", new { itemId = Model.scriptItems[x].itemNo })
                                             </td>
                                         </tr>
                                     }

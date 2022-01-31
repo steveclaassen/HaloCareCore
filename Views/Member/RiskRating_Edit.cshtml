@@ -187,7 +187,7 @@
 
         <!----------------------------------------------------------------------- patient-profile ----------------------------------------------------------------------->
         <div class="profileBar">
-            @Html.Action("_profileBar_edit", "Member", new { DependentID = Model.dependantID })
+            @Html.RenderAction("_profileBar_edit", "Member", new { DependentID = Model.dependantID })
         </div>
     </div>
     <br />

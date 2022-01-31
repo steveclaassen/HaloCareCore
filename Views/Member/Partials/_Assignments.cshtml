@@ -110,7 +110,7 @@
                                                         @Html.DisplayFor(modelItem => item.Instruction)
                                                     </td>
                                                     <td class="statusCode linkNav">
-                                                        @Html.ActionLink("View", "AssignmentDetails", "Clinical", new { id = item.assignmentID }, null)
+                                                        @Html.RenderActionLink("View", "AssignmentDetails", "Clinical", new { id = item.assignmentID }, null)
                                                     </td>
                                                 </tr>
                                             }
@@ -163,7 +163,7 @@
                                                         @Html.DisplayFor(modelItem => item.Instruction)
                                                     </td>
                                                     <td class="statusCode linkNav">
-                                                        @Html.ActionLink("View", "EnquiryFullView", "Member", new { depId = Model.newAssignment.dependentID,  QueryID = item.assignmentID }, null)
+                                                        @Html.RenderActionLink("View", "EnquiryFullView", "Member", new { depId = Model.newAssignment.dependentID,  QueryID = item.assignmentID }, null)
                                                     </td>
                                                 </tr>
                                             }

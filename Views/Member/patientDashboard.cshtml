@@ -80,7 +80,7 @@
         @Html.Partial("_navSlider", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })
         <!--profile-information-->
         <div class="profileBar">
-            @Html.Action("_profileBar_edit", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })
+            @Html.RenderAction("_profileBar_edit", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })
         </div>
     </div>
 
@@ -154,7 +154,7 @@
                                                                                         @Html.DisplayFor(model => progs.effectiveDate)
                                                                                     </td>
                                                                                     <td class="linkNav" style="text-align: center!important">
-                                                                                        @Html.ActionLink("View", "ProgramHistory", new { DependentID = Model.dependent.DependantID, pro = Context.Request.Query["pro"] }, null)
+                                                                                        @Html.RenderActionLink("View", "ProgramHistory", new { DependentID = Model.dependent.DependantID, pro = Context.Request.Query["pro"] }, null)
                                                                                     </td>
                                                                                 </tr>
                                                                             }
@@ -166,7 +166,7 @@
                                                                             <td>-</td>
                                                                             <td>-</td>
                                                                             <td class="linkNav" style="text-align: center!important">
-                                                                                @Html.ActionLink("View", "ProgramHistory", new { DependentID = Model.dependent.DependantID, pro = Context.Request.Query["pro"] }, null)
+                                                                                @Html.RenderActionLink("View", "ProgramHistory", new { DependentID = Model.dependent.DependantID, pro = Context.Request.Query["pro"] }, null)
                                                                             </td>
                                                                         </tr>
                                                                     }
@@ -207,7 +207,7 @@
                                                                                         @Html.DisplayFor(model => stat.endDate)
                                                                                     </td>
                                                                                     <td class="linkNav" style="text-align: center!important">
-                                                                                        @Html.ActionLink("Add/View", "ManageStatus", "Member", new { DependentID = Model.dependent.DependantID, pro = Context.Request.Query["pro"] }, null)
+                                                                                        @Html.RenderActionLink("Add/View", "ManageStatus", "Member", new { DependentID = Model.dependent.DependantID, pro = Context.Request.Query["pro"] }, null)
                                                                                     </td>
                                                                                 </tr>
                                                                                 count++;
@@ -221,7 +221,7 @@
                                                                             <td>-</td>
                                                                             <td>-</td>
                                                                             <td class="linkNav" style="text-align: center!important">
-                                                                                @Html.ActionLink("Add/View", "ManageStatus", "Member", new { DependentID = Model.dependent.DependantID, pro = Context.Request.Query["pro"] }, null)
+                                                                                @Html.RenderActionLink("Add/View", "ManageStatus", "Member", new { DependentID = Model.dependent.DependantID, pro = Context.Request.Query["pro"] }, null)
                                                                             </td>
                                                                         </tr>
                                                                     }
@@ -319,7 +319,7 @@
                                                                             </td>
                                                                         }
                                                                         <td class="linkNav" style="text-align: center!important">
-                                                                            @Html.ActionLink("Add", "DoctorSearch", "PatientManagement", new { DependentID = Model.dependent.DependantID, pro = Context.Request.Query["pro"] }, null)/@Html.ActionLink("View", "ViewDoctorHistory", "Member", new { DependentID = Model.dependent.DependantID, pro = Context.Request.Query["pro"] }, null)
+                                                                            @Html.RenderActionLink("Add", "DoctorSearch", "PatientManagement", new { DependentID = Model.dependent.DependantID, pro = Context.Request.Query["pro"] }, null)/@Html.RenderActionLink("View", "ViewDoctorHistory", "Member", new { DependentID = Model.dependent.DependantID, pro = Context.Request.Query["pro"] }, null)
                                                                         </td>
                                                                     </tr>
                                                                 </table>

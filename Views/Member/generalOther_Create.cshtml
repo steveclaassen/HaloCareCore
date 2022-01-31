@@ -122,7 +122,7 @@
         </div>
         <!----------------------------------------------------------------------- patient-profile ----------------------------------------------------------------------->
         <div class="profileBar">
-            @Html.Action("_profileBar_edit", "Member", new { DependentID = Model.dependentID })
+            @Html.RenderAction("_profileBar_edit", "Member", new { DependentID = Model.dependentID })
         </div>
     </div>
 

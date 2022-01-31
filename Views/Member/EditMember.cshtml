@@ -84,7 +84,7 @@
     <div class="card card-body">
         <div class="collapse-body">
             <div class="member-information-panel" id="memInfo">
-                @Html.Action("_member_profile_bar", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })
+                @Html.RenderAction("_member_profile_bar", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })
             </div>
         </div>
     </div>

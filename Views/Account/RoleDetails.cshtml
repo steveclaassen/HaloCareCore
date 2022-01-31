@@ -85,8 +85,8 @@
     </div>
 </div>
 <p>
-    @Html.ActionLink("EditRole", "Edit", new { id = Model.roleId }) |
-    @Html.ActionLink("Back to List", "ListRolea")
+    @Html.RenderActionLink("EditRole", "Edit", new { id = Model.roleId }) |
+    @Html.RenderActionLink("Back to List", "ListRolea")
 </p>
 
 @section scripts{

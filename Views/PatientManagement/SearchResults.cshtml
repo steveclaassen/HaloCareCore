@@ -263,7 +263,7 @@
                                 }
                             </td>*@
                         <td class="statusCode linkNav" style="text-align: center!important">
-                            @Html.ActionLink("View", "MemberProgram", "Member", new { DependentId = item.dependantID }, null)
+                            @Html.RenderActionLink("View", "MemberProgram", "Member", new { DependentId = item.dependantID }, null)
                         </td>
                     </tr>
                 }

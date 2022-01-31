@@ -11,7 +11,7 @@
 
         <ul class="nav navbar-nav navbar-right navlinks" >
             <li>
-                @Html.ActionLink("User: " + User.Identity.Name, "Index", "Manage", routeValues: null, htmlAttributes: new { title = "Manage", @class = "loginName" })
+                @Html.RenderActionLink("User: " + User.Identity.Name, "Index", "Manage", routeValues: null, htmlAttributes: new { title = "Manage", @class = "loginName" })
             </li>
             <li><a href="javascript:document.getElementById('logoutForm').submit()">Log off</a></li>
         </ul>
@@ -20,7 +20,7 @@
 else
 {
     <ul class="nav navbar-nav navbar-right">
-        <li>@Html.ActionLink("Log in", "Login", "Account", routeValues: null, htmlAttributes: new { id = "loginLink", @class = "loginName" })</li>
+        <li>@Html.RenderActionLink("Log in", "Login", "Account", routeValues: null, htmlAttributes: new { id = "loginLink", @class = "loginName" })</li>
     </ul>
 }
 <br />

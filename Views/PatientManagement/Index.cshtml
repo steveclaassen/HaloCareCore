@@ -33,8 +33,8 @@
             <div class="col-xs-10">
                 <ul>
                     <h2 style="color: #003366; font-size: 115%; text-align: center; margin-bottom: 10%"><i>Search<span style="color: #0081b3"> Management</span></i></h2>
-                    <p class="adminlink" style="text-align: center; font-size: 85%">@Html.ActionLink("Advanced Search", "AdvancedSearch", "PatientManagement")</p>
-                    <p class="adminlink" style="text-align: center; font-size: 85%">@Html.ActionLink("Doctor Search", "DoctorSearch", "PatientManagement")</p>
+                    <p class="adminlink" style="text-align: center; font-size: 85%">@Html.RenderActionLink("Advanced Search", "AdvancedSearch", "PatientManagement")</p>
+                    <p class="adminlink" style="text-align: center; font-size: 85%">@Html.RenderActionLink("Doctor Search", "DoctorSearch", "PatientManagement")</p>
 
 
                 </ul>
@@ -46,9 +46,9 @@
             <div class="col-xs-10">
                 <ul>
                     <h2 style="color: #003366; font-size: 115%; text-align: center; margin-bottom: 10%"><i>Patient<span style="color: #0081b3"> Management</span></i></h2>
-                    <p class="adminlink" style="text-align: center; font-size: 85%">@Html.ActionLink("New Profile", "Enrol", "Member")</p>
-                    <p class="adminlink" style="text-align: center; font-size: 85%">@Html.ActionLink("In Progress Enrolments", "InProgressEnrol", "Member")</p>
-                    <p class="adminlink" style="text-align: center; font-size: 85%">@Html.ActionLink("Recent Enrolments", "RecentEnrol", "PatientManagement")</p>
+                    <p class="adminlink" style="text-align: center; font-size: 85%">@Html.RenderActionLink("New Profile", "Enrol", "Member")</p>
+                    <p class="adminlink" style="text-align: center; font-size: 85%">@Html.RenderActionLink("In Progress Enrolments", "InProgressEnrol", "Member")</p>
+                    <p class="adminlink" style="text-align: center; font-size: 85%">@Html.RenderActionLink("Recent Enrolments", "RecentEnrol", "PatientManagement")</p>
 
                 </ul>
             </div>
@@ -60,11 +60,11 @@
             <ul>
                 <h2 style="color: #003366; font-size: 115%; text-align: center; margin-bottom: 8%"><i>Assignment<span style="color: #0081b3"> Management</span></i></h2>
 
-                <p class="adminlink" style="text-align: center; font-size: 85%">@Html.ActionLink("Open Assignments", "OpenAssignments", "Clinical")</p>
-                <p class="adminlink" style="text-align: center; font-size: 90%">@Html.ActionLink("Closed Assignments", "ClosedAssignments", "Clinical")</p>
-                <p class="adminlink" style="text-align: center; font-size: 85%">@Html.ActionLink("Postponed Assignments", "PostponedAssignments", "Clinical")</p>
-                <p class="adminlink" style="text-align: center; font-size: 85%">@Html.ActionLink("Document Assignments", "DocumentAssignments", "Clinical")</p>
-                <p class="adminlink" style="text-align: center; font-size: 85%">@Html.ActionLink("Enquiries", "SearchQueries", "PatientManagement")</p>
+                <p class="adminlink" style="text-align: center; font-size: 85%">@Html.RenderActionLink("Open Assignments", "OpenAssignments", "Clinical")</p>
+                <p class="adminlink" style="text-align: center; font-size: 90%">@Html.RenderActionLink("Closed Assignments", "ClosedAssignments", "Clinical")</p>
+                <p class="adminlink" style="text-align: center; font-size: 85%">@Html.RenderActionLink("Postponed Assignments", "PostponedAssignments", "Clinical")</p>
+                <p class="adminlink" style="text-align: center; font-size: 85%">@Html.RenderActionLink("Document Assignments", "DocumentAssignments", "Clinical")</p>
+                <p class="adminlink" style="text-align: center; font-size: 85%">@Html.RenderActionLink("Enquiries", "SearchQueries", "PatientManagement")</p>
 
             </ul>
         </div>

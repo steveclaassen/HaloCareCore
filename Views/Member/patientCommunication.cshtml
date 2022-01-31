@@ -458,7 +458,7 @@
         @Html.Partial("_navSlider", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })
         <!--profile-information-->
         <div class="profileBar">
-            @Html.Action("_profileBar_edit", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })
+            @Html.RenderAction("_profileBar_edit", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })
         </div>
     </div>
 
@@ -914,8 +914,8 @@
                                                             <td>@Html.DisplayFor(model => item.Email)</td>
                                                             <td>@Html.DisplayFor(model => item.Relation)</td>
                                                             <td class="linkNav" style="text-align: center!important">
-                                                                @Html.ActionLink("View", "Details_NextOfKin", new { id = item.Id }) /
-                                                                @Html.ActionLink("Edit", "Edit_NextOfKin", new { id = item.Id })
+                                                                @Html.RenderActionLink("View", "Details_NextOfKin", new { id = item.Id }) /
+                                                                @Html.RenderActionLink("Edit", "Edit_NextOfKin", new { id = item.Id })
                                                             </td>
                                                         </tr>
                                                     </tbody>
@@ -1130,8 +1130,8 @@
                                                                         @Html.DisplayFor(modelItem => item.attachmentType)
                                                                     </td>
                                                                     <td class="linkNav" style="text-align: center!important">
-                                                                        @Html.ActionLink("View", "GetImage", new { image = item.Link, @class = "attachmentLink" }) /
-                                                                        @Html.ActionLink("Edit", "Edit_attachmentType", new { id = item.attachmentID, pro = Context.Request.Query["pro"] })
+                                                                        @Html.RenderActionLink("View", "GetImage", new { image = item.Link, @class = "attachmentLink" }) /
+                                                                        @Html.RenderActionLink("Edit", "Edit_attachmentType", new { id = item.attachmentID, pro = Context.Request.Query["pro"] })
                                                                     </td>
                                                                 </tr>
                                                             </tbody>
@@ -1367,7 +1367,7 @@
                                                                         </td>
                                                                     }
                                                                     <td class="statusCode linkNav" style="text-align: center!important">
-                                                                        @Html.ActionLink("Edit", "DiabeticDairy_Edit", new { dairyId = item.dairyId, pro = Context.Request.Query["pro"] })
+                                                                        @Html.RenderActionLink("Edit", "DiabeticDairy_Edit", new { dairyId = item.dairyId, pro = Context.Request.Query["pro"] })
 
                                                                     </td>
                                                                 </tr>

@@ -40,7 +40,7 @@
                         @Html.DisplayFor(modelItem => item.selectedPrograms)
                     </td>
                     <td class="statusCode linkNav" style="text-align: center!important">
-                        @Html.ActionLink("Edit", "AccountSetupMedicalAid", new { id = item.Id })
+                        @Html.RenderActionLink("Edit", "AccountSetupMedicalAid", new { id = item.Id })
                     </td>
                 </tr>
             }

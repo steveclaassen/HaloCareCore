@@ -91,7 +91,7 @@
                 </li>
                 <ul class="sub-menu collapse" id="hivaids">
 
-                    <li>@Html.ActionLink("Dashboard", "dashboardHIV", "ReportManagement")</li>
+                    <li>@Html.RenderActionLink("Dashboard", "dashboardHIV", "ReportManagement")</li>
                     <li data-toggle="collapse" data-target="#hivPatient" class="collapsed">
                         <a href="#">Patient<span class="caret"></span></a>
                     </li>
@@ -324,7 +324,7 @@
         <br />
         <br />
         <div class="backButton_Navigation">
-            @Html.ActionLink("Back", "Index")
+            @Html.RenderActionLink("Back", "Index")
         </div>
     </div>
 

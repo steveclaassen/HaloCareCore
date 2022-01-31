@@ -24,13 +24,13 @@ else
         @if (Model.Notes == null)
         {
             <div class="specialNote_addButton">
-                @Html.ActionLink("Add", "AddNote", new { DependentID = Model.dependent.DependantID, pro = Context.Request.Query["pro"] }, null)
+                @Html.RenderActionLink("Add", "AddNote", new { DependentID = Model.dependent.DependantID, pro = Context.Request.Query["pro"] }, null)
             </div>
         }
         @if (Model.Notes != null)
         {
             <div class="specialNote_addButton">
-                @Html.ActionLink("Edit", "EditNote", "Member", new { NoteId = Model.Notes.noteID, pro = Context.Request.Query["pro"] }, null)
+                @Html.RenderActionLink("Edit", "EditNote", "Member", new { NoteId = Model.Notes.noteID, pro = Context.Request.Query["pro"] }, null)
             </div>
         }
     </div>

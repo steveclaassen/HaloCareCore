@@ -52,7 +52,7 @@
         </div>
         <!--profileInformation-->
         <div class="profileBar">
-            @Html.Action("_profileBar_edit", "Member", new { DependentID = Model.script.dependentID })
+            @Html.RenderAction("_profileBar_edit", "Member", new { DependentID = Model.script.dependentID })
         </div>
     </div>
 
@@ -537,7 +537,7 @@
                                                         @Html.DisplayFor(modelItem => Model.items[i].toDate)
                                                     </td>
                                                     <td class="statusCode linkNav" style="text-align: center!important">
-                                                        @Html.ActionLink("Edit", "EditScriptItem", "Member", new { itemId = Model.items[i].itemNo }, null)
+                                                        @Html.RenderActionLink("Edit", "EditScriptItem", "Member", new { itemId = Model.items[i].itemNo }, null)
                                                     </td>
                                                 </tr>
                                             }

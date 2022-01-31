@@ -183,8 +183,8 @@
                                             <!---->
 
                                             <td class="linkNav statusCode" style="text-align: center!important">
-                                                @Html.ActionLink("View", "diagnosis_Details", new { Id = item.Id, pro = Context.Request.Query["pro"] }) /
-                                                @Html.ActionLink("Edit", "diagnosis_Edit", new { Id = item.Id, pro = Context.Request.Query["pro"] })
+                                                @Html.RenderActionLink("View", "diagnosis_Details", new { Id = item.Id, pro = Context.Request.Query["pro"] }) /
+                                                @Html.RenderActionLink("Edit", "diagnosis_Edit", new { Id = item.Id, pro = Context.Request.Query["pro"] })
                                             </td>
                                         </tr>
                                     </tbody>
@@ -630,8 +630,8 @@
                                             <!---->
 
                                             <td class="linkNav statusCode" style="text-align: center!important">
-                                                @Html.ActionLink("View", "otherMedicalHistory_Details", new { id = item.Id, pro = Context.Request.Query["pro"] }) /
-                                                @Html.ActionLink("Edit", "otherMedicalHistory_Edit", new { id = item.Id, pro = Context.Request.Query["pro"] })
+                                                @Html.RenderActionLink("View", "otherMedicalHistory_Details", new { id = item.Id, pro = Context.Request.Query["pro"] }) /
+                                                @Html.RenderActionLink("Edit", "otherMedicalHistory_Edit", new { id = item.Id, pro = Context.Request.Query["pro"] })
                                             </td>
                                         </tr>
                                     </tbody>
@@ -1065,8 +1065,8 @@
                                             <!---->
 
                                             <td class="linkNav" style="text-align: center!important">
-                                                @Html.ActionLink("View", "hivOther_Details", new { id = item.QuestionnaireOtherID, pro = Context.Request.Query["pro"] }) /
-                                                @Html.ActionLink("Edit", "hivOther_Edit", new { id = item.QuestionnaireOtherID, pro = Context.Request.Query["pro"] })
+                                                @Html.RenderActionLink("View", "hivOther_Details", new { id = item.QuestionnaireOtherID, pro = Context.Request.Query["pro"] }) /
+                                                @Html.RenderActionLink("Edit", "hivOther_Edit", new { id = item.QuestionnaireOtherID, pro = Context.Request.Query["pro"] })
                                             </td>
                                         </tr>
                                     </tbody>

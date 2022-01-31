@@ -103,7 +103,7 @@
 
                 </td>
                 <td>
-                    @Html.ActionLink("Details", "ViewMember", "Member", new { DependentID = item.DependantID }, null)
+                    @Html.RenderActionLink("Details", "ViewMember", "Member", new { DependentID = item.DependantID }, null)
                 </td>
             </tr>
         }

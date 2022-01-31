@@ -89,7 +89,7 @@
 
         <!--profileInformation-->
         <div class="profileBar">
-            @Html.Action("_profileBar_edit", "Member", new { DependentID = Model.assignment.dependentID, pro = Context.Request.Query["pro"] })
+            @Html.RenderAction("_profileBar_edit", "Member", new { DependentID = Model.assignment.dependentID, pro = Context.Request.Query["pro"] })
         </div>
     </div>
 
@@ -166,22 +166,22 @@
                                                         <div class="modal-body">
                                                             @if (Model.items[0].itemTypeName.ToUpper().Contains("PATHOLOGY"))
                                                             {
-                                                                @Html.Action("_InsertPathology", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, pro = Context.Request.Query["pro"] })
+                                                                @Html.RenderAction("_InsertPathology", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, pro = Context.Request.Query["pro"] })
                                                             }
                                                             else if (Model.items[0].itemTypeName.ToUpper().Contains("SCRIPT"))
                                                             {
-                                                                @Html.Action("_AddScript", "Member", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, pro = Context.Request.Query["pro"] })
+                                                                @Html.RenderAction("_AddScript", "Member", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, pro = Context.Request.Query["pro"] })
                                                             }
                                                             else if (task.templateID.ToUpper() == ("DOCTOR REFERRAL"))
                                                             {
                                                                 <div class="modal-body">
-                                                                    @Html.Action("_DoctorReferral", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, task.templateID, pro = Context.Request.Query["pro"] })
+                                                                    @Html.RenderAction("_DoctorReferral", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, task.templateID, pro = Context.Request.Query["pro"] })
                                                                 </div>
                                                             }
                                                             else if (task.templateID.ToUpper() == ("CASE MANAGER"))
                                                             {
                                                                 <div class="modal-body">
-                                                                    @Html.Action("_AllocateCaseManager", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, task.templateID, pro = Context.Request.Query["pro"] })
+                                                                    @Html.RenderAction("_AllocateCaseManager", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, task.templateID, pro = Context.Request.Query["pro"] })
                                                                 </div>
                                                             }
                                                         </div>
@@ -299,13 +299,13 @@
                                                                 if (task.templateID.ToLower() == ("patient_email"))
                                                                 {
                                                                     <div class="modal-body">
-                                                                        @Html.Action("_InsertEmail", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, pro = Context.Request.Query["pro"] })
+                                                                        @Html.RenderAction("_InsertEmail", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, pro = Context.Request.Query["pro"] })
                                                                     </div>
                                                                 }
                                                                 else if (task.templateID.ToLower() == ("doctor_email")) // hcare-1392
                                                                 {
                                                                     <div class="modal-body">
-                                                                        @Html.Action("_DoctorEmailAssignment", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, pro = Context.Request.Query["pro"] })
+                                                                        @Html.RenderAction("_DoctorEmailAssignment", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, pro = Context.Request.Query["pro"] })
                                                                     </div>
                                                                 }
                                                             }
@@ -330,19 +330,19 @@
                                                             @if (Model.items.Count != 0)
                                                             {
                                                                 @*<div class="modal-body">
-                                                                        @Html.Action("_InsertText", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, pro = Context.Request.Query["pro"] })
+                                                                        @Html.RenderAction("_InsertText", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, pro = Context.Request.Query["pro"] })
                                                                     </div>*@
 
                                                                 if (task.templateID.ToLower() == ("patient_text"))
                                                                 {
                                                                     <div class="modal-body">
-                                                                        @Html.Action("_InsertText", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, pro = Context.Request.Query["pro"] })
+                                                                        @Html.RenderAction("_InsertText", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, pro = Context.Request.Query["pro"] })
                                                                     </div>
                                                                 }
                                                                 else if (task.templateID.ToLower() == ("welcome-text")) // hcare-1445
                                                                 {
                                                                     <div class="modal-body">
-                                                                        @Html.Action("_WelcomeText", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, pro = Context.Request.Query["pro"] })
+                                                                        @Html.RenderAction("_WelcomeText", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, pro = Context.Request.Query["pro"] })
                                                                     </div>
                                                                 }
                                                             }
@@ -404,80 +404,80 @@
                                                                 if (task.templateID.ToUpper() == ("DISCLAIMER"))
                                                                 {
                                                                     <div class="modal-body">
-                                                                        @Html.Action("_PatientDisclaimer", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, task.templateID, pro = Context.Request.Query["pro"] })
+                                                                        @Html.RenderAction("_PatientDisclaimer", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, task.templateID, pro = Context.Request.Query["pro"] })
                                                                     </div>
                                                                 }
                                                                 else if (task.templateID.ToUpper() == ("DOCTOR"))
                                                                 {
                                                                     <div class="modal-body">
-                                                                        @Html.Action("_DoctorQuestionnaire", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, task.templateID, pro = Context.Request.Query["pro"] })
+                                                                        @Html.RenderAction("_DoctorQuestionnaire", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, task.templateID, pro = Context.Request.Query["pro"] })
                                                                     </div>
                                                                 }
                                                                 else if (task.templateID.ToUpper() == ("DIABETES"))
                                                                 {
                                                                     <div class="modal-body">
-                                                                        @Html.Action("_DiabetesQuestionnaire", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, task.templateID, pro = Context.Request.Query["pro"] })
+                                                                        @Html.RenderAction("_DiabetesQuestionnaire", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, task.templateID, pro = Context.Request.Query["pro"] })
                                                                     </div>
                                                                 }
                                                                 else if (task.templateID.ToUpper() == ("ENROLMENT_NEW"))
                                                                 {
                                                                     <div class="modal-body">
-                                                                        @Html.Action("_halocareDiabetesQuestionnaire", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, task.templateID, pro = Context.Request.Query["pro"] })
+                                                                        @Html.RenderAction("_halocareDiabetesQuestionnaire", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, task.templateID, pro = Context.Request.Query["pro"] })
                                                                     </div>
                                                                 }
                                                                 else if (task.templateID.ToUpper() == ("QUESTIONNAIRE_GENERAL"))
                                                                 {
                                                                     <div class="modal-body">
-                                                                        @Html.Action("_GeneralQuestionnaire", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, task.templateID, pro = Context.Request.Query["pro"] })
+                                                                        @Html.RenderAction("_GeneralQuestionnaire", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, task.templateID, pro = Context.Request.Query["pro"] })
                                                                     </div>
                                                                 }
                                                                 else if (task.templateID.ToUpper() == ("QUESTIONNAIRE_HIV"))
                                                                 {
                                                                     <div class="modal-body">
-                                                                        @Html.Action("_HIVQuestionnaire", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, task.templateID, pro = Context.Request.Query["pro"] })
+                                                                        @Html.RenderAction("_HIVQuestionnaire", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, task.templateID, pro = Context.Request.Query["pro"] })
                                                                     </div>
                                                                 }
                                                                 else if (task.templateID.ToUpper() == ("PROGRAM/QUESTIONNAIRE/DIABETES"))
                                                                 {
                                                                     <div class="modal-body">
-                                                                        @Html.Action("_newDiabetesQuestionnaire", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, task.templateID, pro = Context.Request.Query["pro"] })
+                                                                        @Html.RenderAction("_newDiabetesQuestionnaire", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, task.templateID, pro = Context.Request.Query["pro"] })
                                                                     </div>
                                                                 }
                                                                 else if (task.templateID.ToUpper() == ("GENERAL/QUESTIONNAIRE/NEWBORN"))
                                                                 {
                                                                     <div class="modal-body">
-                                                                        @Html.Action("_NewBornQuestionnaire", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, task.templateID, pro = Context.Request.Query["pro"] })
+                                                                        @Html.RenderAction("_NewBornQuestionnaire", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, task.templateID, pro = Context.Request.Query["pro"] })
                                                                     </div>
                                                                 }
                                                                 else if (task.templateID.ToUpper() == ("MH/QUESTIONNAIRE/DSM5"))
                                                                 {
 
                                                                     <div class="modal-body">
-                                                                        @Html.Action("_DSM5Questionnaire", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, task.templateID, pro = Context.Request.Query["pro"] })
+                                                                        @Html.RenderAction("_DSM5Questionnaire", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, task.templateID, pro = Context.Request.Query["pro"] })
                                                                     </div>
                                                                 }
                                                                 else if (task.templateID.ToUpper() == ("MH/QUESTIONNAIRE/SCHIZOPHRENIA"))
                                                                 {
                                                                     <div class="modal-body">
-                                                                        @Html.Action("_SchizophreniaQuestionnaire", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, task.templateID, pro = Context.Request.Query["pro"] })
+                                                                        @Html.RenderAction("_SchizophreniaQuestionnaire", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, task.templateID, pro = Context.Request.Query["pro"] })
                                                                     </div>
                                                                 }
                                                                 else if (task.templateID.ToUpper() == ("MH/QUESTIONNAIRE/BIPOLAR"))
                                                                 {
                                                                     <div class="modal-body">
-                                                                        @Html.Action("_BipolarQuestionnaire", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, task.templateID, pro = Context.Request.Query["pro"] })
+                                                                        @Html.RenderAction("_BipolarQuestionnaire", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, task.templateID, pro = Context.Request.Query["pro"] })
                                                                     </div>
                                                                 }
                                                                 else if (task.templateID.ToUpper() == ("MH/QUESTIONNAIRE/DEPRESSION"))
                                                                 {
                                                                     <div class="modal-body">
-                                                                        @Html.Action("_DepressionQuestionnaire", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, task.templateID, pro = Context.Request.Query["pro"] })
+                                                                        @Html.RenderAction("_DepressionQuestionnaire", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, task.templateID, pro = Context.Request.Query["pro"] })
                                                                     </div>
                                                                 }
                                                                 else if (task.templateID.ToUpper() == ("GENERAL/QUESTIONNAIRE/PREGNANT"))
                                                                 {
                                                                     <div class="modal-body">
-                                                                        @Html.Action("_QuestionnairePregnant", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, task.templateID, pro = Context.Request.Query["pro"] })
+                                                                        @Html.RenderAction("_QuestionnairePregnant", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, task.templateID, pro = Context.Request.Query["pro"] })
                                                                     </div>
                                                                 }
                                                                 <!--IF you add a new questionnaire with template, you MUST include the new template ID in the IF ELSE above this div-->
@@ -503,7 +503,7 @@
                                                             @if (Model.items.Count != 0)
                                                             {
                                                                 <div class="modal-body">
-                                                                    @Html.Action("_ChangeStatus", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, pro = Context.Request.Query["pro"] })
+                                                                    @Html.RenderAction("_ChangeStatus", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, pro = Context.Request.Query["pro"] })
                                                                 </div>
                                                             }
                                                         </div>
@@ -521,7 +521,7 @@
                                                             @if (Model.items.Count != 0)
                                                             {
                                                                 <div class="modal-body">
-                                                                    @Html.Action("_Call", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, pro = Context.Request.Query["pro"] })
+                                                                    @Html.RenderAction("_Call", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, pro = Context.Request.Query["pro"] })
                                                                 </div>
                                                             }
                                                         </div>
@@ -540,19 +540,19 @@
                                                                 if (task.templateID.ToUpper().Contains("DISCLAIMER"))
                                                                 {
                                                                     <div class="modal-body">
-                                                                        @Html.Action("_PatientQuestionnaire", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, task.templateID, pro = Context.Request.Query["pro"] })
+                                                                        @Html.RenderAction("_PatientQuestionnaire", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, task.templateID, pro = Context.Request.Query["pro"] })
                                                                     </div>
                                                                 }
                                                                 else if (task.templateID.ToUpper().Contains("DOCTOR"))
                                                                 {
                                                                     <div class="modal-body">
-                                                                        @Html.Action("_DoctorQuestionnaire", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, task.templateID, pro = Context.Request.Query["pro"] })
+                                                                        @Html.RenderAction("_DoctorQuestionnaire", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, task.templateID, pro = Context.Request.Query["pro"] })
                                                                     </div>
                                                                 }
                                                                 else if (task.templateID.Contains("Investigate information and change to stage 4"))
                                                                 {
                                                                     <div class="modal-body">
-                                                                        @Html.Action("_AllocateCaseManager", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, task.templateID, pro = Context.Request.Query["pro"] })
+                                                                        @Html.RenderAction("_AllocateCaseManager", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.assignment.assignmentID, taskId = task.id, task.templateID, pro = Context.Request.Query["pro"] })
                                                                     </div>
                                                                 }
 
@@ -701,11 +701,11 @@
                 <div class="modal-body">
                     @if (Model.items[0].itemTypeName.ToUpper().Contains("PATHOLOGY"))
                     {
-                        @Html.Action("_ViewPathology", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.items[0].itemCapturedId, pro = Context.Request.Query["pro"] })
+                        @Html.RenderAction("_ViewPathology", "Clinical", new { DependentID = Model.assignment.dependentID, id = Model.items[0].itemCapturedId, pro = Context.Request.Query["pro"] })
                     }
                     else if (Model.items[0].itemTypeName.ToUpper().Contains("SCRIPT"))
                     {
-                        @Html.Action("_ViewScript", "Member", new { id = Model.items[0].itemCapturedId, pro = Context.Request.Query["pro"] })
+                        @Html.RenderAction("_ViewScript", "Member", new { id = Model.items[0].itemCapturedId, pro = Context.Request.Query["pro"] })
                     }
 
                 </div>

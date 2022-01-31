@@ -191,7 +191,7 @@
     <!--profileInformation-->
 
     <div class="container" style="margin-left: 0%">
-        @Html.Action("_ProfileInformation_viewMember", "Member", new { DependentID = Model.dependentID })
+        @Html.RenderAction("_ProfileInformation_viewMember", "Member", new { DependentID = Model.dependentID })
     </div>
 
     <div style="margin-bottom: 6%"></div>

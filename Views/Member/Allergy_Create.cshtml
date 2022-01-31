@@ -151,7 +151,7 @@
 
         <!--profileInformation-->
         <div class="profileBar">
-            @Html.Action("_profileBar_edit", "Member", new { DependentID = Model.allergy.dependantId })
+            @Html.RenderAction("_profileBar_edit", "Member", new { DependentID = Model.allergy.dependantId })
         </div>
     </div>
 

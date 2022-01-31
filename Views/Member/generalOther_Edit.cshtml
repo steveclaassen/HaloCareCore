@@ -122,7 +122,7 @@
         @Html.Partial("_navSlider", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })
         <!--profile-information-->
         <div class="profileBar">
-            @Html.Action("_profileBar_edit", "Member", new { DependentID = Model.dependentID })
+            @Html.RenderAction("_profileBar_edit", "Member", new { DependentID = Model.dependentID })
         </div>
     </div>
     <div class="profilebar-spacer"></div>

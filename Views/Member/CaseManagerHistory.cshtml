@@ -52,7 +52,7 @@
         </div>
         <!--profileInformation-->
         <div class="profileBar">
-            @Html.Action("_profileBar_edit", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })
+            @Html.RenderAction("_profileBar_edit", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] })
         </div>
     </div>
 
@@ -125,7 +125,7 @@
                         @Html.DisplayFor(modelItem => item.createdBy)
                     </td>
                     <td class="statusCode linkNav" style="text-align: center!important">
-                        @Html.ActionLink("Edit", "Edit", "CaseManager", new { id = item.caseManagerNo }, null)
+                        @Html.RenderActionLink("Edit", "Edit", "CaseManager", new { id = item.caseManagerNo }, null)
                     </td>
                 </tr>
             }
