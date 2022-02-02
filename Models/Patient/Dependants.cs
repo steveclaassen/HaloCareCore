@@ -214,7 +214,7 @@ namespace HaloCareCore.Models.Patient
         public string prevMembershipNo { get; set; }
 
         [NotMapped]
-        public string fullNameUC { set; get; } //HCare-1088
+        public string fullNameUC { set; get; } //HCare-1088_test
     }
 
 
