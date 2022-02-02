@@ -825,7 +825,7 @@
             $("#aerror-yes-A2").hide();
         });
 
-        var tags = @Html.Raw(Json.Encode(Model.AcknowledgementQuestions));
+        var tags = @Html.Raw(Json.Serialize(Model.AcknowledgementQuestions));
         for (var i = 0; i < tags.length; i++) {
             if (tags[i].Title == "A3") {
             $('#acknowledgement-yes-A3').change(function () {
@@ -856,7 +856,7 @@
                 $("#submit-disclaimer").on('mouseover', function () {
                 var yay = $('input:checkbox[id^="disclaimer-yes"]:checked').length;
                 var nay = $('input:checkbox[id^="disclaimer-no"]:checked').length;
-                var tags = @Html.Raw(Json.Encode(Model.DisclaimerQuestions));
+                var tags = @Html.Raw(Json.Serialize(Model.DisclaimerQuestions));
                     var sum = yay + nay;
                     if (sum < tags.length) {
                         $('#question-error').removeClass('hidden').html('<span class="question-validation"><i class="fas fa-exclamation-circle"></i> Please note that all questions require an answer!</span>');

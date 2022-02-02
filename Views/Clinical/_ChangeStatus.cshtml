@@ -331,7 +331,7 @@
                     //}
                     if ($('#managementStatus').val() == "ERD" || $('#managementStatus').val() == "ERH" || $('#managementStatus').val() == "ERM") {
 
-                        var ms = @Html.Raw(Json.Encode(Model.ManagementStatusVMs))
+                        var ms = @Html.Raw(Json.Serialize(Model.ManagementStatusVMs))
                         $.each(ms, function (index, item) {
                             var name = item.managementStatusName;
                             var code = item.managementStatusCode;

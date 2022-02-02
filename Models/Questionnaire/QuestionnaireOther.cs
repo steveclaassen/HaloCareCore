@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HaloCareCore.Models.Questionnaire
 {
@@ -106,6 +107,7 @@ namespace HaloCareCore.Models.Questionnaire
 
         [DisplayName("Comment")]
         public string frailCareComment { get; set; }
+        [NotMapped]
         public string[] frailCare_Concat
         {
             get

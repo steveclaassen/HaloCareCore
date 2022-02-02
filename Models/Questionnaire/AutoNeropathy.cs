@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HaloCareCore.Models
 {
@@ -40,7 +41,7 @@ namespace HaloCareCore.Models
         [DisplayName("Comment")]
         public string generalComments { get; set; }
 
-        //Needs to be geworked
+        [NotMapped]
         public string[] autoNeuroSymptom_Concat
         {
             get

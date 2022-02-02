@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -92,7 +93,7 @@ namespace HaloCareCore.Models
         public string programType { get; set; }
 
         //listBox concatination
-
+        [NotMapped]
         public string[] amputaionComment_Concat
         {
             get
@@ -111,7 +112,7 @@ namespace HaloCareCore.Models
                 amputationComment = string.Join(",", value);
             }
         }
-        
+        [NotMapped]
         public string[] amputaionReason_Concat
         {
             get
@@ -130,7 +131,7 @@ namespace HaloCareCore.Models
                 amputationReason = string.Join(",", value);
             }
         }
-        
+        [NotMapped]
         public string[] podiatryLops_Concat
         {
             get
@@ -149,7 +150,7 @@ namespace HaloCareCore.Models
                 podiatryLopsComment = string.Join(",", value);
             }
         }
-        
+        [NotMapped]
         public string[] podiatryDeformity_Concat
         {
             get
@@ -168,7 +169,7 @@ namespace HaloCareCore.Models
                 podiatryDeformityComment = string.Join(",", value);
             }
         }
-        
+        [NotMapped]
         public string[] PerArterialDisease_Concat
         {
             get
@@ -187,7 +188,7 @@ namespace HaloCareCore.Models
                 podiatryPerArterialDiseaseComment = string.Join(",", value);
             }
         }
-        
+        [NotMapped]
         public string[] podiatryWound_Concat
         {
             get

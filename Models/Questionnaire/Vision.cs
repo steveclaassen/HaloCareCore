@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -57,7 +58,7 @@ namespace HaloCareCore.Models.Questionnaire
 
         [DisplayName("Program")]
         public string programType { get; set; }
-
+        [NotMapped]
         //listBox concatination
         public string[] vision_Concat
         {
@@ -77,7 +78,7 @@ namespace HaloCareCore.Models.Questionnaire
                 vision = string.Join(",", value);
             }
         }
-
+        [NotMapped]
         //listBox concatination
         public string[] eyeTreat_Concat
         {

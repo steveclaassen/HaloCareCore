@@ -163,7 +163,7 @@
                 }
             </h4>
             <hr class="fancyruler">
-            @using (Html.BeginForm("Pathology_Search_Dependant", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] }, FormMethod.Post, new { id = "formFilter" }))
+            @using (Html.BeginForm("Pathology_Search_Dependant", "Member", new { DependentID = Context.Request.Query["DependentID"], pro = Context.Request.Query["pro"] }, FormMethod.Post,null, new { id = "formFilter" }))
             {
                 @Html.AntiForgeryToken()
                 <div class="form-horizontal form-layout">

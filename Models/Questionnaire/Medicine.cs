@@ -59,7 +59,8 @@ namespace HaloCareCore.Models.Questionnaire
 
         [DisplayName("Drug/Substance abuse")]
         public string drugOrsubstanceAbuseoperty { get; set; }
-        //[NotMapped]
+        
+        [NotMapped]
         public string[] PatientsOnInsulin_Concat
         {
             get
@@ -78,7 +79,7 @@ namespace HaloCareCore.Models.Questionnaire
                 PatientsOnInsulin = string.Join(",", value);
             }
         }
-        //[NotMapped]
+        [NotMapped]
         public string[] changeOfRegimeHIV_Concat
         {
             get
@@ -98,7 +99,7 @@ namespace HaloCareCore.Models.Questionnaire
             }
         }
         
-        //[NotMapped]
+        [NotMapped]
         public string[] changeOfRegimeMental_Concat
         {
             get

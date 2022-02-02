@@ -215,12 +215,6 @@ namespace HaloCareCore.Models.Patient
 
         [NotMapped]
         public string fullNameUC { set; get; } //HCare-1088
-
-
-        [Required]
-        [DisplayName("Email opt-out")]
-        public bool EmailoptOut { get; set; } //HCare-1359
-
     }
 
 
